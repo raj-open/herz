@@ -1,0 +1,30 @@
+{
+  "name": "herz",
+  "version": "0.0.0",
+  "author": "raj-open <raj-open@users.noreply.github.com>",
+  "description": "Python code basis to analyse P-V data series.",
+  "contributors": [
+    "https://github.com/raj-open"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "python",
+    "medicine",
+    "fluid mechanics",
+    "time-series",
+    "data science"
+  ],
+  "engines": {
+    "node": ">=20.6.1",
+    "npm": ">=9.8.1",
+    "python": ">=3.10"
+  },
+  "devDependencies": {
+    "husky": "^8.0.0",
+    "lint-staged": "^14.0.1"
+  },
+  "lint-staged": {
+    "*.py": "just githook-py",
+    "*.ipynb": "just githook-ipynb"
+  }
+}
