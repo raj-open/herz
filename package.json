@@ -24,7 +24,14 @@
     "lint-staged": "^14.0.1"
   },
   "lint-staged": {
-    "*.py": "just githook-py",
-    "*.ipynb": "just githook-ipynb"
+    "!(src/models/generated/**)src/**/*.py": [
+      "just githook-py"
+    ],
+    "!(tests/models/generated/**)tests/**/*.py": [
+      "just githook-py"
+    ],
+    "notebooks/*.ipynb": [
+      "just githook-ipynb"
+    ]
   }
 }
