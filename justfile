@@ -146,7 +146,7 @@ build-dev:
 
 # builds githook based on pre-commit (see https://pre-commit.com)
 build-githook-pc:
-    @git config --unset-all core.hooksPath
+    @- git config --unset-all core.hooksPath
     @{{PYTHON}} -m pre_commit install
 
 # builds githook based on node's husky
