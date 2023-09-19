@@ -1,0 +1,15 @@
+# ----------------------------------------------------------------
+# INTERNAL APP CONFIGURATION
+# ----------------------------------------------------------------
+info:
+  title: Loops
+  description: |-
+    Extracts time series data for pressure and volume,
+    synchronises these and produces a data set and plot.
+  # standard units
+  units:
+    time: 's'
+    pressure: 'Pa'
+    length: 'm'
+    area: 'm^2'
+    volume: 'm^3'
