@@ -1,0 +1,46 @@
+openapi: 3.0.3
+info:
+  version: x.y.z
+  title: Common schemata
+  description: |-
+    Common schemata for other schemata
+servers:
+  - url: "https://define.me"
+paths: {}
+definitions:
+components:
+  schemas:
+    FileString:
+      description: Data type for a string to be the base name of a file.
+      type: string
+      pattern: '^[^\\\/]*\.[^\\\/]+$'
+    PathToFileString:
+      description: Data type for a string to be a path to a file.
+      type: string
+      pattern: '^[^\\\/]+([\\\/][^\\\/]+)*\.[^\\\/]+$'
+    PathToDirString:
+      description: Data type for a string to be a path to a directory.
+      type: string
+      pattern: '^[^\\\/]+([\\\/][^\\\/]+)*$'
+    PythonImportString:
+      description: Data type for a string to constitute an import 'path' in python.
+      type: string
+      pattern: '^(\.\.|\.)[\w\_]+(\.[\w\_]+)*$'
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUMS
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumType:
+      description: |-
+        Enumeration of settings for log level.
+      type: string
+      x-enum-varnames:
+        - BOOLEAN
+        - DOUBLE
+        - INTEGER
+        - STRING
+      enum:
+        - bool
+        - float
+        - int
+        - str
+      default: float

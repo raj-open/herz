@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  version: x.y.z
+  title: Schemata for user config
+servers:
+  - url: "https://define.me"
+paths: {}
+components:
+  schemas:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # AppConfig
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AppConfig:
+      description: |-
+        Data model for all parts of the app configuration.
+      type: object
+      required:
+        - info
+      properties:
+        info:
+          $ref: "#/components/schemas/AppInfo"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > info
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AppInfo:
+      description: |-
+        Meta data about app.
+      type: object
+      required:
+        - title
+        - description
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        units:
+          $ref: "#/components/schemas/AppUnits"
+        version:
+          type: string
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > info > units
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AppUnits:
+      description: |-
+        Standard units for physical conversion.
+      type: object
+      required:
+        - time
+        - pressure
+        - length
+        - area
+        - volume
+      properties:
+        time:
+          type: string
+        pressure:
+          type: string
+        length:
+          type: string
+        area:
+          type: string
+        volume:
+          type: string

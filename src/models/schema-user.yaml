@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  version: x.y.z
+  title: Schemata for user config
+servers:
+  - url: "https://define.me"
+paths: {}
+components:
+  schemas:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # UserConfig
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserConfig:
+      description: |-
+        Data model for all parts of the user configuration.
+      type: object
+      required:
+        - basic
+        - paths
+        - data
+      properties:
+        basic:
+          $ref: "#/components/schemas/UserBasicOptions"
+        data:
+          $ref: "#/components/schemas/UserData"
+        output:
+          $ref: "#/components/schemas/UserOutput"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > basic
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserBasicOptions:
+      description: |-
+        Basic options for running the programme.
+      type: object
+      required:
+        - log-level
+      properties:
+        log-level:
+          $ref: '#/components/schemas/EnumLogLevel'
+          default:
+        verbose:
+          type: boolean
+          default: false
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > data
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserData:
+      description: |-
+        Options for structure of data files.
+      type: object
+      required:
+        - combine
+        - pressure
+        - volume
+      properties:
+        combine:
+          $ref: "#/components/schemas/DataTimeSeriesCommon"
+        pressure:
+          $ref: "#/components/schemas/DataTimeSeries"
+        volume:
+          $ref: "#/components/schemas/DataTimeSeries"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > paths
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserOutput:
+      description: |-
+        Options for outputs
+      type: object
+      required:
+        - name
+        - quantities
+        - table
+        - plot
+      properties:
+        name:
+          description: |-
+            Name of case.
+          type: string
+        quantities:
+          type: object
+          required:
+            - time
+            - pressure
+            - volume
+          properties:
+            time:
+              $ref: '#/components/schemas/DataTypeQuantity'
+            pressure:
+              $ref: '#/components/schemas/DataTypeQuantity'
+            volume:
+              $ref: '#/components/schemas/DataTypeQuantity'
+        table:
+          type: object
+          required:
+            # - path
+            - sep
+            - decimal
+          properties:
+            path:
+              $ref: "./common.yaml/#/components/schemas/PathToDirString"
+            sep:
+              type: string
+              default: ";"
+            decimal:
+              type: string
+              default: "."
+          additionalProperties: true
+        plot:
+          type: object
+          required:
+            # - path
+            - title
+            - font
+          properties:
+            path:
+              $ref: "./common.yaml/#/components/schemas/PathToDirString"
+            title:
+              type: string
+            legend:
+              type: boolean
+              default: false
+            font:
+              type: object
+              required: []
+              properties:
+                family:
+                  type: string
+                  default: 'Tahoma'
+                size:
+                  description: |-
+                    Size of font (in entire plot) in `pt`.
+                  type: integer
+                  default: 12
+                size-title:
+                  description: |-
+                    Size of title font in `pt`.
+                  type: integer
+                  default: 12
+              additionalProperties: false
+          additionalProperties: true
+      additionalProperties: true
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Data structure for time series
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    DataTimeSeriesCommon:
+      description: |-
+        Parameter options for combining time series.
+      type: object
+      required:
+        - dt
+        - unit
+      properties:
+        dt:
+          type: number
+          minimum: 0.
+          exclusiveMinimum: true
+        T-max:
+          type: number
+          minimum: 0.
+          exclusiveMinimum: true
+        unit:
+          type: string
+      additionalProperties: true
+
+    DataTimeSeries:
+      description: |-
+        Structure for time series.
+      type: object
+      required:
+        - path
+        - time
+        - value
+      properties:
+        # path to file
+        path:
+          description: |-
+            Path to file containing time series.
+          $ref: "./common.yaml/#/components/schemas/PathToDirString"
+        # special settings
+        sep:
+          description: |-
+            Delimiter for columns used in file.
+          type: string
+          default: ';'
+        decimal:
+          description: |-
+            Symbol for decimals used in file.
+          type: string
+          default: '.'
+        skip:
+          description: |-
+            Which row indexes to skip.
+            Either provide
+
+            - a string of a lambda function (mapping integers to boolean values)
+            - an integer, indicating how many rows to skip from the top
+            - an array
+
+            Noted that row numbers are **0-based**!
+          oneOf:
+            - type: integer
+            - type: array
+              items:
+                type: integer
+            - type: string
+          examples:
+            simple:
+              value: 3
+              summary: Rows `0,1,2` will be skipped.
+            function:
+              value: "`lambda i: i % 3 == 1`"
+              summary: |-
+                Skips every 3rd rwo starting from row-index 1
+            array:
+              value: [0, 1, 2, 4, 5]
+              summary: |-
+                In this case in the file
+                - extra headers are on lines `0, 1, 2``,
+                - headers are on row `3`
+                - rows 4 and 5 contain further skippable content
+
+                NOTE: negative values will be ignored.
+          default: []
+        # columns
+        time:
+          description: |-
+            Column name for time.
+          $ref: "#/components/schemas/DataTypeQuantity"
+        value:
+          description: |-
+            Column name for value.
+          $ref: "#/components/schemas/DataTypeQuantity"
+      additionalProperties: false
+
+    DataTypeQuantity:
+      description: |-
+        Structure for physical quantity as column
+      type: object
+      required:
+        - name
+        - unit
+        # - type
+      properties:
+        name:
+          description: |-
+            Name of column in file.
+        type:
+          description: |-
+            Data type (float, int, etc.)
+          $ref: "./common.yaml/#/components/schemas/EnumType"
+          default: float
+        unit:
+          description: |-
+            Physical unit as string
+          type: string
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM: log level
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumLogLevel:
+      description: |-
+        Enumeration of settings for log level.
+      type: string
+      enum:
+        - INFO
+        - DEBUG
+      default: INFO
