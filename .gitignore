@@ -9,11 +9,9 @@
 !/LICENCE
 !/justfile
 !/pyproject.toml
-!/package.json
 !/requirements.txt
 # for githook
-!/.husky
-!/.husky/pre-commit
+!/.pre-commit-config.yaml
 
 # ----------------------------------------------------------------
 # PROJECT

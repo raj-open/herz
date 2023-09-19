@@ -1,0 +1,48 @@
+# ----------------------------------------------------------------
+# Automates pre-commit actions,
+# e.g. linting, prettify, removal of artefacts/sensitive data, etc.
+#
+# NOTE: To use this run
+#
+# 1. python3 -m pip install pre-commit
+# 2. python3 -m pre-commit install # in the repository
+#
+# After completing 2, upon every commit the hook will be called.
+# ----------------------------------------------------------------
+default_stages:
+  - pre-commit
+  - pre-push
+
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+
+fail_fast: false
+
+repos:
+  - repo: local
+    hooks:
+
+    - id: python
+      name: Python files
+      description: |-
+        This hook performing linting on python code.
+      files: '^(src|tests)/.*\.py$'
+      language: system
+      args: []
+      entry: |-
+        bash -c 'just githook-py "$0"'
+      pass_filenames: true
+      verbose: true
+
+    - id: python-notebooks
+      name: Python notebooks
+      description: |-
+        This hook performing linting on python notebooks.
+      files: '^(notebooks)/.*\.ipynb$'
+      language: system
+      pass_filenames: true
+      args: []
+      entry: |-
+        bash -c 'just githook-ipynb "$0"'
+      verbose: true

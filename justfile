@@ -21,6 +21,7 @@ OS := if os_family() == "windows" { "windows" } else { "linux" }
 PYTHON := if os_family() == "windows" { "py -3" } else { "python3" }
 NODE := "npm"
 LINTING := "black"
+GITHOOK_PRECOMMIT := "pre_commit"
 GEN_MODELS := "datamodel-codegen"
 GEN_MODELS_DOCUMENTATION := "openapi-generator"
 
@@ -140,15 +141,29 @@ build-dev:
     @just build-requirements
     @just check-system-requirements-dev
     @just build-models
-    @just build-githook
+    @#just build-githook-husky
+    @just build-githook-pc
 
-githook-py file:
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{file}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{file}}"
+# builds githook based on pre-commit (see https://pre-commit.com)
+build-githook-pc:
+    @git config --unset-all core.hooksPath
+    @{{PYTHON}} -m pre_commit install
 
-githook-ipynb file:
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{file}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{file}}"
+# builds githook based on node's husky
+build-githook-husky:
+    @npm install
+    @rm -rf .husky
+    @npx husky install
+    @npx husky add .husky/pre-commit 'npx lint-staged'
+
+githook-py path:
+    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
+
+githook-ipynb path:
+    @just clean-notebook "{{path}}"
+    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: build
@@ -171,12 +186,6 @@ build-requirements:
 build-models:
     @echo "Generate data models from schemata."
     @- just _build-models-recursively "src/models"
-
-build-githook:
-    @npm install
-    @rm -rf .husky
-    @npx husky install
-    @npx husky add .husky/pre-commit 'npx lint-staged'
 
 build-documentation:
     @echo "Generate documentations data models from schemata."
@@ -260,6 +269,12 @@ clean:
     @just clean-basic
     @just clean-notebooks
 
+clean-notebook path:
+    @echo "Clean python notebook {{path}}."
+    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace "{{path}}"
+    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
+    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
+
 clean-notebooks:
     @echo "Clean python notebooks."
     @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace **/*.ipynb
@@ -309,7 +324,8 @@ check-system:
 
 check-system-requirements-dev:
     @just check-system-requirements
-    @just _check-tool "{{NODE}}" "node package manager"
+    @#just _check-tool "{{NODE}}" "node package manager"
+    @just _check-python-tool "{{GITHOOK_PRECOMMIT}}" "pre-commit"
 
 check-system-requirements:
     @just _check-python-tool "{{LINTING}}" "{{LINTING}}"
