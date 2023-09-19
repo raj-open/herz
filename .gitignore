@@ -1,0 +1,72 @@
+*
+!/.gitignore
+
+# ----------------------------------------------------------------
+# ROOT
+# ----------------------------------------------------------------
+
+!/README.md
+!/LICENCE
+!/justfile
+!/pyproject.toml
+!/package.json
+!/requirements.txt
+# for githook
+!/.husky
+!/.husky/pre-commit
+
+# ----------------------------------------------------------------
+# PROJECT
+# ----------------------------------------------------------------
+
+!/scripts
+!/scripts/*.py
+
+!/examples
+!/examples/README.md
+!/examples/setup
+!/examples/setup/config.yaml
+!/examples/data
+!/examples/data/*.csv
+!/examples/output
+!/examples/output/*.png
+!/examples/output/*.html
+
+!/dist
+!/dist/VERSION
+
+!/templates
+!/templates/template-*.yaml
+
+!/src
+!/src/**/
+!/src/**/*.py
+!/src/**/*.yaml
+
+!/tests
+!/tests/**/
+!/tests/**/*.py
+
+!/notebooks
+!/notebooks/*.ipynb
+
+!/documentation
+!/documentation/**/
+!/documentation/*.bib
+!/documentation/*.png
+!/documentation/**/*.md
+
+# ----------------------------------------------------------------
+# FORCE REMOVE ARTEFACTS
+# ----------------------------------------------------------------
+
+**/.DS_Store
+**/__pycache__
+**/*__archive__*
+**/sandbox*
+
+# ----------------------------------------------------------------
+# FORCE INCLUDE
+# ----------------------------------------------------------------
+
+!/**/.gitkeep
