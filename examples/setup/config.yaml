@@ -1,0 +1,70 @@
+# ----------------------------------------------------------------
+# USER CONFIGURATION
+# ----------------------------------------------------------------
+basic:
+  # Logging level may be either INFO (standard) or DEBUG
+  log-level: INFO
+  # Whether or not output is to be logged
+  verbose: true
+# setup for input data
+data:
+  combine:
+    dt: 10
+    unit: "ms"
+  pressure:
+    # paths either absolute or relative to root of project folder
+    path: "examples/data/pressure.csv"
+    sep: ";"
+    decimal: "."
+    skip: [0, 2] # 0-based list of row-indexes to skip (do not include header!)
+    time:
+      name: "Time" # column name
+      unit: "ms"
+      type: float
+    value:
+      name: "Pressure"
+      unit: "mmHg"
+      type: float
+  volume:
+    path: "examples/data/volume.csv"
+    sep: ";"
+    decimal: "."
+    skip: [0, 2] # 0-based list of row-indexes to skip (do not include header!)
+    time:
+      name: "Time"
+      unit: "ms"
+      type: float
+    value:
+      name: "Volume"
+      unit: "mL"
+      type: float
+# setup for outputs
+output:
+  name: "Demonstration"
+  quantities:
+    time:
+      name: "Time"
+      unit: "ms"
+      type: float
+    pressure:
+      name: "Pressure"
+      unit: "mmHg"
+      type: float
+    volume:
+      name: "Volume"
+      unit: "mL"
+      type: float
+  table:
+    path: "examples/output/table.csv"
+    sep: ";"
+    decimal: "."
+  plot:
+    # NOTE: include '{kind}' in path name, as this is a schema!
+    # path: "data/output/plot-{kind}.png" # static output for papers
+    path: 'examples/output/plot-{kind}.png' # interactive output for webpages
+    title: "Pressure-Volume loop"
+    font:
+      family: "Avenir Next"
+      size: 12
+      size-title: 18
+    legend: false
