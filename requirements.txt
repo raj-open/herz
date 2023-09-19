@@ -40,4 +40,5 @@ testfixtures>=7.1.0
 datamodel-code-generator>=0.21.2
 openapi-generator-cli>=4.3.1
 openapi-generator>=1.0.6
+pre_commit>=3.4.0
 black[d, jupyter]>=23.7.0
