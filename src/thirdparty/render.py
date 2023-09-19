@@ -12,7 +12,8 @@ from IPython.display import display_latex
 from IPython.display import display_png
 from IPython.display import display_markdown
 from IPython.display import display
-import ipywidgets as widgets
+from ipywidgets import interact
+from ipywidgets import widgets
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -25,6 +26,7 @@ __all__ = [
     'display_latex',
     'display_markdown',
     'display_png',
+    'interact',
     'tabulate',
     'widgets',
 ]
