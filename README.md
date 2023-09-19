@@ -66,7 +66,7 @@ If there are issues, it often helps to restore things to a fresh state.
 To do this for your local copy of the repository, run
 
 ```bash
-just clean-notebooks
+just clean
 ```
 
 NOTE: After running this, you will need to run `just build` before executing the code again.

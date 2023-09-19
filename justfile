@@ -15,7 +15,6 @@ menu:
 REPO_NAME := "herz"
 PROJECT_NAME := "herz"
 
-
 PATH_ROOT := justfile_directory()
 CURRENT_DIR := invocation_directory()
 OS := if os_family() == "windows" { "windows" } else { "linux" }
@@ -275,7 +274,7 @@ clean-basic:
     @- just _delete-if-file-exists ".coverage" 2> /dev/null
     @- just _delete-if-folder-exists "logs"
     @echo "All build artefacts will be force removed."
-    @- just _delete-if-folder-exists "documentation/models"
+    @#- just _delete-if-folder-exists "documentation/models"
     @- just _delete-if-file-exists "package-lock.json" 2> /dev/null
     @- just _clean-all-folders "." ".idea" 2> /dev/null
     @- just _clean-all-folders "." "__pycache__" 2> /dev/null
