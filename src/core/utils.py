@@ -35,5 +35,5 @@ def where_to_characteristic(indices: list[int], N: int) -> np.ndarray:
 
 
 def characteristic_to_where(ch: np.ndarray) -> list[int]:
-    obj = np.where(ch == True)
+    obj = np.where(ch)
     return obj[0].tolist()
