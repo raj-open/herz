@@ -1,4 +1,4 @@
-# PV-Loops #
+# Pressure-Volume analysis for cadiology #
 
 This repository contains code to extract time-series data for pressure and volume,
 align these and produce pressure-volume data series and plots.
@@ -39,12 +39,12 @@ All **bash** commands are to be run from the **root** folder of this repository.
     If there are any errors, run this once more.
     If this still persists, contact the maintainer.
 
-2. Add your Data e.g. to the [./data](data) folder.
+2. Add your Data e.g. to the [data](data) folder.
 
 3. Configuration:
 
-    - Adjust the file [./setup/config.yaml](setup/config.yaml).
-    - If this does not exist, copy the file form [./templates/templates-config.yaml](templates/template-config.yaml)
+    - Adjust the file [setup/config.yaml](setup/config.yaml).
+    - If this does not exist, copy the file form [templates/templates-config.yaml](templates/template-config.yaml)
      to `setup/config.yaml`.
     - Ensure in particular that the paths to the input and output data are set correctly.
     - For the output plots choose `*.html` format for dynamical output,
@@ -52,9 +52,10 @@ All **bash** commands are to be run from the **root** folder of this repository.
 
 4. _Either_
 
-    - Open the notebook [./notebooks/main.ipynb](notebooks/main.ipynb) and run all cells.
+    - (interactive) open [notebooks/main.ipynb](notebooks/main.ipynb)
+      and run all cells; _or_
 
-    - Run (non-interactive) in a **bash** terminal
+    - (non-interactive) execute in a **bash** terminal
 
         ```bash
         just run

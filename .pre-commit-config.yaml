@@ -26,7 +26,7 @@ repos:
     - id: python
       name: Python files
       description: |-
-        This hook performing linting on python code.
+        This hook performs linting on python code.
       files: '^(src|tests)/.*\.py$'
       language: system
       args: []
@@ -38,7 +38,7 @@ repos:
     - id: python-notebooks
       name: Python notebooks
       description: |-
-        This hook performing linting on python notebooks.
+        This hook performs linting on python notebooks.
       files: '^(notebooks)/.*\.ipynb$'
       language: system
       pass_filenames: true
