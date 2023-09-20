@@ -159,11 +159,15 @@ build-githook-husky:
 githook-py path:
     @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
     @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
+    @# re-add file, as may have been changed:
+    @git add "{{path}}"
 
 githook-ipynb path:
     @just clean-notebook "{{path}}"
     @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
     @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
+    @# re-add file, as may have been changed:
+    @git add "{{path}}"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: build
@@ -237,6 +241,7 @@ tests-unit:
 
 qa:
     @{{PYTHON}} -m coverage report -m
+
 coverage source_path tests_path:
     @just _create-logs
     @{{PYTHON}} -m pytest {{tests_path}} \
