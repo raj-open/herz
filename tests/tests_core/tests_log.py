@@ -5,40 +5,45 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from src.thirdparty.log import *
 from src.thirdparty.types import *
-from src.thirdparty.maths import *
 from tests.thirdparty.unit import *
 
 from src.core.log import *
-from .paths import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# SETTINGS
+# LOCAL VARIABLES / CONSTANTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-np.seterr(all='warn')
+#
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # FIXTURES
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-configure_logging(LOG_LEVELS.INFO)
+#
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TESTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-@fixture(scope='module', autouse=True)
-def test() -> TestCase:
-    return TestCase()
-
-
-@fixture(scope='module', autouse=True)
-def debug() -> Callable[..., None]:
-    '''
-    Fixture for development purposes only.
-    Logs to file 'logs/debug.log'.
-    '''
-    return log_dev
-
-
-@fixture(scope='module', autouse=True)
-def module() -> Callable[[str], str]:
-    return get_module
+@mark.parametrize(
+    ('level',),
+    [
+        ('INFO',),
+        (LOG_LEVELS.INFO,),
+        ('DEBUG',),
+        (LOG_LEVELS.DEBUG,),
+    ],
+)
+def test_log_configure(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    level: Any,
+):
+    with does_not_raise():
+        configure_logging(level)
+    return

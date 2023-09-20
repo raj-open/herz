@@ -10,6 +10,7 @@
 !/justfile
 !/pyproject.toml
 !/requirements.txt
+!/.coveragerc
 # for githook
 !/.pre-commit-config.yaml
 
