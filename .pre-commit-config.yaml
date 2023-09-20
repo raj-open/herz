@@ -9,10 +9,6 @@
 #
 # After completing 2, upon every commit the hook will be called.
 # ----------------------------------------------------------------
-default_stages:
-  - pre-commit
-  - pre-push
-
 default_install_hook_types:
   - pre-commit
   - pre-push
@@ -23,26 +19,54 @@ repos:
   - repo: local
     hooks:
 
-    - id: python
-      name: Python files
+    - id: lint
+      name: Lint files
       description: |-
-        This hook performs linting on python code.
-      files: '^(src|tests)/.*\.py$'
+        This hook performs linting on files.
+      files: '^(src|tests|notebooks|examples)/.*\.(py|ipynb)$'
       language: system
       args: []
       entry: |-
-        bash -c 'just githook-py "$0"'
+        bash -c 'just githook-lint "$0"'
       pass_filenames: true
       verbose: true
+      stages: [ pre-commit ]
 
-    - id: python-notebooks
-      name: Python notebooks
+    - id: test-py
+      name: Test python files
       description: |-
-        This hook performs linting on python notebooks.
+        This hook performs checks to see if test in this file are green.
+      files: '^tests/(tests_[^/]+/)*tests_[^/]+\.py$'
+      language: system
+      args: []
+      entry: |-
+        bash -c 'just githook-test-py "$0"'
+      pass_filenames: true
+      verbose: true
+      stages: [ pre-commit ]
+
+    - id: clean-nb
+      name: Clean python notebooks
+      description: |-
+        This hook cleans python notebooks.
       files: '^(notebooks)/.*\.ipynb$'
       language: system
       pass_filenames: true
       args: []
       entry: |-
-        bash -c 'just githook-ipynb "$0"'
+        bash -c 'just githook-clean-ipynb "$0"'
       verbose: true
+      stages: [ pre-commit ]
+
+    - id: qa
+      name: QA
+      description: |-
+        This hook performs QA on all files before a push.
+      files: '.*'
+      language: system
+      pass_filenames: false
+      args: []
+      entry: |-
+        bash -c 'just githook-qa'
+      verbose: true
+      stages: [ pre-push ]

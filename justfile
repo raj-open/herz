@@ -156,18 +156,24 @@ build-githook-husky:
     @npx husky install
     @npx husky add .husky/pre-commit 'npx lint-staged'
 
-githook-py path:
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
-    @# re-add file, as may have been changed:
-    @git add "{{path}}"
+githook-lint path:
+    @# lint
+    @just lint "{{path}}"
 
-githook-ipynb path:
+githook-test-py path:
+    @# run test
+    @just test-unit "{{path}}"
+
+githook-clean-ipynb path:
+    @# lint
     @just clean-notebook "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
-    @# re-add file, as may have been changed:
-    @git add "{{path}}"
+
+githook-qa:
+    @# lint
+    @just prettify
+    @just check-linting
+    @# run tests
+    @just tests
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: build
@@ -227,6 +233,13 @@ tests-logs:
     @- just tests
     @just _display-logs
 
+test-unit path:
+    @{{PYTHON}} -m pytest "{{path}}" \
+        --ignore=tests/integration \
+        --cov-reset \
+        --cov=. \
+        2> /dev/null
+
 tests-unit:
     @{{PYTHON}} -m pytest tests \
         --ignore=tests/integration \
@@ -255,6 +268,10 @@ coverage source_path tests_path:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: prettify
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+lint path:
+    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
 
 check-linting:
     @{{PYTHON}} -m {{LINTING}} --check --verbose src/*
