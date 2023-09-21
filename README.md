@@ -4,11 +4,14 @@ This repository contains code to extract time-series data for pressure and volum
 align these and produce pressure-volume data series and plots.
 Methods are developed in [^Heerdt2019].
 
+## Examples ##
+
+See [examples](examples).
+
 ## System requirements ##
 
 - [Python 3.10+](https://www.python.org/downloads)
 - [Justfile tool](https://github.com/casey/just#installation)
-- (development only) [Node and npm](https://nodejs.org/en/download/current)
 
 ### Windows users ###
 
@@ -77,5 +80,9 @@ If you just wish to obtain a fresh state for the notebooks, run
 ```bash
 just clean-notebooks
 ```
+
+## Development ##
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [^Heerdt2019]: Heerdt, Paul M et al. "A pressure-based single beat method for estimation of right ventricular ejection fraction: proof of concept." _The European respiratory journal_ vol. 55,3 1901635. 12 Mar. 2020, doi:10.1183/13993003.01635-2019
