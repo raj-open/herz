@@ -164,9 +164,13 @@ githook-test-py path:
     @# run test
     @just test-unit "{{path}}"
 
-githook-clean-ipynb path:
+githook-clean-ipynb-outputs path:
     @# lint
-    @just clean-notebook "{{path}}"
+    @just clean-notebook-outputs "{{path}}"
+
+githook-clean-ipynb-meta path:
+    @# lint
+    @just clean-notebook-meta "{{path}}"
 
 githook-qa:
     @# lint
@@ -291,15 +295,19 @@ clean:
     @just clean-basic
     @just clean-notebooks
 
-clean-notebook path:
-    @echo "Clean python notebook {{path}}."
+clean-notebook-outputs path:
+    @echo "Clean outputs from python notebook {{path}}."
     @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace "{{path}}"
+
+clean-notebook-meta path:
+    @echo "Clean metadata from python notebook {{path}}."
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
 clean-notebooks:
-    @echo "Clean python notebooks."
-    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace **/*.ipynb
+    @echo "Clean outputs and metadata from python notebooks."
+    @# NOTE: only clean outputs in notebooks/... folder
+    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/**/*.ipynb
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
 

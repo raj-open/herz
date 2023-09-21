@@ -190,9 +190,9 @@ which contain the mathematics.
 Here we list a few points mainly about the repository as such,
 and not the code contents:
 
-- Potential use of notebooks in the examples folder should not be entirely wiped.
+- [x] Potential use of notebooks in the examples folder should not be entirely wiped.
   These should have their meta-data wiped, but not their outputs.
-- Work with [V-lang](https://vlang.io/) instead of python?
+- [ ] Work with [V-lang](https://vlang.io/) instead of python?
 
 [^packages]: In future, we may consider using virtual environments to avoid package conflicts.
 [^tests]: Before commits of unit-test files, these will run by a githook.

@@ -101,17 +101,32 @@ repos:
       verbose: true
       stages: [ pre-commit ]
 
-    - id: clean-nb
-      name: Clean python notebooks
+    - id: clean-nb-v
+      name: Clean outputs from python notebooks
       description: |-
         This hook cleans python notebooks.
-      files: '^(notebooks)/.*\.ipynb$'
+      files: '^notebooks/.*\.ipynb$'
       pass_filenames: true
       language: system
       args: []
       entry: |-
         bash -c '
-          just githook-clean-ipynb "$0";
+          just githook-clean-ipynb-outputs "$0";
+        '
+      verbose: true
+      stages: [ pre-commit ]
+
+    - id: clean-nb-meta
+      name: Clean metadata from python notebooks
+      description: |-
+        This hook cleans python notebooks.
+      files: '^.*\.ipynb$'
+      pass_filenames: true
+      language: system
+      args: []
+      entry: |-
+        bash -c '
+          just githook-clean-ipynb-meta "$0";
         '
       verbose: true
       stages: [ pre-commit ]
