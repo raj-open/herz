@@ -42,6 +42,7 @@
 !/src/**/
 !/src/**/*.py
 !/src/**/*.yaml
+/src/models/generated
 
 !/tests
 !/tests/**/
