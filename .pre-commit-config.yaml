@@ -32,41 +32,36 @@ repos:
       language: system
       args: []
       entry: |-
-        bash -c '
-            message="$( cat .git/COMMIT_EDITMSG )";
+        python -c "
+        import os;
+        import sys;
+        import re;
 
-            pattern="^Merge .* into .*";
-            if ( echo "${message}" | grep -Eq "${pattern}" ); then
-              exit 0;
-            fi
+        def bash_stdout(cmd):
+          result = os.popen(cmd).read().strip();
+          return result.split('\n');
 
-            branch="$( git rev-parse --abbrev-ref HEAD )"
-            # get 2nd line of git history
-            line=""
-            while read line_; do
-                line="${line_}";
-            done <<< "$( git show-branch -a | head -n2 )";
-            # NOTE: line is of form
-            # ! [branch] message
-            # Can normally extract using sed, but does not work inside bash -c.
-            line="${line//[/####}";
-            line="${line//]/####}";
-            parts=( $( echo "$line" | tr "####" "\n" ) );
-            parent="${parts[1]}"
-            pattern="^${branch} > ${parent}: [^[:space:]]+([[:space:]]*[^[:space:]]+)*"
-            expected="${branch} > ${parent}: {your message}";
+        with open('.git/COMMIT_EDITMSG', 'r') as fp:
+          message = ''.join(fp.readlines()).strip();
 
-            echo "commit message matches expected:";
-            echo "";
-            echo "    ${expected}";
-            echo "";
+        if re.match(pattern=r'^Merge .* into .*$', string=message):
+          exit(0);
 
-            if ( echo "${message}" | grep -Eq "${pattern}" ); then
-              exit 0;
-            else
-              exit 1;
-            fi
-        '
+        branch = bash_stdout('git rev-parse --abbrev-ref HEAD')[0];
+        branch_history = bash_stdout('git show-branch -a | head -n2');
+        line = branch_history[1];
+        parent = re.sub(pattern=r'^[!\*\s]*\[(.*?)\].*$', repl=r'\1', string=line);
+
+        prefix = f'{branch} > {parent}: ';
+        print('commit message matches expected:');
+        print('');
+        print(f'    {prefix}{{your message}}');
+
+        if message.startswith(prefix):
+          exit(0);
+        else:
+          exit(1);
+        "
       verbose: true
       stages: [ commit-msg ]
 
