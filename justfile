@@ -156,14 +156,28 @@ build-githook-husky:
     @npx husky install
     @npx husky add .husky/pre-commit 'npx lint-staged'
 
-githook-py path:
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
+githook-lint path:
+    @# lint
+    @just lint "{{path}}"
 
-githook-ipynb path:
-    @just clean-notebook "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
-    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
+githook-test-py path:
+    @# run test
+    @just test-unit "{{path}}"
+
+githook-clean-ipynb-outputs path:
+    @# lint
+    @just clean-notebook-outputs "{{path}}"
+
+githook-clean-ipynb-meta path:
+    @# lint
+    @just clean-notebook-meta "{{path}}"
+
+githook-qa:
+    @# lint
+    @just prettify
+    @just check-linting
+    @# run tests
+    @just tests
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: build
@@ -223,6 +237,13 @@ tests-logs:
     @- just tests
     @just _display-logs
 
+test-unit path:
+    @{{PYTHON}} -m pytest "{{path}}" \
+        --ignore=tests/integration \
+        --cov-reset \
+        --cov=. \
+        2> /dev/null
+
 tests-unit:
     @{{PYTHON}} -m pytest tests \
         --ignore=tests/integration \
@@ -237,6 +258,7 @@ tests-unit:
 
 qa:
     @{{PYTHON}} -m coverage report -m
+
 coverage source_path tests_path:
     @just _create-logs
     @{{PYTHON}} -m pytest {{tests_path}} \
@@ -250,6 +272,10 @@ coverage source_path tests_path:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: prettify
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+lint path:
+    @{{PYTHON}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYTHON}} -m {{LINTING}} --check --verbose "{{path}}"
 
 check-linting:
     @{{PYTHON}} -m {{LINTING}} --check --verbose src/*
@@ -269,15 +295,19 @@ clean:
     @just clean-basic
     @just clean-notebooks
 
-clean-notebook path:
-    @echo "Clean python notebook {{path}}."
+clean-notebook-outputs path:
+    @echo "Clean outputs from python notebook {{path}}."
     @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace "{{path}}"
+
+clean-notebook-meta path:
+    @echo "Clean metadata from python notebook {{path}}."
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
 clean-notebooks:
-    @echo "Clean python notebooks."
-    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace **/*.ipynb
+    @echo "Clean outputs and metadata from python notebooks."
+    @# NOTE: only clean outputs in notebooks/... folder
+    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/**/*.ipynb
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
     @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
 

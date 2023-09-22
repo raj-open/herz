@@ -9,11 +9,8 @@
 #
 # After completing 2, upon every commit the hook will be called.
 # ----------------------------------------------------------------
-default_stages:
-  - pre-commit
-  - pre-push
-
 default_install_hook_types:
+  - commit-msg
   - pre-commit
   - pre-push
 
@@ -23,26 +20,133 @@ repos:
   - repo: local
     hooks:
 
-    - id: python
-      name: Python files
+    - id: commit-message
+      name: Commit Message
       description: |-
-        This hook performing linting on python code.
-      files: '^(src|tests)/.*\.py$'
+        This hook ensures that commit messages conform to the schema.
+      # SIMPLER METHOD, but allows any branch name:
+      # language: pygrep
+      # args: [ '--negate' ]
+      # entry: '^\S+(-\S+)* > \S+(-\S+)*:\s+\S+(\s*\S+)*$'
+      # MORE COMPLICATED, but checks branch names:
       language: system
       args: []
       entry: |-
-        bash -c 'just githook-py "$0"'
-      pass_filenames: true
-      verbose: true
+        bash -c '
+            message="$( cat .git/COMMIT_EDITMSG )";
 
-    - id: python-notebooks
-      name: Python notebooks
+            pattern="^Merge .* into .*";
+            if ( echo "${message}" | grep -Eq "${pattern}" ); then
+              exit 0;
+            fi
+
+            branch="$( git rev-parse --abbrev-ref HEAD )"
+            # get 2nd line of git history
+            line=""
+            while read line_; do
+                line="${line_}";
+            done <<< "$( git show-branch -a | head -n2 )";
+            # NOTE: line is of form
+            # ! [branch] message
+            # Can normally extract using sed, but does not work inside bash -c.
+            line="${line//[/####}";
+            line="${line//]/####}";
+            parts=( $( echo "$line" | tr "####" "\n" ) );
+            parent="${parts[1]}"
+            pattern="^${branch} > ${parent}: [^[:space:]]+([[:space:]]*[^[:space:]]+)*"
+            expected="${branch} > ${parent}: {your message}";
+
+            echo "commit message matches expected:";
+            echo "";
+            echo "    ${expected}";
+            echo "";
+
+            if ( echo "${message}" | grep -Eq "${pattern}" ); then
+              exit 0;
+            else
+              exit 1;
+            fi
+        '
+      verbose: true
+      stages: [ commit-msg ]
+
+  - repo: local
+    hooks:
+
+    - id: lint
+      name: Lint files
       description: |-
-        This hook performing linting on python notebooks.
-      files: '^(notebooks)/.*\.ipynb$'
-      language: system
+        This hook performs linting on files.
+      files: '^(src|tests|notebooks|examples)/.*\.(py|ipynb)$'
       pass_filenames: true
+      language: system
       args: []
       entry: |-
-        bash -c 'just githook-ipynb "$0"'
+        bash -c '
+          just githook-lint "$0";
+        '
       verbose: true
+      stages: [ pre-commit ]
+
+    - id: test-py
+      name: Test python files
+      description: |-
+        This hook performs checks to see if test in this file are green.
+      files: '^tests/(tests_[^/]+/)*tests_[^/]+\.py$'
+      pass_filenames: true
+      language: system
+      args: []
+      entry: |-
+        bash -c '
+          just githook-test-py "$0";
+        '
+      verbose: true
+      stages: [ pre-commit ]
+
+    - id: clean-nb-v
+      name: Clean outputs from python notebooks
+      description: |-
+        This hook cleans python notebooks.
+      files: '^notebooks/.*\.ipynb$'
+      pass_filenames: true
+      language: system
+      args: []
+      entry: |-
+        bash -c '
+          just githook-clean-ipynb-outputs "$0";
+        '
+      verbose: true
+      stages: [ pre-commit ]
+
+    - id: clean-nb-meta
+      name: Clean metadata from python notebooks
+      description: |-
+        This hook cleans python notebooks.
+      files: '^.*\.ipynb$'
+      pass_filenames: true
+      language: system
+      args: []
+      entry: |-
+        bash -c '
+          just githook-clean-ipynb-meta "$0";
+        '
+      verbose: true
+      stages: [ pre-commit ]
+
+  - repo: local
+    hooks:
+
+    - id: qa
+      name: QA
+      description: |-
+        This hook performs QA on all files before a push.
+      files: '.*'
+      pass_filenames: false
+      language: system
+      args: []
+      entry: |-
+        bash -c '
+          just githook-qa;
+        '
+      verbose: true
+      stages: [ pre-push ]

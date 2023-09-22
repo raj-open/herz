@@ -6,10 +6,12 @@
 # ----------------------------------------------------------------
 
 !/README.md
+!/CONTRIBUTING.md
 !/LICENCE
 !/justfile
 !/pyproject.toml
 !/requirements.txt
+!/.coveragerc
 # for githook
 !/.pre-commit-config.yaml
 # for workflows

@@ -1,14 +1,17 @@
-# PV-Loops #
+# Pressure-Volume analysis for cadiology #
 
 This repository contains code to extract time-series data for pressure and volume,
 align these and produce pressure-volume data series and plots.
 Methods are developed in [^Heerdt2019].
 
+## Examples ##
+
+See [examples](examples).
+
 ## System requirements ##
 
 - [Python 3.10+](https://www.python.org/downloads)
 - [Justfile tool](https://github.com/casey/just#installation)
-- (development only) [Node and npm](https://nodejs.org/en/download/current)
 
 ### Windows users ###
 
@@ -39,12 +42,12 @@ All **bash** commands are to be run from the **root** folder of this repository.
     If there are any errors, run this once more.
     If this still persists, contact the maintainer.
 
-2. Add your Data e.g. to the [./data](data) folder.
+2. Add your Data e.g. to the [data](data) folder.
 
 3. Configuration:
 
-    - Adjust the file [./setup/config.yaml](setup/config.yaml).
-    - If this does not exist, copy the file form [./templates/templates-config.yaml](templates/template-config.yaml)
+    - Adjust the file [setup/config.yaml](setup/config.yaml).
+    - If this does not exist, copy the file form [templates/templates-config.yaml](templates/template-config.yaml)
      to `setup/config.yaml`.
     - Ensure in particular that the paths to the input and output data are set correctly.
     - For the output plots choose `*.html` format for dynamical output,
@@ -52,9 +55,10 @@ All **bash** commands are to be run from the **root** folder of this repository.
 
 4. _Either_
 
-    - Open the notebook [./notebooks/main.ipynb](notebooks/main.ipynb) and run all cells.
+    - (interactive) open [notebooks/main.ipynb](notebooks/main.ipynb)
+      and run all cells; _or_
 
-    - Run (non-interactive) in a **bash** terminal
+    - (non-interactive) execute in a **bash** terminal
 
         ```bash
         just run
@@ -76,5 +80,9 @@ If you just wish to obtain a fresh state for the notebooks, run
 ```bash
 just clean-notebooks
 ```
+
+## Development ##
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [^Heerdt2019]: Heerdt, Paul M et al. "A pressure-based single beat method for estimation of right ventricular ejection fraction: proof of concept." _The European respiratory journal_ vol. 55,3 1901635. 12 Mar. 2020, doi:10.1183/13993003.01635-2019

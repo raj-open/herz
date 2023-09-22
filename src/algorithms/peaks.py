@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# IMPORTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+from ..thirdparty.maths import *
+from ..thirdparty.types import *
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# EXPORTS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+__all__ = [
+    'get_extremes',
+    'get_peaks_simple',
+]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def get_extremes(
+    values: np.ndarray, sig_width: float = 1 / math.sqrt(2)
+) -> tuple[list[int], list[int]]:
+    N_values = len(values)
+    # first make data as symmetric as possible
+    values = normalised_order_statistics(values)
+    # preliminary computation of peaks
+    peaks = get_peaks_simple(values, add_end=True)
+    # estimate cycle length
+    N = estimate_cycle_duration(peaks) or N_values
+    width = round(sig_width * N) or 1.0
+    # re-compute peaks
+    peaks = get_peaks_simple(values, add_end=False, distance=width, prominence=1)
+    troughs = get_peaks_simple(-values, add_end=False, distance=width, prominence=1)
+    return peaks, troughs
+
+
+def get_peaks_simple(values: np.ndarray, add_end: bool, **kwargs) -> list[int]:
+    N = len(values)
+
+    result = sps.find_peaks(
+        values,
+        **kwargs,
+        # height=None,
+        # threshold=None,
+        # distance=None,
+        # prominence=None,
+        # width=None,
+        # wlen=None,
+        # rel_height=0.5,
+        # plateau_size=None,
+    )
+    peaks = result[0].tolist()
+
+    if add_end:
+        peaks.append(N)
+
+    return peaks
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# AUXILIARY METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def estimate_cycle_duration(peaks: Iterable) -> int:
+    N = 0
+    if len(peaks) > 1:
+        # compute differences between elements
+        delta = np.diff(peaks)
+        # remove outliers
+        delta = remove_outliers(delta)
+        # compute minimal difference (excl. outliers)
+        N = round(min(delta))
+    return N
