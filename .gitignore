@@ -12,6 +12,10 @@
 !/requirements.txt
 # for githook
 !/.pre-commit-config.yaml
+# for workflows
+!/.github
+!/.github/**/
+!/.github/**/*.yaml
 
 # ----------------------------------------------------------------
 # PROJECT
@@ -29,6 +33,8 @@
 !/examples/output
 !/examples/output/*.png
 !/examples/output/*.html
+!/examples/*.py
+!/examples/*.ipynb
 
 !/dist
 !/dist/VERSION
@@ -40,6 +46,7 @@
 !/src/**/
 !/src/**/*.py
 !/src/**/*.yaml
+/src/models/generated
 
 !/tests
 !/tests/**/
