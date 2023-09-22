@@ -37,6 +37,7 @@ codetiming = {version='^1.4.0'}
 asyncio = {version='^3.4.3'}
 anyio = {version='^3.7.1'}
 # config
+toml = {version='^0.10.2'}
 python-dotenv = {version='^1.0.0'}
 jsonschema = {version='^4.18.4'}
 lazy-load = {version='^0.8.3'}
