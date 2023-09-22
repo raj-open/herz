@@ -9,10 +9,10 @@ on:
         type: choice
         options:
           - ubuntu-latest
-          - macos-latest
-          - macos-latest-xl
-          - macos-13
-          - macos-13-xl
+          # - macos-latest
+          # - macos-latest-xl
+          # - macos-13
+          # - macos-13-xl
       log-level:
         description: 'Log level'
         required: true
@@ -30,6 +30,23 @@ on:
         description: 'Environment to run tests against'
         type: environment
         required: false
+  pull_request:
+    branches:
+      - main
+      - dev
+    paths:
+      - examples/**
+      - notebooks/**
+      - src/**
+      - tests/**
+    types:
+      - assigned
+      - opened
+      - edited
+      - reopened
+      - ready_for_review
+      - unlocked
+      - review_requested
 permissions:
   contents: read
 jobs:
@@ -38,10 +55,31 @@ jobs:
     runs-on: ${{ github.event.inputs.docker-image }}
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11
+      - name: Action - install justfile tool
+        uses: extractions/setup-just@v1
+        with:
+          just-version: "1.14.0"
+      - name: Ping - Justfile Tool
+        run: |-
+          just --version
+      - name: Action - install Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.11"
-      - name: Ping
+      - name: Ping - Python
         run: |-
           python3 --version
+      - name: Setup - pre-installation
+        run: |-
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade wheel
+          python3 -m pip install --upgrade toml
+      - name: Setup - build repository
+        run: |-
+          just build
+      - name: QA - Check Linting
+        run: |-
+          just check-linting
+      - name: QA - Unit Tests
+        run: |-
+          just tests-logs
