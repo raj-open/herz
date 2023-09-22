@@ -51,6 +51,7 @@ permissions:
   contents: read
 jobs:
   job-qa:
+    name: QA
     # runs-on: [self-hosted, "${{ github.event.inputs.os }}", x64, gpu]
     runs-on: ${{ github.event.inputs.docker-image }}
     steps:
