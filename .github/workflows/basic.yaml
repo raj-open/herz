@@ -50,11 +50,11 @@ on:
 permissions:
   contents: read
 jobs:
-  build:
-    name: QA
+  job-qa-dispatch:
+    name: QA Manual
     # runs-on: [self-hosted, "${{ github.event.inputs.os }}", x64, gpu]
     runs-on: ${{ github.event.inputs.docker-image }}
-    steps:
+    steps: &steps_job_qa
       - uses: actions/checkout@v3
       - name: Action - install justfile tool
         uses: extractions/setup-just@v1
@@ -84,3 +84,7 @@ jobs:
       - name: QA - Unit Tests
         run: |-
           just tests-logs
+  job-qa-pr:
+    name: QA Pull Request
+    runs-on: "ubuntu-latest"
+    steps: *steps_job_qa
