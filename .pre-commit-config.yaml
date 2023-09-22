@@ -35,6 +35,11 @@ repos:
         bash -c '
             message="$( cat .git/COMMIT_EDITMSG )";
 
+            pattern="^Merge .* into .*";
+            if ( echo "${message}" | grep -Eq "${pattern}" ); then
+              exit 0;
+            fi
+
             branch="$( git rev-parse --abbrev-ref HEAD )"
             # get 2nd line of git history
             line=""
@@ -51,17 +56,14 @@ repos:
             pattern="^${branch} > ${parent}: [^[:space:]]+([[:space:]]*[^[:space:]]+)*"
             expected="${branch} > ${parent}: {your message}";
 
+            echo "commit message matches expected:";
+            echo "";
+            echo "    ${expected}";
+            echo "";
+
             if ( echo "${message}" | grep -Eq "${pattern}" ); then
-              echo "commit message matches expected:";
-              echo "";
-              echo "    ${expected}";
-              echo "";
               exit 0;
             else
-              echo "commit message failed to match";
-              echo "";
-              echo "    ${expected}";
-              echo "";
               exit 1;
             fi
         '
