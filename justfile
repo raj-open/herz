@@ -301,15 +301,16 @@ clean-notebook-outputs path:
 
 clean-notebook-meta path:
     @echo "Clean metadata from python notebook {{path}}."
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
 clean-notebooks:
     @echo "Clean outputs and metadata from python notebooks."
     @# NOTE: only clean outputs in notebooks/... folder
-    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/**/*.ipynb
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
+    @# FIXME: nbconvert no longer recognises the .../**/... pattern
+    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
 
 clean-basic:
     @echo "All system artefacts will be force removed."
