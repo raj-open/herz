@@ -44,10 +44,10 @@ def step_output_time_plots(data: pd.DataFrame) -> pgo.Figure:
     time = cv_t * data['time'].to_numpy(copy=True)
     pressure = cv_p * data['pressure'].to_numpy(copy=True)
     volume = cv_v * data['volume'].to_numpy(copy=True)
-    pressure_peak = data['pressure_peak'].to_numpy(copy=True)
-    pressure_trough = data['pressure_trough'].to_numpy(copy=True)
-    volume_peak = data['volume_peak'].to_numpy(copy=True)
-    volume_trough = data['volume_trough'].to_numpy(copy=True)
+    pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
+    pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
+    volume_peak = data['volume[peak]'].to_numpy(copy=True)
+    volume_trough = data['volume[trough]'].to_numpy(copy=True)
 
     fig = make_subplots(
         rows=2,
@@ -191,10 +191,10 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
     time = cv_t * data['time'].to_numpy(copy=True)
     pressure = cv_p * data['pressure'].to_numpy(copy=True)
     volume = cv_v * data['volume'].to_numpy(copy=True)
-    pressure_peak = data['pressure_peak'].to_numpy(copy=True)
-    pressure_trough = data['pressure_trough'].to_numpy(copy=True)
-    volume_peak = data['volume_peak'].to_numpy(copy=True)
-    volume_trough = data['volume_trough'].to_numpy(copy=True)
+    pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
+    pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
+    volume_peak = data['volume[peak]'].to_numpy(copy=True)
+    volume_trough = data['volume[trough]'].to_numpy(copy=True)
 
     text = np.asarray([f'{t:.0f}{cfg.quantities.time.unit}' for t in time])
 
