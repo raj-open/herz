@@ -44,14 +44,14 @@ def step_recognise_cycles(
 ) -> pd.DataFrame:
     N = len(data)
     peaks = characteristic_to_where(data[f'{quantity}_peak'])
+    x = data[['pressure', 'volume']].to_numpy(copy=True)
     # only perform if there is 1 cycle:
-    if len(peaks) <= 2:
-        data = clean_cycles(
-            data, parameter='time', quantities=['pressure', 'volume'], peaks=peaks, sig_t=0.1
-        )
-        peaks = characteristic_to_where(data[f'{quantity}_peak'])
-    else:
-        data['marked'] = [False] * N
+    data['marked'] = (
+        mark_pinched_points_on_cycles(x=x, peaks=peaks, sig_t=0.1)
+        if len(peaks) <= 2
+        else [False] * N
+    )
+    # peaks = characteristic_to_where(data[f'{quantity}_peak'])
     cycles = get_cycles(peaks=peaks, N=N, remove_gaps=remove_gaps)
     data['cycle'] = cycles
     if reduce:
