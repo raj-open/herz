@@ -35,8 +35,8 @@ def enter(path: str, *_):
 
     log_progress('''PROCESS DATA''', 0, 2)
     data = step_compute_extremes(data, quantities=['pressure', 'volume'])
-    # determine cycles based on pressure-peaks
     data = step_recognise_cycles(data, quantity='pressure')
+    data = step_fit_curve(data, quantity='pressure')
 
     log_progress('''OUTPUT TABLES''', 0, 1)
     step_output_tables(data)
