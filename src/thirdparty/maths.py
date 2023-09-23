@@ -5,10 +5,12 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# import lmfit
 import math
 import numpy as np
 import random
 import scipy as sp
+from scipy import linalg as spla
 from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
@@ -16,6 +18,10 @@ from findpeaks import findpeaks
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MODIFICATIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def nPr(n: int, r: int) -> int:
+    return math.factorial(n - r) * math.comb(n, r)
 
 
 def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
@@ -70,12 +76,15 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
 
 __all__ = [
     'findpeaks',
+    # 'lmfit',
     'math',
     'np',
     'random',
     'normalised_order_statistics',
     'remove_outliers',
     'sp',
+    'spla',
     'spo',
     'sps',
+    'nPr',
 ]

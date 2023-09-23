@@ -50,8 +50,9 @@ pydantic-extra-types = {version='0.0.1'}
 numpy = {version='^1.24.3'}
 pandas = {version='^2.0.3'}
 scipy = {version='^0.0.0'}
-findpeaks = {version='^2.5.2'}
 pint = {version='^0.22'}
+findpeaks = {version='^2.5.2'}
+lmfit = {version='^1.2.2'}
 # rendering
 tabulate = {version='^0.9.0'}
 matplotlib = {version='^3.7.2'}
