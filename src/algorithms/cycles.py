@@ -48,7 +48,7 @@ def get_cycles(
     remove_gaps: bool,
     sig: float = 2.0,
 ) -> list[int]:
-    cycles = [-1] * N
+    cycles = -1 * np.ones(shape=(N,), dtype=int)
 
     # if there is are least 2 peaks, sift out 'bad' cycles
     if len(peaks) > 1:
@@ -67,9 +67,9 @@ def get_cycles(
 
     # ensure that there is at least one cycle:
     if max(cycles) < 0:
-        cycles = [0] * N
+        cycles = np.zeros(shape=(N,), dtype=int)
 
-    return cycles
+    return cycles.tolist()
 
 
 def mark_pinched_points_on_cycles(

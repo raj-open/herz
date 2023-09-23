@@ -15,9 +15,7 @@ from ..thirdparty.physics import *
 __all__ = [
     'where_to_characteristic',
     'characteristic_to_where',
-    'poly',
     'normalise_to_unit_interval',
-    'derivative_coefficients',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,25 +45,9 @@ def characteristic_to_where(ch: list[bool] | np.ndarray) -> list[int]:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def poly(t: np.ndarray, *coeff: float) -> np.ndarray:
-    N = len(t)
-    m = len(coeff)
-    x = np.zeros(shape=(N,), dtype=float)
-    monom = 1.0
-    for k, c in enumerate(coeff):
-        x += c * monom
-        if k < m - 1:
-            monom *= t
-    return x
-
-
 def normalise_to_unit_interval(t: np.ndarray) -> tuple[np.ndarray, float]:
     t_min = min(t)
     t_max = max(t)
     T = t_max - t_min or 1.0
     t = (t - t_min) / T
     return t, T
-
-
-def derivative_coefficients(coeff: list[float]) -> list[float]:
-    return [(k + 1) * c for k, c in enumerate(coeff[1:])]

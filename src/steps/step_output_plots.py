@@ -42,7 +42,7 @@ def step_output_time_plots(data: pd.DataFrame) -> pgo.Figure:
     cycles = data['cycle'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
     time = cv_t * data['time'].to_numpy(copy=True)
-    pressure = cv_p * data['pressure'].to_numpy(copy=True)
+    pressure = cv_p * data['d[2,t]pressure[fit]'].to_numpy(copy=True)
     volume = cv_v * data['volume'].to_numpy(copy=True)
     pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
     pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
