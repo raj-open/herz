@@ -20,6 +20,7 @@ __all__ = [
     'step_combine_data',
     'step_compute_extremes',
     'step_recognise_cycles',
+    'step_fit_curve',
     'step_output_tables',
     'step_output_time_plots',
     'step_output_loop_plot',

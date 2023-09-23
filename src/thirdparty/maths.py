@@ -9,6 +9,7 @@ import math
 import numpy as np
 import random
 import scipy as sp
+from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
 
@@ -75,5 +76,6 @@ __all__ = [
     'normalised_order_statistics',
     'remove_outliers',
     'sp',
+    'spo',
     'sps',
 ]
