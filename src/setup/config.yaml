@@ -6,10 +6,15 @@ info:
   description: |-
     Extracts time series data for pressure and volume,
     synchronises these and produces a data set and plot.
-  # standard units
+settings:
   units:
+    cycle: '1'
     time: 's'
     pressure: 'Pa'
+    d[1,t]pressure: 'Pa/s'
+    d[2,t]pressure: 'Pa/s^2'
     length: 'm'
     area: 'm^2'
     volume: 'm^3'
+    d[1,t]volume: 'm^3/s'
+    d[2,t]volume: 'm^3/s^2'

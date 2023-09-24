@@ -16,18 +16,17 @@ components:
       type: object
       required:
         - basic
-        - paths
-        - data
       properties:
         basic:
           $ref: "#/components/schemas/UserBasicOptions"
-        data:
-          $ref: "#/components/schemas/UserData"
-        processing:
-          $ref: "#/components/schemas/UserProcessing"
-        output:
-          $ref: "#/components/schemas/UserOutput"
-      additionalProperties: false
+        cases:
+          description: |-
+            List of settings for each case.
+          type: array
+          items:
+            $ref: "#/components/schemas/UserCase"
+          default: []
+      additionalProperties: true
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Config > basic
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +44,32 @@ components:
           default: false
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > data
+    # Config > case(s)
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserCase:
+      description: |-
+        User settings for a single case of data.
+      type: object
+      required:
+        - data
+        - process
+        - output
+      properties:
+        label:
+          description: |-
+            Label used to refer to case and generate output files.
+            NOTE: may not contain spaces.
+          type: string
+          pattern: '^\S+$'
+        data:
+          $ref: "#/components/schemas/UserData"
+        process:
+          $ref: "#/components/schemas/UserProcess"
+        output:
+          $ref: "#/components/schemas/UserOutput"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > case > data
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     UserData:
       description: |-
@@ -61,11 +85,11 @@ components:
           $ref: "#/components/schemas/DataTimeSeries"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > processing
+    # Config > case > process
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    UserProcessing:
+    UserProcess:
       description: |-
-        Options for processing steps.
+        Options for process steps.
       type: object
       required:
         - combine
@@ -114,14 +138,13 @@ components:
           additionalProperties: true
       additionalProperties: true
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > output
+    # Config > case > output
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     UserOutput:
       description: |-
         Options for outputs
       type: object
       required:
-        - name
         - quantities
         - table
         - plot
@@ -131,18 +154,12 @@ components:
             Name of case.
           type: string
         quantities:
-          type: object
-          required:
-            - time
-            - pressure
-            - volume
-          properties:
-            time:
-              $ref: '#/components/schemas/DataTypeQuantity'
-            pressure:
-              $ref: '#/components/schemas/DataTypeQuantity'
-            volume:
-              $ref: '#/components/schemas/DataTypeQuantity'
+          description: |-
+            User settings for output quantities.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataTypeColumn'
+          minItems: 1
         table:
           type: object
           required:
@@ -278,6 +295,44 @@ components:
         name:
           description: |-
             Name of column in file.
+        type:
+          description: |-
+            Data type (float, int, etc.)
+          $ref: "./common.yaml/#/components/schemas/EnumType"
+          default: float
+        unit:
+          description: |-
+            Physical unit as string
+          type: string
+      additionalProperties: false
+
+    DataTypeColumn:
+      description: |-
+        Structure for physical quantity for outputs.
+      type: object
+      required:
+        - name
+        - quantity
+        - key
+        - unit
+        # - type
+      properties:
+        name:
+          description: |-
+            Desired name of column in file.
+          type: string
+        quantity:
+          description: |-
+            (Root) name of physical quantity.
+            E.g. for a column for "fitted pressure"
+            use `quantity="pressure"`.
+          type: string
+        key:
+          description: |-
+            Name of column in internal data frame.
+            E.g. for a column for "fitted pressure"
+            use `key="pressure[fit]"`.
+          type: string
         type:
           description: |-
             Data type (float, int, etc.)

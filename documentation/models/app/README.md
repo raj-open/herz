@@ -13,8 +13,8 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [AppConfig](.//Models/AppConfig.md)
+ - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
- - [AppUnits](.//Models/AppUnits.md)
 
 
 <a name="documentation-for-authorization"></a>

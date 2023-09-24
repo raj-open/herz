@@ -16,16 +16,31 @@ components:
       type: object
       required:
         - info
+        - settings
       properties:
         info:
           $ref: "#/components/schemas/AppInfo"
+        settings:
+          description: |-
+            Primary settings
+          type: object
+          required:
+            - units
+          properties:
+            units:
+              description: |-
+                Standard units for physical conversion.
+              type: object
+              additionalProperties:
+                type: string
+                default: {}
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Config > info
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     AppInfo:
       description: |-
-        Meta data about app.
+        Meta settings for app.
       type: object
       required:
         - title
@@ -35,32 +50,6 @@ components:
           type: string
         description:
           type: string
-        units:
-          $ref: "#/components/schemas/AppUnits"
         version:
           type: string
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > info > units
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    AppUnits:
-      description: |-
-        Standard units for physical conversion.
-      type: object
-      required:
-        - time
-        - pressure
-        - length
-        - area
-        - volume
-      properties:
-        time:
-          type: string
-        pressure:
-          type: string
-        length:
-          type: string
-        area:
-          type: string
-        volume:
-          type: string

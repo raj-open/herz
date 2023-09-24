@@ -12,7 +12,6 @@ from ..generated.app import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'AppUnits',
     'AppInfo',
     'AppConfig',
 ]

@@ -3,8 +3,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**name** | [**String**](string.md) | Name of case. | [default to null]
-**quantities** | [**UserOutput_quantities**](UserOutput_quantities.md) |  | [default to null]
+**name** | [**String**](string.md) | Name of case. | [optional] [default to null]
+**quantities** | [**List**](DataTypeColumn.md) | User settings for output quantities. | [default to null]
 **table** | [**Map**](object.md) |  | [default to null]
 **plot** | [**Map**](object.md) |  | [default to null]
 

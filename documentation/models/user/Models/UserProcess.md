@@ -1,4 +1,4 @@
-# UserProcessing
+# UserProcess
 ## Properties
 
 Name | Type | Description | Notes

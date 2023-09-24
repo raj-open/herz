@@ -7,77 +7,152 @@ basic:
   # Whether or not output is to be logged
   verbose: true
 # ----------------------------------------------------------------
-# SETUP OPTIONS FOR INPUTS
+# CASES
 # ----------------------------------------------------------------
-data:
-  pressure:
-    # paths either absolute or relative to root of project folder
-    path: "data/pressure.csv"
-    sep: ";"
-    decimal: "."
-    skip: [] # 0-based list of row-indexes to skip (do not include header!)
-    time:
-      name: "Time" # column name
-      unit: "ms"
-      type: float
-    value:
-      name: "Pressure"
-      unit: "mmHg"
-      type: float
-  volume:
-    path: "data/volume.csv"
-    sep: ";"
-    decimal: "."
-    skip: [] # 0-based list of row-indexes to skip (do not include header!)
-    time:
-      name: "Time"
-      unit: "ms"
-      type: float
-    value:
-      name: "Volume"
-      unit: "mL"
-      type: float
-# ----------------------------------------------------------------
-# SETUP OPTIONS FOR PROCESSING STEPS
-# ----------------------------------------------------------------
-processing:
-  combine:
-    dt: 10
-    T-max: 1000
-    unit: "ms"
-  cycles:
-    remove-bad: false
-  fit:
-    mode: AVERAGE # options: SINGLE, AVERAGE
-# ----------------------------------------------------------------
-# SETUP OPTIONS FOR OUTPUTS
-# ----------------------------------------------------------------
-output:
-  name: "My dataset"
-  quantities:
-    time:
-      name: "Time"
-      unit: "ms"
-      type: float
-    pressure:
-      name: "Pressure"
-      unit: "mmHg"
-      type: float
-    volume:
-      name: "Volume"
-      unit: "mL"
-      type: float
-  table:
-    path: "output/table.csv"
-    sep: ";"
-    decimal: "."
-  plot:
-    # NOTE: include '{kind}' in path name, as this is a schema!
-    path: "output/plot-{kind}.png" # static output for papers
-    # path: 'output/plot-{kind}.html' # interactive output for webpages
-    title: "Pressure-Volume loop"
-    font:
-      family: "Avenir Next"
-      size: 12
-      size-title: 18
-    legend: true
+cases:
+  # ----------------------------------------------------------------
+  # CASE 1
+  # ----------------------------------------------------------------
+  - label: 'case-1' # NOTE: label cannot contain spaces!
+    # ----------------------------------------------------------------
+    # SETUP OPTIONS FOR INPUTS
+    # ----------------------------------------------------------------
+    data:
+      pressure:
+        # paths either absolute or relative to root of project folder
+        path: "data/pressure.csv"
+        sep: ";"
+        decimal: "."
+        skip: [] # 0-based list of row-indexes to skip (do not include header!)
+        time:
+          name: "Time" # column name
+          unit: "ms"
+          type: float
+        value:
+          name: "Pressure"
+          unit: "mmHg"
+          type: float
+      volume:
+        path: "data/volume.csv"
+        sep: ";"
+        decimal: "."
+        skip: [] # 0-based list of row-indexes to skip (do not include header!)
+        time:
+          name: "Time"
+          unit: "ms"
+          type: float
+        value:
+          name: "Volume"
+          unit: "mL"
+          type: float
+    # ----------------------------------------------------------------
+    # SETUP OPTIONS FOR PROCESS-STEPS
+    # ----------------------------------------------------------------
+    process: &ref_process
+      combine:
+        dt: 10
+        T-max: 1000
+        unit: "ms"
+      cycles:
+        remove-bad: false
+      fit:
+        mode: AVERAGE # options: SINGLE, AVERAGE
+    # ----------------------------------------------------------------
+    # SETUP OPTIONS FOR OUTPUTS
+    # ----------------------------------------------------------------
+    output: &ref_output
+      quantities:
+        - name: "Cycle"
+          key: "cycle"
+          quantity: "cycle"
+          unit: "1"
+          type: int
+
+        - name: "Time"
+          key: "time"
+          quantity: "time"
+          unit: "ms"
+          type: float
+
+        - name: "Pressure"
+          key: "pressure"
+          quantity: "pressure"
+          unit: "mmHg"
+          type: float
+
+        - name: "Pressure [fit]"
+          key: "pressure[fit]"
+          quantity: "pressure"
+          unit: "mmHg"
+          type: float
+
+        - name: "(d/dt)P [fit]"
+          key: "d[1,t]pressure[fit]"
+          quantity: "d[1,t]pressure"
+          unit: "mmHg/s"
+          type: float
+
+        - name: "(d/dt)²P [fit]"
+          key: "d[2,t]pressure[fit]"
+          quantity: "d[2,t]pressure"
+          unit: "mmHg/s^2"
+          type: float
+
+        - name: "Volume"
+          key: "volume"
+          quantity: "volume"
+          unit: "mL"
+          type: float
+
+        - name: "Volume [fit]"
+          key: "volume[fit]"
+          quantity: "volume"
+          unit: "mL"
+          type: float
+
+        - name: "(d/dt)V"
+          key: "d[1,t]volume[fit]"
+          quantity: "d[1,t]volume"
+          unit: "mL/s"
+          type: float
+
+        - name: "(d/dt)²V"
+          key: "d[2,t]volume[fit]"
+          quantity: "d[2,t]volume"
+          unit: "mL/s^2"
+          type: float
+
+      table:
+        # NOTE: include '{label}' in path name, as this is a schema!
+        path: "output/{label}-table.csv"
+        sep: ";"
+        decimal: "."
+      plot:
+        # NOTE: include '{label}' + '{kind}' in path name, as this is a schema!
+        path: "output/{label}-plot-{kind}.png" # static output for papers
+        # path: 'output/plot-{kind}.html' # interactive output for webpages
+        title: "Pressure-Volume loop"
+        font:
+          family: "Avenir Next"
+          size: 12
+          size-title: 18
+        legend: true
+
+  # ----------------------------------------------------------------
+  # CASE 2
+  # ----------------------------------------------------------------
+  # - label: '...'
+  #   # ----------------------------------------------------------------
+  #   # SETUP OPTIONS FOR INPUTS
+  #   # ----------------------------------------------------------------
+  #   data:
+  #   # ----------------------------------------------------------------
+  #   # SETUP OPTIONS FOR PROCESS-STEPS
+  #   # ----------------------------------------------------------------
+  #   process:
+  #     <<: *ref_process
+  #   # ----------------------------------------------------------------
+  #   # SETUP OPTIONS FOR OUTPUTS
+  #   # ----------------------------------------------------------------
+  #   output:
+  #     <<: *ref_output
