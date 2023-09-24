@@ -12,6 +12,7 @@ from ..setup import config
 from ..core.utils import *
 from ..algorithms.peaks import *
 from ..algorithms.cycles import *
+from ..algorithms.bad_points import *
 from ..algorithms.fit import *
 
 from ..core.poly import *
@@ -47,6 +48,8 @@ def step_recognise_cycles(
     quantity: str,
     remove_gaps: bool = True,
 ) -> pd.DataFrame:
+    cfg = config.PROCESS_CONFIG
+
     # compute time increment for later
     N = len(data)
     t = data['time'].to_numpy(copy=True)
