@@ -73,8 +73,8 @@ output:
     decimal: "."
   plot:
     # NOTE: include '{kind}' in path name, as this is a schema!
-    # path: "data/output/plot-{kind}.png" # static output for papers
-    path: 'output/plot-{kind}.html' # interactive output for webpages
+    path: "output/plot-{kind}.png" # static output for papers
+    # path: 'output/plot-{kind}.html' # interactive output for webpages
     title: "Pressure-Volume loop"
     font:
       family: "Avenir Next"
