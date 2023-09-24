@@ -17,12 +17,14 @@ from .step_output_plots import *
 
 __all__ = [
     'step_read_data',
+    'step_normalise_data',
     'step_combine_data',
     'step_compute_extremes',
     'step_recognise_cycles',
     'step_removed_marked_sections',
     'step_fit_curve',
-    'step_output_tables',
+    'step_output_single_table',
+    'step_output_combined_table',
     'step_output_time_plots',
     'step_output_loop_plot',
 ]

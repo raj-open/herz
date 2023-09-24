@@ -36,14 +36,13 @@ __all__ = [
 def step_compute_extremes(
     case: UserCase,
     data: pd.DataFrame,
-    quantities: list[str],
+    quantity: str,
 ) -> pd.DataFrame:
     N = len(data)
-    for quantity in quantities:
-        values = data[quantity]
-        peaks, troughs = get_extremes(values)
-        data[f'{quantity}[peak]'] = where_to_characteristic(peaks, N)
-        data[f'{quantity}[trough]'] = where_to_characteristic(troughs, N)
+    values = data[quantity]
+    peaks, troughs = get_extremes(values)
+    data[f'{quantity}[peak]'] = where_to_characteristic(peaks, N)
+    data[f'{quantity}[trough]'] = where_to_characteristic(troughs, N)
     return data
 
 
@@ -67,12 +66,14 @@ def step_recognise_cycles(
     data['cycle'] = cycles
     data = data[data['cycle'] >= 0]
 
-    # detect 'bad' parts of cycles
+    # # detect 'bad' parts of cycles
+    # N = len(data)
+    # x = data[['pressure', 'volume']].to_numpy(copy=True)
+    # cycles = data['cycle'].tolist()
+    # marked = mark_pinched_points_on_cycles(x=x, cycles=cycles, sig_t=0.1)
+    # data['marked'] = marked
     N = len(data)
-    x = data[['pressure', 'volume']].to_numpy(copy=True)
-    cycles = data['cycle'].tolist()
-    marked = mark_pinched_points_on_cycles(x=x, cycles=cycles, sig_t=0.1)
-    data['marked'] = marked
+    data['marked'] = [False] * N
 
     # shift data to peak-to-peak:
     peaks = characteristic_to_where(data[f'{quantity}[peak]'])
@@ -110,6 +111,7 @@ def step_removed_marked_sections(
     # NOTE: we assume that time has already been homogenised.
     N = len(data)
     T = N * dt
+    # data['time[orig]'] = data['time']
     data['time'] = np.linspace(start=0.0, stop=T, num=N, endpoint=False)
 
     return data
@@ -118,9 +120,9 @@ def step_removed_marked_sections(
 def step_fit_curve(
     case: UserCase,
     data: pd.DataFrame,
-    quantities: str,
+    quantity: str,
     n_der: int = 2,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, list[float]]:
     '''
     TODO: Check/correct the following assumptions!
 
@@ -163,6 +165,7 @@ def step_fit_curve(
     - `V(0) = V(1)`;;
     '''
     cfg = case.process
+    cfg_poly = config.POLY[quantity]
 
     t = data['time'].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
@@ -170,54 +173,28 @@ def step_fit_curve(
     # determine start and end of each cycle
     windows = cycles_to_windows(cycles)
 
-    for quantity in quantities:
-        x = data[quantity].to_numpy(copy=True)
+    # fit polynomial
+    x = data[quantity].to_numpy(copy=True)
+    mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
+    x, coeffs = fit_poly_cycles(
+        t=t,
+        x=x,
+        cycles=cycles,
+        deg=cfg_poly.degree,
+        conds=cfg_poly.conditions,
+        average=mode_average,
+    )
+    data[f'{quantity}[fit]'] = x
 
-        deg = 2
-        opt = []
-        match quantity:
-            case 'pressure':
-                n = 2
-                h = 7  # number of 'humps' of n-th derivative of x
-                deg = h + n + 1
-                opt = [
-                    (0, 0.0),
-                    (0, 1.0),
-                    (1, 0.0),
-                    (1, 1.0),
-                    (n + 1, 0.0),
-                    (n + 1, 1.0),
-                ]
-            case 'volume':
-                n = 1
-                h = 7  # number of 'humps' of n-th derivative of x
-                deg = h + n + 1
-                opt = [
-                    (0, 0.0),
-                    (0, 1.0),
-                ]
+    # compute derivatives
+    for i in range(1, n_der + 1):
+        for k, (i1, i2) in enumerate(windows):
+            if not mode_average or k == 0:
+                coeffs[k] = derivative_coefficients(coeffs[k])
+            coeff = coeffs[0] if mode_average else coeffs[k]
+            tt, T = normalise_to_unit_interval(t[i1:i2])
+            x[i1:i2] = 1 / T * poly(tt, *coeff)
 
-        # fit polynomial
-        mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
-        x, coeffs = fit_poly_cycles(
-            t=t,
-            x=x,
-            cycles=cycles,
-            deg=deg,
-            opt=opt,
-            average=mode_average,
-        )
-        data[f'{quantity}[fit]'] = x
+        data[f'd[{i},t]{quantity}[fit]'] = x
 
-        # compute derivatives
-        for i in range(1, n_der + 1):
-            for k, (i1, i2) in enumerate(windows):
-                if not mode_average or k == 0:
-                    coeffs[k] = derivative_coefficients(coeffs[k])
-                coeff = coeffs[0] if mode_average else coeffs[k]
-                tt, T = normalise_to_unit_interval(t[i1:i2])
-                x[i1:i2] = 1 / T * poly(tt, *coeff)
-
-            data[f'd[{i},t]{quantity}[fit]'] = x
-
-    return data
+    return data, coeffs[0]

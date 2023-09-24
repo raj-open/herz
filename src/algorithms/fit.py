@@ -12,6 +12,7 @@ from .peaks import *
 from .cycles import *
 from ..core.utils import *
 from ..core.poly import *
+from ..models.app import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -32,7 +33,7 @@ def fit_poly_cycles(
     x: np.ndarray,
     cycles: list[int],
     deg: int,
-    opt: list[tuple[int, float]],
+    conds: list[PolynomialCondition],
     average: bool = False,
 ) -> tuple[np.ndarray, list[float]]:
     '''
@@ -49,7 +50,7 @@ def fit_poly_cycles(
     for k, (i1, i2) in enumerate(windows):
         xx = x[i1:i2]
         tt, _ = normalise_to_unit_interval(t[i1:i2])
-        x_fit[i1:i2], coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, opt=opt)
+        x_fit[i1:i2], coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
 
     # --------------------------------
     # NOTE:
@@ -96,7 +97,7 @@ def fit_poly_cycle(
     t: np.ndarray,
     x: np.ndarray,
     deg: int,
-    opt: list[tuple[int, float]],
+    conds: list[PolynomialCondition],
 ) -> tuple[np.ndarray, list[float]]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
@@ -113,7 +114,7 @@ def fit_poly_cycle(
       over time uniformly on `[0, T]`.
     - the fit polynomial
     '''
-    Q = onb_conditions(d=deg, opt=opt)
+    Q = onb_conditions(deg=deg, conds=conds)
     coeff = onb_spectrum(
         t=t,
         x=x - x[0],

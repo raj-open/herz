@@ -17,12 +17,48 @@ from ..models.user import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'step_normalise_data',
     'step_combine_data',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def step_normalise_data(
+    case: UserCase,
+    data: pd.DataFrame,
+    quantity: str,
+) -> pd.DataFrame:
+    cfg = case.process
+    cfg_units = config.UNITS
+
+    unit = cfg.combine.unit
+    cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.get('time', unit))
+
+    time = data['time'].to_numpy(copy=True)
+    time = time - min(time)
+    values = data[quantity].to_numpy(copy=True)
+
+    # get total duration
+    T, dt = get_aspects(time)
+    T = max(T, cv_t * (cfg.combine.t_max or 0.0))
+
+    # compute num points and update T (ensure dt is as set)
+    dt = cv_t * cfg.combine.dt or dt
+    N = math.ceil(T / dt)
+    T = N * dt
+
+    # interpolate data
+    time_uniform = np.linspace(start=0, stop=T, num=N, endpoint=False)
+    values = interpolate_curve(time_uniform, x=time, y=values, T_max=T, periodic=True)
+
+    data = pd.DataFrame({'time': time_uniform, quantity: values}).astype(
+        {'time': float, quantity: float}
+    )
+
+    return data
 
 
 def step_combine_data(

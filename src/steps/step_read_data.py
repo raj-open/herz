@@ -29,49 +29,24 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_read_data(case: UserCase) -> tuple[pd.DataFrame, pd.DataFrame]:
-    cfg = case.data
+def step_read_data(
+    cfg: DataTimeSeries,
+    quantity: str,
+) -> pd.DataFrame:
     cfg_units = config.UNITS
 
-    data_pressure = get_data_from_csv(
-        quantity='pressure',
-        unit_time=cfg_units.get('time', 's'),
-        unit_quantity=cfg_units.get('pressure', 'Pa'),
-        config=cfg.pressure,
-    )
+    unit_time: str = cfg_units.get('time', 's')
+    unit_quantity: str = cfg_units.get(quantity)
 
-    data_volume = get_data_from_csv(
-        quantity='volume',
-        unit_time=cfg_units.get('time', 's'),
-        unit_quantity=cfg_units.get('volume', 'm^3'),
-        config=cfg.volume,
-    )
-
-    return data_pressure, data_volume
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def get_data_from_csv(
-    quantity: str,
-    unit_time: str,
-    unit_quantity: str,
-    config: DataTimeSeries,
-) -> pd.DataFrame:
-    path = config.path.__root__
+    path = cfg.path.__root__
     data = pd.read_csv(
         path,
-        sep=config.sep,
-        decimal=config.decimal,
-        skiprows=get_bool_function(configk.skip)
-        if isinstance(config.skip, str)
-        else config.skip,
+        sep=cfg.sep,
+        decimal=cfg.decimal,
+        skiprows=get_bool_function(cfg.skip) if isinstance(cfg.skip, str) else cfg.skip,
     )
-    t = get_column(data, unit=unit_time, config=config.time)
-    x = get_column(data, unit=unit_quantity, config=config.value)
+    t = get_column(data, unit=unit_time, cfg=cfg.time)
+    x = get_column(data, unit=unit_quantity, cfg=cfg.value)
 
     data = pd.DataFrame(
         {
@@ -84,25 +59,32 @@ def get_data_from_csv(
             quantity: float,
         }
     )
+    data.sort_values(inplace=True, by=['time'])
+    data.reset_index(inplace=True, drop=True)
 
     return data
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# AUXILIARY METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 def get_column(
     data: pd.DataFrame,
-    config: DataTypeQuantity,
+    cfg: DataTypeQuantity,
     unit: Optional[str] = None,
 ) -> np.asarray:
-    key = config.name
+    key = cfg.name
     try:
         col = data[key][:]
     except KeyError as e:
         columns = list(data.columns)
         raise KeyError(f'{key} not found in data set with columns {", ".join(columns)}')
 
-    X = np.asarray(col, dtype=config.type.value)
-    if config.unit is not None and unit is not None:
-        cv = convert_units(unitFrom=config.unit, unitTo=unit)
+    X = np.asarray(col, dtype=cfg.type.value)
+    if cfg.unit is not None and unit is not None:
+        cv = convert_units(unitFrom=cfg.unit, unitTo=unit)
         X = cv * X
     return X
 

@@ -20,7 +20,8 @@ from ..models.user import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'step_output_tables',
+    'step_output_single_table',
+    'step_output_combined_table',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,15 +29,51 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_output_tables(
+def step_output_single_table(
+    case: UserCase,
+    data: pd.DataFrame,
+    quantity: str,
+):
+    cfg = case.output
+
+    path = cfg.table.path.__root__
+    path = path.format(label=case.label, kind=f'{quantity}-time')
+    if not prepare_save_table(path=path):
+        return
+
+    cv = output_conversions(cfg.quantities)
+
+    columns = list(data.columns)
+    quantities = [col for col in cfg.quantities if col.key in columns]
+
+    table = pd.DataFrame(
+        {col.key: getattr(cv, col.key, 1) * data[col.key] for col in quantities}
+    ).astype({col.key: col.type.value for col in quantities})
+
+    table.to_csv(
+        path,
+        sep=cfg.table.sep,
+        decimal=cfg.table.decimal,
+        na_rep='',
+        header=[col.name for col in quantities],
+        index=False,
+        mode='w',
+        encoding='utf-8',
+        quotechar='"',
+        doublequote=True,
+    )
+
+    return
+
+
+def step_output_combined_table(
     case: UserCase,
     data: pd.DataFrame,
 ):
     cfg = case.output
-    cfg_units = config.UNITS
 
     path = cfg.table.path.__root__
-    path = path.format(label=case.label)
+    path = path.format(label=case.label, kind=f'combined')
     if not prepare_save_table(path=path):
         return
 
