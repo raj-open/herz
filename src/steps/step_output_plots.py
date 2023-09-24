@@ -37,123 +37,61 @@ def step_output_time_plots(data: pd.DataFrame) -> tuple[pgo.Figure, pgo.Figure]:
     cfg_units = config.UNITS
     cfg_font = cfg.plot.font
 
-    cv_t = convert_units(unitFrom=cfg_units.time, unitTo=cfg.quantities.time.unit)
-    cv_p = convert_units(unitFrom=cfg_units.pressure, unitTo=cfg.quantities.pressure.unit)
-    cv_v = convert_units(unitFrom=cfg_units.volume, unitTo=cfg.quantities.volume.unit)
+    cv = dict(
+        time=convert_units(unitFrom=cfg_units.time, unitTo=cfg.quantities.time.unit),
+        pressure=convert_units(
+            unitFrom=cfg_units.pressure, unitTo=cfg.quantities.pressure.unit
+        ),
+        volume=convert_units(unitFrom=cfg_units.volume, unitTo=cfg.quantities.volume.unit),
+    )
 
     cycles = data['cycle'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
-    time = cv_t * data['time'].to_numpy(copy=True)
-    pressure = cv_p * data['pressure'].to_numpy(copy=True)
-    pressure_fit = cv_p * data['pressure[fit]'].to_numpy(copy=True)
-    dpressure_fit = cv_p * data['d[1,t]pressure[fit]'].to_numpy(copy=True)
-    ddpressure_fit = cv_p * data['d[2,t]pressure[fit]'].to_numpy(copy=True)
-    volume = cv_v * data['volume'].to_numpy(copy=True)
-    pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
-    pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
-    volume_peak = data['volume[peak]'].to_numpy(copy=True)
-    volume_trough = data['volume[trough]'].to_numpy(copy=True)
+    time = cv['time'] * data['time'].to_numpy(copy=True)
 
-    fig_p = make_subplots(
-        rows=3,
-        cols=1,
-        subplot_titles=[
-            f'<b>Time series for {quantity.title()}</b>'
-            for quantity in ['Pressure', '(d/dt)P', '(d/dt)²P']
-        ],
-    )
-    fig_v = make_subplots(
-        rows=3,
-        cols=1,
-        subplot_titles=[
-            f'<b>Time series for {quantity.title()}</b>'
-            for quantity in ['Volume', '(d/dt)V', '(d/dt)²V']
-        ],
-    )
-
-    opt = dict(
-        width=640,
-        height=720,
-        margin=dict(l=40, r=40, t=60, b=40),
-        font=dict(
-            family=cfg_font.family,
-            size=cfg_font.size,
-            color='hsla(0, 100%, 0%, 1)',
-        ),
-        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-        showlegend=cfg.plot.legend,
-        legend=dict(title='Time series'),
-    )
-    fig_p.update_layout(**opt)
-    fig_v.update_layout(**opt)
-
-    special = [
-        SpecialPoints(name='peak', points=pressure_peak, colour='blue', size=6, symbol='x'),
-        SpecialPoints(name='trough', points=pressure_trough, colour='blue', size=6, symbol='x'),
-        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
-    ]
-    add_plot_time_series(
-        fig_p,
-        name=None,
-        text='P [original]',
-        time=time,
-        values=pressure,
-        special=special,
-        mode='markers',
-        row=1,
-        col=1,
-    )
-    special = []
-    add_plot_time_series(
-        fig_p,
-        name='P [fit]',
-        time=time,
-        values=pressure_fit,
-        special=special,
-        row=1,
-        col=1,
-    )
-    special = []
-    add_plot_time_series(
-        fig_p,
-        name='(d/dt)P [fit]',
-        time=time,
-        values=dpressure_fit,
-        special=special,
-        row=2,
-        col=1,
-    )
-    add_plot_time_series(
-        fig_p,
-        name='(d/dt)²P [fit]',
-        time=time,
-        values=ddpressure_fit,
-        special=special,
-        row=3,
-        col=1,
-    )
-
-    special = [
-        SpecialPoints(name='peak', points=pressure_peak, colour='blue', size=6),
-        SpecialPoints(name='trough', points=pressure_trough, colour='blue', size=6),
-        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
-    ]
-    add_plot_time_series(
-        fig_v,
-        name=None,
-        text='V [original]',
-        time=time,
-        values=volume,
-        special=special,
-        mode='markers',
-        row=1,
-        col=1,
-    )
-
-    for fig, quantity, unit in [
-        (fig_p, 'Pressure', cfg.quantities.pressure.unit),
-        (fig_v, 'Volume', cfg.quantities.volume.unit),
+    figs = dict()
+    for quantity, symb, unit in [
+        ('pressure', 'P', cfg.quantities.pressure.unit),
+        ('volume', 'V', cfg.quantities.volume.unit),
     ]:
+        scale = cv[f'{quantity}']
+        x = scale * data[f'{quantity}'].to_numpy(copy=True)
+        x_peak = data[f'{quantity}[peak]'].to_numpy(copy=True)
+        x_trough = data[f'{quantity}[trough]'].to_numpy(copy=True)
+        x_fit = scale * data[f'{quantity}[fit]'].to_numpy(copy=True)
+
+        # s = cv['time']
+        s = 1.0
+
+        scale = cv[f'{quantity}'] / s
+        dx_fit = scale * data[f'd[1,t]{quantity}[fit]'].to_numpy(copy=True)
+
+        scale = cv[f'{quantity}'] / s**2
+        ddx_fit = scale * data[f'd[2,t]{quantity}[fit]'].to_numpy(copy=True)
+
+        fig = make_subplots(
+            rows=3,
+            cols=1,
+            subplot_titles=[
+                f'<b>Time series for {name}</b>'
+                for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
+            ],
+        )
+
+        fig.update_layout(
+            width=640,
+            height=720,
+            margin=dict(l=40, r=40, t=60, b=40),
+            font=dict(
+                family=cfg_font.family,
+                size=cfg_font.size,
+                color='hsla(0, 100%, 0%, 1)',
+            ),
+            plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+            showlegend=cfg.plot.legend,
+            legend=dict(title='Time series'),
+        )
+
         opt = dict(
             linecolor='black',
             mirror=True,  # adds border on right/top too
@@ -161,15 +99,89 @@ def step_output_time_plots(data: pd.DataFrame) -> tuple[pgo.Figure, pgo.Figure]:
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
+        )
+
+        fig.update_xaxes(
+            title=f'Time    ({cfg.quantities.time.unit})',
+            rangemode='tozero',
+            **opt,
             row=1,
             col=1,
         )
-        fig.update_xaxes(title=f'Time ({cfg.quantities.time.unit})', rangemode='tozero', **opt)
-        fig.update_xaxes(title=f'{quantity} ({unit})', rangemode='normal', **opt)
+        fig.update_xaxes(
+            title=f'Time    ({cfg.quantities.time.unit})',
+            rangemode='tozero',
+            **opt,
+            row=2,
+            col=1,
+        )
+        fig.update_xaxes(
+            title=f'Time    ({cfg.quantities.time.unit})',
+            rangemode='tozero',
+            **opt,
+            row=3,
+            col=1,
+        )
+        fig.update_yaxes(
+            title=f'{quantity.title()}    ({unit})', rangemode='normal', **opt, row=1, col=1
+        )
+        fig.update_yaxes(
+            title=f'{symb}´(t)    ({unit}·s¯¹)', rangemode='normal', **opt, row=2, col=1
+        )
+        fig.update_yaxes(
+            title=f'{symb}´´(t)    ({unit}·s¯²)', rangemode='normal', **opt, row=3, col=1
+        )
 
-    save_image(fig=fig_p, path=cfg.plot.path.__root__, kind='pressure-time')
-    save_image(fig=fig_v, path=cfg.plot.path.__root__, kind='volume-time')
-    return fig_p, fig_v
+        special = [
+            SpecialPoints(name='peak', points=x_peak, colour='blue', size=6, symbol='x'),
+            SpecialPoints(name='trough', points=x_trough, colour='blue', size=6, symbol='x'),
+            # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
+        ]
+        add_plot_time_series(
+            fig,
+            name=None,
+            text='P [original]',
+            time=time,
+            values=x,
+            special=special,
+            mode='markers',
+            row=1,
+            col=1,
+        )
+        special = []
+        add_plot_time_series(
+            fig,
+            name=f'{symb} [fit]',
+            time=time,
+            values=x_fit,
+            special=special,
+            row=1,
+            col=1,
+        )
+        special = []
+        add_plot_time_series(
+            fig,
+            name=f'(d/dt){symb} [fit]',
+            time=time,
+            values=dx_fit,
+            special=special,
+            row=2,
+            col=1,
+        )
+        add_plot_time_series(
+            fig,
+            name=f'(d/dt)²{symb} [fit]',
+            time=time,
+            values=ddx_fit,
+            special=special,
+            row=3,
+            col=1,
+        )
+
+        save_image(fig=fig, path=cfg.plot.path.__root__, kind=f'{quantity}-time')
+        figs[quantity] = fig
+
+    return figs['pressure'], figs['volume']
 
 
 def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
@@ -177,17 +189,21 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
     cfg_units = config.UNITS
     cfg_font = cfg.plot.font
 
-    cv_t = convert_units(unitFrom=cfg_units.time, unitTo=cfg.quantities.time.unit)
-    cv_p = convert_units(unitFrom=cfg_units.pressure, unitTo=cfg.quantities.pressure.unit)
-    cv_v = convert_units(unitFrom=cfg_units.volume, unitTo=cfg.quantities.volume.unit)
+    cv = dict(
+        time=convert_units(unitFrom=cfg_units.time, unitTo=cfg.quantities.time.unit),
+        pressure=convert_units(
+            unitFrom=cfg_units.pressure, unitTo=cfg.quantities.pressure.unit
+        ),
+        volume=convert_units(unitFrom=cfg_units.volume, unitTo=cfg.quantities.volume.unit),
+    )
 
     cycles = data['cycle'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
-    time = cv_t * data['time'].to_numpy(copy=True)
-    pressure = cv_p * data['pressure'].to_numpy(copy=True)
-    volume = cv_v * data['volume'].to_numpy(copy=True)
-    pressure_fit = cv_p * data['pressure[fit]'].to_numpy(copy=True)
-    volume_fit = volume
+    time = cv['time'] * data['time'].to_numpy(copy=True)
+    pressure = cv['pressure'] * data['pressure'].to_numpy(copy=True)
+    volume = cv['volume'] * data['volume'].to_numpy(copy=True)
+    pressure_fit = cv['pressure'] * data['pressure[fit]'].to_numpy(copy=True)
+    volume_fit = cv['volume'] * data['volume[fit]'].to_numpy(copy=True)
 
     text = np.asarray([f'{t:.0f}{cfg.quantities.time.unit}' for t in time])
 
@@ -248,7 +264,7 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
                 ),
             ),
             xaxis=dict(
-                title=f'Volume ({cfg.quantities.volume.unit})',
+                title=f'Volume    ({cfg.quantities.volume.unit})',
                 linecolor='black',
                 mirror=True,  # adds border on top too
                 ticks='outside',
@@ -258,7 +274,7 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
                 # rangemode='tozero',
             ),
             yaxis=dict(
-                title=f'Pressure ({cfg.quantities.pressure.unit})',
+                title=f'Pressure    ({cfg.quantities.pressure.unit})',
                 linecolor='black',
                 mirror=True,  # adds border on right too
                 ticks='outside',
