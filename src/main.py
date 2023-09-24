@@ -38,7 +38,7 @@ def enter(path: str, *_):
     data = step_recognise_cycles(data, quantity='pressure')
     if config.PROCESS_CONFIG.cycles.remove_bad:
         data = step_removed_marked_sections(data)
-    data = step_fit_curve(data, quantity='pressure')
+    data = step_fit_curve(data, quantities=['pressure', 'volume'])
 
     log_progress('''OUTPUT TABLES''', 0, 1)
     step_output_tables(data)
