@@ -36,6 +36,7 @@ def step_output_tables(
     cfg_units = config.UNITS
 
     path = cfg.table.path.__root__
+    path = path.format(label=case.label)
     if not prepare_save_table(path=path):
         return
 
@@ -44,6 +45,7 @@ def step_output_tables(
     table = pd.DataFrame(
         {col.key: getattr(cv, col.key, 1) * data[col.key] for col in cfg.quantities}
     ).astype({col.key: col.type.value for col in cfg.quantities})
+
     table.to_csv(
         path,
         sep=cfg.table.sep,
