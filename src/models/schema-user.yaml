@@ -23,6 +23,8 @@ components:
           $ref: "#/components/schemas/UserBasicOptions"
         data:
           $ref: "#/components/schemas/UserData"
+        processing:
+          $ref: "#/components/schemas/UserProcessing"
         output:
           $ref: "#/components/schemas/UserOutput"
       additionalProperties: false
@@ -33,12 +35,11 @@ components:
       description: |-
         Basic options for running the programme.
       type: object
-      required:
-        - log-level
+      required: []
       properties:
         log-level:
           $ref: '#/components/schemas/EnumLogLevel'
-          default:
+          default: INFO
         verbose:
           type: boolean
           default: false
@@ -51,19 +52,69 @@ components:
         Options for structure of data files.
       type: object
       required:
-        - combine
         - pressure
         - volume
       properties:
-        combine:
-          $ref: "#/components/schemas/DataTimeSeriesCommon"
         pressure:
           $ref: "#/components/schemas/DataTimeSeries"
         volume:
           $ref: "#/components/schemas/DataTimeSeries"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > paths
+    # Config > processing
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserProcessing:
+      description: |-
+        Options for processing steps.
+      type: object
+      required:
+        - combine
+        - cycles
+        - fit
+      properties:
+        combine:
+          description: |-
+            Parameter options for combining time series.
+          type: object
+          required:
+            - dt
+            - unit
+          properties:
+            dt:
+              type: number
+              minimum: 0.
+              exclusiveMinimum: true
+            T-max:
+              type: number
+              minimum: 0.
+              exclusiveMinimum: true
+            unit:
+              type: string
+          additionalProperties: true
+        cycles:
+          type: object
+          required: []
+          properties:
+            remove-bad:
+              description: |-
+                Option to remove 'bad' parts at start/end of cycles.
+              type: boolean
+              default: false
+          additionalProperties: true
+        fit:
+          type: object
+          required: []
+          properties:
+            mode:
+              description: |-
+                Whether to fit for each cycle individually,
+                or to fit for all simultaneously (average).
+              $ref: "#/components/schemas/EnumFittingMode"
+              default: AVERAGE
+          additionalProperties: true
+      additionalProperties: true
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > output
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     UserOutput:
       description: |-
@@ -145,26 +196,6 @@ components:
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Data structure for time series
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    DataTimeSeriesCommon:
-      description: |-
-        Parameter options for combining time series.
-      type: object
-      required:
-        - dt
-        - unit
-      properties:
-        dt:
-          type: number
-          minimum: 0.
-          exclusiveMinimum: true
-        T-max:
-          type: number
-          minimum: 0.
-          exclusiveMinimum: true
-        unit:
-          type: string
-      additionalProperties: true
-
     DataTimeSeries:
       description: |-
         Structure for time series.
@@ -268,3 +299,14 @@ components:
         - INFO
         - DEBUG
       default: INFO
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM: fitting mode
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumFittingMode:
+      description: |-
+        Enumeration of settings for log level.
+      type: string
+      enum:
+        - SINGLE
+        - AVERAGE
+      default: AVERAGE

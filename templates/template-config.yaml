@@ -1,17 +1,15 @@
 # ----------------------------------------------------------------
-# USER CONFIGURATION
+# BASIC SETUP
 # ----------------------------------------------------------------
 basic:
   # Logging level may be either INFO (standard) or DEBUG
   log-level: INFO
   # Whether or not output is to be logged
   verbose: true
-# setup for input data
+# ----------------------------------------------------------------
+# SETUP OPTIONS FOR INPUTS
+# ----------------------------------------------------------------
 data:
-  combine:
-    dt: 10
-    T-max: 1000
-    unit: "ms"
   pressure:
     # paths either absolute or relative to root of project folder
     path: "data/pressure.csv"
@@ -39,7 +37,21 @@ data:
       name: "Volume"
       unit: "mL"
       type: float
-# setup for outputs
+# ----------------------------------------------------------------
+# SETUP OPTIONS FOR PROCESSING STEPS
+# ----------------------------------------------------------------
+processing:
+  combine:
+    dt: 10
+    T-max: 1000
+    unit: "ms"
+  cycles:
+    remove-bad: false
+  fit:
+    mode: AVERAGE # options: SINGLE, AVERAGE
+# ----------------------------------------------------------------
+# SETUP OPTIONS FOR OUTPUTS
+# ----------------------------------------------------------------
 output:
   name: "My dataset"
   quantities:
@@ -68,4 +80,4 @@ output:
       family: "Avenir Next"
       size: 12
       size-title: 18
-    legend: false
+    legend: true

@@ -29,10 +29,10 @@ def step_combine_data(
     data_pressure: pd.DataFrame,
     data_volume: pd.DataFrame,
 ) -> pd.DataFrame:
-    cfg = config.DATA_CONFIG.combine
+    cfg = config.PROCESS_CONFIG
     cfg_units = config.UNITS
 
-    unit = cfg.unit
+    unit = cfg.combine.unit
     cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.time)
 
     time_pressure = data_pressure['time'].to_numpy(copy=True)
@@ -41,13 +41,13 @@ def step_combine_data(
     volume = data_volume['volume'].to_numpy(copy=True)
 
     # get T_max
-    T_max = cv_t * (cfg.t_max or 0.0)
+    T_max = cv_t * (cfg.combine.t_max or 0.0)
     T_max_p, _ = get_aspects(time_pressure)
     T_max_v, _ = get_aspects(time_volume)
     T_max = max(T_max, T_max_p, T_max_v)
 
     # compute num points and update T_max (ensure dt is as set)
-    dt = cv_t * cfg.dt
+    dt = cv_t * cfg.combine.dt
     N = math.ceil(T_max / dt)
     T_max = N * dt
 
