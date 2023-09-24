@@ -5,6 +5,8 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from __future__ import annotations
+from ..thirdparty.code import *
 from ..thirdparty.data import *
 from ..thirdparty.maths import *
 from ..thirdparty.physics import *
@@ -30,7 +32,7 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_output_time_plots(data: pd.DataFrame) -> pgo.Figure:
+def step_output_time_plots(data: pd.DataFrame) -> tuple[pgo.Figure, pgo.Figure]:
     cfg = config.OUTPUT_CONFIG
     cfg_units = config.UNITS
     cfg_font = cfg.plot.font
@@ -42,32 +44,34 @@ def step_output_time_plots(data: pd.DataFrame) -> pgo.Figure:
     cycles = data['cycle'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
     time = cv_t * data['time'].to_numpy(copy=True)
-    pressure = cv_p * data['d[2,t]pressure[fit]'].to_numpy(copy=True)
+    pressure = cv_p * data['pressure'].to_numpy(copy=True)
+    pressure_fit = cv_p * data['pressure[fit]'].to_numpy(copy=True)
+    dpressure_fit = cv_p * data['d[1,t]pressure[fit]'].to_numpy(copy=True)
+    ddpressure_fit = cv_p * data['d[2,t]pressure[fit]'].to_numpy(copy=True)
     volume = cv_v * data['volume'].to_numpy(copy=True)
     pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
     pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
     volume_peak = data['volume[peak]'].to_numpy(copy=True)
     volume_trough = data['volume[trough]'].to_numpy(copy=True)
 
-    fig = make_subplots(
-        rows=2,
+    fig_p = make_subplots(
+        rows=3,
         cols=1,
         subplot_titles=[
-            # dict(
-            #     text=f'<b>Time series for {quantity}</b>',
-            #     x=0.5,
-            #     y=0.95,
-            #     font=dict(
-            #         size=cfg_font.size_title,
-            #         color='hsla(240, 100%, 50%, 1)',
-            #     ),
-            # )
-            f'<b>Time series for {quantity}</b>'
-            for quantity in ['Pressure', 'Volume']
+            f'<b>Time series for {quantity.title()}</b>'
+            for quantity in ['Pressure', '(d/dt)P', '(d/dt)²P']
+        ],
+    )
+    fig_v = make_subplots(
+        rows=3,
+        cols=1,
+        subplot_titles=[
+            f'<b>Time series for {quantity.title()}</b>'
+            for quantity in ['Volume', '(d/dt)V', '(d/dt)²V']
         ],
     )
 
-    fig.update_layout(
+    opt = dict(
         width=640,
         height=720,
         margin=dict(l=40, r=40, t=60, b=40),
@@ -78,103 +82,94 @@ def step_output_time_plots(data: pd.DataFrame) -> pgo.Figure:
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         showlegend=cfg.plot.legend,
-        legend=dict(
-            title='Time series',
-        ),
+        legend=dict(title='Time series'),
+    )
+    fig_p.update_layout(**opt)
+    fig_v.update_layout(**opt)
+
+    special = [
+        SpecialPoints(name='peak', points=pressure_peak, colour='blue', size=6, symbol='x'),
+        SpecialPoints(name='trough', points=pressure_trough, colour='blue', size=6, symbol='x'),
+        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
+    ]
+    add_plot_time_series(
+        fig_p,
+        name=None,
+        text='P [original]',
+        time=time,
+        values=pressure,
+        special=special,
+        mode='markers',
+        row=1,
+        col=1,
+    )
+    special = []
+    add_plot_time_series(
+        fig_p,
+        name='P [fit]',
+        time=time,
+        values=pressure_fit,
+        special=special,
+        row=1,
+        col=1,
+    )
+    special = []
+    add_plot_time_series(
+        fig_p,
+        name='(d/dt)P [fit]',
+        time=time,
+        values=dpressure_fit,
+        special=special,
+        row=2,
+        col=1,
+    )
+    add_plot_time_series(
+        fig_p,
+        name='(d/dt)²P [fit]',
+        time=time,
+        values=ddpressure_fit,
+        special=special,
+        row=3,
+        col=1,
     )
 
-    for row, name, y, peaks, troughs in [
-        (1, 'Pressure', pressure, pressure_peak, pressure_trough),
-        (2, 'Volume', volume, volume_peak, volume_trough),
-    ]:
-        fig.append_trace(
-            pgo.Scatter(
-                name=cfg.name,
-                x=time,
-                y=y,
-                mode='markers',
-                marker=dict(
-                    size=2,
-                    color='hsla(0, 100%, 50%, 0)',
-                    line=dict(
-                        width=1,
-                        color='black',
-                    ),
-                ),
-            ),
-            row=row,
-            col=1,
-        )
-        fig.append_trace(
-            pgo.Scatter(
-                name=None,
-                x=time[peaks].tolist() + time[troughs].tolist(),
-                y=y[peaks].tolist() + y[troughs].tolist(),
-                mode='markers',
-                marker=dict(
-                    size=4,
-                    color='hsla(0, 100%, 50%, 0)',
-                    line=dict(
-                        width=2,
-                        color='blue',
-                    ),
-                ),
-            ),
-            row=row,
-            col=1,
-        )
-        fig.append_trace(
-            pgo.Scatter(
-                name=None,
-                x=time[marked],
-                y=y[marked],
-                mode='markers',
-                marker=dict(
-                    size=4,
-                    color='hsla(0, 100%, 50%, 0)',
-                    line=dict(
-                        width=2,
-                        color='red',
-                    ),
-                ),
-            ),
-            row=row,
-            col=1,
-        )
+    special = [
+        SpecialPoints(name='peak', points=pressure_peak, colour='blue', size=6),
+        SpecialPoints(name='trough', points=pressure_trough, colour='blue', size=6),
+        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
+    ]
+    add_plot_time_series(
+        fig_v,
+        name=None,
+        text='V [original]',
+        time=time,
+        values=volume,
+        special=special,
+        mode='markers',
+        row=1,
+        col=1,
+    )
 
-    for i, quantity, unit in [
-        (1, 'Pressure', cfg.quantities.pressure.unit),
-        (2, 'Volume', cfg.quantities.volume.unit),
+    for fig, quantity, unit in [
+        (fig_p, 'Pressure', cfg.quantities.pressure.unit),
+        (fig_v, 'Volume', cfg.quantities.volume.unit),
     ]:
-        fig.update_xaxes(
-            row=i,
-            col=1,
-            title=f'Time ({cfg.quantities.time.unit})',
+        opt = dict(
             linecolor='black',
-            mirror=True,  # adds border on top too
+            mirror=True,  # adds border on right/top too
             ticks='outside',
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
-            rangemode='tozero',
-        )
-
-        fig.update_yaxes(
-            row=i,
+            row=1,
             col=1,
-            title=f'{quantity} ({unit})',
-            linecolor='black',
-            mirror=True,  # adds border on right too
-            ticks='outside',
-            showgrid=True,
-            visible=True,
-            # range=[0, None], # FIXME: does not work!
-            # autorange='reversed',
-            rangemode='normal',
         )
+        fig.update_xaxes(title=f'Time ({cfg.quantities.time.unit})', rangemode='tozero', **opt)
+        fig.update_xaxes(title=f'{quantity} ({unit})', rangemode='normal', **opt)
 
-    save_image(fig=fig, path=cfg.plot.path.__root__, kind='time')
-    return fig
+    save_image(fig=fig_p, path=cfg.plot.path.__root__, kind='pressure-time')
+    save_image(fig=fig_v, path=cfg.plot.path.__root__, kind='volume-time')
+    return fig_p, fig_v
 
 
 def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
@@ -191,49 +186,47 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
     time = cv_t * data['time'].to_numpy(copy=True)
     pressure = cv_p * data['pressure'].to_numpy(copy=True)
     volume = cv_v * data['volume'].to_numpy(copy=True)
-    pressure_peak = data['pressure[peak]'].to_numpy(copy=True)
-    pressure_trough = data['pressure[trough]'].to_numpy(copy=True)
-    volume_peak = data['volume[peak]'].to_numpy(copy=True)
-    volume_trough = data['volume[trough]'].to_numpy(copy=True)
+    pressure_fit = cv_p * data['pressure[fit]'].to_numpy(copy=True)
+    volume_fit = volume
 
     text = np.asarray([f'{t:.0f}{cfg.quantities.time.unit}' for t in time])
 
     fig = pgo.Figure(
         data=[
             pgo.Scatter(
-                name=cfg.name,
+                name='P-V [Original]',
                 x=volume,
                 y=pressure,
                 text=text,
                 mode='markers',
                 marker=dict(
                     size=2,
-                    color='hsla(0, 100%, 50%, 0)',
-                    line=dict(
-                        width=1,
-                        color='black',
-                        # color='hsla(0, 100%, 0%, 1)',
-                        # color=PLOTLY_COLOUR_SCHEME.GREENS.value,
-                    ),
+                    color='black',
                 ),
             ),
             pgo.Scatter(
-                name=cfg.name,
-                x=volume[marked],
-                y=pressure[marked],
-                text=text[marked],
-                mode='markers',
-                marker=dict(
-                    size=4,
-                    color='hsla(0, 100%, 50%, 0)',
-                    line=dict(
-                        width=1,
-                        color='red',
-                        # color='hsla(0, 100%, 0%, 1)',
-                        # color=PLOTLY_COLOUR_SCHEME.GREENS.value,
-                    ),
+                name='P-V [fit]',
+                x=volume_fit,
+                y=pressure_fit,
+                text=text,
+                mode='lines',
+                line=dict(
+                    width=1,
+                    color='blue',
                 ),
             ),
+            # pgo.Scatter(
+            #     name=cfg.name,
+            #     x=volume[marked],
+            #     y=pressure[marked],
+            #     text=text[marked],
+            #     mode='markers',
+            #     marker=dict(
+            #         symbol='circle',
+            #         size=4,
+            #         color='red',
+            #     ),
+            # ),
         ],
         layout=pgo.Layout(
             width=640,
@@ -282,7 +275,70 @@ def step_output_loop_plot(data: pd.DataFrame) -> pgo.Figure:
         ),
     )
 
-    save_image(fig=fig, path=cfg.plot.path.__root__, kind='loop')
+    save_image(fig=fig, path=cfg.plot.path.__root__, kind='pressure-volume')
+
+    return fig
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# SECONDARY METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def add_plot_time_series(
+    fig: pgo.Figure,
+    name: Optional[str],
+    time: np.ndarray,
+    values: np.ndarray,
+    special: list[tuple[Optional[str], list[int], Optional[str]]],
+    row: int,
+    col: int,
+    mode: str = 'lines',
+    line: dict = dict(
+        width=1,
+        color='black',
+    ),
+    text: Optional[str] = None,
+) -> pgo.Figure:
+    p = pgo.Scatter(
+        name=name,
+        x=time,
+        y=values,
+        text=[text or name for _ in time],
+        line_shape='spline',
+        mode=mode,
+        line=dict(
+            width=1,
+            color='black',
+            # color='hsla(0, 100%, 50%, 0)',
+            # line=line,
+        )
+        if mode == 'lines'
+        else None,
+        marker=dict(
+            size=1,
+            color='hsla(0, 100%, 50%, 0)',
+            line=line,
+        )
+        if mode == 'markers'
+        else None,
+        showlegend=False,
+    )
+    fig.append_trace(p, row=row, col=col)
+
+    for s in special:
+        p = pgo.Scatter(
+            name=s.name,
+            x=time[s.points].tolist(),
+            y=values[s.points].tolist(),
+            mode='markers+text',
+            marker=dict(
+                symbol=s.symbol,
+                size=s.size,
+                color=s.colour,
+            ),
+        )
+        fig.append_trace(p, row=row, col=col)
 
     return fig
 
@@ -309,3 +365,18 @@ def save_image(
     else:
         fig.write_image(path)
     return
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# AUXILIARY MODEL
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+@dataclass
+class SpecialPoints:
+    name: str = field()
+    points: list = field()
+    size: int = field(default=2)
+    colour: str = field(default='black')
+    # see https://plotly.com/python/marker-style
+    symbol: str = field(default='x')
