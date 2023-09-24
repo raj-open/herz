@@ -275,6 +275,7 @@ def step_output_loop_plot(
     path = cfg.plot.path.__root__
     if path is not None:
         path = path.format(label=case.label, kind='pressure-volume')
+        save_image(fig=fig, path=path)
 
     return fig
 
