@@ -5,7 +5,7 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# import lmfit
+import lmfit
 import math
 import numpy as np
 import random
@@ -76,7 +76,7 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
 
 __all__ = [
     'findpeaks',
-    # 'lmfit',
+    'lmfit',
     'math',
     'np',
     'random',
