@@ -93,7 +93,13 @@ def get_column(
     config: DataTypeQuantity,
     unit: Optional[str] = None,
 ) -> np.asarray:
-    col = data[config.name][:]
+    key = config.name
+    try:
+        col = data[key][:]
+    except KeyError as e:
+        columns = list(data.columns)
+        raise KeyError(f'{key} not found in data set with columns {", ".join(columns)}')
+
     X = np.asarray(col, dtype=config.type.value)
     if config.unit is not None and unit is not None:
         cv = convert_units(unitFrom=config.unit, unitTo=unit)
