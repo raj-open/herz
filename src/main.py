@@ -36,15 +36,17 @@ def enter(path: str, *_):
     log_progress('''PROCESS DATA''', 0, 2)
     data = step_compute_extremes(data, quantities=['pressure', 'volume'])
     data = step_recognise_cycles(data, quantity='pressure')
-    # data = step_removed_marked_sections(data)
+    if config.PROCESS_CONFIG.cycles.remove_bad:
+        data = step_removed_marked_sections(data)
     data = step_fit_curve(data, quantity='pressure')
 
     log_progress('''OUTPUT TABLES''', 0, 1)
     step_output_tables(data)
 
     log_progress('''OUTPUT TIME PLOTS''', 0, 1)
-    plt = step_output_time_plots(data)
-    # plt.show()
+    plt_p, plt_v = step_output_time_plots(data)
+    # plt_p.show()
+    # plt_v.show()
 
     log_progress('''OUTPUT LOOP PLOTS''', 0, 1)
     plt = step_output_loop_plot(data)
