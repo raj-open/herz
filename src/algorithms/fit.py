@@ -18,8 +18,8 @@ from ..core.poly import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'fit_poly_ventricular_cycle',
-    'fit_poly_ventricular_cycles',
+    'fit_poly_cycle',
+    'fit_poly_cycles',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,15 +27,16 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def fit_poly_ventricular_cycles(
+def fit_poly_cycles(
     t: np.ndarray,
     x: np.ndarray,
     cycles: list[int],
-    n: int = 3,
-    h: int = 7,
-) -> np.ndarray:
+    deg: int,
+    opt: list[tuple[int, float]],
+    average: bool = False,
+) -> tuple[np.ndarray, list[float]]:
     '''
-    Fits 'certain' polynomials to pressure cycles in such a way,
+    Fits 'certain' polynomials to cycles in such a way,
     that special attributes can be extracted.
     '''
     # determine start and end of each cycle
@@ -47,20 +48,58 @@ def fit_poly_ventricular_cycles(
     coeffs = [[]] * len(windows)
     for k, (i1, i2) in enumerate(windows):
         xx = x[i1:i2]
-        tt, T = normalise_to_unit_interval(t[i1:i2])
-        x_fit[i1:i2], coeffs[k] = fit_poly_ventricular_cycle(t=tt, x=xx, n=n, h=h)
+        tt, _ = normalise_to_unit_interval(t[i1:i2])
+        x_fit[i1:i2], coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, opt=opt)
+
+    # --------------------------------
+    # NOTE:
+    # If all cycles are to be fit simultaenously by a single polynomial,
+    # then since a method via ONB is, the optimal solution
+    # (least L^2-distance) is the average.
+    # Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated) curves in C[0, T].
+    # Let x(t) := 1/n ∑ₖ x⁽ᵏ⁾(t) the avarage in C[0, T].
+    # Then
+    #
+    #    res := 1/n · ∑ₖ ‖p - x⁽ᵏ⁾‖²
+    #      = 1/n · ∑ₖ ‖p‖² + ‖x⁽ᵏ⁾‖² + 2Re ⟨x⁽ᵏ⁾, p⟩
+    #      = const + ‖p‖² + 2Re ⟨x, p⟩
+    #      = const + ‖x‖² + ‖p‖² + 2Re ⟨x, p⟩
+    #      = const + ‖p - x‖²
+    #
+    # Hence to res minimsed ⟺ p minimised for the average, x(t).
+    # We do not have access to x, since the x⁽ᵏ⁾ are not comensurable.
+    # However, letting p⁽ᵏ⁾ be minimised for each x⁽ᵏ⁾,
+    # one has via the ONB (qⱼ)ⱼ
+    #
+    #    p optimal for x
+    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨x, qⱼ⟩
+    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ x⁽ᵏ⁾, qⱼ⟩
+    #    ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨x⁽ᵏ⁾, qⱼ⟩
+    #    ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨p⁽ᵏ⁾, qⱼ⟩
+    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ p⁽ᵏ⁾, qⱼ⟩
+    #    ⟺ p = 1/n ∑ₖ p⁽ᵏ⁾
+    #
+    # Hence the coefficients for p are just the average
+    # of the coefficients of the p⁽ᵏ⁾.
+    # --------------------------------
+    if average:
+        coeff = np.mean(np.asarray(coeffs), axis=0).tolist()
+        for k, (i1, i2) in enumerate(windows):
+            tt, _ = normalise_to_unit_interval(t[i1:i2])
+            x_fit[i1:i2] = poly(tt, *coeff)
+        coeffs = [coeff]
 
     return x_fit, coeffs
 
 
-def fit_poly_ventricular_cycle(
+def fit_poly_cycle(
     t: np.ndarray,
     x: np.ndarray,
-    n: int,
-    h: int,
-) -> tuple[np.ndarray, list[tuple[int, float]]]:
+    deg: int,
+    opt: list[tuple[int, float]],
+) -> tuple[np.ndarray, list[float]]:
     '''
-    Fits 'certain' polynomials to a pressure cycle in such a way,
+    Fits 'certain' polynomials to a cycle in such a way,
     that special attributes can be extracted.
 
     @inputs
@@ -73,31 +112,8 @@ def fit_poly_ventricular_cycle(
       Here the polynomial is to be understood as being paramterised
       over time uniformly on `[0, T]`.
     - the fit polynomial
-
-    ## Assumptions ##
-
-    - Assume `x(0) = x(1) =` local maximum.
-    - The `n-1`-th derivative `x⁽ⁿ⁻¹⁾` is a polynomial,
-      with `h` alternating peaks/troughs,
-      whereby the two end points `0` and `T` are peaks.
-    - This implies that the `n`-th derivative `x⁽ⁿ⁾` is a polynomial
-      with `h` zeros (and hence of degree `h`),
-      two of which are the end points.
-      So `x` is a polynomial of degree `n + h`.
     '''
-
-    d = h + n
-    opt = [
-        (0, 0.0),
-        (0, 1.0),
-        (1, 0.0),
-        (1, 1.0),
-        (n, 0.0),
-        (n, 1.0),
-    ]
-    A = force_poly_conditions(d=d, opt=opt)
-    Q = onb_conditions(d=d, opt=opt)
-
+    Q = onb_conditions(d=deg, opt=opt)
     coeff = onb_spectrum(
         t=t,
         x=x - x[0],
@@ -105,7 +121,6 @@ def fit_poly_ventricular_cycle(
         T=1.0,
         in_standard_basis=True,
     )
-
     coeff[0] = x[0]
     x_fit = poly(t, *coeff)
 

@@ -10,12 +10,12 @@ from ..thirdparty.maths import *
 
 from ..setup import config
 from ..core.utils import *
+from ..core.poly import *
+from ..models.user import *
 from ..algorithms.peaks import *
 from ..algorithms.cycles import *
 from ..algorithms.bad_points import *
 from ..algorithms.fit import *
-
-from ..core.poly import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -111,27 +111,106 @@ def step_removed_marked_sections(
 
 def step_fit_curve(
     data: pd.DataFrame,
-    quantity: str,
+    quantities: str,
     n_der: int = 2,
 ) -> pd.DataFrame:
+    '''
+    TODO: Check/correct the following assumptions!
+
+    ## Assumptions on pressure-series ##
+
+    `n = 2`, `h=7`.
+
+    - Assume `P(0) = P(1) =` local maximum.
+    - The `n`-th derivative `x⁽ⁿ⁾` is a polynomial,
+      with `h` alternating peaks/troughs,
+      whereby the two end points `0` and `T` are peaks.
+    - This implies that the `(n+1)`-th derivative
+      `P⁽ⁿ⁺¹⁾` is a polynomial
+      with `h` zeros (and hence of degree `h`),
+      two of which are the end points.
+
+    So `P` is a polynomial of degree `n + h + 1`.
+    Force conditions:
+
+    - `P(0) = P(1)`;
+    - `P´(0) = 0`; `P´(1) = 0`;
+    - `P⁽ⁿ⁺¹⁾(0) = 0`; `P⁽ⁿ⁺¹⁾(1) = 0`;
+
+    ## Assumptions on volume-series ##
+
+    `n = 1`, `h=7`.
+
+    - Assume `V(0) = V(1)`.
+    - The `n`-th derivative `x⁽ⁿ⁾` is a polynomial,
+      with `h` alternating peaks/troughs,
+      whereby the two end points `0` and `T` are peaks.
+    - This implies that the `(n+1)`-th derivative
+      `V⁽ⁿ⁺¹⁾` is a polynomial
+      with `h` zeros (and hence of degree `h`),
+      two of which are the end points.
+
+    So `V` is a polynomial of degree `n + h + 1`.
+    Force conditions:
+
+    - `V(0) = V(1)`;;
+    '''
+    cfg = config.PROCESS_CONFIG
+
     t = data['time'].to_numpy(copy=True)
-    x = data[quantity].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
 
     # determine start and end of each cycle
     windows = cycles_to_windows(cycles)
 
-    # fit polynomial
-    x, coeffs = fit_poly_ventricular_cycles(t=t, x=x, cycles=cycles)
-    data[f'{quantity}[fit]'] = x
+    for quantity in quantities:
+        x = data[quantity].to_numpy(copy=True)
 
-    # compute derivatives
-    for i in range(1, n_der + 1):
-        for k, (i1, i2) in enumerate(windows):
-            coeffs[k] = derivative_coefficients(coeffs[k])
-            tt, T = normalise_to_unit_interval(t[i1:i2])
-            x[i1:i2] = 1 / T * poly(tt, *coeffs[k])
+        deg = 2
+        opt = []
+        match quantity:
+            case 'pressure':
+                n = 2
+                h = 7  # number of 'humps' of n-th derivative of x
+                deg = h + n + 1
+                opt = [
+                    (0, 0.0),
+                    (0, 1.0),
+                    (1, 0.0),
+                    (1, 1.0),
+                    (n + 1, 0.0),
+                    (n + 1, 1.0),
+                ]
+            case 'volume':
+                n = 1
+                h = 7  # number of 'humps' of n-th derivative of x
+                deg = h + n + 1
+                opt = [
+                    (0, 0.0),
+                    (0, 1.0),
+                ]
 
-        data[f'd[{i},t]{quantity}[fit]'] = x
+        # fit polynomial
+        mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
+        x, coeffs = fit_poly_cycles(
+            t=t,
+            x=x,
+            cycles=cycles,
+            deg=deg,
+            opt=opt,
+            average=mode_average,
+        )
+        data[f'{quantity}[fit]'] = x
+
+        # compute derivatives
+        for i in range(1, n_der + 1):
+            for k, (i1, i2) in enumerate(windows):
+                if not mode_average or k == 0:
+                    coeffs[k] = derivative_coefficients(coeffs[k])
+                coeff = coeffs[0] if mode_average else coeffs[k]
+                tt, T = normalise_to_unit_interval(t[i1:i2])
+                x[i1:i2] = 1 / T * poly(tt, *coeff)
+
+            data[f'd[{i},t]{quantity}[fit]'] = x
 
     return data
