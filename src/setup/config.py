@@ -46,7 +46,7 @@ def set_user_config(path: str):
 
     USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
     BASIC = lazy(lambda x: x.basic, USER_CONFIG)
-    CASES = lazy(lambda x: x.cases, USER_CONFIG)
+    CASES = lazy(lambda x: [case for case in x.cases if not case.ignore], USER_CONFIG)
     LOG_LEVEL = lazy(lambda x: x.log_level.name, BASIC)
 
     configure_logging(LOG_LEVEL)
@@ -87,9 +87,9 @@ VERSION = load_version(path=PATH_VERSION)
 
 API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
 INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
-UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
+UNITS: dict[str, str] = {}
 
 USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
 BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)
-CASES: list[UserCase] = lazy(lambda x: x.cases, USER_CONFIG)
-LOG_LEVEL: str = lazy(lambda x: x.log_level.name, BASIC)
+CASES: list[UserCase] = []
+LOG_LEVEL: str = 'INFO'

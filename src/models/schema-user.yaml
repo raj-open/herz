@@ -55,6 +55,11 @@ components:
         - process
         - output
       properties:
+        ignore:
+          description: |-
+            Whether or not to skip the case.
+          type: boolean
+          default: false
         label:
           description: |-
             Label used to refer to case and generate output files.
