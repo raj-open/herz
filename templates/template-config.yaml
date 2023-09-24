@@ -51,8 +51,10 @@ cases:
     # ----------------------------------------------------------------
     process: &ref_process
       combine:
+        # NOTE:
+        # use these settings to determine the resolution of time
+        # used for both the analysis and the output.
         dt: 10
-        T-max: 1000
         unit: "ms"
       cycles:
         remove-bad: false
@@ -124,8 +126,8 @@ cases:
           type: float
 
       table:
-        # NOTE: include '{label}' in path name, as this is a schema!
-        path: "output/{label}-table.csv"
+        # NOTE: include '{label}' + '{kind}' in path name, as this is a schema!
+        path: "output/{label}-table-{kind}.csv"
         sep: ";"
         decimal: "."
       plot:

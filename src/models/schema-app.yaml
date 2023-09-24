@@ -26,6 +26,7 @@ components:
           type: object
           required:
             - units
+            - polynomial
           properties:
             units:
               description: |-
@@ -33,6 +34,13 @@ components:
               type: object
               additionalProperties:
                 type: string
+                default: {}
+            polynomial:
+              description: |-
+                Conditions for fitting (polynomial) curves to raw.
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/PolynomialSetting"
                 default: {}
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,4 +60,51 @@ components:
           type: string
         version:
           type: string
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - polynomial setting
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PolynomialSetting:
+      description: |-
+        Setting on for polynomial fitting for cycles within a time-series.
+      type: object
+      required:
+        - degree
+        - conditions
+      properties:
+        degree:
+          description: |-
+            Degree of polynomial to be fitted.
+          type: integer
+          minimum: 1
+        conditions:
+          description: |-
+            Conditions to force on fitted polynomial
+          type: array
+          items:
+            $ref: "#/components/schemas/PolynomialCondition"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - polynomial condition
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PolynomialCondition:
+      description: |-
+        A condition to force on fitted polynomial of the form:
+
+        - The `n`-th derivative at time point `t` (value in in `[0, 1]`)
+          must be `0`.
+      type: object
+      required:
+        - derivative
+        - time
+      properties:
+        derivative:
+          type: integer
+          minimum: 0
+        time:
+          description: |-
+            Must be a value in `[0, 1]`.
+          type: number
+          minimum: 0.
+          maximum: 1.
       additionalProperties: false

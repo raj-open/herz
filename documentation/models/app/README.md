@@ -15,6 +15,8 @@ Class | Method | HTTP request | Description
  - [AppConfig](.//Models/AppConfig.md)
  - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
+ - [PolynomialCondition](.//Models/PolynomialCondition.md)
+ - [PolynomialSetting](.//Models/PolynomialSetting.md)
 
 
 <a name="documentation-for-authorization"></a>

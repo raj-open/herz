@@ -1,10 +1,10 @@
-# AppConfigSettings
+# PolynomialCondition
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**units** | [**Map**](string.md) | Standard units for physical conversion. | [default to null]
-**polynomial** | [**Map**](PolynomialSetting.md) | Conditions for fitting (polynomial) curves to raw. | [default to null]
+**derivative** | [**Integer**](integer.md) |  | [default to null]
+**time** | [**BigDecimal**](number.md) | Must be a value in &#x60;[0, 1]&#x60;. | [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

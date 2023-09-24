@@ -19,6 +19,7 @@ from ..models.user import *
 
 __all__ = [
     'UNITS',
+    'POLY',
     'VERSION',
 ]
 
@@ -87,7 +88,8 @@ VERSION = load_version(path=PATH_VERSION)
 
 API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
 INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
-UNITS: dict[str, str] = {}
+UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
+POLY: dict[str, PolynomialSetting] = lazy(lambda x: x.settings.polynomial, API_CONFIG)
 
 USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
 BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)

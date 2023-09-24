@@ -6,6 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ..generated.app import *
+from .poly import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -14,4 +15,8 @@ from ..generated.app import *
 __all__ = [
     'AppInfo',
     'AppConfig',
+    'PolynomialSetting',
+    'PolynomialCondition',
+    'onb_conditions',
+    'onb_spectrum',
 ]
