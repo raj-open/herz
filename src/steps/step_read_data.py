@@ -29,21 +29,21 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_read_data() -> tuple[pd.DataFrame, pd.DataFrame]:
-    cfg = config.DATA_CONFIG
+def step_read_data(case: UserCase) -> tuple[pd.DataFrame, pd.DataFrame]:
+    cfg = case.data
     cfg_units = config.UNITS
 
     data_pressure = get_data_from_csv(
         quantity='pressure',
-        unit_time=cfg_units.time,
-        unit_quantity=cfg_units.pressure,
+        unit_time=cfg_units.get('time', 's'),
+        unit_quantity=cfg_units.get('pressure', 'Pa'),
         config=cfg.pressure,
     )
 
     data_volume = get_data_from_csv(
         quantity='volume',
-        unit_time=cfg_units.time,
-        unit_quantity=cfg_units.volume,
+        unit_time=cfg_units.get('time', 's'),
+        unit_quantity=cfg_units.get('volume', 'm^3'),
         config=cfg.volume,
     )
 

@@ -26,14 +26,15 @@ __all__ = [
 
 
 def step_combine_data(
+    case: UserCase,
     data_pressure: pd.DataFrame,
     data_volume: pd.DataFrame,
 ) -> pd.DataFrame:
-    cfg = config.PROCESS_CONFIG
+    cfg = case.process
     cfg_units = config.UNITS
 
     unit = cfg.combine.unit
-    cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.time)
+    cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.get('time', unit))
 
     time_pressure = data_pressure['time'].to_numpy(copy=True)
     pressure = data_pressure['pressure'].to_numpy(copy=True)

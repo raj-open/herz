@@ -33,7 +33,11 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_compute_extremes(data: pd.DataFrame, quantities: list[str]) -> pd.DataFrame:
+def step_compute_extremes(
+    case: UserCase,
+    data: pd.DataFrame,
+    quantities: list[str],
+) -> pd.DataFrame:
     N = len(data)
     for quantity in quantities:
         values = data[quantity]
@@ -44,11 +48,12 @@ def step_compute_extremes(data: pd.DataFrame, quantities: list[str]) -> pd.DataF
 
 
 def step_recognise_cycles(
+    case: UserCase,
     data: pd.DataFrame,
     quantity: str,
     remove_gaps: bool = True,
 ) -> pd.DataFrame:
-    cfg = config.PROCESS_CONFIG
+    cfg = case.process
 
     # compute time increment for later
     N = len(data)
@@ -90,6 +95,7 @@ def step_recognise_cycles(
 
 
 def step_removed_marked_sections(
+    case: UserCase,
     data: pd.DataFrame,
 ):
     # compute time increment for later
@@ -110,6 +116,7 @@ def step_removed_marked_sections(
 
 
 def step_fit_curve(
+    case: UserCase,
     data: pd.DataFrame,
     quantities: str,
     n_der: int = 2,
@@ -155,7 +162,7 @@ def step_fit_curve(
 
     - `V(0) = V(1)`;;
     '''
-    cfg = config.PROCESS_CONFIG
+    cfg = case.process
 
     t = data['time'].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
