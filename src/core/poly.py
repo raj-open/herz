@@ -9,12 +9,16 @@ from ..thirdparty.maths import *
 from ..thirdparty.physics import *
 from ..thirdparty.types import *
 
+from .constants import *
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
     'poly',
+    'poly_single',
+    'get_real_polynomial_roots',
     'derivative_coefficients',
     'ip_poly_poly',
     'ip_basis_basis',
@@ -35,6 +39,17 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+def poly_single(t: float, *coeff: float) -> float:
+    m = len(coeff)
+    x = 0.0
+    monom = 1.0
+    for k, c in enumerate(coeff):
+        x += c * monom
+        if k < m - 1:
+            monom *= t
+    return x
+
+
 def poly(t: np.ndarray, *coeff: float) -> np.ndarray:
     N = len(t)
     m = len(coeff)
@@ -49,6 +64,14 @@ def poly(t: np.ndarray, *coeff: float) -> np.ndarray:
 
 def derivative_coefficients(coeff: list[float], n: int = 1) -> list[float]:
     return [nPr(k + n, k) * c for k, c in enumerate(coeff[n:])]
+
+
+def get_real_polynomial_roots(*coeff: float) -> list[float]:
+    roots = np.roots(list(coeff)[::-1]).tolist()
+    roots = [t.real for t in roots if abs(t.imag) < FLOAT_ERR]
+    # C = sum([ abs(c) for c in coeff ]) or 1.
+    # roots = [ t for t in roots if abs(poly_single(t, *coeff)) < C*FLOAT_ERR ]
+    return roots
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
