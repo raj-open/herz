@@ -124,45 +124,10 @@ def step_fit_curve(
     n_der: int = 2,
 ) -> tuple[pd.DataFrame, list[float]]:
     '''
-    TODO: Check/correct the following assumptions!
-
-    ## Assumptions on pressure-series ##
-
-    `n = 2`, `h=7`.
-
-    - Assume `P(0) = P(1) =` local maximum.
-    - The `n`-th derivative `x⁽ⁿ⁾` is a polynomial,
-      with `h` alternating peaks/troughs,
-      whereby the two end points `0` and `T` are peaks.
-    - This implies that the `(n+1)`-th derivative
-      `P⁽ⁿ⁺¹⁾` is a polynomial
-      with `h` zeros (and hence of degree `h`),
-      two of which are the end points.
-
-    So `P` is a polynomial of degree `n + h + 1`.
-    Force conditions:
-
-    - `P(0) = P(1)`;
-    - `P´(0) = 0`; `P´(1) = 0`;
-    - `P⁽ⁿ⁺¹⁾(0) = 0`; `P⁽ⁿ⁺¹⁾(1) = 0`;
-
-    ## Assumptions on volume-series ##
-
-    `n = 1`, `h=7`.
-
-    - Assume `V(0) = V(1)`.
-    - The `n`-th derivative `x⁽ⁿ⁾` is a polynomial,
-      with `h` alternating peaks/troughs,
-      whereby the two end points `0` and `T` are peaks.
-    - This implies that the `(n+1)`-th derivative
-      `V⁽ⁿ⁺¹⁾` is a polynomial
-      with `h` zeros (and hence of degree `h`),
-      two of which are the end points.
-
-    So `V` is a polynomial of degree `n + h + 1`.
-    Force conditions:
-
-    - `V(0) = V(1)`;;
+    Fits polynomial to cycles in time-series,
+    forcing certain conditions on the `n`th-derivatives
+    at certain time points,
+    and minimising wrt. the L²-norm.
     '''
     cfg = case.process
     cfg_poly = config.POLY[quantity]
@@ -187,14 +152,20 @@ def step_fit_curve(
     data[f'{quantity}[fit]'] = x
 
     # compute derivatives
-    for i in range(1, n_der + 1):
+    for n in range(1, n_der + 1):
         for k, (i1, i2) in enumerate(windows):
             if not mode_average or k == 0:
                 coeffs[k] = derivative_coefficients(coeffs[k])
             coeff = coeffs[0] if mode_average else coeffs[k]
+            # scale time
             tt, T = normalise_to_unit_interval(t[i1:i2])
-            x[i1:i2] = 1 / T * poly(tt, *coeff)
+            # remove drift
+            c, m, s, _ = normalise_interpolated_drift(tt, x[i1:i2], T=1)
+            # compute normalised derivative
+            dnx = poly(tt, *coeff)
+            # undo effects of time-scaling + drift-removal
+            x[i1:i2] = ((m if n == 1 else 0.0) + s * dnx) / T
 
-        data[f'd[{i},t]{quantity}[fit]'] = x
+        data[f'd[{n},t]{quantity}[fit]'] = x
 
     return data, coeffs[0]

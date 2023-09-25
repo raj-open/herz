@@ -32,7 +32,7 @@ __all__ = [
 
 def onb_conditions(
     deg: int,
-    conds: list[PolynomialCondition],
+    conds: list[PolyDerCondition | PolyIntCondition],
     t1: float = 0.0,
     t2: float = 1.0,
 ) -> np.ndarray:
@@ -164,7 +164,12 @@ def onb_spectrum(
     # for x(t) on [t1ᵢ, t2ᵢ].
     # --------------------------------
     t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
-    x = x.tolist() + [x[0] if periodic else x[-1]]
+    if periodic:
+        x = x.tolist() + [x[0]]
+    else:
+        x1 = np.asarray(x[1:])
+        x2 = np.asarray(x[:-1])
+        x = np.concatenate([[x[0]], (x1 + x2) / 2, [x[-1]]]).tolist()
     dt = np.diff(t)
     dx = np.diff(x)
     dt[dt == 0.0] = 1.0
@@ -252,34 +257,45 @@ def onb_spectrum(
 
 def force_poly_conditions(
     deg: int,
-    conds: list[PolynomialCondition],
+    conds: list[PolyDerCondition | PolyIntCondition],
 ) -> np.ndarray:
-    A = np.asarray([force_poly_condition(deg=deg, cond=cond) for cond in conds], dtype=float)
+    m = len(conds)
+    A = np.asarray(
+        [force_poly_condition(deg=deg, cond=cond) for cond in conds], dtype=float
+    ).reshape((m, deg + 1))
     return A
 
 
 def force_poly_condition(
     deg: int,
-    cond: PolynomialCondition,
+    cond: PolyDerCondition | PolyIntCondition,
 ) -> list[float]:
     '''
     Linear condition on coefficients to determine if
     the `n`th derivate of a polynomial `p` of degree `deg` at point `t`
     satisfies `p⁽ⁿ⁾(t) = 0`.
     '''
-    n = cond.derivative
-    t = cond.time
-    coeff = [0.0] * (deg + 1)
-    if n <= deg:
-        match t:
-            case 0:
-                coeff[n] = math.factorial(n)
-            case 1.0:
-                coeff[n:] = [nPr(k, n) for k in range(n, deg + 1)]
-            case _:
-                tpow = np.cumprod([1] + [t] * (deg - n))
-                coeff[n:] = [nPr(k, n) * tt for k, tt in zip(range(n, deg + 1), tpow)]
-    return coeff
+    row = np.zeros(shape=(deg + 1,), dtype=float)
+    if isinstance(cond, PolyDerCondition):
+        n = cond.derivative
+        t = cond.time
+        if n <= deg:
+            match t:
+                case 0:
+                    row[n] = math.factorial(n)
+                case 1.0:
+                    row[n:] = [nPr(k, n) for k in range(n, deg + 1)]
+                case _:
+                    tpow = np.cumprod([1] + [t] * (deg - n))
+                    row[n:] = [nPr(k, n) * tt for k, tt in zip(range(n, deg + 1), tpow)]
+    # elif isinstance(cond, PolyIntCondition):
+    else:
+        [t1, t2] = cond.times
+        t1pow = np.cumprod([t1] * (deg + 1))
+        t2pow = np.cumprod([t2] * (deg + 1))
+        p = np.asarray(range(0, deg + 1))
+        row = (t2pow - t1pow) / (p + 1)
+    return row.tolist()
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

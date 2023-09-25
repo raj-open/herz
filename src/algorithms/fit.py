@@ -33,7 +33,7 @@ def fit_poly_cycles(
     x: np.ndarray,
     cycles: list[int],
     deg: int,
-    conds: list[PolynomialCondition],
+    conds: list[PolyDerCondition | PolyIntCondition],
     average: bool = False,
 ) -> tuple[np.ndarray, list[float]]:
     '''
@@ -47,17 +47,26 @@ def fit_poly_cycles(
     N = len(t)
     x_fit = np.zeros(shape=(N,), dtype=float)
     coeffs = [[]] * len(windows)
+    # due to normalisation, force the following condition
+    conds = conds[:]
+    conds.append(PolyDerCondition(derivative=0, time=0))
+    conds.append(PolyDerCondition(derivative=0, time=1))
     for k, (i1, i2) in enumerate(windows):
-        xx = x[i1:i2]
+        # scale time
         tt, _ = normalise_to_unit_interval(t[i1:i2])
-        x_fit[i1:i2], coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
+        # remove drift
+        c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1)
+        # compute fitted curve
+        xx_fit, coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
+        # undo effects of drift-removal
+        x_fit[i1:i2] = c + m * tt + s * xx_fit
 
     # --------------------------------
     # NOTE:
     # If all cycles are to be fit simultaenously by a single polynomial,
     # then since a method via ONB is, the optimal solution
     # (least L^2-distance) is the average.
-    # Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated) curves in C[0, T].
+    # Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated+normalised) curves in C[0, T].
     # Let x(t) := 1/n ∑ₖ x⁽ᵏ⁾(t) the avarage in C[0, T].
     # Then
     #
@@ -86,8 +95,15 @@ def fit_poly_cycles(
     if average:
         coeff = np.mean(np.asarray(coeffs), axis=0).tolist()
         for k, (i1, i2) in enumerate(windows):
+            # scale time
             tt, _ = normalise_to_unit_interval(t[i1:i2])
-            x_fit[i1:i2] = poly(tt, *coeff)
+            # remove drive
+            c, m, s, _ = normalise_interpolated_drift(tt, x[i1:i2], T=1)
+            # compute fitted curve
+            xx_fit = poly(tt, *coeff)
+            # undo effects of drift-removal
+            x_fit[i1:i2] = c + m * tt + s * xx_fit
+
         coeffs = [coeff]
 
     return x_fit, coeffs
@@ -97,7 +113,7 @@ def fit_poly_cycle(
     t: np.ndarray,
     x: np.ndarray,
     deg: int,
-    conds: list[PolynomialCondition],
+    conds: list[PolyDerCondition | PolyIntCondition],
 ) -> tuple[np.ndarray, list[float]]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
@@ -114,15 +130,11 @@ def fit_poly_cycle(
       over time uniformly on `[0, T]`.
     - the fit polynomial
     '''
+    # x0 = x[0]
+    # x = x - x0
     Q = onb_conditions(deg=deg, conds=conds)
-    coeff = onb_spectrum(
-        t=t,
-        x=x - x[0],
-        Q=Q,
-        T=1.0,
-        in_standard_basis=True,
-    )
-    coeff[0] = x[0]
+    coeff = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
+    # coeff[0] = x0
     x_fit = poly(t, *coeff)
 
     return x_fit, coeff

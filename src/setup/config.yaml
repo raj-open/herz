@@ -22,10 +22,6 @@ settings:
     pressure:
       degree: 10 # 2 + 7 + 1
       conditions:
-        - derivative: 0
-          time: 0.
-        - derivative: 0
-          time: 1.
         - derivative: 1
           time: 0.
         - derivative: 1
@@ -36,16 +32,4 @@ settings:
           time: 1.
     volume:
       degree: 10 # 1 + 7 + 1
-      conditions:
-        - derivative: 0
-          time: 0.
-        - derivative: 0
-          time: 1.
-        # - derivative: 1
-        #   time: 0.
-        # - derivative: 1
-        #   time: 1.
-        # - derivative: 2
-        #   time: 0.
-        # - derivative: 2
-        #   time: 1.
+      conditions: []
