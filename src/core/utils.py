@@ -53,8 +53,8 @@ def characteristic_to_where(ch: list[bool] | np.ndarray) -> list[int]:
 def normalise_to_unit_interval(t: np.ndarray) -> tuple[np.ndarray, float]:
     t_min = min(t)
     t_max = max(t)
-    T = t_max - t_min or 1.0
-    t = (t - t_min) / T
+    T = t_max - t_min
+    t = (t - t_min) / (T or 1.0)
     return t, T
 
 

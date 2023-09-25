@@ -41,21 +41,21 @@ def cycles_to_windows(cycles: list[int]) -> list[tuple[int, int]]:
 
 
 def get_cycles(
-    peaks: list[int],
+    ext: list[int],
     N: int,
     remove_gaps: bool,
     sig: float = 2.0,
 ) -> list[int]:
     cycles = -1 * np.ones(shape=(N,), dtype=int)
 
-    # if there is are least 2 peaks, sift out 'bad' cycles
-    if len(peaks) > 1:
+    # if there is are least 2 extreme points, sift out 'bad' cycles
+    if len(ext) > 1:
         # compute order normalised statistics for gaps
         # NOTE: if len(peaks) == 2, then s = [1.]
-        s = np.abs(normalised_order_statistics(np.diff(peaks)))
+        s = np.abs(normalised_order_statistics(np.diff(ext)))
 
         # remove cycles that are too small or too large
-        gaps = list(zip(peaks, peaks[1:]))
+        gaps = list(zip(ext, ext[1:]))
         if remove_gaps:
             gaps = [I for I, ss in zip(gaps, s) if ss < sig]
 

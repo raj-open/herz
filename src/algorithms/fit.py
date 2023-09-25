@@ -130,11 +130,8 @@ def fit_poly_cycle(
       over time uniformly on `[0, T]`.
     - the fit polynomial
     '''
-    # x0 = x[0]
-    # x = x - x0
     Q = onb_conditions(deg=deg, conds=conds)
     coeff = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
-    # coeff[0] = x0
     x_fit = poly(t, *coeff)
 
     return x_fit, coeff

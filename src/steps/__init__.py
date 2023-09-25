@@ -19,7 +19,6 @@ __all__ = [
     'step_read_data',
     'step_normalise_data',
     'step_combine_data',
-    'step_compute_extremes',
     'step_recognise_cycles',
     'step_removed_marked_sections',
     'step_fit_curve',
