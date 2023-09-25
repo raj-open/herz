@@ -21,7 +21,14 @@ from findpeaks import findpeaks
 
 
 def nPr(n: int, r: int) -> int:
-    return math.factorial(n - r) * math.comb(n, r)
+    '''
+    Computes `n!/(n-r)!`
+    '''
+    if r == 0:
+        return 1
+    if r == 1:
+        return n
+    return math.factorial(r) * math.comb(n, r)
 
 
 def normalised_order_statistics(X: np.ndarray) -> np.ndarray:

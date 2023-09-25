@@ -115,37 +115,132 @@ def onb_spectrum(
     in_standard_basis: bool = True,
 ) -> list[float]:
     '''
-    computes
-    ```
-    ∫_[0, T] p(t)x(t) dt
-    ```
-    where
+    @inputs
+    - `Q` - a `d x m` array, where `Q[:,j]` denote the coefficients of a polynomial qⱼ
+      and {qⱼ}ⱼ is an ONB
+    - (`t`, `x`) - a discrete time-series
+    - `T` - the total time-duration
+    - `periodic` - whether the series is periodic
+    - `in_standard_basis` - whether to convert the computed innerproducts
+       to coefficients wrt the standard basis {tʲ}ⱼ.
 
-    - `p(t)` is determined by the coefficients in `coeff`
-    - `x(t)` is interpolated from the array `x`,
+    @returns
+    coefficients of best fit polynomial either wrt. the ONB {qⱼ}ⱼ
+    or the standard basis {tʲ}ⱼ
+
+    Computes
+    ```
+    cⱼ := ⟨x, qⱼ⟩
+       := 1/T · ∫_[0, T] x(t)·qⱼ(t)^* dt
+    ```
+    where `x(t)` is a piecewise linear interpolation of a discrete time-series `x`.
+    This yields a polynomial:
+    ```
+    p = ∑ⱼ cⱼ·qⱼ
+    ```
+    satisfying
+    ```
+    L²-norm ‖x – p‖ minimal
+    ```
+    amongst all possibly polynomials in the subspace `V ⊆ C[0, T]`
+    spanned by {qⱼ}ⱼ.
     '''
-    N = len(x)
-    d = Q.shape[0] - 1  # degree of polynomials in ONB
+    deg = Q.shape[0] - 1  # degree of polynomials in ONB
     m = Q.shape[1]  # size of ONB
+
     if t is None:
         t = np.linspace(start=0, stop=T, endpoint=False)
-    t = t.tolist()
-    coeff = np.zeros(shape=(m,))
-    for k, (t1, t2, x1, x2) in enumerate(zip(t, t[1:] + [T], x, x[1:] + [x[0]])):
-        if k == N - 1 and not periodic:
-            continue
-        c1 = (x2 - x1) / (t2 - t1 or 1.0)
-        c0 = x1 - c1 * t1
-        coeff_seg = np.asarray([c0, c1], dtype=float)
-        scale = (t2 - t1) / T
 
-        # recompute generating matrix for inner products
-        ip = []
-        for j in range(m):
-            coeff[j] += scale * ip_poly_poly(coeff_seg, Q[:, j], t1=t1, t2=t2, ip=ip)
+    # --------------------------------
+    # NOTE:
+    # The interval [0, T] is subdivided into
+    # intervals [t1ᵢ, t2ᵢ] with endpoints
+    # from the discrete time-series.
+    # The monom
+    #
+    #    C0[i] + C1[i]·t
+    #
+    # is a piecewise-linear interpolation
+    # for x(t) on [t1ᵢ, t2ᵢ].
+    # --------------------------------
+    t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
+    x = x.tolist() + [x[0] if periodic else x[-1]]
+    dt = np.diff(t)
+    dx = np.diff(x)
+    dt[dt == 0.0] = 1.0
+    C1 = dx / dt
+    C0 = np.asarray(x[:-1]) - C1 * np.asarray(t[:-1])
+
+    # --------------------------------
+    # Determine coefficients of integrals of polynomials:
+    # NOTE:
+    # Q[:, j] = coeff of polynomial qⱼ
+    # Q1[:, j] = coeff of polynomial q1ⱼ, a stemfunction of qⱼ
+    # Q2[:, j] = coeff of polynomial q2ⱼ, a stemfunction of q1ⱼ
+    # R[:, j] = coeff of polynomial rⱼ = t·q1ⱼ - q2ⱼ
+    # --------------------------------
+    Q1 = np.asarray([integral_coefficients(Q[:, j].tolist()) for j in range(m)]).T
+    Q2 = np.asarray([integral_coefficients(Q1[:, j].tolist()) for j in range(m)]).T
+    zeros = np.zeros((1, m))
+    R = np.concatenate([zeros, Q1]) - Q2
+    Q1 = np.concatenate([Q1, zeros])  # pad
+
+    # --------------------------------
+    # NOTE:
+    # Set
+    #
+    #    dmonomes[i, k] = t2ᵢᵏ - t2ᵢᵏ
+    #
+    # for each i and for k ∈ {0, 1, ..., deg + 2}
+    # The polynomial evaluations of an array of `deg+2`-degree
+    # computed by
+    #
+    #    dmonomes @ P
+    #
+    # satisfies
+    #
+    #    (dmonomes @ P)[i, j]
+    #      = ∑ₖ dmonomes[i, k]·P[k, j]
+    #      = ∑ₖ P[k, j]·t2ᵢᵏ - P[k, j]·t2ᵢᵏ
+    #      = pⱼ(t2ᵢ) - pⱼ(t1ᵢ)
+    # --------------------------------
+    monomes = np.asarray([[1] + [tt**k for k in range(1, deg + 2 + 1)] for tt in t])
+    dmonomes = monomes[1:, :] - monomes[:-1, :]
+    I0 = dmonomes @ Q1
+    I1 = dmonomes @ R
+
+    # --------------------------------
+    # NOTE:
+    # Part of innerproduct ⟨x, qⱼ⟩ restricted to [t1ᵢ, t2ᵢ],
+    # assuming interpolation
+    #
+    #    ∫ₜ₁ᵢ, ₜ₂ᵢ x(t)qⱼ(t)^* dt
+    #
+    #      = c₀ᵢ∫ₜ₁ᵢ, ₜ₂ᵢ 1 · qⱼ^* dt + c₁ᵢ∫ₜ₁, ₜ₂ t · qⱼ^* dt
+    #
+    #      = c₀ᵢ[q1ⱼ^*]ₜ₁ᵢ, ₜ₂ᵢ + c₁ᵢ·[t·q1ⱼ^* - q2ⱼ^*]ₜ₁ᵢ, ₜ₂ᵢ
+    #
+    #      = c₀ᵢ(q1ⱼ(t2ᵢ) - q1ⱼ(t1ᵢ))^*
+    #        + c₁ᵢ·(rⱼ(t1ᵢ) - rⱼ(t1ᵢ))^*
+    #
+    #      = C0[i]·I0[i, j]^* + C1[i]·I1[i, j]^*
+    #
+    # Hence
+    #
+    #    coeffⱼ := ∫ x(t)qⱼ(t)^* dt
+    #
+    #      = ∑ᵢ ∫ₜ₁ᵢ, ₜ₂ᵢ x(t)qⱼ(t)^* dt
+    #
+    #      = ∑ᵢ C0[i]·I0[i, j]^* + C1[i]·I1[i, j]^*
+    #
+    #      = (I0^* · C0 + I1^* · C1)[j]
+    #
+    #
+    # --------------------------------
+    coeff = I0.conj().T @ C0 + I1.conj().T @ C1
 
     if in_standard_basis:
-        coeff = Q @ np.asarray(coeff)
+        coeff = Q @ coeff
 
     return coeff.tolist()
 
@@ -180,10 +275,10 @@ def force_poly_condition(
             case 0:
                 coeff[n] = math.factorial(n)
             case 1.0:
-                coeff[n:] = [nPr(k, k - n) for k in range(n, deg + 1)]
+                coeff[n:] = [nPr(k, n) for k in range(n, deg + 1)]
             case _:
                 tpow = np.cumprod([1] + [t] * (deg - n))
-                coeff[n:] = [nPr(k, k - n) * tt for k, tt in zip(range(n, deg + 1), tpow)]
+                coeff[n:] = [nPr(k, n) * tt for k, tt in zip(range(n, deg + 1), tpow)]
     return coeff
 
 
