@@ -61,8 +61,7 @@ def test_force_poly_condition(
 ):
     cond_ = force_poly_condition(deg=deg, cond=PolynomialCondition(derivative=n, time=t))
     C = (np.linalg.norm(cond) + np.linalg.norm(cond_)) / 2 or 1.0
-    dist = np.linalg.norm(np.asarray(cond) - np.asarray(cond_))
-    test.assertLess(dist, 1e-6 * C, f'{cond_} should equal {cond}')
+    assert_arrays_close(cond, cond_, eps=1e-6)
     return
 
 
@@ -108,14 +107,12 @@ def test_force_poly_conditions(
 
     # these coefficients should satisfy all the conditions
     x = np.asarray(coeff)
-    dist = np.linalg.norm(A @ x)
-    test.assertLess(dist, 1e-6)
+    assert_array_close_to_zero(A @ x, eps=1e-6)
 
     # check onb
     Q = onb_conditions(deg=deg, conds=conds)
     m = Q.shape[1]
     for j in range(m):
         x = Q[:, j]
-        dist = np.linalg.norm(A @ x)
-        test.assertLess(dist, 1e-6)
+        assert_array_close_to_zero(A @ x, eps=1e-6)
     return

@@ -28,8 +28,117 @@ from src.core.poly import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+def test_derivative_coefficients(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    coeff = derivative_coefficients([0, 1, 1])
+    assert_arrays_equal(coeff, [1, 2])
+    return
+
+
 @mark.parametrize(
-    ('coeffs', 'zeroes'),
+    ('coeff', 'n', 'expected'),
+    [
+        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
+        ([4, 5, 6, -10], 1, [5, 6 * 2, -10 * 3]),
+        ([4, 5, 6, -10], 2, [6 * 2, -10 * 3 * 2]),
+        ([4, 5, 6, -10], 3, [-10 * 3 * 2]),
+    ],
+)
+def test_derivative_coefficients_rote(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    coeff: list[float],
+    n: int,
+    expected: list[float],
+):
+    coeff_ = derivative_coefficients(coeff, n=n)
+    assert_arrays_close(coeff_, expected, eps=1e-6)
+    return
+
+
+def test_integral_coefficients(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    coeff = integral_coefficients([1, 2])
+    assert_arrays_equal(coeff, [0, 1, 1])
+
+    coeff = derivative_coefficients(coeff)
+    assert_arrays_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
+    return
+
+
+@mark.parametrize(
+    ('coeff', 'n', 'expected'),
+    [
+        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
+        ([4, 5, 6, -10], 1, [0, 4, 5 / 2, 6 / 3, -10 / 4]),
+        ([4, 5, 6, -10], 2, [0, 0, 4 / 2, 5 / (2 * 3), 6 / (3 * 4), -10 / (4 * 5)]),
+        (
+            [4, 5, 6, -10],
+            3,
+            [0, 0, 0, 4 / (2 * 3), 5 / (2 * 3 * 4), 6 / (3 * 4 * 5), -10 / (4 * 5 * 6)],
+        ),
+    ],
+)
+def test_integral_coefficients_rote(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    coeff: list[float],
+    n: int,
+    expected: list[float],
+):
+    coeff_ = integral_coefficients(coeff, n=n)
+    assert_arrays_close(coeff_, expected, eps=1e-6)
+
+    coeff_ = derivative_coefficients(expected, n=n)
+    assert_arrays_close(
+        coeff_, coeff, eps=1e-6, message='Derivative should return original coefficients.'
+    )
+    return
+
+
+def test_get_real_polynomial_roots(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    coeff = [-3, 0, 8, 1]
+    roots = get_real_polynomial_roots(*coeff)
+    assert_array_close_to_zero(
+        [poly_single(t, *coeff) for t in roots],
+        eps=1e-10,
+        message='The values computes should be roots of the polynomial.',
+    )
+
+    roots = get_real_polynomial_roots(0, 0, -4, 1)
+    roots = sorted(roots)
+    assert_arrays_equal(
+        roots,
+        [0, 0, 4],
+        message='Roots of algebric multiplicity should occur repeated in list.',
+    )
+
+    roots = get_real_polynomial_roots(0, 0, 0, -4, 1)
+    roots = sorted(roots)
+    assert_arrays_equal(
+        roots,
+        [0, 0, 0, 4],
+        message='Roots of algebric multiplicity should occur repeated in list.',
+    )
+    return
+
+
+@mark.parametrize(
+    ('coeff', 'zeroes'),
     [
         (
             [2, 1],
@@ -51,19 +160,22 @@ from src.core.poly import *
             [0, 1],
             [0],
         ),
+        (
+            [0, 0, 1],
+            [0, 0],
+        ),
     ],
 )
-def test_get_real_polynomial_roots(
+def test_get_real_polynomial_roots_rote(
     test: TestCase,
     debug: Callable[..., None],
     module: Callable[[str], str],
     # test parameters
-    coeffs: list[float],
+    coeff: list[float],
     zeroes: list[float],
 ):
-    roots = get_real_polynomial_roots(*coeffs)
+    roots = get_real_polynomial_roots(*coeff)
     roots = sorted(roots)
     zeroes = sorted(zeroes)
-    dist = np.linalg.norm(np.asarray(roots) - np.asarray(zeroes))
-    test.assertLess(dist, 1e-6)
+    assert_arrays_close(roots, zeroes, eps=1e-6)
     return
