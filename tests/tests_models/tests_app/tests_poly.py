@@ -59,7 +59,7 @@ def test_force_poly_condition(
     t: float,
     cond: list[float],
 ):
-    cond_ = force_poly_condition(deg=deg, cond=PolynomialCondition(derivative=n, time=t))
+    cond_ = force_poly_condition(deg=deg, cond=PolyDerCondition(derivative=n, time=t))
     C = (np.linalg.norm(cond) + np.linalg.norm(cond_)) / 2 or 1.0
     assert_arrays_close(cond, cond_, eps=1e-6)
     return
@@ -71,24 +71,24 @@ def test_force_poly_condition(
         (
             3,
             [
-                PolynomialCondition(derivative=0, time=1.0),
+                PolyDerCondition(derivative=0, time=1.0),
             ],
             [-3, 1, 1, 1],
         ),
         (
             3,
             [
-                PolynomialCondition(derivative=0, time=0.0),
-                PolynomialCondition(derivative=1, time=1.0),
+                PolyDerCondition(derivative=0, time=0.0),
+                PolyDerCondition(derivative=1, time=1.0),
             ],
             [0, 6, 3, -4],
         ),
         (
             4,
             [
-                PolynomialCondition(derivative=0, time=0.0),
-                PolynomialCondition(derivative=0, time=1.0),
-                PolynomialCondition(derivative=3, time=1.0),
+                PolyDerCondition(derivative=0, time=0.0),
+                PolyDerCondition(derivative=0, time=1.0),
+                PolyDerCondition(derivative=3, time=1.0),
             ],
             [0, 7, -10, 4, -1],
         ),
@@ -100,7 +100,7 @@ def test_force_poly_conditions(
     module: Callable[[str], str],
     # test parameters
     deg: int,
-    conds: list[PolynomialCondition],
+    conds: list[PolyDerCondition],
     coeff: list[float],
 ):
     A = force_poly_conditions(deg=deg, conds=conds)
