@@ -47,9 +47,11 @@ def output_conversions(columns: list[DataTypeColumn]) -> dict[str, float]:
     '''
     # internal units
     units = config.UNITS
+    # throws an error if a unit is missing (we want this behaviour!!)
+    units = { col.key: units[col.quantity] for col in columns }
     # compute conversions
     cv = {
-        col.key: convert_units(unitFrom=units.get(col.quantity, col.unit), unitTo=col.unit)
+        col.key: convert_units(unitFrom=units[col.key], unitTo=col.unit)
         for col in columns
     }
     return cv

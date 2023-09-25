@@ -33,6 +33,7 @@ def step_output_single_table(
     case: UserCase,
     data: pd.DataFrame,
     quantity: str,
+    original_time: bool = True,
 ):
     cfg = case.output
 
@@ -42,26 +43,42 @@ def step_output_single_table(
         return
 
     cv = output_conversions(cfg.quantities)
+    units = output_units(cfg.quantities)
+
+    if original_time:
+        data = data.sort_values(by=['time[orig]']).reset_index(drop=True)
+        data['time'] = data['time[orig]']
 
     columns = list(data.columns)
     quantities = [col for col in cfg.quantities if col.key in columns]
 
     table = pd.DataFrame(
-        {col.key: getattr(cv, col.key, 1) * data[col.key] for col in quantities}
+        {col.key: cv[col.key] * data[col.key] for col in quantities}
     ).astype({col.key: col.type.value for col in quantities})
 
-    table.to_csv(
-        path,
-        sep=cfg.table.sep,
-        decimal=cfg.table.decimal,
-        na_rep='',
-        header=[col.name for col in quantities],
-        index=False,
-        mode='w',
-        encoding='utf-8',
-        quotechar='"',
-        doublequote=True,
-    )
+    with open(path, 'w') as fp:
+        sep = cfg.table.sep
+        for header in [
+            [col.name for col in quantities],
+            [print_unit(col.unit, ascii=False) or '' for col in quantities]
+        ]:
+            fp.write(sep.join(header))
+            fp.write('\n')
+
+        table.to_csv(
+            fp,
+            sep=sep,
+            decimal=cfg.table.decimal,
+            na_rep='',
+            header=None,
+            # header=[col.name for col in quantities],
+            index=False,
+            mode='w',
+            encoding='utf-8',
+            quotechar='"',
+            doublequote=True,
+            # float_format='%.6f',
+        )
 
     return
 
@@ -80,7 +97,7 @@ def step_output_combined_table(
     cv = output_conversions(cfg.quantities)
 
     table = pd.DataFrame(
-        {col.key: getattr(cv, col.key, 1) * data[col.key] for col in cfg.quantities}
+        {col.key: cv[col.key] * data[col.key] for col in cfg.quantities}
     ).astype({col.key: col.type.value for col in cfg.quantities})
 
     table.to_csv(

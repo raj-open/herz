@@ -38,12 +38,17 @@ def step_output_time_plot(
     data: pd.DataFrame,
     quantity: str,
     symb: str,
+    original_time: bool = True,
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
+
+    if original_time:
+        data = data.sort_values(by=['time[orig]']).reset_index(drop=True)
+        data['time'] = data['time[orig]']
 
     time = cv['time'] * data['time'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
