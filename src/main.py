@@ -10,7 +10,10 @@ import sys
 
 os.chdir(os.path.join(os.path.dirname(__file__), '..'))
 
+from .thirdparty.misc import *
+
 from .core.log import *
+from .core.poly import *
 from .setup import config
 from src.steps import *
 
@@ -44,11 +47,10 @@ def enter(path: str, *_):
             data = step_normalise_data(case, data, quantity=quantity)
 
             log_progress(f'''PROCESS DATA {quantity}''', 1, 5)
-            data, T = step_recognise_cycles(case, data, quantity=quantity, shift=ext)
+            data = step_recognise_cycles(case, data, quantity=quantity, shift=ext)
             if case.process.cycles.remove_bad:
                 data = step_removed_marked_sections(case, data)
-            data, coeff = step_fit_curve(case, data, quantity=quantity)
-            log_info(f'Recognised period for {quantity}: {1000 * T:.1f}ms.')
+            data, infos = step_fit_curve(case, data, quantity=quantity)
 
             log_progress(f'''OUTPUT TABLES {quantity}''', 2, 5)
             step_output_single_table(case, data, quantity=quantity)
@@ -57,9 +59,37 @@ def enter(path: str, *_):
             plt = step_output_time_plot(case, data, quantity=quantity, symb=symb)
             # plt.show()
 
+            coeff, T, c, m, s = infos[0]
+            coeff_rescaled = [s * cc / T**k for k, cc in enumerate(coeff)]
+            coeff_rescaled[0] += c
+            coeff_rescaled[1] += m / T
+
             datas[quantity] = data
             Ts[quantity] = T
             coeffs[quantity] = coeff
+            log_info(
+                dedent(
+                    f'''
+                Recognised period for {quantity}: T ≈ {1000 * T:.1f}ms.
+
+                Cycles for {quantity} normalised as follows:
+
+                1. shifted to ({ext}-{ext})
+                2. time-normalised from [0, T] ---> [0, 1]
+                3. linear drift removed (from {symb}(0) to {symb}(1))
+                4. re-scaled so that L²-norm = 1
+
+                Fitted Polynomial for normalised cycle of {quantity}:
+
+                    {symb}₀(t) = {print_poly(coeff, var='t', unitise=True)}
+
+                Fitted Polynomial for cycle of {quantity} (not normalised, excecpt for 1.):
+
+                    {symb}(t) = {c} + {m}·t/T + {s}·{symb}₀(t/T)
+                      = {print_poly(coeff_rescaled, var='t', unitise=True)}
+                '''
+                )
+            )
 
         # TODO - handle combined outputs
         # step_output_combined_table(case, datas, coeffs)
