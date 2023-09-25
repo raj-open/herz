@@ -25,7 +25,7 @@ from ..models.user import *
 
 __all__ = [
     'step_output_loop_plot',
-    'step_output_time_plots',
+    'step_output_time_plot',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,10 +33,12 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_output_time_plots(
+def step_output_time_plot(
     case: UserCase,
     data: pd.DataFrame,
-) -> tuple[pgo.Figure, pgo.Figure]:
+    quantity: str,
+    symb: str,
+) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
 
@@ -46,128 +48,119 @@ def step_output_time_plots(
     time = cv['time'] * data['time'].to_numpy(copy=True)
     marked = data['marked'].to_numpy(copy=True)
 
-    figs = dict()
-    for quantity, symb in [
-        ('pressure', 'P'),
-        ('volume', 'V'),
-    ]:
-        x = {
-            key: cv[key_] * data[key_].to_numpy(copy=True)
-            for key, key_ in [
-                ('orig', quantity),
-                ('fit', f'{quantity}[fit]'),
-                ('d', f'd[1,t]{quantity}[fit]'),
-                ('dd', f'd[2,t]{quantity}[fit]'),
-            ]
-        }
-        x['peak'] = data[f'{quantity}[peak]'].to_numpy(copy=True)
-        x['trough'] = data[f'{quantity}[trough]'].to_numpy(copy=True)
-
-        fig = make_subplots(
-            rows=3,
-            cols=1,
-            subplot_titles=[
-                f'<b>Time series for {name}</b>'
-                for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
-            ],
-        )
-
-        fig.update_layout(
-            width=640,
-            height=720,
-            margin=dict(l=40, r=40, t=60, b=40),
-            font=dict(
-                family=cfg_font.family,
-                size=cfg_font.size,
-                color='hsla(0, 100%, 0%, 1)',
-            ),
-            plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-            showlegend=cfg.plot.legend,
-            legend=dict(title='Time series'),
-        )
-
-        opt = dict(
-            linecolor='black',
-            mirror=True,  # adds border on right/top too
-            ticks='outside',
-            showgrid=True,
-            visible=True,
-            # range=[0, None], # FIXME: does not work!
-        )
-
-        for row in range(1, 3 + 1):
-            fig.update_xaxes(
-                title=f'Time    ({units["time"]})',
-                rangemode='tozero',
-                **opt,
-                row=row,
-                col=1,
-            )
-
-        for row, key, name in [
-            (1, quantity, quantity.title()),
-            (2, f'd[1,t]{quantity}[fit]', f'{symb}´(t)'),
-            (3, f'd[2,t]{quantity}[fit]', f'{symb}´´(t)'),
-        ]:
-            unit = units[key]
-            fig.update_yaxes(
-                title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1
-            )
-
-        special = [
-            SpecialPoints(name='peak', points=x['peak'], colour='blue', size=6, symbol='x'),
-            SpecialPoints(name='trough', points=x['trough'], colour='blue', size=6, symbol='x'),
-            # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
+    x = {
+        key: cv[key_] * data[key_].to_numpy(copy=True)
+        for key, key_ in [
+            ('orig', quantity),
+            ('fit', f'{quantity}[fit]'),
+            ('d', f'd[1,t]{quantity}[fit]'),
+            ('dd', f'd[2,t]{quantity}[fit]'),
         ]
-        add_plot_time_series(
-            fig,
-            name=None,
-            text='P [original]',
-            time=time,
-            values=x['orig'],
-            special=special,
-            mode='markers',
-            row=1,
-            col=1,
-        )
-        special = []
-        add_plot_time_series(
-            fig,
-            name=f'{symb} [fit]',
-            time=time,
-            values=x['fit'],
-            special=special,
-            row=1,
-            col=1,
-        )
-        special = []
-        add_plot_time_series(
-            fig,
-            name=f'(d/dt){symb} [fit]',
-            time=time,
-            values=x['d'],
-            special=special,
-            row=2,
-            col=1,
-        )
-        add_plot_time_series(
-            fig,
-            name=f'(d/dt)²{symb} [fit]',
-            time=time,
-            values=x['dd'],
-            special=special,
-            row=3,
+    }
+    x['peak'] = data[f'{quantity}[peak]'].to_numpy(copy=True)
+    x['trough'] = data[f'{quantity}[trough]'].to_numpy(copy=True)
+
+    fig = make_subplots(
+        rows=3,
+        cols=1,
+        subplot_titles=[
+            f'<b>Time series for {name}</b>'
+            for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
+        ],
+    )
+
+    fig.update_layout(
+        width=640,
+        height=720,
+        margin=dict(l=40, r=40, t=60, b=40),
+        font=dict(
+            family=cfg_font.family,
+            size=cfg_font.size,
+            color='hsla(0, 100%, 0%, 1)',
+        ),
+        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        showlegend=cfg.plot.legend,
+        legend=dict(title='Time series'),
+    )
+
+    opt = dict(
+        linecolor='black',
+        mirror=True,  # adds border on right/top too
+        ticks='outside',
+        showgrid=True,
+        visible=True,
+        # range=[0, None], # FIXME: does not work!
+    )
+
+    for row in range(1, 3 + 1):
+        fig.update_xaxes(
+            title=f'Time    ({units["time"]})',
+            rangemode='tozero',
+            **opt,
+            row=row,
             col=1,
         )
 
-        path = cfg.plot.path.__root__
-        if path is not None:
-            path = path.format(label=case.label, kind=f'{quantity}-time')
-            save_image(fig=fig, path=path)
+    for row, key, name in [
+        (1, quantity, quantity.title()),
+        (2, f'd[1,t]{quantity}[fit]', f'{symb}´(t)'),
+        (3, f'd[2,t]{quantity}[fit]', f'{symb}´´(t)'),
+    ]:
+        unit = units[key]
+        fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
 
-        figs[quantity] = fig
+    special = [
+        SpecialPoints(name='peak', points=x['peak'], colour='blue', size=6, symbol='x'),
+        SpecialPoints(name='trough', points=x['trough'], colour='blue', size=6, symbol='x'),
+        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
+    ]
+    add_plot_time_series(
+        fig,
+        name=None,
+        text='P [original]',
+        time=time,
+        values=x['orig'],
+        special=special,
+        mode='markers',
+        row=1,
+        col=1,
+    )
+    special = []
+    add_plot_time_series(
+        fig,
+        name=f'{symb} [fit]',
+        time=time,
+        values=x['fit'],
+        special=special,
+        row=1,
+        col=1,
+    )
+    special = []
+    add_plot_time_series(
+        fig,
+        name=f'(d/dt){symb} [fit]',
+        time=time,
+        values=x['d'],
+        special=special,
+        row=2,
+        col=1,
+    )
+    add_plot_time_series(
+        fig,
+        name=f'(d/dt)²{symb} [fit]',
+        time=time,
+        values=x['dd'],
+        special=special,
+        row=3,
+        col=1,
+    )
 
-    return figs['pressure'], figs['volume']
+    path = cfg.plot.path.__root__
+    if path is not None:
+        path = path.format(label=case.label, kind=f'{quantity}-time')
+        save_image(fig=fig, path=path)
+
+    return fig
 
 
 def step_output_loop_plot(
