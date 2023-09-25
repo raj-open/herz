@@ -15,7 +15,8 @@ Class | Method | HTTP request | Description
  - [AppConfig](.//Models/AppConfig.md)
  - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
- - [PolynomialCondition](.//Models/PolynomialCondition.md)
+ - [PolyDerCondition](.//Models/PolyDerCondition.md)
+ - [PolyIntCondition](.//Models/PolyIntCondition.md)
  - [PolynomialSetting](.//Models/PolynomialSetting.md)
 
 

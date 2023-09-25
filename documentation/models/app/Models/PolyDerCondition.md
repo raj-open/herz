@@ -1,10 +1,10 @@
-# PolynomialSetting
+# PolyDerCondition
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**degree** | [**Integer**](integer.md) | Degree of polynomial to be fitted. | [default to null]
-**conditions** | [**List**](oneOf&lt;PolyDerCondition,PolyIntCondition&gt;.md) | Conditions to force on fitted polynomial | [default to null]
+**derivative** | [**Integer**](integer.md) |  | [default to null]
+**time** | [**BigDecimal**](number.md) |  | [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

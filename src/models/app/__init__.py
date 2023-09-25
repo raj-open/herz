@@ -16,7 +16,8 @@ __all__ = [
     'AppInfo',
     'AppConfig',
     'PolynomialSetting',
-    'PolynomialCondition',
+    'PolyDerCondition',
+    'PolyIntCondition',
     'onb_conditions',
     'onb_spectrum',
 ]

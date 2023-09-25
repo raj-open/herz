@@ -1,10 +1,9 @@
-# PolynomialCondition
+# PolyIntCondition
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**derivative** | [**Integer**](integer.md) |  | [default to null]
-**time** | [**BigDecimal**](number.md) | Must be a value in &#x60;[0, 1]&#x60;. | [default to null]
+**times** | [**List**](number.md) |  | [default to null]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

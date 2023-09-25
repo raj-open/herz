@@ -82,17 +82,18 @@ components:
             Conditions to force on fitted polynomial
           type: array
           items:
-            $ref: "#/components/schemas/PolynomialCondition"
+            oneOf:
+            - $ref: "#/components/schemas/PolyDerCondition"
+            - $ref: "#/components/schemas/PolyIntCondition"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # DATA TYPE - polynomial condition
+    # DATA TYPE - polynomial derivative condition
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PolynomialCondition:
+    PolyDerCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
 
-        - The `n`-th derivative at time point `t` (value in in `[0, 1]`)
-          must be `0`.
+        - The `n`-th derivative at time point `t` must be `0`.
       type: object
       required:
         - derivative
@@ -102,9 +103,26 @@ components:
           type: integer
           minimum: 0
         time:
-          description: |-
-            Must be a value in `[0, 1]`.
           type: number
-          minimum: 0.
-          maximum: 1.
+          # minimum: 0.
+          # maximum: 1.
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - polynomial integral condition
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PolyIntCondition:
+      description: |-
+        A condition to force on fitted polynomial of the form:
+
+        - The integral from `t1` to `t2` must be `0`.
+      type: object
+      required:
+        - times
+      properties:
+        times:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
       additionalProperties: false
