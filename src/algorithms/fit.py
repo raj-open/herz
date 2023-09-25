@@ -35,7 +35,7 @@ def fit_poly_cycles(
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
     average: bool = False,
-) -> tuple[np.ndarray, list[float]]:
+) -> list[tuple[list[float], float, float, float, float]]:
     '''
     Fits 'certain' polynomials to cycles in such a way,
     that special attributes can be extracted.
@@ -46,20 +46,19 @@ def fit_poly_cycles(
     # fit each cycle
     N = len(t)
     x_fit = np.zeros(shape=(N,), dtype=float)
-    coeffs = [[]] * len(windows)
+    infos = [[]] * len(windows)
     # due to normalisation, force the following condition
     conds = conds[:]
     conds.append(PolyDerCondition(derivative=0, time=0))
     conds.append(PolyDerCondition(derivative=0, time=1))
     for k, (i1, i2) in enumerate(windows):
         # scale time
-        tt, _ = normalise_to_unit_interval(t[i1:i2])
+        tt, T = normalise_to_unit_interval(t[i1:i2])
         # remove drift
         c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1)
         # compute fitted curve
-        xx_fit, coeffs[k] = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
-        # undo effects of drift-removal
-        x_fit[i1:i2] = c + m * tt + s * xx_fit
+        coeff = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
+        infos[k] = (coeff, T, c, m, s)
 
     # --------------------------------
     # NOTE:
@@ -93,20 +92,14 @@ def fit_poly_cycles(
     # of the coefficients of the p⁽ᵏ⁾.
     # --------------------------------
     if average:
-        coeff = np.mean(np.asarray(coeffs), axis=0).tolist()
-        for k, (i1, i2) in enumerate(windows):
-            # scale time
-            tt, _ = normalise_to_unit_interval(t[i1:i2])
-            # remove drive
-            c, m, s, _ = normalise_interpolated_drift(tt, x[i1:i2], T=1)
-            # compute fitted curve
-            xx_fit = poly(tt, *coeff)
-            # undo effects of drift-removal
-            x_fit[i1:i2] = c + m * tt + s * xx_fit
+        coeff_ = np.mean(np.asarray([coeff for coeff, _, _, _, _ in infos]), axis=0).tolist()
+        T_ = np.median(np.asarray([T for _, T, _, _, _ in infos]), axis=0).tolist()
+        c_ = np.median(np.asarray([c for _, _, c, _, _ in infos]), axis=0).tolist()
+        m_ = np.median(np.asarray([m for _, _, _, m, _ in infos]), axis=0).tolist()
+        s_ = np.median(np.asarray([s for _, _, _, _, s in infos]), axis=0).tolist()
+        infos.append((coeff_, T_, c_, m_, s_))
 
-        coeffs = [coeff]
-
-    return x_fit, coeffs
+    return infos
 
 
 def fit_poly_cycle(
@@ -114,7 +107,7 @@ def fit_poly_cycle(
     x: np.ndarray,
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-) -> tuple[np.ndarray, list[float]]:
+) -> list[float]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
     that special attributes can be extracted.
@@ -132,9 +125,7 @@ def fit_poly_cycle(
     '''
     Q = onb_conditions(deg=deg, conds=conds)
     coeff = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
-    x_fit = poly(t, *coeff)
-
-    return x_fit, coeff
+    return coeff
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -21,6 +21,7 @@ __all__ = [
     'get_real_polynomial_roots',
     'derivative_coefficients',
     'integral_coefficients',
+    'print_poly',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -83,3 +84,46 @@ def get_real_polynomial_roots(*coeff: float) -> list[float]:
     # C = sum([ abs(c) for c in coeff ]) or 1.
     # roots = [ t for t in roots if abs(poly_single(t, *coeff)) < C*FLOAT_ERR ]
     return roots
+
+
+def print_poly(coeff: list[float], var: str = 'X', unitise: bool = True) -> str:
+    monoms = [(k, c) for k, c in enumerate(coeff) if c != 0]
+    expr = '0'
+
+    def coeff_pow_f(obj: tuple[int, float]) -> str:
+        k, c = obj
+        c_str = f'{c:.4f}'
+        if k == 0:
+            return c_str
+        if k == 1:
+            return f'{c_str} * {var}'
+        return f'{c_str} * {var}^{k}'
+
+    def coeff_pow_g(obj: tuple[int, float]) -> str:
+        k, c = obj
+        c_str = f'{c:.4g}'
+        if k == 0:
+            return c_str
+        if k == 1:
+            return f'{c_str} * {var}'
+        return f'{c_str} * {var}^{k}'
+
+    match len(monoms):
+        case 0:
+            expr = '0'
+        case 1:
+            expr = coeff_pow_g(monoms[-1])
+        case _:
+            (n, c_leading) = monoms[-1]
+            if unitise:
+                expr = ' + '.join([coeff_pow_f((k, c / c_leading)) for k, c in monoms])
+                match c_leading:
+                    case 1:
+                        expr = expr
+                    case -1:
+                        expr = '-' + expr
+                    case _:
+                        expr = f'{c_leading:.4g} * ({expr})'
+            else:
+                expr = ' + '.join([coeff_pow_g(obj) for obj in monoms])
+    return expr

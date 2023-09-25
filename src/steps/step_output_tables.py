@@ -52,15 +52,15 @@ def step_output_single_table(
     columns = list(data.columns)
     quantities = [col for col in cfg.quantities if col.key in columns]
 
-    table = pd.DataFrame(
-        {col.key: cv[col.key] * data[col.key] for col in quantities}
-    ).astype({col.key: col.type.value for col in quantities})
+    table = pd.DataFrame({col.key: cv[col.key] * data[col.key] for col in quantities}).astype(
+        {col.key: col.type.value for col in quantities}
+    )
 
     with open(path, 'w') as fp:
         sep = cfg.table.sep
         for header in [
             [col.name for col in quantities],
-            [print_unit(col.unit, ascii=False) or '' for col in quantities]
+            [print_unit(col.unit, ascii=False) or '' for col in quantities],
         ]:
             fp.write(sep.join(header))
             fp.write('\n')
