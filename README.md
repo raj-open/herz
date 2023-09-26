@@ -4,9 +4,9 @@ This repository contains code to extract time-series data for pressure and volum
 align these and produce pressure-volume data series and plots.
 Methods are developed in [^Heerdt2019].
 
-## Examples ##
+## Examples and technical notes ##
 
-See [examples](examples).
+See [examples](examples) and [notes](documentation/README.md).
 
 ## System requirements ##
 
