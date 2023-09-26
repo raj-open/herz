@@ -14,18 +14,20 @@ The following is an equivalent reformulation of the definitions in [Gaertner, et
    Assume without loss of generality
    that this is defined on a time interval $[0, T]$
 
-The following points are listed out in chronological within such a cycle:
+The following points are listed out in chronological order ("modulo" the peak) within such a cycle:
 
 | Symbol | Characterisation | Interpretation |
 | :----- | :--------------- | :------------- |
-| **`esp`** | 1st local minimum of $P^{\prime\prime}$ | Just before closure of pulmonary valve |
-| **`anti-epad`** | 1st local (and absolut) minimum of $P^{\prime}$ | onset of isovolumetric relaxation phase |
-| **`sdp`** | 1st local maximum of $P^{\prime\prime}$ after `anti-epad` | Start of diastolic phase. Just before opening of tricuspid valve. |
-| **`dia`** | First local minimum of $P$ after `anti-epad` (and `sdp`) | Low point of RV diastolic phase |
-| **`edp`** | 2nd local (and absolute) maximum of $P^{\prime\prime}$ after `anti-epad` (and `dia`) | End of RV diastolic phase |
-| **`epad`** | 2nd local (and absolute) maximum of $P^{\prime}$ | Coincidence of RV- and pulmonary arterial pressure |
-| **`eivc`** | First local minimum of $P^{\prime\prime}$ after `epad` | End of isovolumentric contractions, pulmonary valve is opened. |
-| **`sys`** | Local maximum of $P$ after `epad`. Also: global maximum ('peaks') of $P$, occurs at $t=0$ and $t=T$. | High point of RV-systolic phase |
+| **`dia`** | The "first" local minimum of $P$ (after peak). | First low point of RV diastolic phase |
+| **`edp`** | Local maximum of $P^{\prime\prime}$ after `dia`. | End of RV diastolic phase |
+| **`epad`** | Local (and absolute) maximum of $P^{\prime}$ after `edp`. | Coincidence of RV- and pulmonary arterial pressure |
+| **`eivc`** | Local minimum of $P^{\prime\prime}$ after `epad`. | End of iso-volumetric contractions, pulmonary valve is opened. |
+| --- | --- | --- |
+| **`sys`** | Global maximum ('peaks') of $P$, occurs at $t=0$ and $t=T$. | High point of RV-systolic phase |
+| --- | --- | --- |
+| **`esp`** | Local minimum of $P^{\prime\prime}$ after peak. | Just before closure of pulmonary valve |
+| **`anti-epad`** | Local (and absolute) minimum of $P^{\prime}$ after `esp`. | Onset of isovolumetric relaxation phase |
+| **`sdp`** | Local maximum of $P^{\prime\prime}$ after `anti-epad`. | Start of diastolic phase. Just before opening of tricuspid valve. |
 
 ## Definition of special points for $V(t)$ ##
 
