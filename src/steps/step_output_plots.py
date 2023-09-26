@@ -61,7 +61,21 @@ def step_output_time_plot_ideal(
 
     # define a time axis for [0, T], include endpoints:
     T = info.normalisation.period
-    time = np.linspace(start=0, stop=T, num=N + 1, endpoint=True)
+
+    if 'split' in points:
+        t_split = points['split'][0]
+        shift_times = lambda t: np.concatenate(
+            [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split]]
+        )
+        shift_indices = lambda t: np.concatenate([t[t >= t_split], t[t < t_split]])
+        time0 = np.linspace(start=0, stop=T, num=N, endpoint=False)
+        time = time0[:]
+        time = shift_times(time)
+    else:
+        shift_times = lambda t: t
+        shift_indices = lambda t: t
+        time0 = np.linspace(start=0, stop=T, num=N + 1, endpoint=True)
+        time = time0[:]
 
     fig = make_subplots(
         rows=3,
@@ -97,7 +111,7 @@ def step_output_time_plot_ideal(
 
     t_sp = np.concatenate([[0, T]] + list(points.values()))
     t_sp = np.asarray(list(set(t_sp.tolist())))  # unique elements
-    t_sp = cv['time'] * t_sp  # convert units
+    t_sp = cv['time'] * shift_times(t_sp)  # convert units
     for row in range(1, 3 + 1):
         fig.update_xaxes(
             title=f'Time    ({units["time"]})',
@@ -123,11 +137,15 @@ def step_output_time_plot_ideal(
         fig,
         name=f'{symb} [fit]',
         time=cv['time'] * time,
-        values=poly(time, *q),
+        values=poly(shift_indices(time0), *q),
         row=1,
         col=1,
         markers={
-            key: (cv['time'] * ts, poly(ts, *q), cfg_markers.get(key, None))
+            key: (
+                cv['time'] * shift_times(ts),
+                poly(shift_indices(ts), *q),
+                cfg_markers.get(key, None),
+            )
             for key, ts in points.items()
         },
         showlegend_markers=True,
@@ -136,11 +154,15 @@ def step_output_time_plot_ideal(
         fig,
         name=f'(d/dt){symb} [fit]',
         time=cv['time'] * time,
-        values=poly(time, *dq),
+        values=poly(shift_indices(time0), *dq),
         row=2,
         col=1,
         markers={
-            key: (cv['time'] * ts, poly(ts, *dq), cfg_markers.get(key, None))
+            key: (
+                cv['time'] * shift_times(ts),
+                poly(shift_indices(ts), *dq),
+                cfg_markers.get(key, None),
+            )
             for key, ts in points.items()
         },
         showlegend_markers=False,
@@ -149,11 +171,15 @@ def step_output_time_plot_ideal(
         fig,
         name=f'(d/dt)²{symb} [fit]',
         time=cv['time'] * time,
-        values=poly(time, *ddq),
+        values=poly(shift_indices(time0), *ddq),
         row=3,
         col=1,
         markers={
-            key: (cv['time'] * ts, poly(ts, *ddq), cfg_markers.get(key, None))
+            key: (
+                cv['time'] * shift_times(ts),
+                poly(shift_indices(ts), *ddq),
+                cfg_markers.get(key, None),
+            )
             for key, ts in points.items()
         },
         showlegend_markers=False,
@@ -470,6 +496,8 @@ def add_plot_time_series(
 
     for key, (time_, values_, settings) in markers.items():
         settings = settings or MarkerSettings(name=key, size=6, symbol='x')
+        if settings.ignore:
+            continue
         fig.append_trace(
             pgo.Scatter(
                 name=settings.name,

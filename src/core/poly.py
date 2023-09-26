@@ -219,15 +219,11 @@ def get_critical_points(
         return []
 
     # remove duplicates
-    info = []
-    C = 2 * max([abs(t0) for t0 in t_crit]) + 1
-    delta = np.diff([-C] + t_crit + [C])  # difference between each point and previous neighbour
-    indices = characteristic_to_where(delta >= MACHINE_EPS)
-    for k1, k2 in zip(indices, indices[1:]):
-        info.append((t_crit[k1], k2 - k1))
+    info = recognise_duplicate_times(t_crit)
 
     # compute points between critical points
     t_crit = [t0 for t0, _ in info]
+    C = 2 * max([abs(t0) for t0 in t_crit]) + 1
     delta = np.diff([-C] + t_crit + [C])
     t_between = [t0 - dt / 2 for (t0, dt) in zip(t_crit + [C], delta)]
     t_grid = [t_between[0]] + flatten(*list(zip(t_crit, t_between[1:])))
@@ -324,7 +320,6 @@ def get_critical_points_bounded(
     t_min: float,
     t_max: float,
     dp: Optional[list[float]] = None,
-    only_min_max: bool = False,
 ) -> list[tuple[float, int, CriticalPoint]]:
     results = get_critical_points(p=p, dp=dp)
 
@@ -370,19 +365,5 @@ def get_critical_points_bounded(
     kind = results[-1][-1]
     if kind == CriticalPoint.UNKNOWN:
         results = results[:-1]
-
-    # remove non-min/max
-    if only_min_max:
-        results = [
-            (t0, y0, v, kind)
-            for (t0, y0, v, kind) in results
-            if kind
-            in [
-                CriticalPoint.LOCAL_MINIMUM,
-                CriticalPoint.LOCAL_MAXIMUM,
-                CriticalPoint.MINIMUM,
-                CriticalPoint.MAXIMUM,
-            ]
-        ]
 
     return results

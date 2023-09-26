@@ -52,43 +52,45 @@ settings:
           time: 1.
   # settings for plotting points, see <https://plotly.com/python/marker-style>.
   markers:
+    split:
+      ignore: true
+    sys:
+      name: "systolic"
+      size: 6
+      colour: red
+      symbol: "circle"
+    eivc:
+      name: "eivc"
+      size: 6
+      colour: red
+      symbol: "triangle-up-open"
     esp:
       name: "esp"
       size: 6
       colour: red
-      symbol: "triangle-up-open"
-    anti-epad:
-      name: "anti-epad"
-      size: 6
-      colour: black
-      symbol: "square"
-    sdp:
-      name: "sdp"
-      size: 6
-      colour: black
-      symbol: "triangle-up-open"
-    dia:
-      name: "dia"
-      size: 6
-      colour: blue
-      symbol: "x"
-    edp:
-      name: "edp"
-      size: 6
-      colour: black
       symbol: "triangle-up"
     epad:
       name: "epad"
       size: 6
       colour: black
       symbol: "square-open"
-    eivc:
-      name: "eivc"
+    anti-epad:
+      name: "anti-epad"
       size: 6
-      colour: red
-      symbol: "triangle-up"
-    sys:
-      name: "systolic"
+      colour: black
+      symbol: "square"
+    dia:
+      name: "diastolic"
       size: 6
       colour: blue
-      symbol: "circle"
+      symbol: "x"
+    sdp:
+      name: "sdp"
+      size: 6
+      colour: blue
+      symbol: "triangle-up-open"
+    edp:
+      name: "edp"
+      size: 6
+      colour: blue
+      symbol: "triangle-up"

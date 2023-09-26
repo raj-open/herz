@@ -23,6 +23,7 @@ __all__ = [
     'where_to_characteristic',
     'characteristic_to_where',
     'normalise_to_unit_interval',
+    'recognise_duplicate_times',
     'integral_interpolated',
     'innerproduct_interpolated',
     'norm_interpolated',
@@ -83,6 +84,20 @@ def sign_normalised_difference(x1: float, x2: float, eps: MACHINE_EPS) -> Litera
     if r < -eps:
         return -1
     return 0
+
+
+def recognise_duplicate_times(t: list[float]) -> list[tuple[float, int]]:
+    '''
+    Determines if certain points occur "too closely" together,
+    and views these as duplicates.
+    '''
+    info = []
+    C = 2 * max([abs(tt) for tt in t] + [0]) + 1
+    delta = np.diff([-C] + t + [C])  # difference between each point and previous neighbour
+    indices = characteristic_to_where(delta >= MACHINE_EPS)
+    for k1, k2 in zip(indices, indices[1:]):
+        info.append((t[k1], k2 - k1))
+    return info
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

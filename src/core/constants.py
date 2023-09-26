@@ -35,4 +35,4 @@ class CriticalPoint(Enum):
     MAXIMUM = 2
     LOCAL_MINIMUM = -1
     LOCAL_MAXIMUM = 1
-    INFLECTION = 0
+    INFLECTION = 5

@@ -3,6 +3,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ignore** | [**Boolean**](boolean.md) |  | [optional] [default to false]
 **name** | [**String**](string.md) |  | [optional] [default to null]
 **size** | [**Integer**](integer.md) |  | [optional] [default to 2]
 **colour** | [**String**](string.md) |  | [optional] [default to null]

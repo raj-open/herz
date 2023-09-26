@@ -149,6 +149,9 @@ components:
       type: object
       required: []
       properties:
+        ignore:
+          type: boolean
+          default: false
         name:
           type: string
           default: null

@@ -40,19 +40,17 @@ def recognise_special_points_pressure(info: FittedInfo) -> dict[str, list[float]
         dx[k + 1] = get_derivative_coefficients(dx[k])
     # compute and classify critical points of derivatives:
     crits = [
-        get_critical_points_bounded(
-            p=dx[k],
-            dp=dx[k + 1],
-            t_min=0.0,
-            t_max=1.0,
-            only_min_max=True,
-        )
+        get_critical_points_bounded(p=dx[k], dp=dx[k + 1], t_min=0.0, t_max=1.0)
         for k in range(n_der + 1)
     ]
-    crits_localmin, crits_min, crits_localmax, crits_max = split_critical_points(crits)
+    crits_localmin = filter_kinds(crits, [CriticalPoint.LOCAL_MINIMUM, CriticalPoint.MINIMUM])
+    crits_min = filter_kinds(crits, [CriticalPoint.MINIMUM])
+    crits_localmax = filter_kinds(crits, [CriticalPoint.LOCAL_MAXIMUM, CriticalPoint.MAXIMUM])
+    crits_max = filter_kinds(crits, [CriticalPoint.MAXIMUM])
 
     # RECOGNISE sys:
-    times['sys'] = [0.0, 1.0]
+    # times['sys'] = [0.0, 1.0]
+    times['sys'] = [0.0]
     t0 = 0.0
 
     # RECOGNISE dia:
@@ -93,6 +91,10 @@ def recognise_special_points_pressure(info: FittedInfo) -> dict[str, list[float]
     t0 = crit[0][0]
     times['sdp'] = [t0]
 
+    # RECOGNISE start-end of cycle (for plotting):
+    t_split = (times['edp'][0] + times['epad'][0]) / 2
+    times['split'] = [t_split]
+
     return times
 
 
@@ -108,43 +110,10 @@ def recognise_special_points_volume(info: FittedInfo) -> dict[str, list[float]]:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def split_critical_points(
-    crits: list[list[tuple[float, int, CriticalPoint]]],
-) -> tuple[
-    list[list[tuple[float, int, CriticalPoint]]],
-    list[list[tuple[float, int, CriticalPoint]]],
-    list[list[tuple[float, int, CriticalPoint]]],
-    list[list[tuple[float, int, CriticalPoint]]],
-]:
-    crits_localmin = [
-        [
-            (t0, y0, v, kind)
-            for t0, y0, v, kind in crit
-            if kind in [CriticalPoint.LOCAL_MINIMUM, CriticalPoint.MINIMUM]
-        ]
-        for crit in crits
-    ]
-
-    crits_min = [
-        [(t0, y0, v, kind) for t0, y0, v, kind in crit if kind == CriticalPoint.MINIMUM]
-        for crit in crits
-    ]
-
-    crits_localmax = [
-        [
-            (t0, y0, v, kind)
-            for t0, y0, v, kind in crit
-            if kind in [CriticalPoint.LOCAL_MAXIMUM, CriticalPoint.MAXIMUM]
-        ]
-        for crit in crits
-    ]
-
-    crits_max = [
-        [(t0, y0, v, kind) for t0, y0, v, kind in crit if kind == CriticalPoint.MAXIMUM]
-        for crit in crits
-    ]
-
-    return crits_localmin, crits_min, crits_localmax, crits_max
+def filter_kinds(
+    crits: list[list[tuple[float, int, CriticalPoint]]], kinds: list[CriticalPoint]
+) -> list[list[tuple[float, int, CriticalPoint]]]:
+    return [[(t0, y0, v, kind) for t0, y0, v, kind in crit if kind in kinds] for crit in crits]
 
 
 def filter_times(
