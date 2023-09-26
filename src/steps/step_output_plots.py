@@ -37,7 +37,8 @@ __all__ = [
 
 def step_output_time_plot_ideal(
     case: UserCase,
-    info: FittedInfo,
+    data: pd.DataFrame,
+    fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     points: dict[str, list[float]],
     quantity: str,
     symb: str,
@@ -50,7 +51,11 @@ def step_output_time_plot_ideal(
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
 
+    # normalise data
+    data = get_renormalised_data(data, fitinfos, quantity=quantity)
+
     # rescale normalised polynomial + points:
+    _, info = fitinfos[-1]
     q, points = get_rescaled_polynomial_and_points(info, points)
     q = [cv[quantity] * xx for xx in q]
     dq = get_derivative_coefficients(q)
@@ -71,6 +76,8 @@ def step_output_time_plot_ideal(
         time0 = np.linspace(start=0, stop=T, num=N, endpoint=False)
         time = time0[:]
         time = shift_times(time)
+        t_data = data['time'].to_numpy(copy=True)
+        data['time'] = t_data - t_split + T * (t_data < t_split)
     else:
         shift_times = lambda t: t
         shift_indices = lambda t: t
@@ -135,6 +142,19 @@ def step_output_time_plot_ideal(
 
     add_plot_time_series(
         fig,
+        name=f'{quantity.title()}',
+        text=f'{quantity} [renormalised]',
+        time=cv['time'] * data['time'],
+        values=cv[quantity] * data[quantity],
+        mode='markers',
+        row=1,
+        col=1,
+        markers={},
+        showlegend_markers=False,
+    )
+
+    add_plot_time_series(
+        fig,
         name=f'{symb} [fit]',
         time=cv['time'] * time,
         values=poly(shift_indices(time0), *q),
@@ -190,7 +210,7 @@ def step_output_time_plot_ideal(
         path = path.format(label=case.label, kind=f'{quantity}-time-fit')
         save_image(fig=fig, path=path)
 
-    return
+    return fig
 
 
 def step_output_time_plot(

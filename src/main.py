@@ -53,24 +53,24 @@ def enter(path: str, *_):
                 data = step_removed_marked_sections(case, data)
 
             log_progress(f'''FIT CURVE {quantity}''', 2, 6)
-            data, infos = step_fit_curve(case, data, quantity=quantity)
+            data, fitinfos = step_fit_curve(case, data, quantity=quantity)
 
             log_progress(f'''CLASSIFY POINTS {quantity}''', 3, 6)
-            points_cycles, points0 = step_recognise_points(case, data, infos, quantity=quantity)
+            _, points0 = step_recognise_points(case, data, fitinfos, quantity=quantity)
 
             log_progress(f'''OUTPUT TABLES {quantity}''', 4, 6)
             step_output_single_table(case, data, quantity=quantity)
 
             log_progress('''OUTPUT TIME PLOTS''', 5, 6)
-            plt = step_output_time_plot(case, data, points_cycles, quantity=quantity, symb=symb)
             plt = step_output_time_plot_ideal(
-                case, infos[-1], points0, quantity=quantity, symb=symb
+                case, data, fitinfos, points0, quantity=quantity, symb=symb
             )
             # plt.show()
 
-            coeff0 = infos[-1].coefficients
-            T, c, m, s = get_normalisation_params(infos[-1])
-            coeff1, points1 = get_rescaled_polynomial_and_points(infos[-1], points0)
+            _, info = fitinfos[-1]
+            coeff0 = info.coefficients
+            T, c, m, s = get_normalisation_params(info)
+            coeff1, points1 = get_rescaled_polynomial_and_points(info, points0)
 
             datas[quantity] = data
             coeffs[quantity] = coeff1

@@ -32,7 +32,7 @@ def step_fit_curve(
     data: pd.DataFrame,
     quantity: str,
     n_der: int = 2,
-) -> tuple[pd.DataFrame, list[FittedInfo]]:
+) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
     Fits polynomial to cycles in time-series,
     forcing certain conditions on the `n`th-derivatives
@@ -45,34 +45,31 @@ def step_fit_curve(
     t = data['time'].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
 
-    # determine start and end of each cycle
-    windows = cycles_to_windows(cycles)
-
     # fit polynomial
     x = data[quantity].to_numpy(copy=True)
     mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
-    infos = fit_poly_cycles(
+    results = fit_poly_cycles(
         t=t,
         x=x,
         cycles=cycles,
         deg=cfg_poly.degree,
         conds=cfg_poly.conditions,
-        average=mode_average,
     )
 
     # compute derivatives
     if mode_average:
-        coeff = infos[-1].coefficients
-        coeffs = [coeff[:] for _ in windows]
+        _, info_av = results[-1]
+        coeffs = [info_av.coefficients[:] for _, _ in results[:-1]]
     else:
-        coeffs = [coeff[:] for coeff, _, _, _, _ in infos]
+        coeffs = [info.coefficients[:] for _, info in results[:-1]]
+
     for n in range(n_der + 1):
         # loop over all time-subintervals:
-        for k, (i1, i2) in enumerate(windows):
+        for k, ((i1, i2), info) in enumerate(results[:-1]):
             # get coefficients for (n-1)th derivative polynomial for cycle k:
             coeff = coeffs[k]
             # get drift-values:
-            T, c, m, s = get_normalisation_params(infos[k])
+            T, c, m, s = get_normalisation_params(info)
             # scale time
             tt = (t[i1:i2] - t[i1]) / T
             # compute nth-derivative of fitted polynom to normalise cycle
@@ -96,4 +93,4 @@ def step_fit_curve(
             case _:
                 data[f'd[{n},t]{quantity}[fit]'] = x
 
-    return data, infos
+    return data, results

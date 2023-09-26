@@ -5,6 +5,7 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from ...thirdparty.data import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
 
@@ -19,6 +20,7 @@ __all__ = [
     'get_normalisation_params',
     'get_rescaled_polynomial',
     'get_rescaled_polynomial_and_points',
+    'get_renormalised_data',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,3 +76,36 @@ def get_rescaled_polynomial_and_points(
     T = info.normalisation.period
     points = {key: [T * tt for tt in ts] for key, ts in points.items()}
     return coeff, points
+
+
+def get_renormalised_data(
+    data: pd.DataFrame,
+    fitinfos: list[tuple[tuple[int, int], FittedInfo]],
+    quantity: str,
+) -> pd.DataFrame:
+    t_new = []
+    x_new = []
+    t = data['time'].to_numpy(copy=True)
+    x = data[quantity].to_numpy(copy=True)
+    # get common parameters
+    _, info0 = fitinfos[-1]
+    T0, c0, m0, s0 = get_normalisation_params(info0)
+    # renormalise all cycles
+    for (i1, i2), info in fitinfos[:-1]:
+        T, c, m, s = get_normalisation_params(info)
+        # normalise time and points for cycle
+        # NOTE: normalise t, then x!
+        tt = (t[i1:i2] - t[i1]) / T
+        xx = (x[i1:i2] - (c + m * tt)) / s
+        # unnormlalise based on common parameters
+        # NOTE: unnormalise x, then t!
+        xx = c0 + m0 * tt + s0 * xx
+        tt = T0 * tt
+        # store
+        t_new += tt.tolist()
+        x_new += xx.tolist()
+    # store in new data structure
+    data = pd.DataFrame({'time': t_new, quantity: x_new}).astype(
+        {'time': 'float', quantity: 'float'}
+    )
+    return data
