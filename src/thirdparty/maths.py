@@ -15,6 +15,8 @@ from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
 
+from typing import Iterable
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MODIFICATIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -77,21 +79,31 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
     return X
 
 
+def closest_index(x: float, points: Iterable, init: int = 0) -> int:
+    try:
+        dist = np.abs(np.asarray(points) - x)
+        index = init + dist.argmin()
+    except:
+        index = -1
+    return index
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'closest_index',
     'findpeaks',
     'lmfit',
     'math',
+    'nPr',
+    'normalised_order_statistics',
     'np',
     'random',
-    'normalised_order_statistics',
     'remove_outliers',
     'sp',
     'spla',
     'spo',
     'sps',
-    'nPr',
 ]

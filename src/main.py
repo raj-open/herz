@@ -35,28 +35,33 @@ def enter(path: str, *_):
 
     for case in config.CASES:
         datas = dict()
+        classifieds = dict()
         coeffs = dict()
-        Ts = dict()
         log_progress(f'''RUN CASE {case.label}''', -1, 5)
 
         for quantity, symb, cfg_data, ext in [
             ('pressure', 'P', case.data.pressure, 'peak'),
             ('volume', 'V', case.data.volume, 'trough'),
         ]:
-            log_progress(f'''READ DATA {quantity}''', 0, 5)
+            log_progress(f'''READ DATA {quantity}''', 0, 6)
             data = step_read_data(cfg_data, quantity)
             data = step_normalise_data(case, data, quantity=quantity)
 
-            log_progress(f'''PROCESS DATA {quantity}''', 1, 5)
+            log_progress(f'''RECOGNISE CYCLES {quantity}''', 1, 6)
             data = step_recognise_cycles(case, data, quantity=quantity, shift=ext)
             if case.process.cycles.remove_bad:
                 data = step_removed_marked_sections(case, data)
+
+            log_progress(f'''FIT CURVE {quantity}''', 2, 6)
             data, infos = step_fit_curve(case, data, quantity=quantity)
 
-            log_progress(f'''OUTPUT TABLES {quantity}''', 2, 5)
+            log_progress(f'''CLASSIFY POINTS {quantity}''', 3, 6)
+            classified = step_recognise_special_points(case, data, infos, quantity=quantity)
+
+            log_progress(f'''OUTPUT TABLES {quantity}''', 4, 6)
             step_output_single_table(case, data, quantity=quantity)
 
-            log_progress('''OUTPUT TIME PLOTS''', 3, 5)
+            log_progress('''OUTPUT TIME PLOTS''', 5, 6)
             plt = step_output_time_plot(case, data, quantity=quantity, symb=symb)
             # plt.show()
 
@@ -65,8 +70,8 @@ def enter(path: str, *_):
             coeff_rescaled = get_rescaled_polynomial(infos[-1])
 
             datas[quantity] = data
-            Ts[quantity] = T
             coeffs[quantity] = coeff
+            classifieds[quantity] = classified
             log_info(
                 dedent(
                     f'''
