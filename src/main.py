@@ -56,25 +56,26 @@ def enter(path: str, *_):
             data, infos = step_fit_curve(case, data, quantity=quantity)
 
             log_progress(f'''CLASSIFY POINTS {quantity}''', 3, 6)
-            points_cycles, points_normalised = step_recognise_points(
-                case, data, infos, quantity=quantity
-            )
+            points_cycles, points0 = step_recognise_points(case, data, infos, quantity=quantity)
 
             log_progress(f'''OUTPUT TABLES {quantity}''', 4, 6)
             step_output_single_table(case, data, quantity=quantity)
 
             log_progress('''OUTPUT TIME PLOTS''', 5, 6)
             plt = step_output_time_plot(case, data, points_cycles, quantity=quantity, symb=symb)
+            plt = step_output_time_plot_ideal(
+                case, infos[-1], points0, quantity=quantity, symb=symb
+            )
             # plt.show()
 
-            coeff = infos[-1].coefficients
+            coeff0 = infos[-1].coefficients
             T, c, m, s = get_normalisation_params(infos[-1])
-            coeff_rescaled = get_rescaled_polynomial(infos[-1])
-            points_unnormalised = {key: T * tt for key, tt in points_normalised.items()}
+            coeff1, points1 = get_rescaled_polynomial_and_points(infos[-1], points0)
 
             datas[quantity] = data
-            coeffs[quantity] = coeff_rescaled
-            points[quantity] = points_unnormalised
+            coeffs[quantity] = coeff1
+            points[quantity] = points1
+
             log_info(
                 dedent(
                     f'''
@@ -89,12 +90,12 @@ def enter(path: str, *_):
 
                 Fitted Polynomial for normalised cycle of {quantity}:
 
-                    {symb}₀(t) = {print_poly(coeff, var='t', unitise=True)}
+                    {symb}₀(t) = {print_poly(coeff0, var='t', unitise=True)}
 
                 Fitted Polynomial for cycle of {quantity} (not normalised, excecpt for 1.):
 
                     {symb}(t) = {c} + {m}·t/T + {s}·{symb}₀(t/T)
-                      = {print_poly(coeff_rescaled, var='t', unitise=True)}
+                      = {print_poly(coeff1, var='t', unitise=True)}
                 '''
                 )
             )

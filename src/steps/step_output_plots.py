@@ -16,6 +16,7 @@ from ..thirdparty.types import *
 from ..setup import config
 from ..setup.conversion import *
 from ..core.utils import *
+from ..core.poly import *
 from ..models.internal import *
 from ..models.user import *
 
@@ -26,11 +27,144 @@ from ..models.user import *
 __all__ = [
     'step_output_loop_plot',
     'step_output_time_plot',
+    'step_output_time_plot_ideal',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def step_output_time_plot_ideal(
+    case: UserCase,
+    info: FittedInfo,
+    points: dict[str, list[float]],
+    quantity: str,
+    symb: str,
+    N: int = 1000,
+) -> pgo.Figure:
+    cfg = case.output
+    cfg_font = cfg.plot.font
+    cfg_markers = config.MARKERS
+
+    cv = output_conversions(cfg.quantities)
+    units = output_units(cfg.quantities)
+
+    # rescale normalised polynomial + points:
+    q, points = get_rescaled_polynomial_and_points(info, points)
+    q = [cv[quantity] * xx for xx in q]
+    dq = get_derivative_coefficients(q)
+    ddq = get_derivative_coefficients(dq)
+
+    # convert everything to numpy-arrays for ease of computation
+    points = {key: np.asarray(ts) for key, ts in points.items()}
+
+    # define a time axis for [0, T], include endpoints:
+    T = info.normalisation.period
+    time = np.linspace(start=0, stop=T, num=N + 1, endpoint=True)
+
+    fig = make_subplots(
+        rows=3,
+        cols=1,
+        subplot_titles=[
+            f'<b>Time series for {name} (fitted, single cycle)</b>'
+            for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
+        ],
+    )
+
+    fig.update_layout(
+        width=480,
+        height=720,
+        margin=dict(l=40, r=40, t=60, b=40),
+        font=dict(
+            family=cfg_font.family,
+            size=cfg_font.size,
+            color='hsla(0, 100%, 0%, 1)',
+        ),
+        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        showlegend=cfg.plot.legend,
+        legend=dict(title='Special points'),
+    )
+
+    opt = dict(
+        linecolor='black',
+        mirror=True,  # adds border on right/top too
+        ticks='outside',
+        showgrid=True,
+        visible=True,
+        # range=[0, None], # FIXME: does not work!
+    )
+
+    t_sp = np.concatenate([[0, T]] + list(points.values()))
+    t_sp = np.asarray(list(set(t_sp.tolist())))  # unique elements
+    t_sp = cv['time'] * t_sp  # convert units
+    for row in range(1, 3 + 1):
+        fig.update_xaxes(
+            title=f'Time    ({units["time"]})',
+            rangemode='tozero',
+            **opt,
+            row=row,
+            col=1,
+            range=[-0.1 * cv['time'] * T + 0, 1.1 * cv['time'] * T],
+            tickvals=t_sp,
+            ticktext=[f'{t:.3g}' for t in t_sp],
+            tickangle=90,
+        )
+
+    for row, key, name in [
+        (1, quantity, quantity.title()),
+        (2, f'd[1,t]{quantity}[fit]', f'{symb}´(t)'),
+        (3, f'd[2,t]{quantity}[fit]', f'{symb}´´(t)'),
+    ]:
+        unit = units[key]
+        fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
+
+    add_plot_time_series(
+        fig,
+        name=f'{symb} [fit]',
+        time=cv['time'] * time,
+        values=poly(time, *q),
+        row=1,
+        col=1,
+        markers={
+            key: (cv['time'] * ts, poly(ts, *q), cfg_markers.get(key, None))
+            for key, ts in points.items()
+        },
+        showlegend_markers=True,
+    )
+    add_plot_time_series(
+        fig,
+        name=f'(d/dt){symb} [fit]',
+        time=cv['time'] * time,
+        values=poly(time, *dq),
+        row=2,
+        col=1,
+        markers={
+            key: (cv['time'] * ts, poly(ts, *dq), cfg_markers.get(key, None))
+            for key, ts in points.items()
+        },
+        showlegend_markers=False,
+    )
+    add_plot_time_series(
+        fig,
+        name=f'(d/dt)²{symb} [fit]',
+        time=cv['time'] * time,
+        values=poly(time, *ddq),
+        row=3,
+        col=1,
+        markers={
+            key: (cv['time'] * ts, poly(ts, *ddq), cfg_markers.get(key, None))
+            for key, ts in points.items()
+        },
+        showlegend_markers=False,
+    )
+
+    path = cfg.plot.path.__root__
+    if path is not None:
+        path = path.format(label=case.label, kind=f'{quantity}-time-fit')
+        save_image(fig=fig, path=path)
+
+    return
 
 
 def step_output_time_plot(
@@ -64,8 +198,6 @@ def step_output_time_plot(
             ('dd', f'd[2,t]{quantity}[fit]'),
         ]
     }
-    x['peak'] = data[f'{quantity}[peak]'].to_numpy(copy=True)
-    x['trough'] = data[f'{quantity}[trough]'].to_numpy(copy=True)
 
     fig = make_subplots(
         rows=3,
@@ -128,7 +260,6 @@ def step_output_time_plot(
         markers={},
         showlegend_markers=False,
     )
-    markers = {key: (indices, cfg_markers.get(key, None)) for key, indices in points.items()}
     add_plot_time_series(
         fig,
         name=f'{symb} [fit]',
@@ -136,7 +267,10 @@ def step_output_time_plot(
         values=x['fit'],
         row=1,
         col=1,
-        markers=markers,
+        markers={
+            key: (time[indices], x['fit'][indices], cfg_markers.get(key, None))
+            for key, indices in points.items()
+        },
         showlegend_markers=True,
     )
     add_plot_time_series(
@@ -146,7 +280,10 @@ def step_output_time_plot(
         values=x['d'],
         row=2,
         col=1,
-        markers=markers,
+        markers={
+            key: (time[indices], x['d'][indices], cfg_markers.get(key, None))
+            for key, indices in points.items()
+        },
         showlegend_markers=False,
     )
     add_plot_time_series(
@@ -156,7 +293,10 @@ def step_output_time_plot(
         values=x['dd'],
         row=3,
         col=1,
-        markers=markers,
+        markers={
+            key: (time[indices], x['dd'][indices], cfg_markers.get(key, None))
+            for key, indices in points.items()
+        },
         showlegend_markers=False,
     )
 
@@ -296,50 +436,58 @@ def add_plot_time_series(
         color='black',
     ),
     text: Optional[str] = None,
-    markers: dict[str, tuple[list[int], Optional[MarkerSettings]]] = {},
+    markers: dict[str, tuple[Iterable[float], Iterable[float], Optional[MarkerSettings]]] = {},
     showlegend_markers: bool = True,
 ) -> pgo.Figure:
-    p = pgo.Scatter(
-        name=name,
-        x=time,
-        y=values,
-        text=[text or name for _ in time],
-        line_shape='spline',
-        mode=mode,
-        line=dict(
-            width=1,
-            color='black',
-            # color='hsla(0, 100%, 50%, 0)',
-            # line=line,
-        )
-        if mode == 'lines'
-        else None,
-        marker=dict(
-            size=1,
-            color='hsla(0, 100%, 50%, 0)',
-            line=line,
-        )
-        if mode == 'markers'
-        else None,
-        showlegend=False,
-    )
-    fig.append_trace(p, row=row, col=col)
-
-    for key, (indices, settings) in markers.items():
-        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
-        p = pgo.Scatter(
-            name=settings.name,
-            x=time[indices].tolist(),
-            y=values[indices].tolist(),
-            mode='markers+text',
+    fig.append_trace(
+        pgo.Scatter(
+            name=name,
+            x=time,
+            y=values,
+            text=[text or name for _ in time],
+            line_shape='spline',
+            mode=mode,
+            line=dict(
+                width=1,
+                color='black',
+                # color='hsla(0, 100%, 50%, 0)',
+                # line=line,
+            )
+            if mode == 'lines'
+            else None,
             marker=dict(
-                symbol=settings.symbol,
-                size=settings.size,
-                color=settings.colour,
+                size=1,
+                color='hsla(0, 100%, 50%, 0)',
+                line=line,
+            )
+            if mode == 'markers'
+            else None,
+            showlegend=False,
+        ),
+        row=row,
+        col=col,
+    )
+
+    for key, (time_, values_, settings) in markers.items():
+        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
+        fig.append_trace(
+            pgo.Scatter(
+                name=settings.name,
+                x=time_,
+                y=values_,
+                mode='markers+text',
+                marker=dict(
+                    symbol=settings.symbol,
+                    size=settings.size,
+                    color=settings.colour,
+                ),
+                showlegend=showlegend_markers,
             ),
-            showlegend=showlegend_markers,
+            row=row,
+            col=col,
         )
-        fig.append_trace(p, row=row, col=col)
+        for t in time_:
+            fig.add_vline(x=t, line_width=1, line_dash='dash', line_color=settings.colour)
 
     return fig
 

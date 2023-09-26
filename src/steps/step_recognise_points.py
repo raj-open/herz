@@ -33,7 +33,7 @@ def step_recognise_points(
     data: pd.DataFrame,
     infos: list[FittedInfo],
     quantity: str,
-) -> tuple[dict[str, list[int]], dict[str, float],]:
+) -> tuple[dict[str, list[int]], dict[str, list[float]],]:
     match quantity:
         case 'pressure':
             times = [recognise_special_points_pressure(info) for info in infos]
@@ -44,30 +44,38 @@ def step_recognise_points(
 
     # NOTE: use boolean-tags to mark whether a set of classified points has been adjusted
     keys = flatten(*[obj.keys() for obj in times])
-    calculations = [(False, {key: (-1, tt) for key, tt in obj.items()}) for obj in times]
+    calculations = [(False, {key: ([], ts) for key, ts in obj.items()}) for obj in times]
 
     # adjust classified points in each cycle
-    t = data['time'].to_numpy(copy=True)
+    time = data['time'].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
     windows = cycles_to_windows(cycles)
     for k, ((i1, i2), points) in enumerate(zip(windows, times)):
         # undo normalisation of time points:
         T = infos[k].normalisation.period
-        points = {key: t[i1] + T * tt for key, tt in points.items()}
+        points = {key: [time[i1] + T * tt for tt in ts] for key, ts in points.items()}
         # add in tag=True + indices of time points
         calculations[k] = (
             True,
-            {key: (closest_index(tt, t[i1:i2], init=i1), tt) for key, tt in points.items()},
+            {
+                key: (closest_indices(ts, time[i1:i2], init=i1), [])
+                for key, ts in points.items()
+            },
         )
 
-    calculations_false = [times for tag, times in calculations if not tag] + [{}]
-    calculations_true = [times for tag, times in calculations if tag]
+    calculations_false = [data for tag, data in calculations if not tag] + [{}]
+    calculations_true = [data for tag, data in calculations if tag]
 
-    points_normalised = {key: tt for key, (i, tt) in calculations_false[0].items()}
+    points_normalised = {key: ts for key, (i, ts) in calculations_false[0].items()}
     points = {
-        key: [
-            i for times in calculations_true for key_, (i, tt) in times.items() if key_ == key
-        ]
+        key: flatten(
+            *[
+                indices
+                for times in calculations_true
+                for key_, (indices, ts) in times.items()
+                if key_ == key
+            ]
+        )
         for key in keys
     }
 

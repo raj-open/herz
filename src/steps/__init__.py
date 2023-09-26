@@ -28,5 +28,6 @@ __all__ = [
     'step_output_single_table',
     'step_output_combined_table',
     'step_output_time_plot',
+    'step_output_time_plot_ideal',
     'step_output_loop_plot',
 ]

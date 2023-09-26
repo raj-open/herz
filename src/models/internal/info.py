@@ -18,6 +18,7 @@ from ..generated.internal import *
 __all__ = [
     'get_normalisation_params',
     'get_rescaled_polynomial',
+    'get_rescaled_polynomial_and_points',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -63,3 +64,13 @@ def get_rescaled_polynomial(
     coeff_rescaled[0] += c
     coeff_rescaled[1] += m / T
     return coeff_rescaled
+
+
+def get_rescaled_polynomial_and_points(
+    info: FittedInfo,
+    points: dict[str, list[float]],
+) -> tuple[list[float], dict[str, list[float]]]:
+    coeff = get_rescaled_polynomial(info)
+    T = info.normalisation.period
+    points = {key: [T * tt for tt in ts] for key, ts in points.items()}
+    return coeff, points

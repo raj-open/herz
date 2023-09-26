@@ -26,6 +26,7 @@ __all__ = [
     'PolyIntCondition',
     'get_normalisation_params',
     'get_rescaled_polynomial',
+    'get_rescaled_polynomial_and_points',
     'onb_conditions',
     'onb_spectrum',
 ]

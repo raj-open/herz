@@ -138,7 +138,7 @@ cases:
         font:
           family: "Avenir Next"
           size: 12
-          size-title: 18
+          size-title: 16
         legend: true
 
   # ----------------------------------------------------------------

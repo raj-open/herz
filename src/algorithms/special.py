@@ -26,7 +26,7 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def recognise_special_points_pressure(info: FittedInfo) -> dict[str, float]:
+def recognise_special_points_pressure(info: FittedInfo) -> dict[str, list[float]]:
     times = {}
 
     # NOTE: see documentation/README.md for definitions.
@@ -52,40 +52,51 @@ def recognise_special_points_pressure(info: FittedInfo) -> dict[str, float]:
     crits_localmin, crits_min, crits_localmax, crits_max = split_critical_points(crits)
 
     # RECOGNISE sys:
-    times['sys'] = t0 = 0.0
-
-    # RECOGNISE esp:
-    crit = filter_times(crits_localmin[2], t_after=t0, t_before=1.0)
-    times['esp'] = t0 = crit[0][0]
-
-    # RECOGNISE anti_epad:
-    crit = filter_times(crits_localmin[1], t_after=t0, t_before=1.0)
-    times['anti-epad'] = t0 = crit[0][0]
-
-    # RECOGNISE sdp:
-    crit = filter_times(crits_localmax[2], t_after=t0, t_before=1.0)
-    times['sdp'] = crit[0][0]
+    times['sys'] = [0.0, 1.0]
+    t0 = 0.0
 
     # RECOGNISE dia:
     crit = filter_times(crits_localmin[0], t_after=t0, t_before=1.0)
-    times['dia'] = crit[0][0]
+    t0 = crit[0][0]
+    times['dia'] = [t0]
 
     # RECOGNISE edp:
     crit = filter_times(crits_localmax[2], t_after=t0, t_before=1.0)
-    times['edp'] = crit[0][0]
+    t0 = crit[0][0]
+    times['edp'] = [t0]
 
     # RECOGNISE epad:
     crit = filter_times(crits_localmax[1], t_after=t0, t_before=1.0)
-    times['epad'] = crit[0][0]
+    t0 = crit[0][0]
+    times['epad'] = [t0]
 
     # RECOGNISE eivc:
     crit = filter_times(crits_localmin[2], t_after=t0, t_before=1.0)
-    times['eivc'] = crit[0][0]
+    t0 = crit[0][0]
+    times['eivc'] = [t0]
+
+    # MODULO PEAK:
+    t0 = 0
+
+    # RECOGNISE esp:
+    crit = filter_times(crits_localmin[2], t_after=t0, t_before=1.0)
+    t0 = crit[0][0]
+    times['esp'] = [t0]
+
+    # RECOGNISE anti_epad:
+    crit = filter_times(crits_localmin[1], t_after=t0, t_before=1.0)
+    t0 = crit[0][0]
+    times['anti-epad'] = [t0]
+
+    # RECOGNISE sdp:
+    crit = filter_times(crits_localmax[2], t_after=t0, t_before=1.0)
+    t0 = crit[0][0]
+    times['sdp'] = [t0]
 
     return times
 
 
-def recognise_special_points_volume(info: FittedInfo) -> dict[str, float]:
+def recognise_special_points_volume(info: FittedInfo) -> dict[str, list[float]]:
     # NOTE: see documentation/README.md for definitions.
     # TODO: implement this
     log_warn('Classification of volume points not yet implemented!')

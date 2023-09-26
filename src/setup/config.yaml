@@ -20,7 +20,20 @@ settings:
     d[2,t]volume: 'm^3/s^2'
   polynomial:
     pressure:
-      degree: 8 # 2 + 5 + 1
+      # OPTIONS
+      # ~~~~~~~
+      # 1) Without 0 conditions on 2nd derivative,
+      #    i.e. 0 conditions on 3rd derivative
+      #    ==> the 2nd derivative must have >= 5 critical points
+      #    ==> 3rd derivative must have >= 5 zeroes
+      #    ==> polynomial must be of degree >= 3 + 5 = 8
+      #
+      # 2) With h (e.g. h=2) critical conditions on 2nd derivative,
+      #    i.e. h conditions on 3rd derivative
+      #    ==> 2nd derivative must have >= 5 + h critical points
+      #    ==> 3rd derivative must have >= 5 + h zeroes
+      #    ==> polynomial must be of degree >= 3 + 5 + h = 8
+      degree: 8 # 3 + 5 + h [= # conditions on 3rd derivative]
       conditions:
         - derivative: 1
           time: 0.
@@ -30,12 +43,8 @@ settings:
           time: 0.
         - derivative: 2
           time: 1.
-        - derivative: 3
-          time: 0.
-        - derivative: 3
-          time: 1.
     volume:
-      degree: 7 # 1 + 5 + 1
+      degree: 7 # 2 + 5 + h [= # conditions on 2nd derivative]
       conditions:
         - derivative: 1
           time: 0.
