@@ -22,6 +22,13 @@ from typing import Iterable
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+def nCr(n: int, r: int) -> int:
+    '''
+    Computes `n!/(r!(n-r)!)`
+    '''
+    return math.comb(n, r)
+
+
 def nPr(n: int, r: int) -> int:
     '''
     Computes `n!/(n-r)!`
@@ -97,6 +104,7 @@ __all__ = [
     'findpeaks',
     'lmfit',
     'math',
+    'nCr',
     'nPr',
     'normalised_order_statistics',
     'np',

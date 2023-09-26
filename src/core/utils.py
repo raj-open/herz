@@ -5,14 +5,21 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+from ..thirdparty.code import *
 from ..thirdparty.maths import *
 from ..thirdparty.physics import *
+from ..thirdparty.types import *
+
+from .constants import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'flatten',
+    'relative_change',
+    'signed_relative_change',
     'where_to_characteristic',
     'characteristic_to_where',
     'normalise_to_unit_interval',
@@ -27,7 +34,7 @@ __all__ = [
 # LOCAL VARIABLES / CONSTANTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#
+T = TypeVar('T')
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # METHODS - INDICES
@@ -43,6 +50,34 @@ def where_to_characteristic(indices: list[int] | np.ndarray, N: int) -> list[boo
 def characteristic_to_where(ch: list[bool] | np.ndarray) -> list[int]:
     obj = np.where(ch)
     return obj[0].tolist()
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# METHODS - ARRAYS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def flatten(*X: list[T]) -> list[T]:
+    return list(itertools_chain(*X))
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# METHODS - COMPARISONS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def relative_change(x1: float, x2: float) -> float:
+    C = (np.abs(x1) + np.abs(x2)) / 2
+    return (x2 - x1) / (C or 1.0)
+
+
+def signed_relative_change(x1: float, x2: float, eps: MACHINE_EPS) -> Literal[0, -1, 1]:
+    r = relative_change(x1, x2)
+    if r > eps:
+        return 1
+    if r < -eps:
+        return -1
+    return 0
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

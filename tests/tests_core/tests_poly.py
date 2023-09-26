@@ -9,6 +9,7 @@ from src.thirdparty.maths import *
 from src.thirdparty.types import *
 from tests.thirdparty.unit import *
 
+from src.core.constants import *
 from src.core.poly import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,81 +29,26 @@ from src.core.poly import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def test_derivative_coefficients(
-    test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
-):
-    coeff = derivative_coefficients([0, 1, 1])
-    assert_arrays_equal(coeff, [1, 2])
-    return
-
-
 @mark.parametrize(
-    ('coeff', 'n', 'expected'),
+    ('coeff', 't0', 'coeff_r'),
     [
-        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
-        ([4, 5, 6, -10], 1, [5, 6 * 2, -10 * 3]),
-        ([4, 5, 6, -10], 2, [6 * 2, -10 * 3 * 2]),
-        ([4, 5, 6, -10], 3, [-10 * 3 * 2]),
+        ([1], 0.3, [1]),
+        ([1, 1], 0.3, [1 + 0.3, 1]),
+        ([1, -2, 1], 1, [0, 0, 1]),
+        ([1, 2, 1], -1, [0, 0, 1]),
     ],
 )
-def test_derivative_coefficients_rote(
+def test_get_recentred_coefficients_rote(
     test: TestCase,
     debug: Callable[..., None],
     module: Callable[[str], str],
     # test parameters
     coeff: list[float],
-    n: int,
-    expected: list[float],
+    t0: float,
+    coeff_r: list[float],
 ):
-    coeff_ = derivative_coefficients(coeff, n=n)
-    assert_arrays_close(coeff_, expected, eps=1e-6)
-    return
-
-
-def test_integral_coefficients(
-    test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
-):
-    coeff = integral_coefficients([1, 2])
-    assert_arrays_equal(coeff, [0, 1, 1])
-
-    coeff = derivative_coefficients(coeff)
-    assert_arrays_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
-    return
-
-
-@mark.parametrize(
-    ('coeff', 'n', 'expected'),
-    [
-        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
-        ([4, 5, 6, -10], 1, [0, 4, 5 / 2, 6 / 3, -10 / 4]),
-        ([4, 5, 6, -10], 2, [0, 0, 4 / 2, 5 / (2 * 3), 6 / (3 * 4), -10 / (4 * 5)]),
-        (
-            [4, 5, 6, -10],
-            3,
-            [0, 0, 0, 4 / (2 * 3), 5 / (2 * 3 * 4), 6 / (3 * 4 * 5), -10 / (4 * 5 * 6)],
-        ),
-    ],
-)
-def test_integral_coefficients_rote(
-    test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
-    # test parameters
-    coeff: list[float],
-    n: int,
-    expected: list[float],
-):
-    coeff_ = integral_coefficients(coeff, n=n)
-    assert_arrays_close(coeff_, expected, eps=1e-6)
-
-    coeff_ = derivative_coefficients(expected, n=n)
-    assert_arrays_close(
-        coeff_, coeff, eps=1e-6, message='Derivative should return original coefficients.'
-    )
+    coeff_r_ = get_recentred_coefficients(coeff, t0)
+    assert_arrays_close(coeff_r_, coeff_r, eps=1e-6)
     return
 
 
@@ -112,23 +58,21 @@ def test_get_real_polynomial_roots(
     module: Callable[[str], str],
 ):
     coeff = [-3, 0, 8, 1]
-    roots = get_real_polynomial_roots(*coeff)
+    roots = get_real_polynomial_roots(coeff)
     assert_array_close_to_zero(
         [poly_single(t, *coeff) for t in roots],
         eps=1e-10,
         message='The values computes should be roots of the polynomial.',
     )
 
-    roots = get_real_polynomial_roots(0, 0, -4, 1)
-    roots = sorted(roots)
+    roots = get_real_polynomial_roots([0, 0, -4, 1])
     assert_arrays_equal(
         roots,
         [0, 0, 4],
         message='Roots of algebric multiplicity should occur repeated in list.',
     )
 
-    roots = get_real_polynomial_roots(0, 0, 0, -4, 1)
-    roots = sorted(roots)
+    roots = get_real_polynomial_roots([0, 0, 0, -4, 1])
     assert_arrays_equal(
         roots,
         [0, 0, 0, 4],
@@ -174,8 +118,150 @@ def test_get_real_polynomial_roots_rote(
     coeff: list[float],
     zeroes: list[float],
 ):
-    roots = get_real_polynomial_roots(*coeff)
-    roots = sorted(roots)
-    zeroes = sorted(zeroes)
+    roots = get_real_polynomial_roots(coeff)
     assert_arrays_close(roots, zeroes, eps=1e-6)
+    return
+
+
+def test_get_derivative_coefficients(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    coeff = get_derivative_coefficients([0, 1, 1])
+    assert_arrays_equal(coeff, [1, 2])
+    return
+
+
+@mark.parametrize(
+    ('coeff', 'n', 'expected'),
+    [
+        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
+        ([4, 5, 6, -10], 1, [5, 6 * 2, -10 * 3]),
+        ([4, 5, 6, -10], 2, [6 * 2, -10 * 3 * 2]),
+        ([4, 5, 6, -10], 3, [-10 * 3 * 2]),
+    ],
+)
+def test_get_derivative_coefficients_rote(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    coeff: list[float],
+    n: int,
+    expected: list[float],
+):
+    coeff_ = get_derivative_coefficients(coeff, n=n)
+    assert_arrays_close(coeff_, expected, eps=1e-6)
+    return
+
+
+def test_get_integral_coefficients(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    coeff = get_integral_coefficients([1, 2])
+    assert_arrays_equal(coeff, [0, 1, 1])
+
+    coeff = get_derivative_coefficients(coeff)
+    assert_arrays_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
+    return
+
+
+@mark.parametrize(
+    ('coeff', 'n', 'expected'),
+    [
+        ([4, 5, 6, -10], 0, [4, 5, 6, -10]),
+        ([4, 5, 6, -10], 1, [0, 4, 5 / 2, 6 / 3, -10 / 4]),
+        ([4, 5, 6, -10], 2, [0, 0, 4 / 2, 5 / (2 * 3), 6 / (3 * 4), -10 / (4 * 5)]),
+        (
+            [4, 5, 6, -10],
+            3,
+            [0, 0, 0, 4 / (2 * 3), 5 / (2 * 3 * 4), 6 / (3 * 4 * 5), -10 / (4 * 5 * 6)],
+        ),
+    ],
+)
+def test_get_integral_coefficients_rote(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    coeff: list[float],
+    n: int,
+    expected: list[float],
+):
+    coeff_ = get_integral_coefficients(coeff, n=n)
+    assert_arrays_close(coeff_, expected, eps=1e-6)
+
+    coeff_ = get_derivative_coefficients(expected, n=n)
+    assert_arrays_close(
+        coeff_, coeff, eps=1e-6, message='Derivative should return original coefficients.'
+    )
+    return
+
+
+def test_get_critical_points(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+):
+    # p(t) = t^2 - 2t + 1
+    results = get_critical_points([1, -2, 1])
+    test.assertEquals(len(results), 1)
+    t0, y0, v, kind = results[0]
+    test.assertEquals(t0, 1.0)
+    test.assertEquals(v, 1.0)
+    test.assertEquals(kind, CriticalPoint.LOCAL_MINIMUM)
+
+    # p(t) = -(t^2 - 2t + 1)
+    results = get_critical_points([-1, 2, -1])
+    test.assertEquals(len(results), 1)
+    t0, y0, v, kind = results[0]
+    test.assertEquals(t0, 1)
+    test.assertEquals(v, 1)
+    test.assertEquals(kind, CriticalPoint.LOCAL_MAXIMUM)
+
+    # p(t) = t^3
+    results = get_critical_points([0, 0, 0, 1])
+    test.assertEquals(len(results), 1)
+    t0, y0, v, kind = results[0]
+    test.assertEquals(t0, 0.0)
+    test.assertEquals(v, 2)
+    test.assertEquals(kind, CriticalPoint.INFLECTION)
+
+    # Force
+    #    p'(t) = t^2 - 3t + 2 = (t - 2)(t - 1)
+    # => p''(t) = 2t - 3
+    # so
+    #    p''(1) = -1 --> (1, p(1)) loc. max
+    #    p''(2) = +1 --> (2, p(2)) loc. min
+    coeff = get_integral_coefficients([2, -3, 1])
+    results = get_critical_points(coeff)
+    test.assertEquals(len(results), 2)
+
+    t0, y0, v, kind = results[0]
+    test.assertEquals(t0, 1.0)
+    test.assertEquals(v, 1)
+    test.assertEquals(kind, CriticalPoint.LOCAL_MAXIMUM)
+
+    t0, y0, v, kind = results[1]
+    test.assertEquals(t0, 2.0)
+    test.assertEquals(v, 1)
+    test.assertEquals(kind, CriticalPoint.LOCAL_MINIMUM)
+
+    # Force
+    #    p'(t) = t^2 - 2t + 1 = (t - 1)^2
+    # => p''(t) = 2(t - 1)
+    # => p'''(t) = 2
+    # so
+    #    p''(1) = 0
+    #    p'''(1) > 0 --> (1, p(1)) inflection
+    coeff = get_integral_coefficients([1, -2, 1])
+    results = get_critical_points(coeff)
+    test.assertEquals(len(results), 1)
+    t0, y0, v, kind = results[0]
+    test.assertEquals(t0, 1.0)
+    test.assertEquals(v, 2)
+    test.assertEquals(kind, CriticalPoint.INFLECTION)
     return

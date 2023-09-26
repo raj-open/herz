@@ -188,8 +188,8 @@ def onb_spectrum(
     # Q2[:, j] = coeff of polynomial q2ⱼ, a stemfunction of q1ⱼ
     # R[:, j] = coeff of polynomial rⱼ = t·q1ⱼ - q2ⱼ
     # --------------------------------
-    Q1 = np.asarray([integral_coefficients(Q[:, j].tolist()) for j in range(m)]).T
-    Q2 = np.asarray([integral_coefficients(Q1[:, j].tolist()) for j in range(m)]).T
+    Q1 = np.asarray([get_integral_coefficients(Q[:, j].tolist()) for j in range(m)]).T
+    Q2 = np.asarray([get_integral_coefficients(Q1[:, j].tolist()) for j in range(m)]).T
     zeros = np.zeros((1, m))
     R = np.concatenate([zeros, Q1]) - Q2
     Q1 = np.concatenate([Q1, zeros])  # pad

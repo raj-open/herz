@@ -168,7 +168,7 @@ def step_fit_curve(
             tt = (t[i1:i2] - t[i1]) / T
             # compute nth-derivative of fitted polynom to normalise cycle
             if n > 0:
-                coeff = derivative_coefficients(coeff)
+                coeff = get_derivative_coefficients(coeff)
                 coeffs[k] = coeff
             xx = poly(tt, *coeff)
             # undo effects of time-scaling and drift-removal

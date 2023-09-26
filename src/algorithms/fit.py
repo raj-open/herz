@@ -181,8 +181,8 @@ def objective_function(n: int):
 
     def obj(params: lmfit.Parameters, t: np.ndarray, x: np.ndarray):
         coeff = [params[key].value for key in params]
-        # coeff_d1 = derivative_coefficients(coeff, n=1)
-        # coeff_dn = derivative_coefficients(coeff, n=n)
+        # coeff_d1 = get_derivative_coefficients(coeff, n=1)
+        # coeff_dn = get_derivative_coefficients(coeff, n=n)
         # # polynomial x´(0) and x´(1) must be 0 and x⁽ⁿ⁾(0) and x⁽ⁿ⁾(1) must be 0:
         # values = np.asarray([
         #     coeff_d1[0],
