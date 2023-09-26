@@ -12,7 +12,7 @@ The following is an equivalent reformulation of the definitions in [Gaertner, et
    that the cycles are defined from peak-to-peak.
 2. Consider one such cycle.
    Assume without loss of generality
-   that this is defined on a time interval $[0,\:T]$
+   that this is defined on a time interval $[0, T]$
 
 The following points are listed out in chronological within such a cycle:
 

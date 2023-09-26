@@ -12,6 +12,7 @@ from ..setup import config
 from ..core.utils import *
 from ..core.poly import *
 from ..models.user import *
+from ..models.internal import *
 from ..algorithms.peaks import *
 from ..algorithms.cycles import *
 from ..algorithms.bad_points import *
@@ -122,7 +123,7 @@ def step_fit_curve(
     data: pd.DataFrame,
     quantity: str,
     n_der: int = 2,
-) -> tuple[pd.DataFrame, list[tuple[list[float], float, float, float, float]]]:
+) -> tuple[pd.DataFrame, list[FittedInfo]]:
     '''
     Fits polynomial to cycles in time-series,
     forcing certain conditions on the `n`th-derivatives
@@ -152,7 +153,7 @@ def step_fit_curve(
 
     # compute derivatives
     if mode_average:
-        coeff, _, _, _, _ = infos[-1]
+        coeff = infos[-1].coefficients
         coeffs = [coeff[:] for _ in windows]
     else:
         coeffs = [coeff[:] for coeff, _, _, _, _ in infos]
@@ -162,9 +163,9 @@ def step_fit_curve(
             # get coefficients for (n-1)th derivative polynomial for cycle k:
             coeff = coeffs[k]
             # get drift-values:
-            _, _, c, m, s = infos[k]
+            T, c, m, s = get_normalisation_params(infos[k])
             # scale time
-            tt, T = normalise_to_unit_interval(t[i1:i2])
+            tt = (t[i1:i2] - t[i1]) / T
             # compute nth-derivative of fitted polynom to normalise cycle
             if n > 0:
                 coeff = derivative_coefficients(coeff)

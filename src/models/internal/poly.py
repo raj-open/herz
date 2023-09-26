@@ -6,9 +6,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ...thirdparty.maths import *
+from ...thirdparty.types import *
 
 from ...core.poly import *
-from ..generated.app import *
+
+# NOTE: foreign import
+from ..generated.app import PolyDerCondition
+from ..generated.app import PolyIntCondition
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS

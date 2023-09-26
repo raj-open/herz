@@ -15,7 +15,8 @@ from .thirdparty.misc import *
 from .core.log import *
 from .core.poly import *
 from .setup import config
-from src.steps import *
+from .models.internal import *
+from .steps import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # LOCAL VARIABLES / CONSTANTS
@@ -59,10 +60,9 @@ def enter(path: str, *_):
             plt = step_output_time_plot(case, data, quantity=quantity, symb=symb)
             # plt.show()
 
-            coeff, T, c, m, s = infos[0]
-            coeff_rescaled = [s * cc / T**k for k, cc in enumerate(coeff)]
-            coeff_rescaled[0] += c
-            coeff_rescaled[1] += m / T
+            coeff = infos[-1].coefficients
+            T, c, m, s = get_normalisation_params(infos[-1])
+            coeff_rescaled = get_rescaled_polynomial(infos[-1])
 
             datas[quantity] = data
             Ts[quantity] = T

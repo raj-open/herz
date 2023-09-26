@@ -12,7 +12,7 @@ from .peaks import *
 from .cycles import *
 from ..core.utils import *
 from ..core.poly import *
-from ..models.app import *
+from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -35,7 +35,7 @@ def fit_poly_cycles(
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
     average: bool = False,
-) -> list[tuple[list[float], float, float, float, float]]:
+) -> list[FittedInfo]:
     '''
     Fits 'certain' polynomials to cycles in such a way,
     that special attributes can be extracted.
@@ -58,7 +58,8 @@ def fit_poly_cycles(
         c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1)
         # compute fitted curve
         coeff = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
-        infos[k] = (coeff, T, c, m, s)
+        params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
+        infos[k] = FittedInfo(coefficients=coeff, normalisation=params)
 
     # --------------------------------
     # NOTE:
@@ -92,12 +93,19 @@ def fit_poly_cycles(
     # of the coefficients of the p⁽ᵏ⁾.
     # --------------------------------
     if average:
-        coeff_ = np.mean(np.asarray([coeff for coeff, _, _, _, _ in infos]), axis=0).tolist()
-        T_ = np.median(np.asarray([T for _, T, _, _, _ in infos]), axis=0).tolist()
-        c_ = np.median(np.asarray([c for _, _, c, _, _ in infos]), axis=0).tolist()
-        m_ = np.median(np.asarray([m for _, _, _, m, _ in infos]), axis=0).tolist()
-        s_ = np.median(np.asarray([s for _, _, _, _, s in infos]), axis=0).tolist()
-        infos.append((coeff_, T_, c_, m_, s_))
+        coeff = np.mean(np.asarray([info.coefficients for info in infos]), axis=0).tolist()
+        T = np.median(
+            np.asarray([info.normalisation.period for info in infos]), axis=0
+        ).tolist()
+        c = np.median(
+            np.asarray([info.normalisation.intercept for info in infos]), axis=0
+        ).tolist()
+        m = np.median(
+            np.asarray([info.normalisation.gradient for info in infos]), axis=0
+        ).tolist()
+        s = np.median(np.asarray([info.normalisation.scale for info in infos]), axis=0).tolist()
+        params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
+        infos.append(FittedInfo(coefficients=coeff, normalisation=params))
 
     return infos
 
