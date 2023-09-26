@@ -43,7 +43,6 @@ def step_output_single_table(
         return
 
     cv = output_conversions(cfg.quantities)
-    units = output_units(cfg.quantities)
 
     if original_time:
         data = data.sort_values(by=['time[orig]']).reset_index(drop=True)

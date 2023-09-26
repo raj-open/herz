@@ -56,7 +56,7 @@ def recognise_special_points_pressure(info: FittedInfo) -> dict[str, float]:
 
     # RECOGNISE esp:
     crit = filter_times(crits_localmin[2], t_after=t0, t_before=1.0)
-    times['eps'] = t0 = crit[0][0]
+    times['esp'] = t0 = crit[0][0]
 
     # RECOGNISE anti_epad:
     crit = filter_times(crits_localmin[1], t_after=t0, t_before=1.0)

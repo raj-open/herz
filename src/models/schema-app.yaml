@@ -27,6 +27,7 @@ components:
           required:
             - units
             - polynomial
+            - points
           properties:
             units:
               description: |-
@@ -41,6 +42,13 @@ components:
               type: object
               additionalProperties:
                 $ref: "#/components/schemas/PolynomialSetting"
+                default: {}
+            markers:
+              description: |-
+                Settings for plottings special points.
+              type: object
+              additionalProperties:
+                $ref: "#/components/schemas/MarkerSettings"
                 default: {}
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -125,4 +133,32 @@ components:
             type: number
           minItems: 2
           maxItems: 2
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - Points display settings
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    MarkerSettings:
+      description: |-
+        Settings for plotting special points.
+
+        - `name` - <string>
+        - `size` - <int> size of marker
+        - `colour` - <string> colour of marker, can be either a name or of the form
+            `'rgba(<float>,<float>,<float>,<float>)'`, `'hsla(<int>,<float>%,<float>%,<float>)'`, etc.
+        - `symbol` - <string> symbool for marker, see <https://plotly.com/python/marker-style>.
+      type: object
+      required: []
+      properties:
+        name:
+          type: string
+          default: null
+        size:
+          type: integer
+          default: 2
+        colour:
+          type: string
+          default: null
+        symbol:
+          type: string
+          default: null
       additionalProperties: false

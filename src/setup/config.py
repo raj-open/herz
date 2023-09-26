@@ -12,14 +12,16 @@ from ..paths import *
 from ..core.log import *
 from ..models.app import *
 from ..models.user import *
+from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'UNITS',
+    'MARKERS',
     'POLY',
+    'UNITS',
     'VERSION',
 ]
 
@@ -68,9 +70,9 @@ def load_version(path: str) -> str:
 @make_lazy
 def load_api_config(path: str, version: str) -> AppConfig:
     with open(path, 'r') as fp:
-        assets = yaml_to_py_dictionary(yaml.load(fp, Loader=yaml.FullLoader), deep=True)
+        assets = yaml.load(fp, Loader=yaml.FullLoader)
         assert isinstance(assets, dict)
-        api_config: AppConfig = catch_fatal(lambda: AppConfig(**assets))
+        api_config: AppConfig = catch_fatal(lambda: AppConfig.parse_obj(assets))
         api_config.info.version = version
         return api_config
 
@@ -78,9 +80,9 @@ def load_api_config(path: str, version: str) -> AppConfig:
 @make_lazy
 def load_assets_config(path: str) -> UserConfig:
     with open(path, 'r') as fp:
-        assets = yaml_to_py_dictionary(yaml.load(fp, Loader=yaml.FullLoader), deep=True)
+        assets = yaml.load(fp, Loader=yaml.FullLoader)
         assert isinstance(assets, dict)
-        return catch_fatal(lambda: UserConfig(**assets))
+        return catch_fatal(lambda: UserConfig.parse_obj(assets))
 
 
 # use lazy loading to ensure that values only loaded (once) when used
@@ -90,6 +92,7 @@ API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
 INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
 UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
 POLY: dict[str, PolynomialSetting] = lazy(lambda x: x.settings.polynomial, API_CONFIG)
+MARKERS: dict[str, MarkerSettings] = lazy(lambda x: x.settings.markers, API_CONFIG)
 
 USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
 BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)

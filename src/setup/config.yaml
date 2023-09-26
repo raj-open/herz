@@ -30,10 +30,10 @@ settings:
           time: 0.
         - derivative: 2
           time: 1.
-        # - derivative: 3
-        #   time: 0.
-        # - derivative: 3
-        #   time: 1.
+        - derivative: 3
+          time: 0.
+        - derivative: 3
+          time: 1.
     volume:
       degree: 7 # 1 + 5 + 1
       conditions:
@@ -41,3 +41,45 @@ settings:
           time: 0.
         - derivative: 1
           time: 1.
+  # settings for plotting points, see <https://plotly.com/python/marker-style>.
+  markers:
+    esp:
+      name: "esp"
+      size: 6
+      colour: red
+      symbol: "triangle-up-open"
+    anti-epad:
+      name: "anti-epad"
+      size: 6
+      colour: black
+      symbol: "square"
+    sdp:
+      name: "sdp"
+      size: 6
+      colour: black
+      symbol: "triangle-up-open"
+    dia:
+      name: "dia"
+      size: 6
+      colour: blue
+      symbol: "x"
+    edp:
+      name: "edp"
+      size: 6
+      colour: black
+      symbol: "triangle-up"
+    epad:
+      name: "epad"
+      size: 6
+      colour: black
+      symbol: "square-open"
+    eivc:
+      name: "eivc"
+      size: 6
+      colour: red
+      symbol: "triangle-up"
+    sys:
+      name: "systolic"
+      size: 6
+      colour: blue
+      symbol: "circle"

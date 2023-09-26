@@ -12,16 +12,18 @@ from .info import *
 # NOTE: foreign import
 from ..generated.app import PolyDerCondition
 from ..generated.app import PolyIntCondition
+from ..generated.app import MarkerSettings
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'PolyDerCondition',
-    'PolyIntCondition',
     'FittedInfo',
     'FittedInfoNormalisation',
+    'MarkerSettings',
+    'PolyDerCondition',
+    'PolyIntCondition',
     'get_normalisation_params',
     'get_rescaled_polynomial',
     'onb_conditions',

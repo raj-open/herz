@@ -5,7 +5,6 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from __future__ import annotations
 from ..thirdparty.code import *
 from ..thirdparty.data import *
 from ..thirdparty.maths import *
@@ -17,6 +16,7 @@ from ..thirdparty.types import *
 from ..setup import config
 from ..setup.conversion import *
 from ..core.utils import *
+from ..models.internal import *
 from ..models.user import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -43,6 +43,7 @@ def step_output_time_plot(
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
+    cfg_markers = config.MARKERS
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
@@ -86,7 +87,7 @@ def step_output_time_plot(
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         showlegend=cfg.plot.legend,
-        legend=dict(title='Time series'),
+        legend=dict(title='Special points'),
     )
 
     opt = dict(
@@ -121,41 +122,42 @@ def step_output_time_plot(
         text='P [original]',
         time=time,
         values=x['orig'],
-        special=[],
         mode='markers',
         row=1,
         col=1,
+        markers={},
+        showlegend_markers=False,
     )
-    special = [
-        SpecialPoints(name=key, points=indices, size=6, colour='blue', symbol='x')
-        for key, indices in points.items()
-    ]
+    markers = {key: (indices, cfg_markers.get(key, None)) for key, indices in points.items()}
     add_plot_time_series(
         fig,
         name=f'{symb} [fit]',
         time=time,
         values=x['fit'],
-        special=special,
         row=1,
         col=1,
+        markers=markers,
+        showlegend_markers=True,
     )
     add_plot_time_series(
         fig,
         name=f'(d/dt){symb} [fit]',
         time=time,
         values=x['d'],
-        special=special,
         row=2,
         col=1,
+        markers=markers,
+        showlegend_markers=False,
     )
     add_plot_time_series(
         fig,
         name=f'(d/dt)²{symb} [fit]',
         time=time,
         values=x['dd'],
-        special=special,
         row=3,
         col=1,
+        markers=markers,
+        showlegend_markers=False,
     )
 
     path = cfg.plot.path.__root__
@@ -286,7 +288,6 @@ def add_plot_time_series(
     name: Optional[str],
     time: np.ndarray,
     values: np.ndarray,
-    special: list[SpecialPoints],
     row: int,
     col: int,
     mode: str = 'lines',
@@ -295,6 +296,8 @@ def add_plot_time_series(
         color='black',
     ),
     text: Optional[str] = None,
+    markers: dict[str, tuple[list[int], Optional[MarkerSettings]]] = {},
+    showlegend_markers: bool = True,
 ) -> pgo.Figure:
     p = pgo.Scatter(
         name=name,
@@ -322,17 +325,19 @@ def add_plot_time_series(
     )
     fig.append_trace(p, row=row, col=col)
 
-    for s in special:
+    for key, (indices, settings) in markers.items():
+        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
         p = pgo.Scatter(
-            name=s.name,
-            x=time[s.points].tolist(),
-            y=values[s.points].tolist(),
+            name=settings.name,
+            x=time[indices].tolist(),
+            y=values[indices].tolist(),
             mode='markers+text',
             marker=dict(
-                symbol=s.symbol,
-                size=s.size,
-                color=s.colour,
+                symbol=settings.symbol,
+                size=settings.size,
+                color=settings.colour,
             ),
+            showlegend=showlegend_markers,
         )
         fig.append_trace(p, row=row, col=col)
 
@@ -352,18 +357,3 @@ def save_image(fig: pgo.Figure, path: str):
     else:
         fig.write_image(path)
     return
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# AUXILIARY MODEL
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-@dataclass
-class SpecialPoints:
-    name: str = field()
-    points: list = field()
-    size: int = field(default=2)
-    colour: Optional[str] = field(default=None)
-    # see https://plotly.com/python/marker-style
-    symbol: Optional[str] = field(default=None)
