@@ -20,16 +20,24 @@ settings:
     d[2,t]volume: 'm^3/s^2'
   polynomial:
     pressure:
-      degree: 10 # 2 + 7 + 1
+      degree: 8 # 2 + 5 + 1
       conditions:
         - derivative: 1
           time: 0.
         - derivative: 1
           time: 1.
-        - derivative: 3
+        - derivative: 2
           time: 0.
-        - derivative: 3
+        - derivative: 2
           time: 1.
+        # - derivative: 3
+        #   time: 0.
+        # - derivative: 3
+        #   time: 1.
     volume:
-      degree: 10 # 1 + 7 + 1
-      conditions: []
+      degree: 7 # 1 + 5 + 1
+      conditions:
+        - derivative: 1
+          time: 0.
+        - derivative: 1
+          time: 1.

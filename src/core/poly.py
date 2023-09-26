@@ -257,8 +257,8 @@ def get_critical_points(
         # ----------------------------------------------------------------
 
         # classify based on pre/post-changes:
-        change_post = signed_relative_change(y0, ym_post, eps=MACHINE_EPS)
-        change_pre = signed_relative_change(ym_pre, y0, eps=MACHINE_EPS)
+        change_post = sign_normalised_difference(y0, ym_post, eps=MACHINE_EPS)
+        change_pre = sign_normalised_difference(ym_pre, y0, eps=MACHINE_EPS)
         match change_pre, change_post:
             case (-1, 1):
                 results.append((t0, y0, v, CriticalPoint.LOCAL_MINIMUM))
@@ -357,9 +357,9 @@ def get_critical_points_bounded(
     y_min = np.min(values)
     y_max = np.max(values)
     for k, (t0, y0, v, kind) in enumerate(results):
-        if abs(relative_change(y_max, y0)) < MACHINE_EPS:
+        if abs(normalised_difference(y_max, y0)) < MACHINE_EPS:
             results[k] = (t0, y_max, v, CriticalPoint.MAXIMUM)
-        elif abs(relative_change(y_min, y0)) < MACHINE_EPS:
+        elif abs(normalised_difference(y_min, y0)) < MACHINE_EPS:
             results[k] = (t0, y_min, v, CriticalPoint.MINIMUM)
 
     # remove boundaries of not classified as absolute min/max

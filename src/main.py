@@ -35,7 +35,7 @@ def enter(path: str, *_):
 
     for case in config.CASES:
         datas = dict()
-        classifieds = dict()
+        points = dict()
         coeffs = dict()
         log_progress(f'''RUN CASE {case.label}''', -1, 5)
 
@@ -56,22 +56,25 @@ def enter(path: str, *_):
             data, infos = step_fit_curve(case, data, quantity=quantity)
 
             log_progress(f'''CLASSIFY POINTS {quantity}''', 3, 6)
-            classified = step_recognise_special_points(case, data, infos, quantity=quantity)
+            points_cycles, points_normalised = step_recognise_points(
+                case, data, infos, quantity=quantity
+            )
 
             log_progress(f'''OUTPUT TABLES {quantity}''', 4, 6)
             step_output_single_table(case, data, quantity=quantity)
 
             log_progress('''OUTPUT TIME PLOTS''', 5, 6)
-            plt = step_output_time_plot(case, data, quantity=quantity, symb=symb)
+            plt = step_output_time_plot(case, data, points_cycles, quantity=quantity, symb=symb)
             # plt.show()
 
             coeff = infos[-1].coefficients
             T, c, m, s = get_normalisation_params(infos[-1])
             coeff_rescaled = get_rescaled_polynomial(infos[-1])
+            points_unnormalised = {key: T * tt for key, tt in points_normalised.items()}
 
             datas[quantity] = data
-            coeffs[quantity] = coeff
-            classifieds[quantity] = classified
+            coeffs[quantity] = coeff_rescaled
+            points[quantity] = points_unnormalised
             log_info(
                 dedent(
                     f'''

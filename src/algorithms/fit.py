@@ -49,8 +49,8 @@ def fit_poly_cycles(
     infos = [[]] * len(windows)
     # due to normalisation, force the following condition
     conds = conds[:]
-    conds.append(PolyDerCondition(derivative=0, time=0))
-    conds.append(PolyDerCondition(derivative=0, time=1))
+    conds.append(PolyDerCondition(derivative=0, time=0.0))
+    conds.append(PolyDerCondition(derivative=0, time=1.0))
     for k, (i1, i2) in enumerate(windows):
         # scale time
         tt, T = normalise_to_unit_interval(t[i1:i2])

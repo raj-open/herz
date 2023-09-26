@@ -18,8 +18,8 @@ from .constants import *
 
 __all__ = [
     'flatten',
-    'relative_change',
-    'signed_relative_change',
+    'normalised_difference',
+    'sign_normalised_difference',
     'where_to_characteristic',
     'characteristic_to_where',
     'normalise_to_unit_interval',
@@ -66,13 +66,18 @@ def flatten(*X: list[T]) -> list[T]:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def relative_change(x1: float, x2: float) -> float:
+def normalised_difference(x1: float, x2: float) -> float:
+    '''
+    NOTE:
+    - For large numbers it is the same as a relative difference.
+    - For small numbers this is the same as an ordinary difference.
+    '''
     C = (np.abs(x1) + np.abs(x2)) / 2
-    return (x2 - x1) / (C or 1.0)
+    return (x2 - x1) / max(C, 1.0)
 
 
-def signed_relative_change(x1: float, x2: float, eps: MACHINE_EPS) -> Literal[0, -1, 1]:
-    r = relative_change(x1, x2)
+def sign_normalised_difference(x1: float, x2: float, eps: MACHINE_EPS) -> Literal[0, -1, 1]:
+    r = normalised_difference(x1, x2)
     if r > eps:
         return 1
     if r < -eps:

@@ -36,6 +36,7 @@ __all__ = [
 def step_output_time_plot(
     case: UserCase,
     data: pd.DataFrame,
+    points: dict[str, list[int]],
     quantity: str,
     symb: str,
     original_time: bool = True,
@@ -114,23 +115,21 @@ def step_output_time_plot(
         unit = units[key]
         fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
 
-    special = [
-        SpecialPoints(name='peak', points=x['peak'], colour='blue', size=6, symbol='x'),
-        SpecialPoints(name='trough', points=x['trough'], colour='blue', size=6, symbol='x'),
-        # SpecialPoints(name='marked', points=marked, colour='red', size=4, symbol='circle'),
-    ]
     add_plot_time_series(
         fig,
         name=None,
         text='P [original]',
         time=time,
         values=x['orig'],
-        special=special,
+        special=[],
         mode='markers',
         row=1,
         col=1,
     )
-    special = []
+    special = [
+        SpecialPoints(name=key, points=indices, size=6, colour='blue', symbol='x')
+        for key, indices in points.items()
+    ]
     add_plot_time_series(
         fig,
         name=f'{symb} [fit]',
@@ -140,7 +139,6 @@ def step_output_time_plot(
         row=1,
         col=1,
     )
-    special = []
     add_plot_time_series(
         fig,
         name=f'(d/dt){symb} [fit]',
@@ -288,7 +286,7 @@ def add_plot_time_series(
     name: Optional[str],
     time: np.ndarray,
     values: np.ndarray,
-    special: list[tuple[Optional[str], list[int], Optional[str]]],
+    special: list[SpecialPoints],
     row: int,
     col: int,
     mode: str = 'lines',
@@ -366,6 +364,6 @@ class SpecialPoints:
     name: str = field()
     points: list = field()
     size: int = field(default=2)
-    colour: str = field(default='black')
+    colour: Optional[str] = field(default=None)
     # see https://plotly.com/python/marker-style
-    symbol: str = field(default='x')
+    symbol: Optional[str] = field(default=None)

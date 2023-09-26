@@ -132,8 +132,8 @@ cases:
         decimal: "."
       plot:
         # NOTE: include '{label}' + '{kind}' in path name, as this is a schema!
-        path: "output/{label}-plot-{kind}.png" # static output for papers
-        # path: 'output/plot-{kind}.html' # interactive output for webpages
+        # path: "output/{label}-plot-{kind}.png" # static output for papers
+        path: 'output/plot-{kind}.html' # interactive output for webpages
         title: "Pressure-Volume loop"
         font:
           family: "Avenir Next"
