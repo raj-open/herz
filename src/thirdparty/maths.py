@@ -86,7 +86,7 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
     return X
 
 
-def closest_index(x: float, points: Iterable, init: int = 0) -> int:
+def closest_index(x: float, points: Iterable[float], init: int = 0) -> int:
     try:
         dist = np.abs(np.asarray(points) - x)
         index = init + dist.argmin()
@@ -95,12 +95,28 @@ def closest_index(x: float, points: Iterable, init: int = 0) -> int:
     return index
 
 
+def closest_indices(
+    x: Iterable[float],
+    points: Iterable[float],
+    init: int = 0,
+    remove_repetitions: bool = True,
+    remove_bad: bool = True,
+) -> list[int]:
+    indices = [closest_index(xx, points, init=init) for xx in x]
+    if remove_repetitions:
+        indices = list(set(indices))
+    if remove_bad:
+        indices = [i for i in indices if i != -1]
+    return indices
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
     'closest_index',
+    'closest_indices',
     'findpeaks',
     'lmfit',
     'math',
