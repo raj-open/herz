@@ -12,7 +12,6 @@ from ..paths import *
 from ..core.log import *
 from ..models.app import *
 from ..models.user import *
-from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -92,7 +91,7 @@ API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
 INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
 UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
 POLY: dict[str, PolynomialSetting] = lazy(lambda x: x.settings.polynomial, API_CONFIG)
-MARKERS: dict[str, MarkerSettings] = lazy(lambda x: x.settings.markers, API_CONFIG)
+MARKERS: MarkerConfig = lazy(lambda x: x.settings.markers, API_CONFIG)
 
 USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
 BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)

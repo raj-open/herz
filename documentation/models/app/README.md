@@ -15,6 +15,7 @@ Class | Method | HTTP request | Description
  - [AppConfig](.//Models/AppConfig.md)
  - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
+ - [MarkerConfig](.//Models/MarkerConfig.md)
  - [MarkerSettings](.//Models/MarkerSettings.md)
  - [PolyDerCondition](.//Models/PolyDerCondition.md)
  - [PolyIntCondition](.//Models/PolyIntCondition.md)

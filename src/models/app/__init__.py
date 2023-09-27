@@ -15,4 +15,5 @@ __all__ = [
     'AppInfo',
     'AppConfig',
     'PolynomialSetting',
+    'MarkerConfig',
 ]

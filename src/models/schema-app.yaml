@@ -44,12 +44,7 @@ components:
                 $ref: "#/components/schemas/PolynomialSetting"
                 default: {}
             markers:
-              description: |-
-                Settings for plottings special points.
-              type: object
-              additionalProperties:
-                $ref: "#/components/schemas/MarkerSettings"
-                default: {}
+              $ref: "#/components/schemas/MarkerConfig"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Config > info
@@ -133,6 +128,28 @@ components:
             type: number
           minItems: 2
           maxItems: 2
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - MarkerConfig
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    MarkerConfig:
+      description: |-
+        Settings for plottings special points for time-series.
+      type: object
+      required:
+        - pressure
+        - volume
+      properties:
+        pressure:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/MarkerSettings"
+            default: {}
+        volume:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/MarkerSettings"
+            default: {}
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # DATA TYPE - Points display settings

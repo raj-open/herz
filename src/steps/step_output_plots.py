@@ -15,6 +15,7 @@ from ..thirdparty.types import *
 
 from ..setup import config
 from ..setup.conversion import *
+from ..setup.plots import *
 from ..core.utils import *
 from ..core.poly import *
 from ..models.internal import *
@@ -46,7 +47,9 @@ def step_output_time_plot_ideal(
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
-    cfg_markers = config.MARKERS
+    cfg_markers = get_markers(quantity)
+
+    cfg_markers
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)

@@ -52,45 +52,64 @@ settings:
           time: 1.
   # settings for plotting points, see <https://plotly.com/python/marker-style>.
   markers:
-    split:
-      ignore: true
-    sys:
-      name: "systolic"
-      size: 6
-      colour: red
-      symbol: "circle"
-    eivc:
-      name: "eivc"
-      size: 6
-      colour: red
-      symbol: "triangle-up-open"
-    esp:
-      name: "esp"
-      size: 6
-      colour: red
-      symbol: "triangle-up"
-    epad:
-      name: "epad"
-      size: 6
-      colour: black
-      symbol: "square-open"
-    anti-epad:
-      name: "anti-epad"
-      size: 6
-      colour: black
-      symbol: "square"
-    dia:
-      name: "diastolic"
-      size: 6
-      colour: blue
-      symbol: "x"
-    sdp:
-      name: "sdp"
-      size: 6
-      colour: blue
-      symbol: "triangle-up-open"
-    edp:
-      name: "edp"
-      size: 6
-      colour: blue
-      symbol: "triangle-up"
+    pressure:
+      split:
+        ignore: true
+      max:
+        name: "P_max"
+        size: 6
+        colour: red
+        symbol: "circle-open"
+      sys:
+        name: "systolic"
+        size: 6
+        colour: red
+        symbol: "circle"
+      eivc:
+        name: "eivc"
+        size: 6
+        colour: red
+        symbol: "triangle-up-open"
+      esp:
+        name: "esp"
+        size: 6
+        colour: red
+        symbol: "triangle-up"
+      epad:
+        name: "epad"
+        size: 6
+        colour: black
+        symbol: "square-open"
+      anti-epad:
+        name: "anti-epad"
+        size: 6
+        colour: black
+        symbol: "square"
+      dia:
+        name: "diastolic"
+        size: 6
+        colour: blue
+        symbol: "x"
+      sdp:
+        name: "sdp"
+        size: 6
+        colour: blue
+        symbol: "triangle-up-open"
+      edp:
+        name: "edp"
+        size: 6
+        colour: blue
+        symbol: "triangle-up"
+    volume:
+      split:
+        ignore: true
+      max:
+        name: "V_max"
+        size: 6
+        colour: red
+        symbol: "circle"
+      min:
+        name: "V_min"
+        size: 6
+        colour: red
+        symbol: "triangle-up-open"
