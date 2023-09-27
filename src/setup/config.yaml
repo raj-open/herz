@@ -59,12 +59,12 @@ settings:
         name: "P_max"
         size: 6
         colour: red
-        symbol: "circle-open"
+        symbol: "circle"
       sys:
         name: "systolic"
         size: 6
         colour: red
-        symbol: "circle"
+        symbol: "x"
       eivc:
         name: "eivc"
         size: 6
@@ -112,4 +112,24 @@ settings:
         name: "V_max"
         size: 6
         colour: red
-        symbol: "circle"
+        symbol: "x"
+      dV-min:
+        name: "min dV/dt"
+        size: 6
+        colour: blue
+        symbol: "triangle-up-open"
+      dV-max:
+        name: "max dV/dt"
+        size: 6
+        colour: red
+        symbol: "triangle-up-open"
+      ddV-min:
+        name: "min d²V/dt²"
+        size: 6
+        colour: blue
+        symbol: "square-open"
+      ddV-max:
+        name: "max d²V/dt²"
+        size: 6
+        colour: red
+        symbol: "square-open"

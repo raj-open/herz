@@ -105,7 +105,16 @@ def enter(path: str, *_):
 
         # combined output
         LPsub = LP.subtask(f'''OUTPLOT P/V-LOOP PLOT''', 0)
-        log_warn('Not yet implemented!')
+        plt = step_output_loop_plot(
+            case,
+            data_p=datas['pressure'],
+            fitinfos_p=fitinfos['pressure'],
+            points_p=points['pressure'],
+            data_v=datas['volume'],
+            fitinfos_v=fitinfos['volume'],
+            points_v=points['volume'],
+        )
+        # plt.show()
         LPsub.next()
         LP.next()
     return

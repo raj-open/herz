@@ -120,14 +120,17 @@ def recognise_special_points_volume(info: FittedInfo) -> dict[str, list[float]]:
     crits_localmax = filter_kinds(crits, [CriticalPoint.LOCAL_MAXIMUM, CriticalPoint.MAXIMUM])
     crits_max = filter_kinds(crits, [CriticalPoint.MAXIMUM])
 
-    # RECOGNISE V_max:
-    times['max'] = [0.0]
-    t0 = 0.0
-
-    # RECOGNISE dia:
-    crit = filter_times(crits_min[0], t_after=t0, t_before=1.0)
-    t0 = crit[0][0]
+    # RECOGNISE max/min V:
+    t0 = crits_max[0][0][0]
+    times['max'] = [t0]
+    t0 = crits_min[0][0][0]
     times['min'] = [t0]
+
+    # RECOGNISE max/min V´:
+    t0 = crits_max[1][0][0]
+    times['dV-max'] = [t0]
+    t0 = crits_min[1][0][0]
+    times['dV-min'] = [t0]
 
     # RECOGNISE start-end of cycle (for plotting):
     t_split = times['max'][0]

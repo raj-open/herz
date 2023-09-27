@@ -56,26 +56,29 @@ def step_output_time_plot(
 
     # rescale normalised polynomial + points:
     _, info = fitinfos[-1]
-    q, points = get_rescaled_polynomial_and_points(info, points)
+    T = info.normalisation.period
+
+    # re-normalise polynomials
+    q, points = get_renormalised_polynomial_and_points(info, points)
     q = [cv[quantity] * xx for xx in q]
     dq = get_derivative_coefficients(q)
     ddq = get_derivative_coefficients(dq)
 
-    # convert everything to numpy-arrays for ease of computation
-    points = {key: np.asarray(ts) for key, ts in points.items()}
+    # extract spltting-time:
+    # NOTE: must be computed after renormalisation of points!
+    t_split = points.get('split', [0.0])[0]
 
-    # define a time axis for [0, T], include endpoints:
-    T = info.normalisation.period
-
-    t_split = points['split'][0] if 'split' in points else 0.0
+    # define a time axis for [0, T]:
     shift_times = shift_function_times(t_split=t_split, T=T)
     shift_indices = shift_function_indices(t_split=t_split, T=T)
-    time0 = np.linspace(start=0, stop=T, num=N, endpoint=False)
-    time = time0[:]
-    time = shift_times(time)
-    t_data = data['time'].to_numpy(copy=True)
-    data['time'] = t_data - t_split + T * (t_data < t_split)
+    time_orig = np.linspace(start=0, stop=T, num=N, endpoint=False)
+    time = shift_times(time_orig, strict=False)
 
+    # re-normalise data
+    data = get_renormalised_data(data, fitinfos, t_split=t_split, quantity=quantity)
+
+    # re-normalise points
+    points = {key: np.asarray(ts) for key, ts in points.items()}
     points_ = [
         {
             key: coordinates_special_points(ts, q, T=T, t_split=t_split)
@@ -91,11 +94,12 @@ def step_output_time_plot(
         },
     ]
 
+    # set up plots
     fig = make_subplots(
         rows=3,
         cols=1,
         subplot_titles=[
-            f'<b>Time series for {name} (fitted, single cycle)</b>'
+            f'Time series for {name} (fitted, single cycle)'
             for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
         ],
     )
@@ -133,9 +137,8 @@ def step_output_time_plot(
         # range=[0, None], # FIXME: does not work!
     )
 
-    t_sp = np.concatenate([[0, T]] + list(points.values()))
-    t_sp = np.asarray(list(set(t_sp.tolist())))  # unique elements
-    t_sp = cv['time'] * shift_times(t_sp)  # convert units
+    t_sp = np.concatenate([[0, t_split, T]] + list(points.values()))
+    t_sp = cv['time'] * np.unique(shift_times(t_sp, strict=False))  # convert units
 
     for row in range(1, 3 + 1):
         fig.update_xaxes(
@@ -158,6 +161,7 @@ def step_output_time_plot(
         unit = units[key]
         fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
 
+    # add series
     add_plot_time_series(
         fig,
         name=f'{quantity.title()} [data]',
@@ -167,69 +171,74 @@ def step_output_time_plot(
         mode='markers',
         row=1,
         col=1,
-        markers={},
+        points=[],
         showlegend=True,
-        showlegend_markers=False,
+        showlegend_points=False,
     )
 
     add_plot_time_series(
         fig,
         name=f'{quantity.title()} [fit]',
         time=cv['time'] * time,
-        values=poly(shift_indices(time0), *q),
+        values=poly(shift_indices(time_orig, strict=False), *q),
         row=1,
         col=1,
-        markers={
-            key: (
+        points=[
+            (
+                key,
                 cv['time'] * ts,
                 values,
                 cfg_markers.get(key, None),
             )
             for key, (ts, values) in points_[0].items()
-        },
+        ],
         showlegend=True,
-        showlegend_markers=True,
+        showlegend_points=True,
     )
+
     add_plot_time_series(
         fig,
         name=f'(d/dt){symb} [fit]',
         time=cv['time'] * time,
-        values=poly(shift_indices(time0), *dq),
+        values=poly(shift_indices(time_orig, strict=False), *dq),
         row=2,
         col=1,
-        markers={
-            key: (
+        points=[
+            (
+                key,
                 cv['time'] * ts,
                 values,
                 cfg_markers.get(key, None),
             )
             for key, (ts, values) in points_[1].items()
-        },
+        ],
         showlegend=False,
-        showlegend_markers=False,
+        showlegend_points=False,
     )
+
     add_plot_time_series(
         fig,
         name=f'(d/dt)²{symb} [fit]',
         time=cv['time'] * time,
-        values=poly(shift_indices(time0), *ddq),
+        values=poly(shift_indices(time_orig, strict=False), *ddq),
         row=3,
         col=1,
-        markers={
-            key: (
+        points=[
+            (
+                key,
                 cv['time'] * ts,
                 values,
                 cfg_markers.get(key, None),
             )
             for key, (ts, values) in points_[2].items()
-        },
+        ],
         showlegend=False,
-        showlegend_markers=False,
+        showlegend_points=False,
     )
 
     path = cfg.plot.path.__root__
     if path is not None:
-        path = path.format(label=case.label, kind=f'{quantity}-time-fit')
+        path = path.format(label=case.label, kind=f'{quantity}-time')
         save_image(fig=fig, path=path)
 
     return fig
@@ -237,105 +246,207 @@ def step_output_time_plot(
 
 def step_output_loop_plot(
     case: UserCase,
-    data: pd.DataFrame,
+    data_p: pd.DataFrame,
+    fitinfos_p: list[tuple[tuple[int, int], FittedInfo]],
+    points_p: dict[str, list[float]],
+    data_v: pd.DataFrame,
+    fitinfos_v: list[tuple[tuple[int, int], FittedInfo]],
+    points_v: dict[str, list[float]],
+    N: int = 1000,
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
+    cfg_markers_p = get_markers('pressure')
+    cfg_markers_v = get_markers('volume')
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
 
-    time = cv['time'] * data['time'].to_numpy(copy=True)
-    pressure = cv['pressure'] * data['pressure'].to_numpy(copy=True)
-    volume = cv['volume'] * data['volume'].to_numpy(copy=True)
-    pressure_fit = cv['pressure'] * data['pressure[fit]'].to_numpy(copy=True)
-    volume_fit = cv['volume'] * data['volume[fit]'].to_numpy(copy=True)
+    _, info_p = fitinfos_p[-1]
+    _, info_v = fitinfos_v[-1]
+    T_p = info_p.normalisation.period
+    T_v = info_v.normalisation.period
+    t_split_p = points_p.get('split', [0.0])[0]
+    t_split_v = points_v.get('split', [0.0])[0]
 
-    text = np.asarray([f'{t:.0f}{units["time"]}' for t in time])
+    # define a time axis for [0, T]:
+    shift_times_p = shift_function_times(t_split=t_split_p, T=T_p)
+    shift_times_v = shift_function_times(t_split=t_split_v, T=T_v)
+    shift_indices_p = shift_function_indices(t_split=t_split_p, T=T_p)
+    shift_indices_v = shift_function_indices(t_split=t_split_v, T=T_v)
+    unshift_times_p = shift_function_times(t_split=T_p - t_split_p, T=T_p)
+    unshift_times_v = shift_function_times(t_split=T_v - t_split_v, T=T_v)
+    unshift_indices_p = shift_function_indices(t_split=T_p - t_split_p, T=T_p)
+    unshift_indices_v = shift_function_indices(t_split=T_v - t_split_v, T=T_v)
+    time_orig_p = np.linspace(start=0, stop=T_p, num=N, endpoint=False)
+    time_orig_v = np.linspace(start=0, stop=T_v, num=N, endpoint=False)
+    time_p = shift_times_p(time_orig_p)
+    time_v = shift_times_v(time_orig_v)
 
-    fig = pgo.Figure(
-        data=[
-            pgo.Scatter(
-                name='P-V [Original]',
-                x=volume,
-                y=pressure,
-                text=text,
-                mode='markers',
-                marker=dict(
-                    size=2,
-                    color='black',
-                ),
-            ),
-            pgo.Scatter(
-                name='P-V [fit]',
-                x=volume_fit,
-                y=pressure_fit,
-                text=text,
-                mode='lines',
-                line=dict(
-                    width=1,
-                    color='blue',
-                ),
-            ),
-            # pgo.Scatter(
-            #     name=None,
-            #     x=volume[marked],
-            #     y=pressure[marked],
-            #     text=text[marked],
-            #     mode='markers',
-            #     marker=dict(
-            #         symbol='circle',
-            #         size=4,
-            #         color='red',
-            #     ),
-            # ),
-        ],
-        layout=pgo.Layout(
-            width=640,
-            height=480,
-            margin=dict(l=40, r=40, t=60, b=40),
+    # re-normalise data
+    data_p = get_renormalised_data(data_p, fitinfos_p, t_split=t_split_p, quantity='pressure')
+    data_v = get_renormalised_data(data_v, fitinfos_v, t_split=t_split_v, quantity='volume')
+
+    # re-normalise polynomial + points:
+    p, points_p = get_renormalised_polynomial_and_points(info_p, points_p)
+    v, points_v = get_renormalised_polynomial_and_points(info_v, points_v)
+
+    # convert units
+    p = [cv['pressure'] * xx for xx in p]
+    v = [cv['volume'] * xx for xx in v]
+    data_p['pressure'] = cv['pressure'] * data_p['pressure']
+    data_v['volume'] = cv['volume'] * data_v['volume']
+
+    # fit 'other' measurement to each time-series
+    data_p['volume'] = poly(
+        unshift_indices_v(T_v / T_p * shift_times_p(data_p['time[orig]'])), *v
+    )
+    data_v['pressure'] = poly(
+        unshift_indices_p(T_p / T_v * shift_times_v(data_v['time[orig]'])), *p
+    )
+
+    pressure_fit = poly(unshift_indices_p(time_p), *p)
+    volume_fit = poly(unshift_indices_v(time_v), *v)
+
+    # set up plots
+    fig = make_subplots(
+        rows=1,
+        cols=1,
+        subplot_titles=[cfg.plot.title],
+    )
+
+    fig.update_layout(
+        width=640,
+        height=480,
+        margin=dict(l=40, r=40, t=60, b=40),
+        font=dict(
+            family=cfg_font.family,
+            size=cfg_font.size,
+            color='hsla(0, 100%, 0%, 1)',
+        ),
+        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        title=dict(
+            text=cfg.plot.title,
+            x=0.5,
+            y=0.95,
             font=dict(
-                family=cfg_font.family,
-                size=cfg_font.size,
-                color='hsla(0, 100%, 0%, 1)',
-            ),
-            plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-            title=dict(
-                text=f'<b>{cfg.plot.title}</b>',
-                x=0.5,
-                y=0.95,
-                font=dict(
-                    size=cfg_font.size_title,
-                    color='hsla(240, 100%, 50%, 1)',
-                ),
-            ),
-            xaxis=dict(
-                title=f'Volume    ({units["volume"]})',
-                linecolor='black',
-                mirror=True,  # adds border on top too
-                ticks='outside',
-                showgrid=True,
-                visible=True,
-                # range=[0, None], # FIXME: does not work!
-                # rangemode='tozero',
-            ),
-            yaxis=dict(
-                title=f'Pressure    ({units["pressure"]})',
-                linecolor='black',
-                mirror=True,  # adds border on right too
-                ticks='outside',
-                showgrid=True,
-                visible=True,
-                # range=[0, None], # FIXME: does not work!
-                # autorange='reversed',
-                rangemode='tozero',
-            ),
-            showlegend=cfg.plot.legend,
-            legend=dict(
-                title='P-V Loops',
+                size=cfg_font.size_title,
             ),
         ),
+        xaxis=dict(
+            title=f'Volume    ({units["volume"]})',
+            linecolor='black',
+            mirror=True,  # adds border on top too
+            ticks='outside',
+            showgrid=True,
+            visible=True,
+            # range=[0, None], # FIXME: does not work!
+            # rangemode='tozero',
+        ),
+        yaxis=dict(
+            title=f'Pressure    ({units["pressure"]})',
+            linecolor='black',
+            mirror=True,  # adds border on right too
+            ticks='outside',
+            showgrid=True,
+            visible=True,
+            # range=[0, None], # FIXME: does not work!
+            # autorange='reversed',
+            rangemode='tozero',
+        ),
+        showlegend=cfg.plot.legend,
+        legend=dict(
+            title='Series/Points',
+        ),
     )
+
+    fig.append_trace(
+        pgo.Scatter(
+            name='P-V [data/fit]',
+            x=data_p['volume'],
+            y=data_p['pressure'],
+            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_p['time']],
+            mode='markers',
+            marker=dict(
+                size=2,
+                color='black',
+            ),
+            showlegend=True,
+        ),
+        row=1,
+        col=1,
+    )
+
+    fig.append_trace(
+        pgo.Scatter(
+            name='P-V [fit/data]',
+            x=data_v['volume'],
+            y=data_v['pressure'],
+            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_v['time']],
+            mode='markers',
+            marker=dict(
+                size=2,
+                color='black',
+            ),
+            showlegend=True,
+        ),
+        row=1,
+        col=1,
+    )
+
+    fig.append_trace(
+        pgo.Scatter(
+            name='P-V [fit]',
+            x=volume_fit,
+            y=pressure_fit,
+            text=[],
+            mode='lines',
+            line_shape='spline',
+            line=dict(
+                width=1,
+                color='black',
+                # color='hsla(0, 100%, 50%, 0)',
+            ),
+            showlegend=True,
+        ),
+        row=1,
+        col=1,
+    )
+
+    points_ = []
+
+    for key, ts in points_p.items():
+        _, p_ = coordinates_special_points(ts, p, T=T_p, t_split=t_split_p)
+        _, v_ = coordinates_special_points(ts, v, T=T_p, t_split=t_split_p)
+        settings = cfg_markers_p.get(key, None)
+        points_.append((key, v_, p_, settings))
+
+    for key, ts in points_v.items():
+        _, p_ = coordinates_special_points(ts, p, T=T_v, t_split=t_split_v)
+        _, v_ = coordinates_special_points(ts, v, T=T_v, t_split=t_split_v)
+        settings = cfg_markers_v.get(key, None)
+        points_.append((key, v_, p_, settings))
+
+    for key, v_, p_, settings in points_:
+        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
+        if settings.ignore:
+            continue
+        fig.append_trace(
+            pgo.Scatter(
+                name=settings.name,
+                x=v_,
+                y=p_,
+                mode='markers+text',
+                marker=dict(
+                    symbol=settings.symbol,
+                    size=settings.size,
+                    color=settings.colour,
+                ),
+                showlegend=True,
+            ),
+            row=1,
+            col=1,
+        )
 
     path = cfg.plot.path.__root__
     if path is not None:
@@ -361,11 +472,20 @@ def add_plot_time_series(
     line: dict = dict(
         width=1,
         color='black',
+        # color='hsla(0, 100%, 50%, 0)',
+    ),
+    marker: dict = dict(
+        size=1,
+        color='hsla(0, 100%, 50%, 0)',
+        line=dict(
+            width=1,
+            color='black',
+        ),
     ),
     text: Optional[str] = None,
-    markers: dict[str, tuple[Iterable[float], Iterable[float], Optional[MarkerSettings]]] = {},
+    points: list[tuple[str, Iterable[float], Iterable[float], Optional[MarkerSettings]]] = {},
     showlegend: bool = False,
-    showlegend_markers: bool = True,
+    showlegend_points: bool = True,
 ) -> pgo.Figure:
     fig.append_trace(
         pgo.Scatter(
@@ -373,30 +493,17 @@ def add_plot_time_series(
             x=time,
             y=values,
             text=[text or name for _ in time],
-            line_shape='spline',
             mode=mode,
-            line=dict(
-                width=1,
-                color='black',
-                # color='hsla(0, 100%, 50%, 0)',
-                # line=line,
-            )
-            if mode == 'lines'
-            else None,
-            marker=dict(
-                size=1,
-                color='hsla(0, 100%, 50%, 0)',
-                line=line,
-            )
-            if mode == 'markers'
-            else None,
+            line=line if mode == 'lines' else None,
+            line_shape='spline',
+            marker=marker if mode == 'markers' else None,
             showlegend=showlegend,
         ),
         row=row,
         col=col,
     )
 
-    for key, (time_, values_, settings) in markers.items():
+    for key, time_, values_, settings in points:
         settings = settings or MarkerSettings(name=key, size=6, symbol='x')
         if settings.ignore:
             continue
@@ -411,13 +518,13 @@ def add_plot_time_series(
                     size=settings.size,
                     color=settings.colour,
                 ),
-                showlegend=showlegend_markers,
+                showlegend=showlegend_points,
             ),
             row=row,
             col=col,
         )
         for t in time_:
-            fig.add_vline(x=t, line_width=1, line_dash='dash', line_color=settings.colour)
+            fig.add_vline(x=t, line_width=0.5, line_dash='dash', line_color=settings.colour)
 
     return fig
 
@@ -438,29 +545,39 @@ def save_image(fig: pgo.Figure, path: str):
 
 
 def shift_function_times(t_split: float, T: float):
-    def shift(t: np.ndarray) -> np.ndarray:
-        TT = 0 * t[t == t_split]  # add this for peridocity
-        TT[:] = T
-        return np.concatenate([t[t >= t_split] - t_split, (T - t_split) + t[t < t_split], TT])
+    def shift(t: np.ndarray, strict: bool = True) -> np.ndarray:
+        if strict:
+            parts = [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split]]
+        else:
+            TT = 0 * t[t == t_split]  # add this for peridocity
+            TT[:] = T
+            parts = [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split], TT]
+        return np.concatenate(parts)
 
     return shift
 
 
 def shift_function_indices(t_split: float, T: float):
-    def shift(t: np.ndarray) -> np.ndarray:
-        TT = 0 * t[t == t_split]  # add this for peridocity
-        TT[:] = T if t_split == 0 else t_split
-        return np.concatenate([t[t >= t_split], t[t < t_split], TT])
+    def shift(t: np.ndarray, strict: bool = True) -> np.ndarray:
+        if strict:
+            parts = [t[t >= t_split], t[t < t_split]]
+        else:
+            TT = 0 * t[t == t_split]  # add this for peridocity
+            TT[:] = T if t_split == 0 else t_split
+            parts = [t[t >= t_split], t[t < t_split], TT]
+        return np.concatenate(parts)
 
     return shift
 
 
 def coordinates_special_points(
-    t: np.ndarray, p: list[float], T: float, t_split: float
-) -> np.ndarray:
+    t: Iterable[float], p: list[float], T: float, t_split: float
+) -> tuple[np.ndarray, np.ndarray]:
     shift_times = shift_function_times(t_split=t_split, T=T)
     shift_indices = shift_function_indices(t_split=t_split, T=T)
-    t = np.asarray(list(set(t.tolist())))
-    values = poly(shift_indices(t), *p)
-    t = shift_times(t)
+
+    t = np.unique(np.asarray(t))
+    values = poly(shift_indices(t, strict=False), *p)
+    t = shift_times(t, strict=False)
+
     return t, values
