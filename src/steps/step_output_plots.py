@@ -28,7 +28,6 @@ from ..models.user import *
 __all__ = [
     'step_output_loop_plot',
     'step_output_time_plot',
-    'step_output_time_plot_ideal',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,7 +35,7 @@ __all__ = [
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def step_output_time_plot_ideal(
+def step_output_time_plot(
     case: UserCase,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
@@ -48,8 +47,6 @@ def step_output_time_plot_ideal(
     cfg = case.output
     cfg_font = cfg.plot.font
     cfg_markers = get_markers(quantity)
-
-    cfg_markers
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
@@ -70,22 +67,29 @@ def step_output_time_plot_ideal(
     # define a time axis for [0, T], include endpoints:
     T = info.normalisation.period
 
-    if 'split' in points:
-        t_split = points['split'][0]
-        shift_times = lambda t: np.concatenate(
-            [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split]]
-        )
-        shift_indices = lambda t: np.concatenate([t[t >= t_split], t[t < t_split]])
-        time0 = np.linspace(start=0, stop=T, num=N, endpoint=False)
-        time = time0[:]
-        time = shift_times(time)
-        t_data = data['time'].to_numpy(copy=True)
-        data['time'] = t_data - t_split + T * (t_data < t_split)
-    else:
-        shift_times = lambda t: t
-        shift_indices = lambda t: t
-        time0 = np.linspace(start=0, stop=T, num=N + 1, endpoint=True)
-        time = time0[:]
+    t_split = points['split'][0] if 'split' in points else 0.0
+    shift_times = shift_function_times(t_split=t_split, T=T)
+    shift_indices = shift_function_indices(t_split=t_split, T=T)
+    time0 = np.linspace(start=0, stop=T, num=N, endpoint=False)
+    time = time0[:]
+    time = shift_times(time)
+    t_data = data['time'].to_numpy(copy=True)
+    data['time'] = t_data - t_split + T * (t_data < t_split)
+
+    points_ = [
+        {
+            key: coordinates_special_points(ts, q, T=T, t_split=t_split)
+            for key, ts in points.items()
+        },
+        {
+            key: coordinates_special_points(ts, dq, T=T, t_split=t_split)
+            for key, ts in points.items()
+        },
+        {
+            key: coordinates_special_points(ts, ddq, T=T, t_split=t_split)
+            for key, ts in points.items()
+        },
+    ]
 
     fig = make_subplots(
         rows=3,
@@ -100,6 +104,11 @@ def step_output_time_plot_ideal(
         width=480,
         height=720,
         margin=dict(l=40, r=40, t=60, b=40),
+        title=dict(
+            font=dict(
+                size=cfg_font.size_title,
+            ),
+        ),
         font=dict(
             family=cfg_font.family,
             size=cfg_font.size,
@@ -107,7 +116,12 @@ def step_output_time_plot_ideal(
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         showlegend=cfg.plot.legend,
-        legend=dict(title='Special points'),
+        legend=dict(
+            title='Series/Points',
+            font=dict(
+                size=cfg_font.size_legend,
+            ),
+        ),
     )
 
     opt = dict(
@@ -122,6 +136,7 @@ def step_output_time_plot_ideal(
     t_sp = np.concatenate([[0, T]] + list(points.values()))
     t_sp = np.asarray(list(set(t_sp.tolist())))  # unique elements
     t_sp = cv['time'] * shift_times(t_sp)  # convert units
+
     for row in range(1, 3 + 1):
         fig.update_xaxes(
             title=f'Time    ({units["time"]})',
@@ -145,32 +160,34 @@ def step_output_time_plot_ideal(
 
     add_plot_time_series(
         fig,
-        name=f'{quantity.title()}',
-        text=f'{quantity} [renormalised]',
+        name=f'{quantity.title()} [data]',
+        text=f'{quantity}',
         time=cv['time'] * data['time'],
         values=cv[quantity] * data[quantity],
         mode='markers',
         row=1,
         col=1,
         markers={},
+        showlegend=True,
         showlegend_markers=False,
     )
 
     add_plot_time_series(
         fig,
-        name=f'{symb} [fit]',
+        name=f'{quantity.title()} [fit]',
         time=cv['time'] * time,
         values=poly(shift_indices(time0), *q),
         row=1,
         col=1,
         markers={
             key: (
-                cv['time'] * shift_times(ts),
-                poly(shift_indices(ts), *q),
+                cv['time'] * ts,
+                values,
                 cfg_markers.get(key, None),
             )
-            for key, ts in points.items()
+            for key, (ts, values) in points_[0].items()
         },
+        showlegend=True,
         showlegend_markers=True,
     )
     add_plot_time_series(
@@ -182,12 +199,13 @@ def step_output_time_plot_ideal(
         col=1,
         markers={
             key: (
-                cv['time'] * shift_times(ts),
-                poly(shift_indices(ts), *dq),
+                cv['time'] * ts,
+                values,
                 cfg_markers.get(key, None),
             )
-            for key, ts in points.items()
+            for key, (ts, values) in points_[1].items()
         },
+        showlegend=False,
         showlegend_markers=False,
     )
     add_plot_time_series(
@@ -199,159 +217,19 @@ def step_output_time_plot_ideal(
         col=1,
         markers={
             key: (
-                cv['time'] * shift_times(ts),
-                poly(shift_indices(ts), *ddq),
+                cv['time'] * ts,
+                values,
                 cfg_markers.get(key, None),
             )
-            for key, ts in points.items()
+            for key, (ts, values) in points_[2].items()
         },
+        showlegend=False,
         showlegend_markers=False,
     )
 
     path = cfg.plot.path.__root__
     if path is not None:
         path = path.format(label=case.label, kind=f'{quantity}-time-fit')
-        save_image(fig=fig, path=path)
-
-    return fig
-
-
-def step_output_time_plot(
-    case: UserCase,
-    data: pd.DataFrame,
-    points: dict[str, list[int]],
-    quantity: str,
-    symb: str,
-    original_time: bool = True,
-) -> pgo.Figure:
-    cfg = case.output
-    cfg_font = cfg.plot.font
-    cfg_markers = config.MARKERS
-
-    cv = output_conversions(cfg.quantities)
-    units = output_units(cfg.quantities)
-
-    if original_time:
-        data = data.sort_values(by=['time[orig]']).reset_index(drop=True)
-        data['time'] = data['time[orig]']
-
-    time = cv['time'] * data['time'].to_numpy(copy=True)
-    marked = data['marked'].to_numpy(copy=True)
-
-    x = {
-        key: cv[key_] * data[key_].to_numpy(copy=True)
-        for key, key_ in [
-            ('orig', quantity),
-            ('fit', f'{quantity}[fit]'),
-            ('d', f'd[1,t]{quantity}[fit]'),
-            ('dd', f'd[2,t]{quantity}[fit]'),
-        ]
-    }
-
-    fig = make_subplots(
-        rows=3,
-        cols=1,
-        subplot_titles=[
-            f'<b>Time series for {name}</b>'
-            for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
-        ],
-    )
-
-    fig.update_layout(
-        width=640,
-        height=720,
-        margin=dict(l=40, r=40, t=60, b=40),
-        font=dict(
-            family=cfg_font.family,
-            size=cfg_font.size,
-            color='hsla(0, 100%, 0%, 1)',
-        ),
-        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-        showlegend=cfg.plot.legend,
-        legend=dict(title='Special points'),
-    )
-
-    opt = dict(
-        linecolor='black',
-        mirror=True,  # adds border on right/top too
-        ticks='outside',
-        showgrid=True,
-        visible=True,
-        # range=[0, None], # FIXME: does not work!
-    )
-
-    for row in range(1, 3 + 1):
-        fig.update_xaxes(
-            title=f'Time    ({units["time"]})',
-            rangemode='tozero',
-            **opt,
-            row=row,
-            col=1,
-        )
-
-    for row, key, name in [
-        (1, quantity, quantity.title()),
-        (2, f'd[1,t]{quantity}[fit]', f'{symb}´(t)'),
-        (3, f'd[2,t]{quantity}[fit]', f'{symb}´´(t)'),
-    ]:
-        unit = units[key]
-        fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
-
-    add_plot_time_series(
-        fig,
-        name=None,
-        text='P [original]',
-        time=time,
-        values=x['orig'],
-        mode='markers',
-        row=1,
-        col=1,
-        markers={},
-        showlegend_markers=False,
-    )
-    add_plot_time_series(
-        fig,
-        name=f'{symb} [fit]',
-        time=time,
-        values=x['fit'],
-        row=1,
-        col=1,
-        markers={
-            key: (time[indices], x['fit'][indices], cfg_markers.get(key, None))
-            for key, indices in points.items()
-        },
-        showlegend_markers=True,
-    )
-    add_plot_time_series(
-        fig,
-        name=f'(d/dt){symb} [fit]',
-        time=time,
-        values=x['d'],
-        row=2,
-        col=1,
-        markers={
-            key: (time[indices], x['d'][indices], cfg_markers.get(key, None))
-            for key, indices in points.items()
-        },
-        showlegend_markers=False,
-    )
-    add_plot_time_series(
-        fig,
-        name=f'(d/dt)²{symb} [fit]',
-        time=time,
-        values=x['dd'],
-        row=3,
-        col=1,
-        markers={
-            key: (time[indices], x['dd'][indices], cfg_markers.get(key, None))
-            for key, indices in points.items()
-        },
-        showlegend_markers=False,
-    )
-
-    path = cfg.plot.path.__root__
-    if path is not None:
-        path = path.format(label=case.label, kind=f'{quantity}-time')
         save_image(fig=fig, path=path)
 
     return fig
@@ -486,6 +364,7 @@ def add_plot_time_series(
     ),
     text: Optional[str] = None,
     markers: dict[str, tuple[Iterable[float], Iterable[float], Optional[MarkerSettings]]] = {},
+    showlegend: bool = False,
     showlegend_markers: bool = True,
 ) -> pgo.Figure:
     fig.append_trace(
@@ -511,7 +390,7 @@ def add_plot_time_series(
             )
             if mode == 'markers'
             else None,
-            showlegend=False,
+            showlegend=showlegend,
         ),
         row=row,
         col=col,
@@ -556,3 +435,32 @@ def save_image(fig: pgo.Figure, path: str):
     else:
         fig.write_image(path)
     return
+
+
+def shift_function_times(t_split: float, T: float):
+    def shift(t: np.ndarray) -> np.ndarray:
+        TT = 0 * t[t == t_split]  # add this for peridocity
+        TT[:] = T
+        return np.concatenate([t[t >= t_split] - t_split, (T - t_split) + t[t < t_split], TT])
+
+    return shift
+
+
+def shift_function_indices(t_split: float, T: float):
+    def shift(t: np.ndarray) -> np.ndarray:
+        TT = 0 * t[t == t_split]  # add this for peridocity
+        TT[:] = T if t_split == 0 else t_split
+        return np.concatenate([t[t >= t_split], t[t < t_split], TT])
+
+    return shift
+
+
+def coordinates_special_points(
+    t: np.ndarray, p: list[float], T: float, t_split: float
+) -> np.ndarray:
+    shift_times = shift_function_times(t_split=t_split, T=T)
+    shift_indices = shift_function_indices(t_split=t_split, T=T)
+    t = np.asarray(list(set(t.tolist())))
+    values = poly(shift_indices(t), *p)
+    t = shift_times(t)
+    return t, values

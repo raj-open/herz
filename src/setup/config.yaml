@@ -103,13 +103,13 @@ settings:
     volume:
       split:
         ignore: true
+      min:
+        name: "V_min"
+        size: 6
+        colour: blue
+        symbol: "x"
       max:
         name: "V_max"
         size: 6
         colour: red
         symbol: "circle"
-      min:
-        name: "V_min"
-        size: 6
-        colour: red
-        symbol: "triangle-up-open"

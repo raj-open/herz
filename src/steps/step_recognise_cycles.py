@@ -55,13 +55,6 @@ def step_recognise_cycles(
         indices = indices[index_max:] + indices[:index_max]
         data = data.iloc[indices, :]
         data.reset_index(inplace=True, drop=True)
-        s = N - 1 - index_max
-        peaks = [s + i for i in peaks]
-        troughs = [s + i for i in troughs]
-        data[f'{quantity}[peak]'] = False
-        data[f'{quantity}[peak]'][peaks] = True
-        data[f'{quantity}[troughs]'] = False
-        data[f'{quantity}[troughs]'][troughs] = True
         ext = characteristic_to_where(data[f'{quantity}[{shift}]'])
 
     # 3. get cycles based on peaks

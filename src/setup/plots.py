@@ -33,6 +33,6 @@ def get_markers(quantity: str) -> dict[str, MarkerSettings]:
         case 'pressure':
             return config.MARKERS.pressure
         case 'volume':
-            return config.MARKERS.pressure
+            return config.MARKERS.volume
         case _:
             return {}

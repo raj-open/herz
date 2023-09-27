@@ -211,7 +211,12 @@ components:
                   description: |-
                     Size of title font in `pt`.
                   type: integer
-                  default: 12
+                  default: 14
+                size-legend:
+                  description: |-
+                    Size of legend font in `pt`.
+                  type: integer
+                  default: 10
               additionalProperties: false
           additionalProperties: true
       additionalProperties: true

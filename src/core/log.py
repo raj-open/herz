@@ -130,7 +130,10 @@ class LogProgress:
     @property
     def state(self) -> str:
         dash = '-' * (3 + 2 * self.depth)
-        return f'Progress {dash} \x1b[1m{self.name}\x1b[0m: {self.step}/{self.steps} ({self.step/self.steps:.2%})'
+        k = self.step
+        n = self.steps
+        r = 1 if n == 0 else k / n
+        return f'Progress {dash} \x1b[1m{self.name}\x1b[0m: {k}/{n} ({r:.2%})'
 
     @property
     def done(self) -> bool:
