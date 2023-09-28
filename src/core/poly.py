@@ -11,6 +11,7 @@ from ..thirdparty.types import *
 
 from .utils import *
 from .constants import *
+from ..models.enums import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -206,7 +207,7 @@ def get_integral_coefficients(coeff: list[float], n: int = 1) -> list[float]:
 def get_critical_points(
     p: list[float],
     dp: Optional[list[float]] = None,
-) -> list[tuple[float, float, int, CriticalPoint]]:
+) -> list[tuple[float, float, int, EnumCriticalPoints]]:
     results = []
 
     # if not precomputed, compute 1st and 2nd derivatives:
@@ -257,11 +258,11 @@ def get_critical_points(
         change_pre = sign_normalised_difference(ym_pre, y0, eps=MACHINE_EPS)
         match change_pre, change_post:
             case (-1, 1):
-                results.append((t0, y0, v, CriticalPoint.LOCAL_MINIMUM))
+                results.append((t0, y0, v, EnumCriticalPoints.LOCAL_MINIMUM))
             case (1, -1):
-                results.append((t0, y0, v, CriticalPoint.LOCAL_MAXIMUM))
+                results.append((t0, y0, v, EnumCriticalPoints.LOCAL_MAXIMUM))
             case (-1, -1) | (1, 1):
-                results.append((t0, y0, v, CriticalPoint.INFLECTION))
+                results.append((t0, y0, v, EnumCriticalPoints.INFLECTION))
             case _:
                 # NOTE: This case should not occur! If it does - reject!
                 pass
@@ -270,9 +271,9 @@ def get_critical_points(
     # values = poly(t_crit, *dp)
     # for t0, y in zip(t_crit, values):
     #     if y > MACHINE_EPS:
-    #         results.append((t0, CriticalPoint.MINIMUM))
+    #         results.append((t0, EnumCriticalPoints.MINIMUM))
     #     elif y < -MACHINE_EPS:
-    #         results.append((t0, CriticalPoint.MAXIMUM))
+    #         results.append((t0, EnumCriticalPoints.MAXIMUM))
     #     else:
     #         # ----------------------------------------------------------------
     #         # NOTE: this is computationally intensive
@@ -306,11 +307,11 @@ def get_critical_points(
     #             # Should not occur! If it does, reject critical point.
     #             pass
     #         elif k_min % 2 == 1:
-    #             results.append((t0, CriticalPoint.INFLECTION))
+    #             results.append((t0, EnumCriticalPoints.INFLECTION))
     #         elif q[k_min] > MACHINE_EPS:
-    #             results.append((t0, CriticalPoint.MINIMUM))
+    #             results.append((t0, EnumCriticalPoints.MINIMUM))
     #         elif q[k_min] < -MACHINE_EPS:
-    #             results.append((t0, CriticalPoint.MAXIMUM))
+    #             results.append((t0, EnumCriticalPoints.MAXIMUM))
 
     return results
 
@@ -320,7 +321,7 @@ def get_critical_points_bounded(
     t_min: float,
     t_max: float,
     dp: Optional[list[float]] = None,
-) -> list[tuple[float, int, CriticalPoint]]:
+) -> list[tuple[float, float, int, EnumCriticalPoints]]:
     results = get_critical_points(p=p, dp=dp)
 
     # restrict to interval
@@ -338,14 +339,14 @@ def get_critical_points_bounded(
     if abs(t_crit[0] - t_min) < MACHINE_EPS:
         results[0] = (t_min, values[0], *results[-1][2:])
     else:
-        results.insert(0, (t_min, values[0], 1, CriticalPoint.UNKNOWN))
+        results.insert(0, (t_min, values[0], 1, EnumCriticalPoints.UNKNOWN))
 
     # add in right-boundary or purify points that are too close
     if abs(t_max - t_crit[-1]) < MACHINE_EPS:
         results[-1] = (t_max, values[-1], *results[-1][2:])
     else:
         t_crit.append(t_max)
-        results.append((t_max, values[-1], 1, CriticalPoint.UNKNOWN))
+        results.append((t_max, values[-1], 1, EnumCriticalPoints.UNKNOWN))
 
     # compute absoulte min/max
     values = [y0 for t0, y0, v, kind in results]
@@ -353,17 +354,17 @@ def get_critical_points_bounded(
     y_max = np.max(values)
     for k, (t0, y0, v, kind) in enumerate(results):
         if abs(normalised_difference(y_max, y0)) < MACHINE_EPS:
-            results[k] = (t0, y_max, v, CriticalPoint.MAXIMUM)
+            results[k] = (t0, y_max, v, EnumCriticalPoints.MAXIMUM)
         elif abs(normalised_difference(y_min, y0)) < MACHINE_EPS:
-            results[k] = (t0, y_min, v, CriticalPoint.MINIMUM)
+            results[k] = (t0, y_min, v, EnumCriticalPoints.MINIMUM)
 
     # remove boundaries of not classified as absolute min/max
     kind = results[0][-1]
-    if kind == CriticalPoint.UNKNOWN:
+    if kind == EnumCriticalPoints.UNKNOWN:
         results = results[1:]
 
     kind = results[-1][-1]
-    if kind == CriticalPoint.UNKNOWN:
+    if kind == EnumCriticalPoints.UNKNOWN:
         results = results[:-1]
 
     return results

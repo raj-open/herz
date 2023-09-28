@@ -9,7 +9,7 @@ from src.thirdparty.maths import *
 from src.thirdparty.types import *
 from tests.thirdparty.unit import *
 
-from src.core.constants import *
+from src.models.enums import *
 from src.core.poly import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -212,7 +212,7 @@ def test_get_critical_points(
     t0, y0, v, kind = results[0]
     test.assertEquals(t0, 1.0)
     test.assertEquals(v, 1.0)
-    test.assertEquals(kind, CriticalPoint.LOCAL_MINIMUM)
+    test.assertEquals(kind, EnumCriticalPoints.LOCAL_MINIMUM)
 
     # p(t) = -(t^2 - 2t + 1)
     results = get_critical_points([-1, 2, -1])
@@ -220,7 +220,7 @@ def test_get_critical_points(
     t0, y0, v, kind = results[0]
     test.assertEquals(t0, 1)
     test.assertEquals(v, 1)
-    test.assertEquals(kind, CriticalPoint.LOCAL_MAXIMUM)
+    test.assertEquals(kind, EnumCriticalPoints.LOCAL_MAXIMUM)
 
     # p(t) = t^3
     results = get_critical_points([0, 0, 0, 1])
@@ -228,7 +228,7 @@ def test_get_critical_points(
     t0, y0, v, kind = results[0]
     test.assertEquals(t0, 0.0)
     test.assertEquals(v, 2)
-    test.assertEquals(kind, CriticalPoint.INFLECTION)
+    test.assertEquals(kind, EnumCriticalPoints.INFLECTION)
 
     # Force
     #    p'(t) = t^2 - 3t + 2 = (t - 2)(t - 1)
@@ -243,12 +243,12 @@ def test_get_critical_points(
     t0, y0, v, kind = results[0]
     test.assertEquals(t0, 1.0)
     test.assertEquals(v, 1)
-    test.assertEquals(kind, CriticalPoint.LOCAL_MAXIMUM)
+    test.assertEquals(kind, EnumCriticalPoints.LOCAL_MAXIMUM)
 
     t0, y0, v, kind = results[1]
     test.assertEquals(t0, 2.0)
     test.assertEquals(v, 1)
-    test.assertEquals(kind, CriticalPoint.LOCAL_MINIMUM)
+    test.assertEquals(kind, EnumCriticalPoints.LOCAL_MINIMUM)
 
     # Force
     #    p'(t) = t^2 - 2t + 1 = (t - 1)^2
@@ -263,5 +263,5 @@ def test_get_critical_points(
     t0, y0, v, kind = results[0]
     test.assertEquals(t0, 1.0)
     test.assertEquals(v, 2)
-    test.assertEquals(kind, CriticalPoint.INFLECTION)
+    test.assertEquals(kind, EnumCriticalPoints.INFLECTION)
     return

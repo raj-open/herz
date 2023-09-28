@@ -7,12 +7,13 @@
 
 from ..thirdparty.types import *
 
+from ..models.generated.app import *
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'CriticalPoint',
     'MACHINE_EPS',
     'FLOAT_ERR',
 ]
@@ -23,16 +24,3 @@ __all__ = [
 
 MACHINE_EPS = 1e-10
 FLOAT_ERR = 1e-6
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ENUMS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-class CriticalPoint(Enum):
-    UNKNOWN = 1000
-    MINIMUM = -2
-    MAXIMUM = 2
-    LOCAL_MINIMUM = -1
-    LOCAL_MAXIMUM = 1
-    INFLECTION = 5
