@@ -68,3 +68,17 @@ components:
           type: number
           default: 1.
       additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM Extreme Point Type
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumExtremePoints:
+      description: |-
+        Enumeration of extreme point types.
+      type: string
+      x-enum-varnames:
+        - PEAK
+        - TROUGH
+      enum:
+        - peak
+        - trough
+      default: float

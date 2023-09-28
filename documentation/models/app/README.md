@@ -15,11 +15,16 @@ Class | Method | HTTP request | Description
  - [AppConfig](.//Models/AppConfig.md)
  - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
- - [MarkerConfig](.//Models/MarkerConfig.md)
+ - [EnumCriticalPoints](.//Models/EnumCriticalPoints.md)
  - [MarkerSettings](.//Models/MarkerSettings.md)
+ - [MatchingConfig](.//Models/MatchingConfig.md)
+ - [PolyCritCondition](.//Models/PolyCritCondition.md)
  - [PolyDerCondition](.//Models/PolyDerCondition.md)
  - [PolyIntCondition](.//Models/PolyIntCondition.md)
- - [PolynomialSetting](.//Models/PolynomialSetting.md)
+ - [PolynomialConfig](.//Models/PolynomialConfig.md)
+ - [SpecialPointsConfig](.//Models/SpecialPointsConfig.md)
+ - [SpecialPointsConfigs](.//Models/SpecialPointsConfigs.md)
+ - [SpecialPointsSpec](.//Models/SpecialPointsSpec.md)
 
 
 <a name="documentation-for-authorization"></a>

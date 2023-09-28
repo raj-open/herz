@@ -18,118 +18,212 @@ settings:
     volume: 'm^3'
     d[1,t]volume: 'm^3/s'
     d[2,t]volume: 'm^3/s^2'
-  polynomial:
+  # selected points in cycles for matching (alignment of multiple time series).
+  matching:
+    pressure: 'edp'
+    volume: 'dV-max'
+  # settings for polynomial conditions for initial (peak-to-peak) fitting.
+  polynomial-init:
     pressure:
-      # OPTIONS
-      # ~~~~~~~
-      # 1) Without 0 conditions on 2nd derivative,
-      #    i.e. 0 conditions on 3rd derivative
-      #    ==> the 2nd derivative must have >= 5 critical points
-      #    ==> 3rd derivative must have >= 5 zeroes
-      #    ==> polynomial must be of degree >= 3 + 5 = 8
-      #
-      # 2) With h (e.g. h=2) critical conditions on 2nd derivative,
-      #    i.e. h conditions on 3rd derivative
-      #    ==> 2nd derivative must have >= 5 + h critical points
-      #    ==> 3rd derivative must have >= 5 + h zeroes
-      #    ==> polynomial must be of degree >= 3 + 5 + h = 8
-      degree: 8 # 3 + 5 + h [= # conditions on 3rd derivative]
-      conditions:
-        - derivative: 1
-          time: 0.
-        - derivative: 1
-          time: 1.
-        - derivative: 2
-          time: 0.
-        - derivative: 2
-          time: 1.
+      - derivative: 2
+        num-critical: 5
+      # boundary point is peak ==> LOCAL_MAX
+      - derivative: 1
+        time: 0.
+      - derivative: 1
+        time: 1.
     volume:
-      degree: 7 # 2 + 5 + h [= # conditions on 2nd derivative]
-      conditions:
-        - derivative: 1
-          time: 0.
-        - derivative: 1
-          time: 1.
-  # settings for plotting points, see <https://plotly.com/python/marker-style>.
-  markers:
+      - derivative: 1
+        num-critical: 5
+      # boundary point is peak ==> LOCAL_MAX
+      - derivative: 1
+        time: 0.
+      - derivative: 1
+        time: 1.
+  # settings for polynomial conditions for final (between selected points in cycles).
+  polynomial-final:
     pressure:
-      split:
-        ignore: true
+      - derivative: 2
+        num-critical: 5
+      # boundary point is 'edp' ==> 2nd deriv = LOCAL_MAX
+      - derivative: 3
+        time: 0.
+      - derivative: 3
+        time: 1.
+    volume:
+      - derivative: 1
+        num-critical: 5
+      # boundary point is 'dV-max' ==> 1st deriv = LOCAL_MAX
+      - derivative: 2
+        time: 0.
+      - derivative: 2
+        time: 1.
+  # settings for special points
+  # for marker symbols see <https://plotly.com/python/marker-style>
+  points:
+    pressure:
       max:
         name: "P_max"
-        size: 6
-        colour: red
-        symbol: "circle"
+        ignore: true
+        spec: null
+        marker:
+          size: 6
+          colour: red
+          symbol: "circle"
       sys:
-        name: "systolic"
-        size: 6
-        colour: red
-        symbol: "x"
-      eivc:
-        name: "eivc"
-        size: 6
-        colour: red
-        symbol: "triangle-up-open"
-      esp:
-        name: "esp"
-        size: 6
-        colour: red
-        symbol: "triangle-up"
-      epad:
-        name: "epad"
-        size: 6
-        colour: black
-        symbol: "square-open"
-      anti-epad:
-        name: "anti-epad"
-        size: 6
-        colour: black
-        symbol: "square"
+        name: "systole"
+        spec:
+          derivative: 0
+          kind: MAXIMUM
+          strict: false
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "x"
       dia:
-        name: "diastolic"
-        size: 6
-        colour: blue
-        symbol: "x"
-      sdp:
-        name: "sdp"
-        size: 6
-        colour: blue
-        symbol: "triangle-up-open"
+        name: "diastole"
+        spec:
+          derivative: 0
+          kind: LOCAL_MINIMUM
+          after: ['sys']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "x"
       edp:
         name: "edp"
-        size: 6
-        colour: blue
-        symbol: "triangle-up"
+        spec:
+          derivative: 2
+          kind: LOCAL_MAXIMUM
+          after: ['dia']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "triangle-up"
+      epad:
+        name: "epad"
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: ['edp']
+          before: []
+        marker:
+          size: 6
+          colour: black
+          symbol: "square-open"
+      eivc:
+        name: "eivc"
+        spec:
+          derivative: 2
+          kind: LOCAL_MINIMUM
+          after: ['epad']
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "triangle-up-open"
+      esp:
+        name: "esp"
+        spec:
+          derivative: 2
+          kind: LOCAL_MINIMUM
+          after: ['sys']
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "triangle-up"
+      anti-epad:
+        name: "anti-epad"
+        spec:
+          derivative: 1
+          kind: LOCAL_MINIMUM
+          after: ['esp']
+          before: []
+        marker:
+          size: 6
+          colour: black
+          symbol: "square"
+      sdp:
+        name: "sdp"
+        spec:
+          derivative: 2
+          kind: LOCAL_MAXIMUM
+          after: ['anti-epad']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "triangle-up-open"
     volume:
-      split:
-        ignore: true
-      min:
-        name: "V_min"
-        size: 6
-        colour: blue
-        symbol: "x"
       max:
         name: "V_max"
-        size: 6
-        colour: red
-        symbol: "x"
-      dV-min:
-        name: "min dV/dt"
-        size: 6
-        colour: blue
-        symbol: "triangle-up-open"
+        spec:
+          derivative: 0
+          kind: MAXIMUM
+          strict: false
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "x"
+      min:
+        name: "V_min"
+        spec:
+          derivative: 0
+          kind: MINIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "x"
       dV-max:
         name: "max dV/dt"
-        size: 6
-        colour: red
-        symbol: "triangle-up-open"
-      ddV-min:
-        name: "min d²V/dt²"
-        size: 6
-        colour: blue
-        symbol: "square-open"
-      ddV-max:
-        name: "max d²V/dt²"
-        size: 6
-        colour: red
-        symbol: "square-open"
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "triangle-up-open"
+      dV-min:
+        name: "min dV/dt"
+        spec:
+          derivative: 1
+          kind: MINIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "triangle-up-open"
+      # ddV-max:
+      #   name: "max d²V/dt²"
+      #   spec:
+      #     derivative: 2
+      #     kind: MAXIMUM
+      #     after: []
+      #     before: []
+      #   marker:
+      #     size: 6
+      #     colour: red
+      #     symbol: "square-open"
+      # ddV-min:
+      #   name: "min d²V/dt²"
+      #   spec:
+      #     derivative: 2
+      #     kind: MINIMUM
+      #     after: []
+      #     before: []
+      #   marker:
+      #     size: 6
+      #     colour: blue
+      #     symbol: "square-open"

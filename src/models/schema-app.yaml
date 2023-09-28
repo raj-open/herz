@@ -26,7 +26,9 @@ components:
           type: object
           required:
             - units
-            - polynomial
+            - matching
+            - polynomial-init
+            - polynomial-final
             - points
           properties:
             units:
@@ -36,15 +38,20 @@ components:
               additionalProperties:
                 type: string
                 default: {}
-            polynomial:
+            matching:
+              $ref: "#/components/schemas/MatchingConfig"
+            polynomial-init:
               description: |-
-                Conditions for fitting (polynomial) curves to raw.
-              type: object
-              additionalProperties:
-                $ref: "#/components/schemas/PolynomialSetting"
-                default: {}
-            markers:
-              $ref: "#/components/schemas/MarkerConfig"
+                Conditions for initial fitting (polynomial) curves to raw data.
+              $ref: "#/components/schemas/PolynomialConfig"
+            polynomial-final:
+              description: |-
+                Conditions for final fitting (polynomial) curves to raw data.
+              $ref: "#/components/schemas/PolynomialConfig"
+            points:
+              description: |-
+                Specifications used to compute special points.
+              $ref: "#/components/schemas/SpecialPointsConfigs"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Config > info
@@ -65,29 +72,68 @@ components:
           type: string
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - matching settings
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    MatchingConfig:
+      description: |-
+        Designates to each data series the name of a special point
+        to be used for alignment of the data series.
+        These can then be used as a starting points.
+      type: object
+      required:
+        - pressure
+        - volume
+      properties:
+        pressure:
+          type: string
+        volume:
+          type: string
+      additionalProperties:
+        type: False
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # DATA TYPE - polynomial setting
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    PolynomialSetting:
+    PolynomialConfig:
       description: |-
         Setting on for polynomial fitting for cycles within a time-series.
       type: object
       required:
-        - degree
-        - conditions
+        - pressure
+        - volume
       properties:
-        degree:
-          description: |-
-            Degree of polynomial to be fitted.
-          type: integer
-          minimum: 1
-        conditions:
-          description: |-
-            Conditions to force on fitted polynomial
+        pressure:
           type: array
           items:
             oneOf:
+            - $ref: "#/components/schemas/PolyCritCondition"
             - $ref: "#/components/schemas/PolyDerCondition"
             - $ref: "#/components/schemas/PolyIntCondition"
+        volume:
+          type: array
+          items:
+            oneOf:
+            - $ref: "#/components/schemas/PolyCritCondition"
+            - $ref: "#/components/schemas/PolyDerCondition"
+            - $ref: "#/components/schemas/PolyIntCondition"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - polynomial critical conditions
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    PolyCritCondition:
+      description: |-
+        A condition to force on fitted polynomial of the form:
+        - The `n`-th derivative has `h` critical points.
+      type: object
+      required:
+        - derivative
+        - num-critical
+      properties:
+        derivative:
+          type: integer
+          minimum: 0
+        num-critical:
+          type: integer
+          minimum: 0
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # DATA TYPE - polynomial derivative condition
@@ -130,11 +176,11 @@ components:
           maxItems: 2
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # DATA TYPE - MarkerConfig
+    # DATA TYPE - special points configs
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    MarkerConfig:
+    SpecialPointsConfigs:
       description: |-
-        Settings for plottings special points for time-series.
+        Configuration of special points.
       type: object
       required:
         - pressure
@@ -143,13 +189,100 @@ components:
         pressure:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/MarkerSettings"
-            default: {}
+            $ref: "#/components/schemas/SpecialPointsConfig"
         volume:
           type: object
           additionalProperties:
-            $ref: "#/components/schemas/MarkerSettings"
-            default: {}
+            $ref: "#/components/schemas/SpecialPointsConfig"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - special points config
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    SpecialPointsConfig:
+      description: |-
+        Configuration of special points.
+      type: object
+      required:
+        - name
+        # - spec
+        - marker
+      properties:
+        name:
+          description: |-
+            Name of special point.
+          type: string
+        ignore:
+          description: |-
+            Option to suppress plotting.
+          type: boolean
+          default: false
+        time:
+          description: |-
+            Time co-ordinate of special point (initially normalised to `[0, 1]`).
+          type: number
+          default: -1
+        value:
+          description: |-
+            Value of special point.
+          type: number
+          default: -1
+        spec:
+          description: |-
+            Optional specifications for computation of special point.
+          $ref: "#/components/schemas/SpecialPointsSpec"
+        marker:
+          description: |-
+            Settings for plot marker.
+          $ref: "#/components/schemas/MarkerSettings"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - special points specification
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    SpecialPointsSpec:
+      description: |-
+        A single condition used to defined special point in terms of
+
+        - position relative to other special points,
+        - criticality of an n'th derivative
+
+        NOTE: The 'before' / 'after' conditions are defined purely in terms of the peak-to-peak cycle.
+      type: object
+      required:
+        - derivative
+        - kind
+        - after
+        - before
+      properties:
+        derivative:
+          description: |-
+            Order of the n'th derivative condition.
+          type: integer
+          minimum: 0
+        kind:
+          description: |-
+            Kind of n'th derivative condition: (local) min/max.
+          $ref: "#/components/schemas/EnumCriticalPoints"
+        strict:
+          description: |-
+            Whether the point is to occur strictly inside the cycle.
+
+            Default: `true`.
+
+            NOTE: Only set to `false` for a time point that is the peak value.
+          type: boolean
+          default: true
+        after:
+          description: |-
+            The currently specified point has to occur after this list of named points.
+          type: array
+          items:
+            type: string
+        before:
+          description: |-
+            The currently specified point has to occur before this list of named points.
+          type: array
+          items:
+            type: string
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # DATA TYPE - Points display settings
@@ -158,7 +291,6 @@ components:
       description: |-
         Settings for plotting special points.
 
-        - `name` - <string>
         - `size` - <int> size of marker
         - `colour` - <string> colour of marker, can be either a name or of the form
             `'rgba(<float>,<float>,<float>,<float>)'`, `'hsla(<int>,<float>%,<float>%,<float>)'`, etc.
@@ -166,12 +298,6 @@ components:
       type: object
       required: []
       properties:
-        ignore:
-          type: boolean
-          default: false
-        name:
-          type: string
-          default: null
         size:
           type: integer
           default: 2
@@ -182,3 +308,18 @@ components:
           type: string
           default: null
       additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM Critical Point Type
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumCriticalPoints:
+      description: |-
+        Enumeration of critical point types.
+      type: string
+      enum:
+        - UNKNOWN
+        - MINIMUM
+        - MAXIMUM
+        - LOCAL_MINIMUM
+        - LOCAL_MAXIMUM
+        - INFLECTION
+      default: UNKNOWN

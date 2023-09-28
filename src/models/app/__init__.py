@@ -14,6 +14,6 @@ from ..generated.app import *
 __all__ = [
     'AppInfo',
     'AppConfig',
-    'PolynomialSetting',
-    'MarkerConfig',
+    'PolynomialConfig',
+    'MatchingConfig',
 ]

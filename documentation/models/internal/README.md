@@ -12,6 +12,7 @@ Class | Method | HTTP request | Description
 <a name="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [EnumExtremePoints](.//Models/EnumExtremePoints.md)
  - [FittedInfo](.//Models/FittedInfo.md)
  - [FittedInfoNormalisation](.//Models/FittedInfoNormalisation.md)
 

@@ -19,7 +19,8 @@ from ..generated.internal import *
 __all__ = [
     'get_normalisation_params',
     'get_renormalised_polynomial',
-    'get_renormalised_polynomial_and_points',
+    'get_renormalised_polynomial_time_only',
+    'get_renormalised_polynomial_values_only',
     'get_renormalised_data',
 ]
 
@@ -67,15 +68,36 @@ def get_renormalised_polynomial(
     coeff_rescaled[1] += m / T
     return coeff_rescaled
 
-
-def get_renormalised_polynomial_and_points(
+def get_renormalised_polynomial_time_only(
     info: FittedInfo,
-    points: dict[str, list[float]],
-) -> tuple[list[float], dict[str, list[float]]]:
-    coeff = get_renormalised_polynomial(info)
-    T = info.normalisation.period
-    points = {key: [T * tt for tt in ts] for key, ts in points.items()}
-    return coeff, points
+) -> list[float]:
+    coeff = info.coefficients
+    T, c, m, s = get_normalisation_params(info)
+    deg = len(coeff) - 1
+    Tpow = np.cumprod([1] + [T] * deg)
+    coeff_rescaled = [s * cc / TT for cc, TT in zip(coeff, Tpow)]
+    return coeff_rescaled
+
+
+def get_renormalised_polynomial_values_only(
+    info: FittedInfo,
+) -> list[float]:
+    '''
+    Normalisation:
+    ```
+    z(t) = (x(t₀ + T·t) - (c + mt))/s
+    ```
+    Unnormalisation (but write polynomial centred on `t₀` instead of `0`):
+    ```
+    x(T·t) = c + m · (t-t₀) + s · z(t-t₀)
+    ```
+    '''
+    coeff = info.coefficients
+    T, c, m, s = get_normalisation_params(info)
+    coeff_rescaled = [ s * cc for cc in coeff ]
+    coeff_rescaled[0] += c
+    coeff_rescaled[1] += m
+    return coeff_rescaled
 
 
 def get_renormalised_data(
