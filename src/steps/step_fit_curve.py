@@ -8,6 +8,7 @@
 from ..thirdparty.data import *
 
 from ..setup import config
+from ..core.log import *
 from ..core.poly import *
 from ..models.user import *
 from ..models.internal import *
@@ -20,6 +21,7 @@ from ..algorithms.fit import *
 
 __all__ = [
     'step_fit_curve',
+    'step_refit_curve',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -48,7 +50,7 @@ def step_fit_curve(
     # fit polynomial
     x = data[quantity].to_numpy(copy=True)
     mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
-    results = fit_poly_cycles(
+    fitinfos = fit_poly_cycles(
         t=t,
         x=x,
         cycles=cycles,
@@ -58,14 +60,14 @@ def step_fit_curve(
 
     # compute derivatives
     if mode_average:
-        _, info_av = results[-1]
-        coeffs = [info_av.coefficients[:] for _, _ in results[:-1]]
+        _, info_av = fitinfos[-1]
+        coeffs = [info_av.coefficients[:] for _, _ in fitinfos[:-1]]
     else:
-        coeffs = [info.coefficients[:] for _, info in results[:-1]]
+        coeffs = [info.coefficients[:] for _, info in fitinfos[:-1]]
 
     for n in range(n_der + 1):
         # loop over all time-subintervals:
-        for k, ((i1, i2), info) in enumerate(results[:-1]):
+        for k, ((i1, i2), info) in enumerate(fitinfos[:-1]):
             # get coefficients for (n-1)th derivative polynomial for cycle k:
             coeff = coeffs[k]
             # get drift-values:
@@ -93,4 +95,15 @@ def step_fit_curve(
             case _:
                 data[f'd[{n},t]{quantity}[fit]'] = x
 
-    return data, results
+    return data, fitinfos
+
+
+def step_refit_curve(
+    case: UserCase,
+    data: pd.DataFrame,
+    quantity: str,
+    n_der: int = 2,
+) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
+    fitinfos = []
+    log_warn('Not yet implemented')
+    return data, fitinfos

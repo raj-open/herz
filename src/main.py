@@ -38,10 +38,10 @@ def enter(path: str, *_):
         datas = dict()
         fitinfos = dict()
         points = dict()
-        LP = LogProgress(f'''RUN CASE {case.label}''', steps=6)
+        LP = LogProgress(f'''RUN CASE {case.label}''', steps=5)
 
         # process quantities separately
-        for quantity, symb, cfg_data, ext in [
+        for quantity, symb, cfg_data, shift in [
             ('pressure', 'P', case.data.pressure, 'peak'),
             ('volume', 'V', case.data.volume, 'peak'),
         ]:
@@ -51,18 +51,34 @@ def enter(path: str, *_):
             data = step_normalise_data(case, data, quantity=quantity)
             LPsub.next()
 
-            LPsub = LP.subtask(f'''RECOGNISE CYCLES {quantity}''', 2)
-            data = step_recognise_cycles(case, data, quantity=quantity, shift=ext)
+            LPsub = LP.subtask(f'''INITIAL RECOGNITION OF CYCLES {quantity} ({shift} -> {shift})''', 4)  # fmt: skip
+            data = step_recognise_peaks(case, data, quantity=quantity)
+            LPsub.next()
+            data = step_shift_data_extremes(case, data, quantity=quantity, shift=shift)
+            LPsub.next()
+            data = step_recognise_cycles(case, data, quantity=quantity, shift=shift)
             LPsub.next()
             if case.process.cycles.remove_bad:
                 data = step_removed_marked_sections(case, data)
             LPsub.next()
 
-            LPsub = LP.subtask(f'''FIT CURVE {quantity}''', 1)
+            LPsub = LP.subtask(f'''INITIAL FIT CURVE {quantity}''', 1)
             data, fits = step_fit_curve(case, data, quantity=quantity)
             LPsub.next()
 
-            LPsub = LP.subtask(f'''CLASSIFY POINTS {quantity}''', 1)
+            LPsub = LP.subtask(f'''INITIAL CLASSIFICATION OF POINTS {quantity}''', 1)
+            points_data, points0 = step_recognise_points(case, data, fits, quantity=quantity)
+            LPsub.next()
+
+            LPsub = LP.subtask(f'''RE-RECOGNITION OF CYCLES {quantity} / MATCHING''', 1)
+            data = step_shift_data_custom(case, data, points_data, quantity=quantity)
+            LPsub.next()
+
+            LPsub = LP.subtask(f'''RE-FIT CURVE {quantity}''', 1)
+            data, _ = step_refit_curve(case, data, quantity=quantity)
+            LPsub.next()
+
+            LPsub = LP.subtask(f'''RE-CLASSIFICATION OF POINTS {quantity}''', 1)
             _, points0 = step_recognise_points(case, data, fits, quantity=quantity)
             LPsub.next()
 
@@ -70,19 +86,6 @@ def enter(path: str, *_):
             fitinfos[quantity] = fits
             points[quantity] = points0
             LP.next()
-
-        # align before plotting
-        LPsub = LP.subtask(f'''ALIGN CYCLES''', 1)
-        fits_p, fits_v = step_align_cycles(
-            case,
-            fitinfos_p=fitinfos['pressure'],
-            points_p=points['pressure'],
-            fitinfos_v=fitinfos['volume'],
-            points_v=points['volume'],
-        )
-        fitinfos['pressure'] = fits_p
-        fitinfos['volume'] = fits_v
-        LPsub.next()
 
         # process quantities separately
         for quantity, symb in [

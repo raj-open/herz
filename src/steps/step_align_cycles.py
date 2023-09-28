@@ -9,6 +9,7 @@ from ..thirdparty.maths import *
 from ..thirdparty.physics import *
 
 from ..setup import config
+from ..core.log import *
 from ..models.user import *
 from ..models.internal import *
 
@@ -40,4 +41,5 @@ def step_align_cycles(
     T_p = infos_p.normalisation.period
     T_v = infos_v.normalisation.period
     scale = T_p / T_v
+    log_warn('Not yet implemented')
     return fitinfos_p, fitinfos_v

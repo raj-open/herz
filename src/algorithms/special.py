@@ -91,7 +91,7 @@ def recognise_special_points_pressure(info: FittedInfo) -> dict[str, list[float]
     times['sdp'] = [t0]
 
     # RECOGNISE start-end of cycle (for plotting):
-    t_split = times['epad'][0]
+    t_split = times['edp'][0]
     times['split'] = [t_split]
 
     return times
@@ -133,7 +133,7 @@ def recognise_special_points_volume(info: FittedInfo) -> dict[str, list[float]]:
     times['dV-min'] = [t0]
 
     # RECOGNISE start-end of cycle (for plotting):
-    t_split = times['max'][0]
+    t_split = times['dV-max'][0]
     times['split'] = [t_split]
 
     return times

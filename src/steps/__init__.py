@@ -7,6 +7,8 @@
 
 from .step_read_data import *
 from .step_combine_data import *
+from .step_recognise_peaks import *
+from .step_shift_data import *
 from .step_recognise_cycles import *
 from .step_fit_curve import *
 from .step_recognise_points import *
@@ -22,9 +24,13 @@ __all__ = [
     'step_read_data',
     'step_normalise_data',
     'step_combine_data',
+    'step_recognise_peaks',
+    'step_shift_data_extremes',
+    'step_shift_data_custom',
     'step_recognise_cycles',
     'step_removed_marked_sections',
     'step_fit_curve',
+    'step_refit_curve',
     'step_recognise_points',
     'step_align_cycles',
     'step_output_single_table',

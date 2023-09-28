@@ -11,6 +11,7 @@ from ..thirdparty.physics import *
 
 from ..setup import config
 from ..models.user import *
+from .methods import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -42,7 +43,7 @@ def step_normalise_data(
     values = data[quantity].to_numpy(copy=True)
 
     # get total duration
-    T, dt = get_aspects(time)
+    N, dt, T = get_time_aspects(time)
     T = max(T, cv_t * (cfg.combine.t_max or 0.0))
 
     # compute num points and update T (ensure dt is as set)
@@ -79,8 +80,8 @@ def step_combine_data(
 
     # get T_max
     T_max = cv_t * (cfg.combine.t_max or 0.0)
-    T_max_p, _ = get_aspects(time_pressure)
-    T_max_v, _ = get_aspects(time_volume)
+    _, _, T_max_p = get_time_aspects(time_pressure)
+    _, _, T_max_v = get_time_aspects(time_volume)
     T_max = max(T_max, T_max_p, T_max_v)
 
     # compute num points and update T_max (ensure dt is as set)
@@ -113,12 +114,6 @@ def step_combine_data(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUXILIARY METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def get_aspects(t: np.ndarray) -> tuple[float, float]:
-    dt = np.mean(np.diff(t))
-    T_max = t[-1] - t[0] + dt
-    return T_max, dt
 
 
 def interpolate_curve(

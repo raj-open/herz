@@ -278,10 +278,6 @@ def step_output_loop_plot(
     unshift_times_v = shift_function_times(t_split=T_v - t_split_v, T=T_v)
     unshift_indices_p = shift_function_indices(t_split=T_p - t_split_p, T=T_p)
     unshift_indices_v = shift_function_indices(t_split=T_v - t_split_v, T=T_v)
-    time_orig_p = np.linspace(start=0, stop=T_p, num=N, endpoint=False)
-    time_orig_v = np.linspace(start=0, stop=T_v, num=N, endpoint=False)
-    time_p = shift_times_p(time_orig_p)
-    time_v = shift_times_v(time_orig_v)
 
     # re-normalise data
     data_p = get_renormalised_data(data_p, fitinfos_p, t_split=t_split_p, quantity='pressure')
@@ -298,15 +294,15 @@ def step_output_loop_plot(
     data_v['volume'] = cv['volume'] * data_v['volume']
 
     # fit 'other' measurement to each time-series
-    data_p['volume'] = poly(
-        unshift_indices_v(T_v / T_p * shift_times_p(data_p['time[orig]'])), *v
-    )
-    data_v['pressure'] = poly(
-        unshift_indices_p(T_p / T_v * shift_times_v(data_v['time[orig]'])), *p
-    )
+    data_p['volume'] = poly(shift_indices_p(T_v * data_p['time[orig]'] / T_p), *v)
+    data_v['pressure'] = poly(shift_indices_p(T_p * data_v['time[orig]'] / T_v), *p)
 
-    pressure_fit = poly(unshift_indices_p(time_p), *p)
-    volume_fit = poly(unshift_indices_v(time_v), *v)
+    # generate times + fitted polynomials for P+V
+    time_orig = np.linspace(start=0, stop=1, num=N, endpoint=False)
+    time_p = shift_times_p(T_p * time_orig)
+    time_v = shift_times_v(T_v * time_orig)
+    pressure_fit = poly(unshift_indices_p(T_p * time_orig), *p)
+    volume_fit = poly(unshift_indices_v(T_v * time_orig), *v)
 
     # set up plots
     fig = make_subplots(
@@ -360,22 +356,22 @@ def step_output_loop_plot(
         ),
     )
 
-    fig.append_trace(
-        pgo.Scatter(
-            name='P-V [data/fit]',
-            x=data_p['volume'],
-            y=data_p['pressure'],
-            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_p['time']],
-            mode='markers',
-            marker=dict(
-                size=2,
-                color='black',
-            ),
-            showlegend=True,
-        ),
-        row=1,
-        col=1,
-    )
+    # fig.append_trace(
+    #     pgo.Scatter(
+    #         name='P-V [data/fit]',
+    #         x=data_p['volume'],
+    #         y=data_p['pressure'],
+    #         text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_p['time']],
+    #         mode='markers',
+    #         marker=dict(
+    #             size=2,
+    #             color='black',
+    #         ),
+    #         showlegend=True,
+    #     ),
+    #     row=1,
+    #     col=1,
+    # )
 
     fig.append_trace(
         pgo.Scatter(
@@ -397,9 +393,13 @@ def step_output_loop_plot(
     fig.append_trace(
         pgo.Scatter(
             name='P-V [fit]',
-            x=volume_fit,
-            y=pressure_fit,
-            text=[],
+            # NOTE: Ensure that the cycle contains start+end points!
+            x=np.concatenate([volume_fit, volume_fit[:1]]),
+            y=np.concatenate([pressure_fit, pressure_fit[:1]]),
+            text=[
+                f'{tt:.0f}{units["time"]}'
+                for tt in cv['time'] * np.concatenate([time_p, time_p[:1]])
+            ],
             mode='lines',
             line_shape='spline',
             line=dict(
@@ -416,14 +416,16 @@ def step_output_loop_plot(
     points_ = []
 
     for key, ts in points_p.items():
-        _, p_ = coordinates_special_points(ts, p, T=T_p, t_split=t_split_p)
-        _, v_ = coordinates_special_points(ts, v, T=T_p, t_split=t_split_p)
+        ts = np.asarray(ts)
+        p_ = poly(shift_indices_p(ts), *p)
+        v_ = poly(shift_indices_v(T_v * unshift_times_p(ts) / T_p), *v)
         settings = cfg_markers_p.get(key, None)
         points_.append((key, v_, p_, settings))
 
     for key, ts in points_v.items():
-        _, p_ = coordinates_special_points(ts, p, T=T_v, t_split=t_split_v)
-        _, v_ = coordinates_special_points(ts, v, T=T_v, t_split=t_split_v)
+        ts = np.asarray(ts)
+        p_ = poly(shift_indices_p(T_p * unshift_times_v(ts) / T_v), *p)
+        v_ = poly(shift_indices_v(ts), *v)
         settings = cfg_markers_v.get(key, None)
         points_.append((key, v_, p_, settings))
 

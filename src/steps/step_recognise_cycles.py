@@ -13,6 +13,7 @@ from ..core.utils import *
 from ..models.user import *
 from ..algorithms.peaks import *
 from ..algorithms.cycles import *
+from .methods import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -35,52 +36,21 @@ def step_recognise_cycles(
     shift: str,
     remove_gaps: bool = True,
 ) -> pd.DataFrame:
-    # compute time increment for later
     N = len(data)
-    t = data['time'].to_numpy(copy=True)
-    dt = (t[-1] - t[0]) / (N - 1)
 
-    # 1. detect peaks
-    N = len(data)
-    values = data[quantity]
-    peaks, troughs = get_extremes(values)
-    data[f'{quantity}[peak]'] = where_to_characteristic(peaks, N)
-    data[f'{quantity}[trough]'] = where_to_characteristic(troughs, N)
-
-    # 2. first shift data to peak-to-peak:
+    # get cycles based on peaks (or troughs)
     ext = characteristic_to_where(data[f'{quantity}[{shift}]'])
-    if len(ext) > 0:
-        index_max = max(ext)
-        indices = list(range(N))
-        indices = indices[index_max:] + indices[:index_max]
-        data = data.iloc[indices, :]
-        data.reset_index(inplace=True, drop=True)
-        ext = characteristic_to_where(data[f'{quantity}[{shift}]'])
-
-    # 3. get cycles based on peaks
-    N = len(data)
     cycles = get_cycles(ext=ext, N=N, remove_gaps=remove_gaps)
     data['cycle'] = cycles
     data = data[data['cycle'] >= 0]
     data.reset_index(inplace=True, drop=True)
 
-    # 4. mark bad
-    # # detect 'bad' parts of cycles
-    # N = len(data)
+    # detect 'bad' parts of cycles
+    N = len(data)
     # x = data[['pressure', 'volume']].to_numpy(copy=True)
-    # cycles = data['cycle'].tolist()
     # marked = mark_pinched_points_on_cycles(x=x, cycles=cycles, sig_t=0.1)
     # data['marked'] = marked
-    N = len(data)
     data['marked'] = [False] * N
-
-    # 5. recompute time axis.
-    # NOTE: we assume that time has already been homogenised.
-    N = len(data)
-    T_max = N * dt
-    data['time[orig]'] = data['time']
-    data['time'] = np.linspace(start=0.0, stop=T_max, num=N, endpoint=True)
-
     return data
 
 
@@ -90,17 +60,15 @@ def step_removed_marked_sections(
 ):
     # compute time increment for later
     N = len(data)
-    t = data['time'].to_numpy(copy=True)
-    dt = (t[-1] - t[0]) / (N - 1)
+    time = data['time'].to_numpy(copy=True)
+    _, dt, _ = get_time_aspects(time)
 
     # remove marked points
     data = data[data['marked'] == False]
 
-    # recompute time axis.
-    # NOTE: we assume that time has already been homogenised.
+    # recompute time axis
     N = len(data)
     T = N * dt
-    # data['time[orig]'] = data['time']
-    data['time'] = np.linspace(start=0.0, stop=T, num=N, endpoint=False)
+    data = recocompute_time_axis(data, N=N, dt=dt)
 
     return data
