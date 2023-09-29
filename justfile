@@ -173,6 +173,8 @@ githook-clean-ipynb-meta path:
     @just clean-notebook-meta "{{path}}"
 
 githook-qa:
+    @# build
+    @just build-skip-packages
     @# lint
     @just prettify
     @just check-linting
@@ -186,6 +188,11 @@ githook-qa:
 build:
     @just build-misc
     @just build-requirements
+    @just check-system-requirements
+    @just build-models
+
+build-skip-packages:
+    @just build-misc
     @just check-system-requirements
     @just build-models
 
