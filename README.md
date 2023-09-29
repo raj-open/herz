@@ -1,8 +1,19 @@
-# Pressure-Volume analysis for cadiology #
+[![Python version: 3.10, 3.11](https://img.shields.io/badge/python%20version-3.10,%203.11-1464b4.svg)](https://www.python.org)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-This repository contains code to extract time-series data for pressure and volume,
-align these and produce pressure-volume data series and plots.
-Methods are developed in [^Heerdt2019].
+# Pressure-Volume analysis (RV) for cardiology #
+
+This repository contains that analysis time-series data for pressure and volume
+(right-ventricular measurements). This involves:
+
+- automatic recognition of cycles
+- fitting/re-fitting of models
+- automatic recognition of 'special points' (of physical interest)
+- automatic matching of the pressure and volume series
+- output of tables and plots (individual time-series and P-V plots).
+
+The code handles unit conversions (input -> internal usage -> outputs)
+robustly using the python package [pint](https://pint.readthedocs.io).
 
 ## Examples and technical notes ##
 
@@ -84,5 +95,14 @@ just clean-notebooks
 ## Development ##
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## References ##
+
+The structure of the code in this repository is entirely the work of the owner.
+Some methods in this repository (e.g. the automatic recognition of cycles)
+are in part inspired by literature, e.g. [^Heerdt2019].
+The remaining methods (esp. polynomial fitting methods)
+and corresponding code in this repository
+was developed independently by the repository owner.
 
 [^Heerdt2019]: Heerdt, Paul M et al. "A pressure-based single beat method for estimation of right ventricular ejection fraction: proof of concept." _The European respiratory journal_ vol. 55,3 1901635. 12 Mar. 2020, doi:10.1183/13993003.01635-2019
