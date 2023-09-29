@@ -136,6 +136,6 @@ def enter(path: str, *_):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 if __name__ == '__main__':
-    # sys.tracebacklimit = 0
+    sys.tracebacklimit = 0
     args = sys.argv[1:]
     enter(*args)
