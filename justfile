@@ -295,6 +295,19 @@ prettify:
     @{{PYTHON}} -m {{LINTING}} --verbose notebooks/*
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TARGES: utilities
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+create-badge-pyversion:
+    @{{PYTHON}} -m pybadges \
+        --left-text="python" \
+        --right-text="3.10, 3.11" \
+        --whole-link="https://www.python.org/" \
+        --browser \
+        --logo='https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/python.svg' \
+        >> documentation/badges/pyversion.svg
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
