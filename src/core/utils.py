@@ -215,4 +215,5 @@ def normalise_interpolated_drift(
     x = x / (x_max or 1.0)
     s = norm_interpolated(t, x, T=T, periodic=periodic, average=True)
     x = x / (s or 1.0)
+    s = s * x_max
     return c, m, s, x

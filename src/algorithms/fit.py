@@ -32,39 +32,42 @@ def fit_poly_cycles(
     t: np.ndarray,
     x: np.ndarray,
     cycles: list[int],
-    deg: int,
-    conds: list[PolyDerCondition | PolyIntCondition],
+    conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
 ) -> list[tuple[tuple[int, int], FittedInfo]]:
     '''
-    Fits 'certain' polynomials to cycles in such a way,
-    that special attributes can be extracted.
+    Fits polynomial to cycles of a time-series:
+    - minimises wrt. the L²-norm
+    - forces certain conditions on n'th-derivatives at certain time points
     '''
     # determine start and end of each cycle
     windows = cycles_to_windows(cycles)
 
-    # fit each cycle
-    N = len(t)
-    results = []
-    # due to normalisation, force the following condition
+    # due to normalisation (drift-removal), force extra boundary conditions
     conds = conds[:]
     conds.append(PolyDerCondition(derivative=0, time=0.0))
     conds.append(PolyDerCondition(derivative=0, time=1.0))
+
+    # refine conditions + determine degree of polynomial needed
+    conds, deg = refine_conditions_determine_degree(conds)
+
+    # fit each cycle
+    fitinfos = []
     for i1, i2 in windows:
         # scale time
         tt, T = normalise_to_unit_interval(t[i1:i2])
         # remove drift
-        c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1)
+        c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1, periodic=True)
         # compute fitted curve
         coeff = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
         params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
         info = FittedInfo(coefficients=coeff, normalisation=params)
-        results.append(((i1, i2), info))
+        fitinfos.append(((i1, i2), info))
 
     # --------------------------------
     # NOTE:
     # If all cycles are to be fit simultaenously by a single polynomial,
     # then since a method via ONB is, the optimal solution
-    # (least L^2-distance) is the average.
+    # (least L²-distance) is the average.
     # Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated+normalised) curves in C[0, T].
     # Let x(t) := 1/n ∑ₖ x⁽ᵏ⁾(t) the avarage in C[0, T].
     # Then
@@ -91,24 +94,16 @@ def fit_poly_cycles(
     # Hence the coefficients for p are just the average
     # of the coefficients of the p⁽ᵏ⁾.
     # --------------------------------
-    coeff = np.mean(np.asarray([info.coefficients for _, info in results]), axis=0).tolist()
-    T = np.median(
-        np.asarray([info.normalisation.period for _, info in results]), axis=0
-    ).tolist()
-    c = np.median(
-        np.asarray([info.normalisation.intercept for _, info in results]), axis=0
-    ).tolist()
-    m = np.median(
-        np.asarray([info.normalisation.gradient for _, info in results]), axis=0
-    ).tolist()
-    s = np.median(
-        np.asarray([info.normalisation.scale for _, info in results]), axis=0
-    ).tolist()
+    coeff = np.mean(np.asarray([info.coefficients for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
+    T = np.median(np.asarray([info.normalisation.period for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
+    c = np.median(np.asarray([info.normalisation.intercept for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
+    m = np.median(np.asarray([info.normalisation.gradient for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
+    s = np.median(np.asarray([info.normalisation.scale for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
     params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
     info = FittedInfo(coefficients=coeff, normalisation=params)
-    results.append(((-1, -1), info))
+    fitinfos.append(((-1, -1), info))
 
-    return results
+    return fitinfos
 
 
 def fit_poly_cycle(
@@ -140,6 +135,35 @@ def fit_poly_cycle(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUXILIARY METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def refine_conditions_determine_degree(
+    conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+) -> tuple[list[PolyDerCondition | PolyIntCondition], int]:
+    conds_crit = [cond for cond in conds if isinstance(cond, PolyCritCondition)]
+    conds_der = [cond for cond in conds if isinstance(cond, PolyDerCondition)]
+    conds_int = [cond for cond in conds if isinstance(cond, PolyIntCondition)]
+
+    # determine the number of unique ZEROES being forced by derivative conditions:
+    n_max = max(
+        [0]
+        + [cond.derivative for cond in conds_der]
+        + [cond.derivative + 1 for cond in conds_crit]
+    )
+    num_zeroes = [
+        len(np.unique([cond.time for cond in conds_der if cond.derivative == n]))
+        for n in range(n_max + 1)
+    ]
+
+    # ensure the number of forced CRITICAL POINTS on n'th derivatives:
+    deg = 0
+    for cond in conds_crit:
+        # NOTE: n'th derivative has h critical <==> (n+1)'th derivative has h zeroes
+        n = cond.derivative
+        h = max(cond.num_critical, num_zeroes[n + 1])
+        deg = max(deg, n + 1 + h)
+
+    return conds_der + conds_int, deg
 
 
 def effective_coefficients_pq(n: int, *coeff_q: float) -> list[float]:

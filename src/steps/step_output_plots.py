@@ -15,9 +15,10 @@ from ..thirdparty.types import *
 
 from ..setup import config
 from ..setup.conversion import *
-from ..setup.plots import *
+from ..setup.series import *
 from ..core.utils import *
 from ..core.poly import *
+from ..models.app import *
 from ..models.internal import *
 from ..models.user import *
 
@@ -28,6 +29,7 @@ from ..models.user import *
 __all__ = [
     'step_output_loop_plot',
     'step_output_time_plot',
+    'quick_plot',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,14 +41,13 @@ def step_output_time_plot(
     case: UserCase,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
-    points: dict[str, list[float]],
+    points: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
     N: int = 1000,
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
-    cfg_markers = get_markers(quantity)
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
@@ -59,40 +60,21 @@ def step_output_time_plot(
     T = info.normalisation.period
 
     # re-normalise polynomials
-    q, points = get_renormalised_polynomial_and_points(info, points)
-    q = [cv[quantity] * xx for xx in q]
+    q = get_renormalised_polynomial(info)
     dq = get_derivative_coefficients(q)
     ddq = get_derivative_coefficients(dq)
 
-    # extract spltting-time:
-    # NOTE: must be computed after renormalisation of points!
-    t_split = points.get('split', [0.0])[0]
+    points_ = [
+        get_renormalised_coordinates_of_special_points(points, q, info=info),
+        get_renormalised_coordinates_of_special_points(points, dq, info=info),
+        get_renormalised_coordinates_of_special_points(points, ddq, info=info),
+    ]
 
     # define a time axis for [0, T]:
-    shift_times = shift_function_times(t_split=t_split, T=T)
-    shift_indices = shift_function_indices(t_split=t_split, T=T)
-    time_orig = np.linspace(start=0, stop=T, num=N, endpoint=False)
-    time = shift_times(time_orig, strict=False)
+    time = np.linspace(start=0, stop=T, num=N + 1, endpoint=True)
 
     # re-normalise data
-    data = get_renormalised_data(data, fitinfos, t_split=t_split, quantity=quantity)
-
-    # re-normalise points
-    points = {key: np.asarray(ts) for key, ts in points.items()}
-    points_ = [
-        {
-            key: coordinates_special_points(ts, q, T=T, t_split=t_split)
-            for key, ts in points.items()
-        },
-        {
-            key: coordinates_special_points(ts, dq, T=T, t_split=t_split)
-            for key, ts in points.items()
-        },
-        {
-            key: coordinates_special_points(ts, ddq, T=T, t_split=t_split)
-            for key, ts in points.items()
-        },
-    ]
+    data = get_renormalised_data(data, fitinfos, quantity=quantity)
 
     # set up plots
     fig = make_subplots(
@@ -137,8 +119,8 @@ def step_output_time_plot(
         # range=[0, None], # FIXME: does not work!
     )
 
-    t_sp = np.concatenate([[0, t_split, T]] + list(points.values()))
-    t_sp = cv['time'] * np.unique(shift_times(t_sp, strict=False))  # convert units
+    t_sp = np.unique([0, T] + [point.time for key, point in points_[0]])
+    t_sp = cv['time'] * t_sp  # convert units
 
     for row in range(1, 3 + 1):
         fig.update_xaxes(
@@ -179,19 +161,13 @@ def step_output_time_plot(
     add_plot_time_series(
         fig,
         name=f'{quantity.title()} [fit]',
-        time=cv['time'] * time,
-        values=poly(shift_indices(time_orig, strict=False), *q),
+        time=time,
+        values=poly(time, *q),
+        cv_time=cv['time'],
+        cv_value=cv[quantity],
         row=1,
         col=1,
-        points=[
-            (
-                key,
-                cv['time'] * ts,
-                values,
-                cfg_markers.get(key, None),
-            )
-            for key, (ts, values) in points_[0].items()
-        ],
+        points=points_[0],
         showlegend=True,
         showlegend_points=True,
     )
@@ -199,19 +175,13 @@ def step_output_time_plot(
     add_plot_time_series(
         fig,
         name=f'(d/dt){symb} [fit]',
-        time=cv['time'] * time,
-        values=poly(shift_indices(time_orig, strict=False), *dq),
+        time=time,
+        values=poly(time, *dq),
+        cv_time=cv['time'],
+        cv_value=cv[quantity],
         row=2,
         col=1,
-        points=[
-            (
-                key,
-                cv['time'] * ts,
-                values,
-                cfg_markers.get(key, None),
-            )
-            for key, (ts, values) in points_[1].items()
-        ],
+        points=points_[1],
         showlegend=False,
         showlegend_points=False,
     )
@@ -219,19 +189,13 @@ def step_output_time_plot(
     add_plot_time_series(
         fig,
         name=f'(d/dt)²{symb} [fit]',
-        time=cv['time'] * time,
-        values=poly(shift_indices(time_orig, strict=False), *ddq),
+        time=time,
+        values=poly(time, *ddq),
+        cv_time=cv['time'],
+        cv_value=cv[quantity],
         row=3,
         col=1,
-        points=[
-            (
-                key,
-                cv['time'] * ts,
-                values,
-                cfg_markers.get(key, None),
-            )
-            for key, (ts, values) in points_[2].items()
-        ],
+        points=points_[2],
         showlegend=False,
         showlegend_points=False,
     )
@@ -248,16 +212,14 @@ def step_output_loop_plot(
     case: UserCase,
     data_p: pd.DataFrame,
     fitinfos_p: list[tuple[tuple[int, int], FittedInfo]],
-    points_p: dict[str, list[float]],
+    points_p: dict[str, SpecialPointsConfig],
     data_v: pd.DataFrame,
     fitinfos_v: list[tuple[tuple[int, int], FittedInfo]],
-    points_v: dict[str, list[float]],
+    points_v: dict[str, SpecialPointsConfig],
     N: int = 1000,
 ) -> pgo.Figure:
     cfg = case.output
     cfg_font = cfg.plot.font
-    cfg_markers_p = get_markers('pressure')
-    cfg_markers_v = get_markers('volume')
 
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
@@ -266,43 +228,30 @@ def step_output_loop_plot(
     _, info_v = fitinfos_v[-1]
     T_p = info_p.normalisation.period
     T_v = info_v.normalisation.period
-    t_split_p = points_p.get('split', [0.0])[0]
-    t_split_v = points_v.get('split', [0.0])[0]
-
-    # define a time axis for [0, T]:
-    shift_times_p = shift_function_times(t_split=t_split_p, T=T_p)
-    shift_times_v = shift_function_times(t_split=t_split_v, T=T_v)
-    shift_indices_p = shift_function_indices(t_split=t_split_p, T=T_p)
-    shift_indices_v = shift_function_indices(t_split=t_split_v, T=T_v)
-    unshift_times_p = shift_function_times(t_split=T_p - t_split_p, T=T_p)
-    unshift_times_v = shift_function_times(t_split=T_v - t_split_v, T=T_v)
-    unshift_indices_p = shift_function_indices(t_split=T_p - t_split_p, T=T_p)
-    unshift_indices_v = shift_function_indices(t_split=T_v - t_split_v, T=T_v)
-
-    # re-normalise data
-    data_p = get_renormalised_data(data_p, fitinfos_p, t_split=t_split_p, quantity='pressure')
-    data_v = get_renormalised_data(data_v, fitinfos_v, t_split=t_split_v, quantity='volume')
-
-    # re-normalise polynomial + points:
-    p, points_p = get_renormalised_polynomial_and_points(info_p, points_p)
-    v, points_v = get_renormalised_polynomial_and_points(info_v, points_v)
-
-    # convert units
-    p = [cv['pressure'] * xx for xx in p]
-    v = [cv['volume'] * xx for xx in v]
-    data_p['pressure'] = cv['pressure'] * data_p['pressure']
-    data_v['volume'] = cv['volume'] * data_v['volume']
-
-    # fit 'other' measurement to each time-series
-    data_p['volume'] = poly(shift_indices_p(T_v * data_p['time[orig]'] / T_p), *v)
-    data_v['pressure'] = poly(shift_indices_p(T_p * data_v['time[orig]'] / T_v), *p)
 
     # generate times + fitted polynomials for P+V
-    time_orig = np.linspace(start=0, stop=1, num=N, endpoint=False)
-    time_p = shift_times_p(T_p * time_orig)
-    time_v = shift_times_v(T_v * time_orig)
-    pressure_fit = poly(unshift_indices_p(T_p * time_orig), *p)
-    volume_fit = poly(unshift_indices_v(T_v * time_orig), *v)
+    time = np.linspace(start=0, stop=1, num=N, endpoint=False)
+    time_p = T_p * time
+    time_v = T_v * time
+
+    # re-normalise polynomial + points:
+    p = get_renormalised_polynomial(info_p)
+    v = get_renormalised_polynomial(info_v)
+
+    points_p = get_renormalised_coordinates_of_special_points(points_p, p, info=info_p)
+    points_v = get_renormalised_coordinates_of_special_points(points_v, v, info=info_v)
+
+    # re-normalise data
+    data_p = get_renormalised_data(data_p, fitinfos_p, quantity='pressure')
+    data_v = get_renormalised_data(data_v, fitinfos_v, quantity='volume')
+
+    # fit 'other' measurement to each time-series
+    data_p['volume'] = poly(T_v * data_p['time[orig]'] / T_p, *v)
+    data_v['pressure'] = poly(T_p * data_v['time[orig]'] / T_v, *p)
+
+    # compute (matched and) fitted curves
+    pressure_fit = poly(T_p * time, *p)
+    volume_fit = poly(T_v * time, *v)
 
     # set up plots
     fig = make_subplots(
@@ -376,8 +325,8 @@ def step_output_loop_plot(
     fig.append_trace(
         pgo.Scatter(
             name='P-V [fit/data]',
-            x=data_v['volume'],
-            y=data_v['pressure'],
+            x=cv['volume'] * data_v['volume'],
+            y=cv['pressure'] * data_v['pressure'],
             text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_v['time']],
             mode='markers',
             marker=dict(
@@ -394,8 +343,8 @@ def step_output_loop_plot(
         pgo.Scatter(
             name='P-V [fit]',
             # NOTE: Ensure that the cycle contains start+end points!
-            x=np.concatenate([volume_fit, volume_fit[:1]]),
-            y=np.concatenate([pressure_fit, pressure_fit[:1]]),
+            x=cv['volume'] * np.concatenate([volume_fit, volume_fit[:1]]),
+            y=cv['pressure'] * np.concatenate([pressure_fit, pressure_fit[:1]]),
             text=[
                 f'{tt:.0f}{units["time"]}'
                 for tt in cv['time'] * np.concatenate([time_p, time_p[:1]])
@@ -415,34 +364,32 @@ def step_output_loop_plot(
 
     points_ = []
 
-    for key, ts in points_p.items():
-        ts = np.asarray(ts)
-        p_ = poly(shift_indices_p(ts), *p)
-        v_ = poly(shift_indices_v(T_v * unshift_times_p(ts) / T_p), *v)
-        settings = cfg_markers_p.get(key, None)
-        points_.append((key, v_, p_, settings))
+    for key, point in points_p:
+        t_ = point.time
+        p_ = poly_single(t_, *p)
+        v_ = poly_single(T_v * t_ / T_p, *v)
+        points_.append((key, t_, v_, p_, point))
 
-    for key, ts in points_v.items():
-        ts = np.asarray(ts)
-        p_ = poly(shift_indices_p(T_p * unshift_times_v(ts) / T_v), *p)
-        v_ = poly(shift_indices_v(ts), *v)
-        settings = cfg_markers_v.get(key, None)
-        points_.append((key, v_, p_, settings))
+    for key, point in points_v:
+        t_ = point.time
+        v_ = poly_single(t_, *v)
+        p_ = poly_single(T_p * t_ / T_v, *p)
+        points_.append((key, t_, v_, p_, point))
 
-    for key, v_, p_, settings in points_:
-        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
-        if settings.ignore:
+    for key, t_, v_, p_, point in points_:
+        if point.ignore:
             continue
+        marker = point.marker
         fig.append_trace(
             pgo.Scatter(
-                name=settings.name,
-                x=v_,
-                y=p_,
+                name=point.name,
+                x=[cv['volume'] * v_],
+                y=[cv['pressure'] * p_],
                 mode='markers+text',
                 marker=dict(
-                    symbol=settings.symbol,
-                    size=settings.size,
-                    color=settings.colour,
+                    symbol=marker.symbol,
+                    size=marker.size,
+                    color=marker.colour,
                 ),
                 showlegend=True,
             ),
@@ -463,13 +410,127 @@ def step_output_loop_plot(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
+def quick_plot(
+    data: pd.DataFrame,
+    fitinfos: list[tuple[tuple[int, int], FittedInfo]],
+    quantity: str,
+    N: int = 1000,
+) -> pgo.Figure:
+    _, info = fitinfos[-1]
+    T = info.normalisation.period
+    q = get_renormalised_polynomial(info)
+    dq = get_derivative_coefficients(q)
+    ddq = get_derivative_coefficients(dq)
+    data = get_renormalised_data(data, fitinfos, quantity=quantity)
+    time = np.linspace(start=0.0, stop=T, num=N + 1, endpoint=True)
+
+    fig = pgo.Figure(
+        data=[
+            pgo.Scatter(
+                name='debug [data]',
+                # NOTE: Ensure that the cycle contains start+end points!
+                x=data['time'],
+                y=data[quantity],
+                mode='markers',
+                line_shape='spline',
+                marker=dict(
+                    size=2,
+                    color='black',
+                ),
+                showlegend=True,
+            ),
+            pgo.Scatter(
+                name='debug [fit]',
+                # NOTE: Ensure that the cycle contains start+end points!
+                x=time,
+                y=poly(time, *q),
+                mode='lines',
+                line_shape='spline',
+                line=dict(
+                    width=1,
+                    color='black',
+                ),
+                showlegend=True,
+            ),
+            # pgo.Scatter(
+            #     name='dx/dt [fit]',
+            #     # NOTE: Ensure that the cycle contains start+end points!
+            #     x=time,
+            #     y=poly(time, *dq) / T,
+            #     mode='lines',
+            #     line_shape='spline',
+            #     line=dict(
+            #         width=1,
+            #         color='black',
+            #     ),
+            #     showlegend=True,
+            # ),
+            # pgo.Scatter(
+            #     name='d²x/dt² [fit]',
+            #     # NOTE: Ensure that the cycle contains start+end points!
+            #     x=time,
+            #     y=poly(time, *ddq) / T**2,
+            #     mode='lines',
+            #     line_shape='spline',
+            #     line=dict(
+            #         width=1,
+            #         color='black',
+            #     ),
+            #     showlegend=True,
+            # ),
+        ],
+        layout=pgo.Layout(
+            width=640,
+            height=480,
+            margin=dict(l=40, r=40, t=60, b=40),
+            font=dict(
+                family='Calibri',
+                size=10,
+                color='black',
+            ),
+            plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+            title=dict(
+                text='Debug plot',
+                x=0.5,
+                y=0.95,
+                font=dict(size=12),
+            ),
+            xaxis=dict(
+                title=f'time',
+                linecolor='black',
+                mirror=True,  # adds border on top too
+                ticks='outside',
+                showgrid=True,
+                visible=True,
+                # range=[0, None], # FIXME: does not work!
+                # rangemode='tozero',
+            ),
+            yaxis=dict(
+                title=quantity,
+                linecolor='black',
+                mirror=True,  # adds border on right too
+                ticks='outside',
+                showgrid=True,
+                visible=True,
+                # range=[0, None], # FIXME: does not work!
+                # autorange='reversed',
+                # rangemode='tozero',
+            ),
+            showlegend=True,
+        ),
+    )
+    return fig
+
+
 def add_plot_time_series(
     fig: pgo.Figure,
     name: Optional[str],
     time: np.ndarray,
     values: np.ndarray,
-    row: int,
-    col: int,
+    cv_time: float = 1.0,
+    cv_value: float = 1.0,
+    row: int = 1,
+    col: int = 1,
     mode: str = 'lines',
     line: dict = dict(
         width=1,
@@ -485,15 +546,15 @@ def add_plot_time_series(
         ),
     ),
     text: Optional[str] = None,
-    points: list[tuple[str, Iterable[float], Iterable[float], Optional[MarkerSettings]]] = {},
+    points: list[tuple[str, SpecialPointsConfig]] = [],
     showlegend: bool = False,
     showlegend_points: bool = True,
 ) -> pgo.Figure:
     fig.append_trace(
         pgo.Scatter(
             name=name,
-            x=time,
-            y=values,
+            x=cv_time * time,
+            y=cv_value * values,
             text=[text or name for _ in time],
             mode=mode,
             line=line if mode == 'lines' else None,
@@ -505,28 +566,29 @@ def add_plot_time_series(
         col=col,
     )
 
-    for key, time_, values_, settings in points:
-        settings = settings or MarkerSettings(name=key, size=6, symbol='x')
-        if settings.ignore:
+    for key, point in points:
+        if point.ignore:
             continue
+        marker = point.marker
         fig.append_trace(
             pgo.Scatter(
-                name=settings.name,
-                x=time_,
-                y=values_,
+                name=point.name,
+                x=[cv_time * point.time],
+                y=[cv_value * point.value],
                 mode='markers+text',
                 marker=dict(
-                    symbol=settings.symbol,
-                    size=settings.size,
-                    color=settings.colour,
+                    symbol=marker.symbol,
+                    size=marker.size,
+                    color=marker.colour,
                 ),
                 showlegend=showlegend_points,
             ),
             row=row,
             col=col,
         )
-        for t in time_:
-            fig.add_vline(x=t, line_width=0.5, line_dash='dash', line_color=settings.colour)
+        fig.add_vline(
+            x=cv_time * point.time, line_width=0.5, line_dash='dash', line_color=marker.colour
+        )
 
     return fig
 
@@ -546,40 +608,27 @@ def save_image(fig: pgo.Figure, path: str):
     return
 
 
-def shift_function_times(t_split: float, T: float):
-    def shift(t: np.ndarray, strict: bool = True) -> np.ndarray:
-        if strict:
-            parts = [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split]]
-        else:
-            TT = 0 * t[t == t_split]  # add this for peridocity
-            TT[:] = T
-            parts = [t[t >= t_split] - t_split, (T - t_split) + t[t < t_split], TT]
-        return np.concatenate(parts)
-
-    return shift
-
-
-def shift_function_indices(t_split: float, T: float):
-    def shift(t: np.ndarray, strict: bool = True) -> np.ndarray:
-        if strict:
-            parts = [t[t >= t_split], t[t < t_split]]
-        else:
-            TT = 0 * t[t == t_split]  # add this for peridocity
-            TT[:] = T if t_split == 0 else t_split
-            parts = [t[t >= t_split], t[t < t_split], TT]
-        return np.concatenate(parts)
-
-    return shift
-
-
-def coordinates_special_points(
-    t: Iterable[float], p: list[float], T: float, t_split: float
-) -> tuple[np.ndarray, np.ndarray]:
-    shift_times = shift_function_times(t_split=t_split, T=T)
-    shift_indices = shift_function_indices(t_split=t_split, T=T)
-
-    t = np.unique(np.asarray(t))
-    values = poly(shift_indices(t, strict=False), *p)
-    t = shift_times(t, strict=False)
-
-    return t, values
+def get_renormalised_coordinates_of_special_points(
+    points: dict[str, SpecialPointsConfig],
+    p: list[float],
+    info: FittedInfo,
+) -> list[tuple[str, SpecialPointsConfig]]:
+    T = info.normalisation.period
+    points_ = []
+    for key, point in points.items():
+        tt = point.time
+        # if tt in [0.0, 1.0]:
+        #     point = point.copy()
+        #     point.time = 0.0
+        #     points_.append((key, point))
+        #     point = point.copy()
+        #     point.time = 1.0
+        #     points_.append((key, point))
+        point = point.copy()
+        points_.append((key, point))
+    t = [point.time for key, point in points_]
+    values = poly(t, *p)
+    for (key, point), y in zip(points_, values):
+        point.value = T * y
+        point.value = y
+    return points_

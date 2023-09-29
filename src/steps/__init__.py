@@ -30,11 +30,11 @@ __all__ = [
     'step_recognise_cycles',
     'step_removed_marked_sections',
     'step_fit_curve',
-    'step_refit_curve',
     'step_recognise_points',
     'step_align_cycles',
     'step_output_single_table',
     'step_output_combined_table',
     'step_output_time_plot',
     'step_output_loop_plot',
+    'quick_plot',
 ]

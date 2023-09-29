@@ -63,11 +63,11 @@ def enter(path: str, *_):
             LPsub.next()
 
             LPsub = LP.subtask(f'''INITIAL FIT CURVE {quantity}''', 1)
-            data, fits = step_fit_curve(case, data, quantity=quantity)
+            data, fits = step_fit_curve(case, data, quantity=quantity, init=True)
             LPsub.next()
 
             LPsub = LP.subtask(f'''INITIAL CLASSIFICATION OF POINTS {quantity}''', 1)
-            points_data, points0 = step_recognise_points(case, data, fits, quantity=quantity)
+            points_data, points_fit = step_recognise_points(case, data, fits, quantity=quantity)
             LPsub.next()
 
             LPsub = LP.subtask(f'''RE-RECOGNITION OF CYCLES {quantity} / MATCHING''', 1)
@@ -75,16 +75,16 @@ def enter(path: str, *_):
             LPsub.next()
 
             LPsub = LP.subtask(f'''RE-FIT CURVE {quantity}''', 1)
-            data, _ = step_refit_curve(case, data, quantity=quantity)
+            data, fits = step_fit_curve(case, data, quantity=quantity, init=False)
             LPsub.next()
 
             LPsub = LP.subtask(f'''RE-CLASSIFICATION OF POINTS {quantity}''', 1)
-            _, points0 = step_recognise_points(case, data, fits, quantity=quantity)
+            _, points_fit = step_recognise_points(case, data, fits, quantity=quantity)
             LPsub.next()
 
             datas[quantity] = data
             fitinfos[quantity] = fits
-            points[quantity] = points0
+            points[quantity] = points_fit
             LP.next()
 
         # process quantities separately
@@ -94,14 +94,16 @@ def enter(path: str, *_):
         ]:
             data = datas[quantity]
             fits = fitinfos[quantity]
-            points0 = points[quantity]
+            points_fit = points[quantity]
 
             LPsub = LP.subtask(f'''OUTPUT TABLES {quantity}''', 1)
             step_output_single_table(case, data, quantity=quantity)
             LPsub.next()
 
             LPsub = LP.subtask('''OUTPUT TIME PLOTS''', 1)
-            plt = step_output_time_plot(case, data, fits, points0, quantity=quantity, symb=symb)
+            plt = step_output_time_plot(
+                case, data, fits, points_fit, quantity=quantity, symb=symb
+            )
             # plt.show()
             LPsub.next()
             LP.next()

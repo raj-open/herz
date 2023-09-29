@@ -68,6 +68,7 @@ def get_renormalised_polynomial(
     coeff_rescaled[1] += m / T
     return coeff_rescaled
 
+
 def get_renormalised_polynomial_time_only(
     info: FittedInfo,
 ) -> list[float]:
@@ -94,7 +95,7 @@ def get_renormalised_polynomial_values_only(
     '''
     coeff = info.coefficients
     T, c, m, s = get_normalisation_params(info)
-    coeff_rescaled = [ s * cc for cc in coeff ]
+    coeff_rescaled = [s * cc for cc in coeff]
     coeff_rescaled[0] += c
     coeff_rescaled[1] += m
     return coeff_rescaled

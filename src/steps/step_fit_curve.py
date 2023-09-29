@@ -6,10 +6,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ..thirdparty.data import *
+from ..thirdparty.maths import *
 
 from ..setup import config
+from ..setup.series import *
 from ..core.log import *
 from ..core.poly import *
+from ..models.enums import *
 from ..models.user import *
 from ..models.internal import *
 from ..algorithms.cycles import *
@@ -21,7 +24,6 @@ from ..algorithms.fit import *
 
 __all__ = [
     'step_fit_curve',
-    'step_refit_curve',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,38 +36,61 @@ def step_fit_curve(
     data: pd.DataFrame,
     quantity: str,
     n_der: int = 2,
+    init: bool = False,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
-    Fits polynomial to cycles in time-series,
-    forcing certain conditions on the `n`th-derivatives
-    at certain time points,
+    Fits polynomial to cycles in time-series, forcing certain conditions
+    on the `n`th-derivatives at certain time points,
     and minimising wrt. the L²-norm.
+
+    NOTE: Initial fitting runs from peak to peak.
     '''
     cfg = case.process
-    cfg_poly = config.POLY[quantity]
-
-    t = data['time'].to_numpy(copy=True)
-    cycles = data['cycle'].tolist()
+    conds = get_polynomial_condition(quantity, init=init)
 
     # fit polynomial
+    t = data['time'].to_numpy(copy=True)
     x = data[quantity].to_numpy(copy=True)
-    mode_average = cfg.fit.mode == EnumFittingMode.AVERAGE
-    fitinfos = fit_poly_cycles(
-        t=t,
-        x=x,
-        cycles=cycles,
-        deg=cfg_poly.degree,
-        conds=cfg_poly.conditions,
+    cycles = data['cycle'].tolist()
+    fitinfos = fit_poly_cycles(t=t, x=x, cycles=cycles, conds=conds)
+
+    # compute n'th derivatives
+    data = compute_nth_derivatives_for_cycles(
+        case, data, fitinfos, quantity=quantity, n_der=n_der
     )
 
-    # compute derivatives
-    if mode_average:
-        _, info_av = fitinfos[-1]
-        coeffs = [info_av.coefficients[:] for _, _ in fitinfos[:-1]]
-    else:
-        coeffs = [info.coefficients[:] for _, info in fitinfos[:-1]]
+    return data, fitinfos
 
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# AUXILIARY METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def compute_nth_derivatives_for_cycles(
+    case: UserCase,
+    data: pd.DataFrame,
+    fitinfos: list[tuple[tuple[int, int], FittedInfo]],
+    quantity: str,
+    n_der: int,
+) -> pd.DataFrame:
+    '''
+    Computes the n'th derivatives of the fitted curve for each cycle.
+    '''
+    cfg = case.process
+    N = len(data)
+    t = data['time'].to_numpy(copy=True)
+
+    match cfg.fit.mode:
+        case EnumFittingMode.AVERAGE:
+            _, info_av = fitinfos[-1]
+            coeffs = [info_av.coefficients[:] for _, _ in fitinfos[:-1]]
+        case _:
+            coeffs = [info.coefficients[:] for _, info in fitinfos[:-1]]
+
+    # compute each n'th derivative
     for n in range(n_der + 1):
+        x = np.zeros((N,), dtype=float)
         # loop over all time-subintervals:
         for k, ((i1, i2), info) in enumerate(fitinfos[:-1]):
             # get coefficients for (n-1)th derivative polynomial for cycle k:
@@ -95,15 +120,4 @@ def step_fit_curve(
             case _:
                 data[f'd[{n},t]{quantity}[fit]'] = x
 
-    return data, fitinfos
-
-
-def step_refit_curve(
-    case: UserCase,
-    data: pd.DataFrame,
-    quantity: str,
-    n_der: int = 2,
-) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
-    fitinfos = []
-    log_warn('Not yet implemented')
-    return data, fitinfos
+    return data
