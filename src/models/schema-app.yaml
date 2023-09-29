@@ -317,6 +317,7 @@ components:
       type: string
       enum:
         - UNKNOWN
+        - ZERO
         - MINIMUM
         - MAXIMUM
         - LOCAL_MINIMUM
