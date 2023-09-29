@@ -10,7 +10,6 @@ from ..thirdparty.maths import *
 
 from ..setup import config
 from ..setup.series import *
-from ..core.log import *
 from ..core.poly import *
 from ..models.enums import *
 from ..models.user import *
@@ -35,8 +34,8 @@ def step_fit_curve(
     case: UserCase,
     data: pd.DataFrame,
     quantity: str,
+    init: bool,
     n_der: int = 2,
-    init: bool = False,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
     Fits polynomial to cycles in time-series, forcing certain conditions

@@ -11,7 +11,8 @@ from ..thirdparty.types import *
 from .peaks import *
 from .cycles import *
 from ..core.utils import *
-from ..core.poly import *
+from ..core.log import *
+from ..core.crit import *
 from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

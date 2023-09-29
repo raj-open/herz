@@ -414,18 +414,79 @@ def quick_plot(
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
+    renormalised: bool = True,
     N: int = 1000,
-) -> pgo.Figure:
-    _, info = fitinfos[-1]
-    T = info.normalisation.period
-    q = get_renormalised_polynomial(info)
+) -> Generator[pgo.Figure, None, None]:
+    _, info = fitinfos[0]
+    if renormalised:
+        T = info.normalisation.period
+        q = get_renormalised_polynomial(info)
+        data = get_renormalised_data(data, fitinfos, quantity=quantity)
+    else:
+        T = 1.0
+        q = info.coefficients
+
     dq = get_derivative_coefficients(q)
     ddq = get_derivative_coefficients(dq)
-    data = get_renormalised_data(data, fitinfos, quantity=quantity)
     time = np.linspace(start=0.0, stop=T, num=N + 1, endpoint=True)
 
-    fig = pgo.Figure(
-        data=[
+    layout = pgo.Layout(
+        width=640,
+        height=480,
+        margin=dict(l=40, r=40, t=60, b=40),
+        font=dict(
+            family='Calibri',
+            size=10,
+            color='black',
+        ),
+        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        title=dict(
+            text='Debug plot',
+            x=0.5,
+            y=0.95,
+            font=dict(size=12),
+        ),
+        xaxis=dict(
+            title=f'time',
+            linecolor='black',
+            mirror=True,  # adds border on top too
+            ticks='outside',
+            showgrid=True,
+            visible=True,
+            # range=[0, None], # FIXME: does not work!
+            # rangemode='tozero',
+        ),
+        yaxis=dict(
+            title=quantity,
+            linecolor='black',
+            mirror=True,  # adds border on right too
+            ticks='outside',
+            showgrid=True,
+            visible=True,
+            # range=[0, None], # FIXME: does not work!
+            # autorange='reversed',
+            # rangemode='tozero',
+        ),
+        showlegend=True,
+    )
+
+    plot_data = [
+        pgo.Scatter(
+            name='debug [fit]',
+            # NOTE: Ensure that the cycle contains start+end points!
+            x=time,
+            y=poly(time, *q),
+            mode='lines',
+            line_shape='spline',
+            line=dict(
+                width=1,
+                color='black',
+            ),
+            showlegend=True,
+        ),
+    ]
+    if renormalised:
+        plot_data.append(
             pgo.Scatter(
                 name='debug [data]',
                 # NOTE: Ensure that the cycle contains start+end points!
@@ -439,87 +500,43 @@ def quick_plot(
                 ),
                 showlegend=True,
             ),
-            pgo.Scatter(
-                name='debug [fit]',
-                # NOTE: Ensure that the cycle contains start+end points!
-                x=time,
-                y=poly(time, *q),
-                mode='lines',
-                line_shape='spline',
-                line=dict(
-                    width=1,
-                    color='black',
-                ),
-                showlegend=True,
-            ),
-            # pgo.Scatter(
-            #     name='dx/dt [fit]',
-            #     # NOTE: Ensure that the cycle contains start+end points!
-            #     x=time,
-            #     y=poly(time, *dq) / T,
-            #     mode='lines',
-            #     line_shape='spline',
-            #     line=dict(
-            #         width=1,
-            #         color='black',
-            #     ),
-            #     showlegend=True,
-            # ),
-            # pgo.Scatter(
-            #     name='d²x/dt² [fit]',
-            #     # NOTE: Ensure that the cycle contains start+end points!
-            #     x=time,
-            #     y=poly(time, *ddq) / T**2,
-            #     mode='lines',
-            #     line_shape='spline',
-            #     line=dict(
-            #         width=1,
-            #         color='black',
-            #     ),
-            #     showlegend=True,
-            # ),
-        ],
-        layout=pgo.Layout(
-            width=640,
-            height=480,
-            margin=dict(l=40, r=40, t=60, b=40),
-            font=dict(
-                family='Calibri',
-                size=10,
+        )
+    yield pgo.Figure(layout=layout, data=plot_data)
+
+    plot_data = [
+        pgo.Scatter(
+            name='dx/dt [fit]',
+            # NOTE: Ensure that the cycle contains start+end points!
+            x=time,
+            y=poly(time, *dq) / T,
+            mode='lines',
+            line_shape='spline',
+            line=dict(
+                width=1,
                 color='black',
-            ),
-            plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-            title=dict(
-                text='Debug plot',
-                x=0.5,
-                y=0.95,
-                font=dict(size=12),
-            ),
-            xaxis=dict(
-                title=f'time',
-                linecolor='black',
-                mirror=True,  # adds border on top too
-                ticks='outside',
-                showgrid=True,
-                visible=True,
-                # range=[0, None], # FIXME: does not work!
-                # rangemode='tozero',
-            ),
-            yaxis=dict(
-                title=quantity,
-                linecolor='black',
-                mirror=True,  # adds border on right too
-                ticks='outside',
-                showgrid=True,
-                visible=True,
-                # range=[0, None], # FIXME: does not work!
-                # autorange='reversed',
-                # rangemode='tozero',
             ),
             showlegend=True,
         ),
-    )
-    return fig
+    ]
+    yield pgo.Figure(layout=layout, data=plot_data)
+
+    plot_data = [
+        pgo.Scatter(
+            name='d²x/dt² [fit]',
+            # NOTE: Ensure that the cycle contains start+end points!
+            x=time,
+            y=poly(time, *ddq) / T**2,
+            mode='lines',
+            line_shape='spline',
+            line=dict(
+                width=1,
+                color='black',
+            ),
+            showlegend=True,
+        ),
+    ]
+    yield pgo.Figure(layout=layout, data=plot_data)
+    return
 
 
 def add_plot_time_series(

@@ -10,9 +10,7 @@ from ..thirdparty.maths import *
 
 from ..setup import config
 from ..setup.series import *
-from ..core.utils import *
-from ..algorithms.cycles import *
-from ..algorithms.special import *
+from ..algorithms.points import *
 from ..models.user import *
 from ..models.internal import *
 
