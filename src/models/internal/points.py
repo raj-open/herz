@@ -88,16 +88,17 @@ def get_renormalised_polynomial_values_only(
     ```
     z(t) = (x(t₀ + T·t) - (c + mt))/s
     ```
-    Unnormalisation (but write polynomial centred on `t₀` instead of `0`):
+    Unnormalisation that restores the shape of the the polynomial only,
+    but does not re-scale time and values.
     ```
-    x(T·t) = c + m · (t-t₀) + s · z(t-t₀)
+    x(T·t)/s = c/s + m/s · (t – t₀) + z(t – t₀)
     ```
     '''
     coeff = info.coefficients
     T, c, m, s = get_normalisation_params(info)
-    coeff_rescaled = [s * cc for cc in coeff]
-    coeff_rescaled[0] += c
-    coeff_rescaled[1] += m
+    coeff_rescaled = coeff[:]
+    coeff_rescaled[0] += c / (s or 1.0)
+    coeff_rescaled[1] += m / (s or 1.0)
     return coeff_rescaled
 
 

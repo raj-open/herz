@@ -6,12 +6,10 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ..thirdparty.maths import *
-from ..thirdparty.physics import *
 from ..thirdparty.types import *
 
 from .utils import *
 from .constants import *
-from ..models.enums import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -25,8 +23,6 @@ __all__ = [
     'get_recentred_coefficients',
     'get_derivative_coefficients',
     'get_integral_coefficients',
-    'get_critical_points',
-    'get_critical_points_bounded',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,174 +193,3 @@ def get_integral_coefficients(coeff: list[float], n: int = 1) -> list[float]:
     if n == 1:
         return [0] + [c / (k + 1) for k, c in enumerate(coeff)]
     return [0] * n + [c / nPr(k + n, n) for k, c in enumerate(coeff)]
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# METHODS - critical points
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def get_critical_points(
-    p: list[float],
-    dp: Optional[list[float]] = None,
-) -> list[tuple[float, float, int, EnumCriticalPoints]]:
-    results = []
-
-    # if not precomputed, compute 1st and 2nd derivatives:
-    dp = dp or get_derivative_coefficients(p)
-
-    # necessary condition: t (real-valued) is critical ONLY IF p'(t) = 0:
-    t_crit = get_real_polynomial_roots(dp)
-    N = len(t_crit)
-    if N == 0:
-        return []
-
-    # remove duplicates
-    info = recognise_duplicate_times(t_crit)
-
-    # compute points between critical points
-    t_crit = [t0 for t0, _ in info]
-    C = 2 * max([abs(t0) for t0 in t_crit]) + 1
-    delta = np.diff([-C] + t_crit + [C])
-    t_between = [t0 - dt / 2 for (t0, dt) in zip(t_crit + [C], delta)]
-    t_grid = [t_between[0]] + flatten(*list(zip(t_crit, t_between[1:])))
-
-    # classify critical points:
-    # FAST METHOD:
-    N = len(t_grid)
-    values = poly(t_grid, *p)
-    values = [tuple(values[k - 1 :][:3]) for k in range(1, N - 1, 2)]
-    for (t0, v), (ym_pre, y0, ym_post) in zip(info, values):
-        # ----------------------------------------------------------------
-        # NOTE:
-        # Times between critical points:
-        #
-        #  ----O------|------O------|--------O----
-        #     pre   tm_pre   t0    tm_post  post
-        #
-        # - y0 := p(t0)
-        # - ym_pre := p(tm_pre)
-        # - ym_post := p(tm_post)
-        #
-        # If any of these values are equal,then by mean-value-thm
-        # a critical point occurs between them - contradiction!
-        # Hence it is mathematically guaranteed,
-        # that sgn(ym_pre - y0) = ±1
-        # and sgn(ym_post - y0) = ±1
-        # ----------------------------------------------------------------
-
-        # classify based on pre/post-changes:
-        change_post = sign_normalised_difference(y0, ym_post, eps=MACHINE_EPS)
-        change_pre = sign_normalised_difference(ym_pre, y0, eps=MACHINE_EPS)
-        match change_pre, change_post:
-            case (-1, 1):
-                results.append((t0, y0, v, EnumCriticalPoints.LOCAL_MINIMUM))
-            case (1, -1):
-                results.append((t0, y0, v, EnumCriticalPoints.LOCAL_MAXIMUM))
-            case (-1, -1) | (1, 1):
-                results.append((t0, y0, v, EnumCriticalPoints.INFLECTION))
-            case _:
-                # NOTE: This case should not occur! If it does - reject!
-                pass
-
-    # CLASSICAL METHOD:
-    # values = poly(t_crit, *dp)
-    # for t0, y in zip(t_crit, values):
-    #     if y > MACHINE_EPS:
-    #         results.append((t0, EnumCriticalPoints.MINIMUM))
-    #     elif y < -MACHINE_EPS:
-    #         results.append((t0, EnumCriticalPoints.MAXIMUM))
-    #     else:
-    #         # ----------------------------------------------------------------
-    #         # NOTE: this is computationally intensive
-    #         # so only resort to this for unclear cases
-    #         # Let q be the polynomial p centred on t₀,
-    #         # i.e. q[k] = p⁽ᵏ⁾(t₀)/k! for each k.
-    #         # Then q[1] = 0 (by previous computation)
-    #         #
-    #         # Case 1. For all k > 1 it holds that q[k] = 0.
-    #         #     Then q is a constant function!
-    #         #     NOTE:
-    #         #     This case cannot occur, since 'roots' function
-    #         #     returns [] for constant-polynomials.
-    #         #
-    #         # Case 1. There is some k≥1 for which q[k] ≠ 0.
-    #         #     Then let k_min ≥ 1 be minimal occurrence.
-    #         #
-    #         #     Case 1.1 k_min is even and q[k_min] > 0.
-    #         #       ---> LOCAL MIN
-    #         #
-    #         #     Case 1.2 k_min is even and q[k_min] < 0.
-    #         #       ---> LOCAL MAX
-    #         #
-    #         #     Case 1.3 k_min is odd.
-    #         #       ---> LOCAL INFLECTION
-    #         # ----------------------------------------------------------------
-    #         q = get_recentred_coefficients(p, t0)
-    #         indices = [ k for k, c in enumerate(q) if k > 1 and abs(c) > MACHINE_EPS ]
-    #         k_min = (indices + [-1])[0]
-    #         if k_min == -1:
-    #             # Should not occur! If it does, reject critical point.
-    #             pass
-    #         elif k_min % 2 == 1:
-    #             results.append((t0, EnumCriticalPoints.INFLECTION))
-    #         elif q[k_min] > MACHINE_EPS:
-    #             results.append((t0, EnumCriticalPoints.MINIMUM))
-    #         elif q[k_min] < -MACHINE_EPS:
-    #             results.append((t0, EnumCriticalPoints.MAXIMUM))
-
-    return results
-
-
-def get_critical_points_bounded(
-    p: list[float],
-    t_min: float,
-    t_max: float,
-    dp: Optional[list[float]] = None,
-) -> list[tuple[float, float, int, EnumCriticalPoints]]:
-    results = get_critical_points(p=p, dp=dp)
-
-    # restrict to interval
-    results = [
-        (t0, y0, v, kind) for (t0, y0, v, kind) in results if t_min <= t0 and t0 <= t_max
-    ]
-
-    if len(results) == 0:
-        return []
-
-    t_crit = [results[0][0], results[-1][0]]
-    values = poly([t_min, t_max], *p)
-
-    # add in left-boundary or purify points that are too close
-    if abs(t_crit[0] - t_min) < MACHINE_EPS:
-        results[0] = (t_min, values[0], *results[-1][2:])
-    else:
-        results.insert(0, (t_min, values[0], 1, EnumCriticalPoints.UNKNOWN))
-
-    # add in right-boundary or purify points that are too close
-    if abs(t_max - t_crit[-1]) < MACHINE_EPS:
-        results[-1] = (t_max, values[-1], *results[-1][2:])
-    else:
-        t_crit.append(t_max)
-        results.append((t_max, values[-1], 1, EnumCriticalPoints.UNKNOWN))
-
-    # compute absoulte min/max
-    values = [y0 for t0, y0, v, kind in results]
-    y_min = np.min(values)
-    y_max = np.max(values)
-    for k, (t0, y0, v, kind) in enumerate(results):
-        if abs(normalised_difference(y_max, y0)) < MACHINE_EPS:
-            results[k] = (t0, y_max, v, EnumCriticalPoints.MAXIMUM)
-        elif abs(normalised_difference(y_min, y0)) < MACHINE_EPS:
-            results[k] = (t0, y_min, v, EnumCriticalPoints.MINIMUM)
-
-    # remove boundaries of not classified as absolute min/max
-    kind = results[0][-1]
-    if kind == EnumCriticalPoints.UNKNOWN:
-        results = results[1:]
-
-    kind = results[-1][-1]
-    if kind == EnumCriticalPoints.UNKNOWN:
-        results = results[:-1]
-
-    return results

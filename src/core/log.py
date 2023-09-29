@@ -22,6 +22,7 @@ __all__ = [
     'catch_fatal',
     'configure_logging',
     'log_debug',
+    'log_debug_long',
     'log_dev',
     'log_error',
     'log_fatal',
@@ -40,6 +41,7 @@ class LOG_LEVELS(Enum):  # pragma: no cover
 
 
 # local usage only
+_IS_DEBUG: bool = False
 _LOGGING_DEBUG_FILE: str = 'logs/debug.log'
 T = TypeVar('T')
 
@@ -49,16 +51,27 @@ T = TypeVar('T')
 
 
 def configure_logging(level: str | LOG_LEVELS):
+    global _IS_DEBUG
+    level_ = level.value if isinstance(level, LOG_LEVELS) else level
+    _IS_DEBUG = level_ == 'DEBUG'
     logging.basicConfig(
         format='%(asctime)s [\x1b[1m%(levelname)s\x1b[0m] %(message)s',
-        level=level.value if isinstance(level, LOG_LEVELS) else level,
         datefmt=r'%Y-%m-%d %H:%M:%S',
     )
+    logger = logging.getLogger()
+    logger.setLevel(level_)
     return
 
 
 def log_debug(*messages: Any):
     logging.debug(*messages)
+
+
+def log_debug_long(cb: Callable[[], Any]):
+    if not _IS_DEBUG:
+        return
+    message = cb()
+    log_debug('\n' + message)
 
 
 def log_info(*messages: Any):
@@ -75,7 +88,7 @@ def log_error(*messages: Any):
 
 def log_fatal(*messages: Any):
     logging.fatal(*messages)
-    exit(1)
+    sys.exit(1)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

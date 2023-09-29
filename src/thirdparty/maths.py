@@ -16,10 +16,14 @@ from scipy import signal as sps
 from findpeaks import findpeaks
 
 from typing import Iterable
+from typing import TypeVar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MODIFICATIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+T = TypeVar('T')
 
 
 def nCr(n: int, r: int) -> int:
@@ -91,23 +95,27 @@ def closest_index(x: float, points: Iterable[float], init: int = 0) -> int:
         dist = np.abs(np.asarray(points) - x)
         index = init + dist.argmin()
     except:
-        index = -1
+        raise ValueError('List of points must be non-empty!')
     return index
 
 
 def closest_indices(
-    x: Iterable[float],
+    X: Iterable[float],
     points: Iterable[float],
     init: int = 0,
-    remove_repetitions: bool = True,
-    remove_bad: bool = True,
 ) -> list[int]:
-    indices = [closest_index(xx, points, init=init) for xx in x]
-    if remove_repetitions:
-        indices = list(set(indices))
-    if remove_bad:
-        indices = [i for i in indices if i != -1]
+    indices = [closest_index(x, points, init=init) for x in X]
     return indices
+
+
+def closest_value(x: float, points: Iterable[float]) -> T:
+    i = closest_index(x, points)
+    return points[i]
+
+
+def closest_values(X: list[float], points: Iterable[float]) -> list[T]:
+    indices = closest_indices(X, points)
+    return [X[i] for i in indices]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,6 +125,8 @@ def closest_indices(
 __all__ = [
     'closest_index',
     'closest_indices',
+    'closest_value',
+    'closest_values',
     'findpeaks',
     'lmfit',
     'math',
