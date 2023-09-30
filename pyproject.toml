@@ -1,6 +1,6 @@
 [project]
 name = 'herz'
-version = '0.0.0'
+version = '0.1.0'
 description = 'Computations for Pressure-Volume data series'
 authors = [
     { name = 'raj-open', email='raj-open@users.noreply.github.com' },

@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: x.y.z
+  version: 0.1.0
   title: Schemata for internal models.
 servers:
   - url: "https://define.me"

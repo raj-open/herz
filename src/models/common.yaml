@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: x.y.z
+  version: 0.1.0
   title: Common schemata
   description: |-
     Common schemata for other schemata
