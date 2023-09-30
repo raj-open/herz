@@ -567,6 +567,9 @@ def add_plot_time_series(
     showlegend: bool = False,
     showlegend_points: bool = True,
 ) -> pgo.Figure:
+    # indices = indices_non_outliers(values, sig=2)
+    # time = time[indices]
+    # values = values[indices]
     fig.append_trace(
         pgo.Scatter(
             name=name,

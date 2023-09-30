@@ -13,7 +13,7 @@ from .constants import *
 from ..models.enums import *
 from .log import *
 from .utils import *
-from .constants import *
+from .epsilon import *
 from .poly import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,35 +54,22 @@ def get_critical_points(
     # necessary condition: t (real-valued) is critical ONLY IF p'(t) = 0
     t_crit = get_real_polynomial_roots(dp)
 
-    # compute multiplicity of each root
-    info = get_duplicate_times_and_multiplicity(t_crit, t_min=t_min, t_max=t_max, eps=eps)
-    t_crit = [t0 for t0, _ in info]
-
+    # remove eps-close points
+    t_crit = get_duplicate_times(t_crit, t_min=-np.inf, t_max=np.inf, eps=eps)
     N = len(t_crit)
     if N == 0:
         return []
 
     # compute points between critical points
-    dt = 0.1 * max([abs(t0) + 1 for t0 in t_crit])
-    t_crit_ = t_crit[:]
-    if abs(t_min) < np.inf and t_min not in t_crit_:
-        t_crit_ = [t_min] + t_crit_
-    else:
-        t_crit_ = [min(t_crit) - dt] + t_crit_
-    if abs(t_max) < np.inf and t_max not in t_crit_:
-        t_crit_ = t_crit_ + [t_max]
-    else:
-        t_crit_ = t_crit_ + [max(t_crit) + dt]
-    delta = np.diff(t_crit_)
-    t_between = [t0 - dt / 2 for (t0, dt) in zip(t_crit_[1:], delta)]
-    t_grid = [t_between[0]] + flatten(*list(zip(t_crit, t_between[1:])))
+    t_grid = get_time_grid(t_crit, t_min=t_min, t_max=t_max, eps=eps)
 
     # classify critical points:
     # FAST METHOD:
     N = len(t_grid)
     values = poly(t_grid, *p)
-    values = [tuple(values[k - 1 :][:3]) for k in range(1, N - 1, 2)]
-    for (t0, v), (ym_pre, y0, ym_post) in zip(info, values):
+    for k in range(1, N - 1, 2):
+        t0 = t_grid[k]
+        ym_pre, y0, ym_post = values[k - 1 :][:3]
         # ----------------------------------------------------------------
         # NOTE:
         # Times between critical points:
@@ -102,8 +89,8 @@ def get_critical_points(
         # ----------------------------------------------------------------
 
         # classify based on pre/post-changes:
-        change_post = sign_normalised_difference(y0, ym_post, eps=MACHINE_EPS)
-        change_pre = sign_normalised_difference(ym_pre, y0, eps=MACHINE_EPS)
+        change_pre = sign_normalised_difference(x_from=ym_pre, x_to=y0, eps=MACHINE_EPS)
+        change_post = sign_normalised_difference(x_from=y0, x_to=ym_post, eps=MACHINE_EPS)
         match change_pre, change_post:
             case (-1, 1):
                 crit.append((t0, y0, {EnumCriticalPoints.LOCAL_MINIMUM}))
@@ -115,20 +102,24 @@ def get_critical_points(
                 # NOTE: This case should not occur! If it does - reject!
                 pass
 
-    # compute zeroes
-    t_zeroes = get_real_polynomial_roots(p)
-    info = get_duplicate_times_and_multiplicity(t_zeroes, t_min=t_min, t_max=t_max, eps=eps)
-    for t0 in t_zeroes:
-        crit.append((t0, 0.0, {EnumCriticalPoints.ZERO}))
-
-    # clean up classified point (e.g. combine multiply classified points)
+    # add in zeroes
     # NOTE: increase eps-value, to prevent duplicates
-    crit = clean_time_points_for_list_of_critical_points(
-        crit, t_min=t_min, t_max=t_max, eps=100 * eps
-    )
+    t_zeroes = get_real_polynomial_roots(p)
+    t_zeroes = get_duplicate_times(t_zeroes, t_min=t_min, t_max=t_max, eps=eps)
+    times = [t0 for t0, y0, kinds in crit]
+    for t0 in t_zeroes:
+        i = closest_index(t0, times)
+        t0_, _, kinds = crit[i]
+        if is_epsilon_eq(t0_, t0, eps=100 * eps):
+            kinds.add(EnumCriticalPoints.ZERO)
+        else:
+            crit.append((t0, 0.0, {EnumCriticalPoints.ZERO}))
 
     # deal with inflection points
     crit = handle_inflection_points(crit)
+
+    # sort points
+    crit = sorted(crit, key=lambda obj: obj[0])
 
     return crit
 
@@ -147,9 +138,6 @@ def get_critical_points_bounded(
 ) -> list[tuple[float, float, set[EnumCriticalPoints]]]:
     crit = get_critical_points(p=p, dp=dp, t_min=t_min, t_max=t_max, eps=eps)
 
-    # restrict to interval
-    crit = [(t0, y0, kinds) for (t0, y0, kinds) in crit if t_min <= t0 and t0 <= t_max]
-
     if len(crit) == 0:
         return []
 
@@ -157,13 +145,13 @@ def get_critical_points_bounded(
     values = poly([t_min, t_max], *p)
 
     # add in left-boundary or purify points that are too close
-    if abs(t_crit[0] - t_min) < eps:
+    if is_epsilon_eq(t_min, t_crit[0], eps=eps):
         crit[0] = (t_min, values[0], *crit[0][2:])
     else:
         crit.insert(0, (t_min, values[0], set()))
 
     # add in right-boundary or purify points that are too close
-    if abs(t_max - t_crit[-1]) < eps:
+    if is_epsilon_eq(t_max, t_crit[-1], eps=eps):
         crit[-1] = (t_max, values[-1], *crit[-1][2:])
     else:
         t_crit.append(t_max)
@@ -174,13 +162,13 @@ def get_critical_points_bounded(
     y_min = np.min(values)
     y_max = np.max(values)
     for k, (t0, y0, kinds) in enumerate(crit):
-        if abs(normalised_difference(y_max, y0)) < MACHINE_EPS:
+        if abs(normalised_difference(x_from=y_max, x_to=y0)) < MACHINE_EPS:
             crit[k] = (
                 t0,
                 y_max,
                 kinds.union({EnumCriticalPoints.MAXIMUM}),
             )
-        elif abs(normalised_difference(y_min, y0)) < MACHINE_EPS:
+        elif abs(normalised_difference(x_from=y_min, x_to=y0)) < MACHINE_EPS:
             crit[k] = (
                 t0,
                 y_min,
@@ -208,7 +196,7 @@ def clean_time_points_for_list_of_critical_points(
         return []
 
     # find unique time-values
-    times = get_times_from_list_of_critical_points(crit, t_min=t_min, t_max=t_max)
+    times = get_times_from_list_of_critical_points(crit, t_min=t_min, t_max=t_max, eps=eps)
     t_min = min(times)
     t_max = max(times)
 
@@ -237,7 +225,7 @@ def clean_time_points_for_list_of_critical_points(
 
 def clean_time_points_for_list_of_lists_of_critical_points(
     crits: list[list[tuple[float, float, set[EnumCriticalPoints]]]],
-    eps: float = FLOAT_ERR,
+    eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[list[tuple[float, float, set[EnumCriticalPoints]]]]:
@@ -245,7 +233,11 @@ def clean_time_points_for_list_of_lists_of_critical_points(
         return []
 
     # find unique time-values
-    times = get_times_from_list_of_lists_of_critical_points(crits, t_min=t_min, t_max=t_max)
+    times = get_times_from_list_of_lists_of_critical_points(
+        crits, eps=eps, t_min=t_min, t_max=t_max
+    )
+    if len(times) == 0:
+        return []
     t_min = min(times)
     t_max = max(times)
 
@@ -276,7 +268,7 @@ def log_critical_points(
 ) -> str:
     n_der = len(crits) - 1
     classifications = gather_multi_level_critical_points_classifications(
-        crits, t_min=t_min, t_max=t_max
+        crits, eps=MACHINE_EPS, t_min=t_min, t_max=t_max
     )
     data = []
     for t0, classif in classifications:
@@ -302,6 +294,41 @@ def log_critical_points(
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # AUXILIARY METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def get_time_grid(
+    t: list[float],
+    eps: float,
+    t_min: float,
+    t_max: float,
+) -> list[float]:
+    if len(t) == 0:
+        return []
+    # add extra supports:
+    dt = 0.1 * max([abs(t0) + 1 for t0 in t])
+    delta = np.minimum(
+        np.diff([min(t) - dt] + t),
+        np.diff(t + [max(t) + dt]),
+    )
+    # ensure finite values:
+    t_min = t_min if abs(t_min) < np.inf else min(t)
+    t_max = t_max if abs(t_max) < np.inf else max(t)
+    # only use balls that occur in window:
+    window = are_epsilon_le([t_min], t, eps=eps) & are_epsilon_le(t, [t_max], eps=eps)
+    balls = [(tt, d) for check, tt, d in zip(window, t, delta) if check]
+    if len(balls) == 0:
+        return []
+    # clean up end points if necessary:
+    tt, d = balls[0]
+    if is_epsilon_eq(t_min, tt, eps=eps):
+        balls[0] = (t_min, d)
+    tt, d = balls[-1]
+    if is_epsilon_eq(t_max, tt, eps=eps):
+        balls[-1] = (t_max, d)
+    # compute grid:
+    t_end, d_end = balls[-1]
+    t_grid = flatten(*[[tt - d / 2, tt] for tt, d in balls], [t_end + d / 2])
+    return t_grid
 
 
 def handle_inflection_points(
@@ -342,9 +369,9 @@ def get_duplicate_times_and_multiplicity(
     if len(t) == 0:
         return []
     t = sorted(t)
-    C = 2 * max([abs(tt) for tt in t] + [0]) + 1
-    delta = np.diff([-C] + t + [C])  # difference between each point and previous neighbour
-    indices = characteristic_to_where(delta >= eps)
+    dt = 0.1 * max([abs(tt) + 1 for tt in t])
+    rel = sign_normalised_diffs(x_from=[min(t) - dt] + t, x_to=t + [max(t) + dt], eps=eps)
+    indices = characteristic_to_where(rel != 0)
     info = []
     for k1, k2 in zip(indices, indices[1:]):
         info.append((t[k1], k2 - k1))
@@ -352,13 +379,13 @@ def get_duplicate_times_and_multiplicity(
     if abs(t_min) < np.inf:
         i = closest_index(t_min, [tt for tt, v in info])
         tt, v = info[i]
-        if abs(t_min - tt) < eps:
+        if is_epsilon_eq(t_min, tt, eps=eps):
             info[i] = (t_min, v)
 
     if abs(t_max) < np.inf:
         i = closest_index(t_max, [tt for tt, v in info])
         tt, v = info[i]
-        if abs(t_max - tt) < eps:
+        if is_epsilon_eq(t_max, tt, eps=eps):
             info[i] = (t_min, v)
 
     info = [(tt, v) for tt, v in info if t_min <= tt and tt <= t_max]
@@ -367,36 +394,46 @@ def get_duplicate_times_and_multiplicity(
 
 def get_times_from_list_of_critical_points(
     crit: list[tuple[float, float, set[EnumCriticalPoints]]],
+    eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[float]:
-    times = [t0 for t0, y0, kinds in crit if len(kinds) > 0 and t_min < t0 and t0 < t_max]
-    if abs(t_min) < np.inf:
-        times.insert(0, t_min)
-    if abs(t_max) < np.inf:
-        times.append(t_max)
-    times = unique(sorted(times))
+    times = [t0 for t0, y0, kinds in crit if len(kinds) > 0]
+    START = [t_min] if abs(t_min) < np.inf else []
+    MIDDLE = [
+        min(max(t_min, t0), t_max)
+        for t0 in times
+        if is_epsilon_lt(t_min, t0, eps=eps) and is_epsilon_lt(t0, t_max, eps=eps)
+    ]
+    END = [t_max] if abs(t_max) < np.inf else []
+    times = sorted(unique(START + MIDDLE + END))
     return times
 
 
 def get_times_from_list_of_lists_of_critical_points(
     crits: list[list[tuple[float, float, set[EnumCriticalPoints]]]],
+    eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[float]:
-    times = get_times_from_list_of_critical_points(flatten(*crits))
+    times = get_times_from_list_of_critical_points(
+        flatten(*crits), eps=eps, t_min=t_min, t_max=t_max
+    )
     return times
 
 
 def gather_multi_level_critical_points_classifications(
     crits: list[list[tuple[float, float, set[EnumCriticalPoints]]]],
+    eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[tuple[float, list[dict[EnumCriticalPoints]]]]:
     crits = clean_time_points_for_list_of_lists_of_critical_points(
-        crits, t_min=t_min, t_max=t_max
+        crits, t_min=t_min, t_max=t_max, eps=eps
     )
-    times = get_times_from_list_of_lists_of_critical_points(crits, t_min=t_min, t_max=t_max)
+    times = get_times_from_list_of_lists_of_critical_points(
+        crits, t_min=t_min, t_max=t_max, eps=eps
+    )
 
     if abs(t_min) < np.inf and t_min not in times:
         times.insert(0, t_min)

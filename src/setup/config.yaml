@@ -22,6 +22,8 @@ settings:
   matching:
     pressure: 'edp'
     volume: 'dV-max'
+    # pressure: 'dia'
+    # volume: 'min'
   # settings for polynomial conditions for initial (peak-to-peak) fitting.
   polynomial:
     pressure:
