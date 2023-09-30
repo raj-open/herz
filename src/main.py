@@ -63,7 +63,7 @@ def enter(path: str, *_):
             LPsub.next()
 
             LPsub = LP.subtask(f'''INITIAL FIT CURVE {quantity}''', 1)
-            data, fits = step_fit_curve(case, data, quantity=quantity, init=True)
+            data, fits = step_fit_curve(case, data, quantity=quantity)
             LPsub.next()
 
             LPsub = LP.subtask(f'''INITIAL CLASSIFICATION OF POINTS {quantity}''', 1)
@@ -75,7 +75,7 @@ def enter(path: str, *_):
             LPsub.next()
 
             LPsub = LP.subtask(f'''RE-FIT CURVE {quantity}''', 1)
-            data, fits = step_fit_curve(case, data, quantity=quantity, init=False)
+            data, fits = step_refit_curve(case, data, points_fit, quantity=quantity)
             LPsub.next()
 
             LPsub = LP.subtask(f'''RE-CLASSIFICATION OF POINTS {quantity}''', 1)
