@@ -23,10 +23,10 @@ settings:
     pressure: 'edp'
     volume: 'dV-max'
   # settings for polynomial conditions for initial (peak-to-peak) fitting.
-  polynomial-init:
+  polynomial:
     pressure:
       - derivative: 2
-        num-critical: 5
+        num-critical: 7 # NOTE: 5 for 'inside' the interval + 2 for boundaries
       # boundary point is peak ==> LOCAL_MAX
       - derivative: 1
         time: 0.
@@ -45,24 +45,6 @@ settings:
         time: 0.
       - derivative: 1
         time: 1.
-  # settings for polynomial conditions for final (between selected points in cycles).
-  polynomial-final:
-    pressure:
-      - derivative: 2
-        num-critical: 5
-      # boundary point is 'edp' ==> 2nd deriv = LOCAL_MAX
-      - derivative: 3
-        time: 0.
-      - derivative: 3
-        time: 1.
-    volume:
-      - derivative: 1
-        num-critical: 5
-      # boundary point is 'dV-max' ==> 1st deriv = LOCAL_MAX
-      - derivative: 2
-        time: 0.
-      - derivative: 2
-        time: 1.
   # settings for special points
   # for marker symbols see <https://plotly.com/python/marker-style>
   points:
@@ -80,6 +62,7 @@ settings:
         spec:
           derivative: 0
           kind: MAXIMUM
+          reuse: true
           strict: false
           after: []
           before: []
@@ -170,6 +153,7 @@ settings:
         spec:
           derivative: 0
           kind: MAXIMUM
+          reuse: true
           strict: false
           after: []
           before: []
