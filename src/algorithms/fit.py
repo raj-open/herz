@@ -47,6 +47,7 @@ def fit_poly_cycles(
     conds = conds[:]
     conds.append(PolyDerCondition(derivative=0, time=0.0))
     conds.append(PolyDerCondition(derivative=0, time=1.0))
+    # conds.append(PolyIntCondition(times=[TimeInterval(a=0., b=1.)]))
 
     # refine conditions + determine degree of polynomial needed
     conds, deg = refine_conditions_determine_degree(conds)

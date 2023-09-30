@@ -31,13 +31,13 @@ __all__ = [
 
 
 def get_polynomial_condition(
-    quantity: str, init: bool = False
+    quantity: str,
 ) -> list[PolyCritCondition | PolyDerCondition | PolyIntCondition]:
     match quantity:
         case 'pressure':
-            return config.POLY_INIT.pressure if init else config.POLY_FINAL.pressure
+            return config.POLY.pressure
         case 'volume':
-            return config.POLY_INIT.volume if init else config.POLY_FINAL.volume
+            return config.POLY.volume
         case _:
             raise []
 

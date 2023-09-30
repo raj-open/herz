@@ -179,12 +179,15 @@ def normalise_interpolated(
     x: np.ndarray,
     T: float,
     periodic: bool = False,
-) -> tuple[float, float, np.ndarray]:
+) -> tuple[float, float, float, np.ndarray]:
     m = integral_interpolated(t, x, T=T, periodic=periodic, average=True)
     x = x - m * (t - t[0])
+    x_max = np.max(np.abs(x))
+    x = x / (x_max or 1.0)
     s = norm_interpolated(t, x, T=T, periodic=periodic, average=True)
     x = x / (s or 1.0)
-    return m, s, x
+    s = s * x_max
+    return 0, m, s, x
 
 
 def normalise_interpolated_drift(

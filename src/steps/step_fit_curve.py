@@ -7,6 +7,7 @@
 
 from ..thirdparty.data import *
 from ..thirdparty.maths import *
+from ..thirdparty.types import *
 
 from ..setup import config
 from ..setup.series import *
@@ -23,6 +24,7 @@ from ..algorithms.fit import *
 
 __all__ = [
     'step_fit_curve',
+    'step_refit_curve',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -34,7 +36,7 @@ def step_fit_curve(
     case: UserCase,
     data: pd.DataFrame,
     quantity: str,
-    init: bool,
+    conds: Optional[list[PolyCritCondition | PolyDerCondition | PolyIntCondition]] = None,
     n_der: int = 2,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
@@ -45,7 +47,7 @@ def step_fit_curve(
     NOTE: Initial fitting runs from peak to peak.
     '''
     cfg = case.process
-    conds = get_polynomial_condition(quantity, init=init)
+    conds = conds or get_polynomial_condition(quantity)
 
     # fit polynomial
     t = data['time'].to_numpy(copy=True)
@@ -56,6 +58,38 @@ def step_fit_curve(
     # compute n'th derivatives
     data = compute_nth_derivatives_for_cycles(
         case, data, fitinfos, quantity=quantity, n_der=n_der
+    )
+
+    return data, fitinfos
+
+
+def step_refit_curve(
+    case: UserCase,
+    data: pd.DataFrame,
+    points: dict[str, SpecialPointsConfig],
+    quantity: str,
+    n_der: int = 2,
+) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
+    align = get_alignment_point(quantity)
+    conds = get_polynomial_condition(quantity)
+
+    # add in conditions for special points:
+    conds = conds[:] + [
+        PolyDerCondition(derivative=point.spec.derivative + 1, time=point.time)
+        for key, point in points.items()
+        if point.spec is not None and point.spec.reuse
+    ]
+
+    # shift current conditions
+    t_align = points[align].time if align in points else 0.0
+    conds = shift_conditions(conds, t0=t_align)
+
+    data, fitinfos = step_fit_curve(
+        case=case,
+        data=data,
+        quantity=quantity,
+        conds=conds,
+        n_der=n_der,
     )
 
     return data, fitinfos
