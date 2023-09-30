@@ -63,9 +63,18 @@ def get_critical_points(
         return []
 
     # compute points between critical points
-    C = 2 * max([abs(t0) for t0 in t_crit]) + 1
-    delta = np.diff([-C] + t_crit + [C])
-    t_between = [t0 - dt / 2 for (t0, dt) in zip(t_crit + [C], delta)]
+    dt = 0.1 * max([abs(t0) + 1 for t0 in t_crit])
+    t_crit_ = t_crit[:]
+    if abs(t_min) < np.inf and t_min not in t_crit_:
+        t_crit_ = [t_min] + t_crit_
+    else:
+        t_crit_ = [min(t_crit) - dt] + t_crit_
+    if abs(t_max) < np.inf and t_max not in t_crit_:
+        t_crit_ = t_crit_ + [t_max]
+    else:
+        t_crit_ = t_crit_ + [max(t_crit) + dt]
+    delta = np.diff(t_crit_)
+    t_between = [t0 - dt / 2 for (t0, dt) in zip(t_crit_[1:], delta)]
     t_grid = [t_between[0]] + flatten(*list(zip(t_crit, t_between[1:])))
 
     # classify critical points:
