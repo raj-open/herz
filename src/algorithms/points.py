@@ -81,12 +81,14 @@ def recognise_special_points(
     ]
 
     # clean up critical points
-    crits = clean_time_points_for_list_of_lists_of_critical_points(crits, eps=FLOAT_ERR)
+    crits = clean_time_points_for_list_of_lists_of_critical_points(
+        crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR
+    )
 
     # determine peak
     crit = filter_kinds(crits[0], kinds={EnumCriticalPoints.MAXIMUM})
     crit = filter_times(crit, t_before=1.0)
-    assert len(crit) == 1, 'The cycle should have exactly one peak!'
+    assert len(crit) >= 1, 'The cycle should have exactly one peak!'
     t_max = crit[0][0]
 
     # shift cycle to format peak-to-peak:

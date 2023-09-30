@@ -6,10 +6,10 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ..thirdparty.data import *
-from ..thirdparty.maths import *
 
 from ..setup import config
 from ..setup.series import *
+from ..core.epsilon import *
 from ..algorithms.points import *
 from ..models.user import *
 from ..models.internal import *

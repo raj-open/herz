@@ -15,15 +15,9 @@ from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
 
-from typing import Iterable
-from typing import TypeVar
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MODIFICATIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-T = TypeVar('T')
 
 
 def nCr(n: int, r: int) -> int:
@@ -73,6 +67,24 @@ def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
     return s
 
 
+def indices_non_outliers(X: np.ndarray, sig: float = 2.0) -> list[int]:
+    '''
+    Computes indices of all elements in an array,
+    bar those which are significantly far away from the median.
+
+    NOTE: Choose `sig > 1`.
+
+    NOTE:
+    - If `X` contains `<= 2` elements, then nothing is removed.
+    - If `X` is non-empty,
+      then the result contains at least the elements
+      closest to the median.
+    '''
+    s = np.abs(normalised_order_statistics(X))
+    obj = np.where(s < sig)
+    return obj[0].tolist()
+
+
 def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
     '''
     Removes elements from an array which are significantly far away from the median.
@@ -85,37 +97,9 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
       then the result contains at least the elements
       closest to the median.
     '''
-    s = np.abs(normalised_order_statistics(X))
-    X = X[s < sig]
+    indices = indices_non_outliers(X, sig=sig)
+    X = X[indices]
     return X
-
-
-def closest_index(x: float, points: Iterable[float], init: int = 0) -> int:
-    try:
-        dist = np.abs(np.asarray(points) - x)
-        index = init + dist.argmin()
-    except:
-        raise ValueError('List of points must be non-empty!')
-    return index
-
-
-def closest_indices(
-    X: Iterable[float],
-    points: Iterable[float],
-    init: int = 0,
-) -> list[int]:
-    indices = [closest_index(x, points, init=init) for x in X]
-    return indices
-
-
-def closest_value(x: float, points: Iterable[float]) -> T:
-    i = closest_index(x, points)
-    return points[i]
-
-
-def closest_values(X: list[float], points: Iterable[float]) -> list[T]:
-    indices = closest_indices(X, points)
-    return [X[i] for i in indices]
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -123,10 +107,6 @@ def closest_values(X: list[float], points: Iterable[float]) -> list[T]:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
-    'closest_index',
-    'closest_indices',
-    'closest_value',
-    'closest_values',
     'findpeaks',
     'lmfit',
     'math',
@@ -135,6 +115,7 @@ __all__ = [
     'normalised_order_statistics',
     'np',
     'random',
+    'indices_non_outliers',
     'remove_outliers',
     'sp',
     'spla',

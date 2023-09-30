@@ -64,7 +64,8 @@ def configure_logging(level: str | LOG_LEVELS):
 
 
 def log_debug(*messages: Any):
-    logging.debug(*messages)
+    for text in messages:
+        logging.debug(text)
 
 
 def log_debug_long(cb: Callable[[], Any]):
@@ -75,19 +76,22 @@ def log_debug_long(cb: Callable[[], Any]):
 
 
 def log_info(*messages: Any):
-    logging.info(*messages)
+    for text in messages:
+        logging.info(text)
 
 
 def log_warn(*messages: Any):
-    logging.warning(*messages)
+    for text in messages:
+        logging.warning(text)
 
 
 def log_error(*messages: Any):
-    logging.error(*messages)
+    for text in messages:
+        logging.error(text)
 
 
 def log_fatal(*messages: Any):
-    logging.fatal(*messages)
+    logging.fatal('\n'.join([str(text) for text in messages]))
     sys.exit(1)
 
 

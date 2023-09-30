@@ -10,8 +10,6 @@ from ..thirdparty.maths import *
 from ..thirdparty.physics import *
 from ..thirdparty.types import *
 
-from .log import *
-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,8 +19,6 @@ __all__ = [
     'flatten',
     'flatten_by_key',
     'gather_by_key',
-    'normalised_difference',
-    'sign_normalised_difference',
     'where_to_characteristic',
     'characteristic_to_where',
     'normalise_to_unit_interval',
@@ -84,30 +80,6 @@ def flatten_by_key(*X: dict[str, list[T]]) -> dict[str, list[T]]:
     G = gather_by_key(*X)
     D = {key: flatten(*values) for key, values in G.items()}
     return D
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# METHODS - COMPARISONS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def normalised_difference(x1: float, x2: float) -> float:
-    '''
-    NOTE:
-    - For large numbers it is the same as a relative difference.
-    - For small numbers this is the same as an ordinary difference.
-    '''
-    C = (np.abs(x1) + np.abs(x2)) / 2
-    return (x2 - x1) / max(C, 1.0)
-
-
-def sign_normalised_difference(x1: float, x2: float, eps: float) -> Literal[0, -1, 1]:
-    r = normalised_difference(x1, x2)
-    if r > eps:
-        return 1
-    if r < -eps:
-        return -1
-    return 0
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
