@@ -8,8 +8,10 @@
 from ..generated.internal import *
 from .poly import *
 from .points import *
+from .conditions import *
 
 # NOTE: foreign import
+from ..generated.app import TimeInterval
 from ..generated.app import PolyCritCondition
 from ..generated.app import PolyDerCondition
 from ..generated.app import PolyIntCondition
@@ -32,11 +34,16 @@ __all__ = [
     'SpecialPointsConfig',
     'SpecialPointsConfigs',
     'SpecialPointsSpec',
+    'TimeInterval',
     'get_normalisation_params',
     'get_renormalised_data',
     'get_renormalised_polynomial',
     'get_renormalised_polynomial_time_only',
     'get_renormalised_polynomial_values_only',
+    'shift_conditions',
+    'shift_condition',
+    'shift_der_condition',
+    'shift_int_condition',
     'onb_conditions',
     'onb_spectrum',
 ]

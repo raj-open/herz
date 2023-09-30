@@ -294,11 +294,13 @@ def force_poly_condition(
                     row[n:] = [nPr(k, n) * tt for k, tt in zip(range(n, deg + 1), tpow)]
     # elif isinstance(cond, PolyIntCondition):
     else:
-        [t1, t2] = cond.times
-        t1pow = np.cumprod([t1] * (deg + 1))
-        t2pow = np.cumprod([t2] * (deg + 1))
-        p = np.asarray(range(0, deg + 1))
-        row = (t2pow - t1pow) / (p + 1)
+        for interval in cond.times:
+            t1 = interval.a
+            t2 = interval.b
+            t1pow = np.cumprod([t1] * (deg + 1))
+            t2pow = np.cumprod([t2] * (deg + 1))
+            p = np.asarray(range(0, deg + 1))
+            row = (t2pow - t1pow) / (p + 1)
     return row.tolist()
 
 

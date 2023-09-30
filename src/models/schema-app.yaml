@@ -27,8 +27,7 @@ components:
           required:
             - units
             - matching
-            - polynomial-init
-            - polynomial-final
+            - polynomial
             - points
           properties:
             units:
@@ -40,13 +39,9 @@ components:
                 default: {}
             matching:
               $ref: "#/components/schemas/MatchingConfig"
-            polynomial-init:
+            polynomial:
               description: |-
                 Conditions for initial fitting (polynomial) curves to raw data.
-              $ref: "#/components/schemas/PolynomialConfig"
-            polynomial-final:
-              description: |-
-                Conditions for final fitting (polynomial) curves to raw data.
               $ref: "#/components/schemas/PolynomialConfig"
             points:
               description: |-
@@ -163,7 +158,7 @@ components:
       description: |-
         A condition to force on fitted polynomial of the form:
 
-        - The integral from `t1` to `t2` must be `0`.
+        - The integral over the union of the time intervals must be `0`.
       type: object
       required:
         - times
@@ -171,9 +166,24 @@ components:
         times:
           type: array
           items:
-            type: number
-          minItems: 2
-          maxItems: 2
+            $ref: "#/components/schemas/TimeInterval"
+          minItems: 1
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - Time interval
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    TimeInterval:
+      description: |-
+        Defines end points of a time-interval (`a` to `b`).
+      type: object
+      required:
+        - a
+        - b
+      properties:
+        a:
+          type: number
+        b:
+          type: number
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # DATA TYPE - special points configs
@@ -262,6 +272,11 @@ components:
           description: |-
             Kind of n'th derivative condition: (local) min/max.
           $ref: "#/components/schemas/EnumCriticalPoints"
+        reuse:
+          description: |-
+            Whether the recognised point is to be reused for the 2nd round of fitting.
+          type: boolean
+          default: false
         strict:
           description: |-
             Whether the point is to occur strictly inside the cycle.

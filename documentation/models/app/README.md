@@ -25,6 +25,7 @@ Class | Method | HTTP request | Description
  - [SpecialPointsConfig](.//Models/SpecialPointsConfig.md)
  - [SpecialPointsConfigs](.//Models/SpecialPointsConfigs.md)
  - [SpecialPointsSpec](.//Models/SpecialPointsSpec.md)
+ - [TimeInterval](.//Models/TimeInterval.md)
 
 
 <a name="documentation-for-authorization"></a>
