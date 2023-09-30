@@ -5,7 +5,7 @@ basic:
   # Logging level may be either INFO (standard) or DEBUG
   log-level: INFO
   # Whether or not output is to be logged
-  verbose: true
+  verbose: false
 # ----------------------------------------------------------------
 # CASES
 # ----------------------------------------------------------------
