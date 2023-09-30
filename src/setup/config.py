@@ -11,6 +11,7 @@ from ..thirdparty.code import *
 from ..paths import *
 from ..core.log import *
 from ..models.app import *
+from ..models.internal import *
 from ..models.user import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -18,6 +19,10 @@ from ..models.user import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'POINTS',
+    'POLY_INIT',
+    'POLY_FINAL',
+    'MATCHING',
     'UNITS',
     'VERSION',
 ]
@@ -39,17 +44,17 @@ def set_user_config(path: str):
     global PATH_ASSETS_CONFIG_USER
     global USER_CONFIG
     global BASIC
-    global DATA_CONFIG
-    global OUTPUT_CONFIG
+    global CASES
     global LOG_LEVEL
 
     PATH_ASSETS_CONFIG_USER = path
 
     USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
     BASIC = lazy(lambda x: x.basic, USER_CONFIG)
-    DATA_CONFIG = lazy(lambda x: x.data, USER_CONFIG)
-    OUTPUT_CONFIG = lazy(lambda x: x.output, USER_CONFIG)
+    CASES = lazy(lambda x: [case for case in x.cases if not case.ignore], USER_CONFIG)
     LOG_LEVEL = lazy(lambda x: x.log_level.name, BASIC)
+
+    configure_logging(LOG_LEVEL)
     return
 
 
@@ -65,30 +70,34 @@ def load_version(path: str) -> str:
 
 
 @make_lazy
-def load_api_info(path: str, version: str) -> AppInfo:
+def load_api_config(path: str, version: str) -> AppConfig:
     with open(path, 'r') as fp:
-        assets = yaml_to_py_dictionary(yaml.load(fp, Loader=yaml.FullLoader), deep=True)
+        assets = yaml.load(fp, Loader=yaml.FullLoader)
         assert isinstance(assets, dict)
-        api_config: AppConfig = catch_fatal(lambda: AppConfig(**assets))
-        api_info = api_config.info
-        api_info.version = version
-        return api_info
+        api_config: AppConfig = catch_fatal(lambda: AppConfig.parse_obj(assets))
+        api_config.info.version = version
+        return api_config
 
 
 @make_lazy
 def load_assets_config(path: str) -> UserConfig:
     with open(path, 'r') as fp:
-        assets = yaml_to_py_dictionary(yaml.load(fp, Loader=yaml.FullLoader), deep=True)
+        assets = yaml.load(fp, Loader=yaml.FullLoader)
         assert isinstance(assets, dict)
-        return catch_fatal(lambda: UserConfig(**assets))
+        return catch_fatal(lambda: UserConfig.parse_obj(assets))
 
 
 # use lazy loading to ensure that values only loaded (once) when used
 VERSION = load_version(path=PATH_VERSION)
-API_INFO = load_api_info(path=PATH_ASSETS_CONFIG_API, version=VERSION)
-UNITS: AppUnits = lazy(lambda x: x.units, API_INFO)
+
+API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
+INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
+UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
+MATCHING: MatchingConfig = lazy(lambda x: x.settings.matching, API_CONFIG)
+POLY: PolynomialConfig = lazy(lambda x: x.settings.polynomial, API_CONFIG)
+POINTS: SpecialPointsConfigs = lazy(lambda x: x.settings.points, API_CONFIG)
+
 USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
 BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)
-DATA_CONFIG: UserData = lazy(lambda x: x.data, USER_CONFIG)
-OUTPUT_CONFIG: UserOutput = lazy(lambda x: x.output, USER_CONFIG)
-LOG_LEVEL: str = lazy(lambda x: x.log_level.name, BASIC)
+CASES: list[UserCase] = []
+LOG_LEVEL: str = 'INFO'

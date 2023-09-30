@@ -3,7 +3,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**combine** | [**DataTimeSeriesCommon**](DataTimeSeriesCommon.md) |  | [default to null]
 **pressure** | [**DataTimeSeries**](DataTimeSeries.md) |  | [default to null]
 **volume** | [**DataTimeSeries**](DataTimeSeries.md) |  | [default to null]
 

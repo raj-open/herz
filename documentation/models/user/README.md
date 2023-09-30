@@ -13,15 +13,17 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [DataTimeSeries](.//Models/DataTimeSeries.md)
- - [DataTimeSeriesCommon](.//Models/DataTimeSeriesCommon.md)
+ - [DataTypeColumn](.//Models/DataTypeColumn.md)
  - [DataTypeQuantity](.//Models/DataTypeQuantity.md)
+ - [EnumFittingMode](.//Models/EnumFittingMode.md)
  - [EnumLogLevel](.//Models/EnumLogLevel.md)
  - [EnumType](.//Models/EnumType.md)
  - [UserBasicOptions](.//Models/UserBasicOptions.md)
+ - [UserCase](.//Models/UserCase.md)
  - [UserConfig](.//Models/UserConfig.md)
  - [UserData](.//Models/UserData.md)
  - [UserOutput](.//Models/UserOutput.md)
- - [UserOutputQuantities](.//Models/UserOutputQuantities.md)
+ - [UserProcess](.//Models/UserProcess.md)
 
 
 <a name="documentation-for-authorization"></a>

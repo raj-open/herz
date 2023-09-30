@@ -6,13 +6,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from enum import Enum
+from collections.abc import Iterable
 from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Concatenate
 from typing import Generator
 from typing import Generic
-from typing import Iterable
 from typing import Literal
 from typing import Optional
 from typing import ParamSpec

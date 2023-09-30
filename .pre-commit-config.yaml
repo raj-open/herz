@@ -98,7 +98,7 @@ repos:
       verbose: true
       stages: [ pre-commit ]
 
-    - id: clean-nb-v
+    - id: clean-nb-outputs
       name: Clean outputs from python notebooks
       description: |-
         This hook cleans python notebooks.

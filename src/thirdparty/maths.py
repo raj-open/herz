@@ -5,16 +5,43 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+import lmfit
 import math
 import numpy as np
 import random
 import scipy as sp
+from scipy import linalg as spla
+from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
+
+from typing import Iterable
+from typing import TypeVar
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # MODIFICATIONS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+T = TypeVar('T')
+
+
+def nCr(n: int, r: int) -> int:
+    '''
+    Computes `n!/(r!(n-r)!)`
+    '''
+    return math.comb(n, r)
+
+
+def nPr(n: int, r: int) -> int:
+    '''
+    Computes `n!/(n-r)!`
+    '''
+    if r == 0:
+        return 1
+    if r == 1:
+        return n
+    return math.factorial(r) * math.comb(n, r)
 
 
 def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
@@ -63,17 +90,54 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
     return X
 
 
+def closest_index(x: float, points: Iterable[float], init: int = 0) -> int:
+    try:
+        dist = np.abs(np.asarray(points) - x)
+        index = init + dist.argmin()
+    except:
+        raise ValueError('List of points must be non-empty!')
+    return index
+
+
+def closest_indices(
+    X: Iterable[float],
+    points: Iterable[float],
+    init: int = 0,
+) -> list[int]:
+    indices = [closest_index(x, points, init=init) for x in X]
+    return indices
+
+
+def closest_value(x: float, points: Iterable[float]) -> T:
+    i = closest_index(x, points)
+    return points[i]
+
+
+def closest_values(X: list[float], points: Iterable[float]) -> list[T]:
+    indices = closest_indices(X, points)
+    return [X[i] for i in indices]
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'closest_index',
+    'closest_indices',
+    'closest_value',
+    'closest_values',
     'findpeaks',
+    'lmfit',
     'math',
+    'nCr',
+    'nPr',
+    'normalised_order_statistics',
     'np',
     'random',
-    'normalised_order_statistics',
     'remove_outliers',
     'sp',
+    'spla',
+    'spo',
     'sps',
 ]

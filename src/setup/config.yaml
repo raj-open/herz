@@ -2,14 +2,196 @@
 # INTERNAL APP CONFIGURATION
 # ----------------------------------------------------------------
 info:
-  title: Loops
+  title: Herz
   description: |-
     Extracts time series data for pressure and volume,
     synchronises these and produces a data set and plot.
-  # standard units
+settings:
   units:
+    cycle: '1'
     time: 's'
     pressure: 'Pa'
+    d[1,t]pressure: 'Pa/s'
+    d[2,t]pressure: 'Pa/s^2'
     length: 'm'
     area: 'm^2'
     volume: 'm^3'
+    d[1,t]volume: 'm^3/s'
+    d[2,t]volume: 'm^3/s^2'
+  # selected points in cycles for matching (alignment of multiple time series).
+  matching:
+    pressure: 'edp'
+    volume: 'dV-max'
+  # settings for polynomial conditions for initial (peak-to-peak) fitting.
+  polynomial:
+    pressure:
+      - derivative: 2
+        num-critical: 7 # NOTE: 5 for 'inside' the interval + 2 for boundaries
+      # boundary point is peak ==> LOCAL_MAX
+      - derivative: 1
+        time: 0.
+      - derivative: 1
+        time: 1.
+      # boundary point of P' is inflection point
+      - derivative: 2
+        time: 0.
+      - derivative: 2
+        time: 1.
+    volume:
+      - derivative: 1
+        num-critical: 5
+      # boundary point is peak ==> LOCAL_MAX
+      - derivative: 1
+        time: 0.
+      - derivative: 1
+        time: 1.
+  # settings for special points
+  # for marker symbols see <https://plotly.com/python/marker-style>
+  points:
+    pressure:
+      max:
+        name: "P_max"
+        ignore: true
+        spec: null
+        marker:
+          size: 6
+          colour: red
+          symbol: "circle"
+      sys:
+        name: "systole"
+        spec:
+          derivative: 0
+          kind: MAXIMUM
+          reuse: true
+          strict: false
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "x"
+      dia:
+        name: "diastole"
+        spec:
+          # NOTE: perhaps this definition should be reconsidered
+          derivative: 0
+          kind: LOCAL_MINIMUM
+          after: ['sys', 'sdp']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "x"
+      edp:
+        name: "edp"
+        spec:
+          derivative: 2
+          kind: LOCAL_MAXIMUM
+          after: ['dia']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "triangle-up"
+      epad:
+        name: "epad"
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: ['edp']
+          before: []
+        marker:
+          size: 6
+          colour: black
+          symbol: "square-open"
+      eivc:
+        name: "eivc"
+        spec:
+          derivative: 2
+          kind: LOCAL_MINIMUM
+          after: ['epad']
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "triangle-up-open"
+      esp:
+        name: "esp"
+        spec:
+          derivative: 2
+          kind: LOCAL_MINIMUM
+          after: ['sys']
+          before: []
+        marker:
+          size: 6
+          colour: red
+          symbol: "triangle-up"
+      anti-epad:
+        name: "anti-epad"
+        spec:
+          derivative: 1
+          kind: LOCAL_MINIMUM
+          after: ['esp']
+          before: []
+        marker:
+          size: 6
+          colour: black
+          symbol: "square"
+      sdp:
+        name: "sdp"
+        spec:
+          derivative: 2
+          kind: LOCAL_MAXIMUM
+          after: ['anti-epad']
+          before: []
+        marker:
+          size: 6
+          colour: blue
+          symbol: "triangle-up-open"
+    volume:
+      max:
+        name: "V_max"
+        spec:
+          derivative: 0
+          kind: MAXIMUM
+          reuse: true
+          strict: false
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: green
+          symbol: "x"
+      min:
+        name: "V_min"
+        spec:
+          derivative: 0
+          kind: MINIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: blueviolet
+          symbol: "x"
+      dV-max:
+        name: "max dV/dt"
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: green
+          symbol: "triangle-up-open"
+      dV-min:
+        name: "min dV/dt"
+        spec:
+          derivative: 1
+          kind: MINIMUM
+          after: []
+          before: []
+        marker:
+          size: 6
+          colour: blueviolet
+          symbol: "triangle-up-open"

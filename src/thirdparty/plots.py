@@ -10,9 +10,11 @@ from matplotlib import colors as mcolours
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.patches import FancyArrowPatch
+
+# NOTE: reference https://plotly.com/python/reference
 import plotly
 from plotly.subplots import make_subplots
-import plotly.express as px
+import plotly.express as pex
 import plotly.graph_objects as pgo
 
 from enum import Enum
@@ -137,5 +139,5 @@ __all__ = [
     'mplot',
     'pgo',
     'plotly',
-    'px',
+    'pex',
 ]

@@ -1,6 +1,6 @@
 [project]
 name = 'herz'
-version = '0.0.0'
+version = '0.1.0'
 description = 'Computations for Pressure-Volume data series'
 authors = [
     { name = 'raj-open', email='raj-open@users.noreply.github.com' },
@@ -50,14 +50,15 @@ pydantic-extra-types = {version='0.0.1'}
 numpy = {version='^1.24.3'}
 pandas = {version='^2.0.3'}
 scipy = {version='^0.0.0'}
-findpeaks = {version='^2.5.2'}
 pint = {version='^0.22'}
+findpeaks = {version='^2.5.2'}
+lmfit = {version='^1.2.2'}
 # rendering
 tabulate = {version='^0.9.0'}
 matplotlib = {version='^3.7.2'}
 imageio = {version='^2.31.1'}
 # notebooks
-ipython = {version='^8.15.0'}
+ipython = {version='8.15.0'} # NOTE: ^8.16.0 has issues!
 jupyter = {version='^1.0.0'}
 jupyterthemes = {version='^0.20.0'}
 widgetsnbextension = {version='^4.0.9'}
@@ -69,23 +70,25 @@ pendulum = {version='^2.1.2'}
 lorem = {version='^0.1.1'}
 
 [project.optional-dependencies.test]
-coverage = {extras=['toml'], version = '^7.2.7'}
-pytest-cov = {version = '^4.1.0'}
-pytest-lazy-fixture = {version = '^0.6.3'}
-pytest-order = {version = '^1.1.0'}
-pytest = {version = '^7.4.0'}
-testfixtures = {version = '^7.1.0'}
+coverage = {extras=['toml'], version='^7.2.7'}
+pytest-cov = {version='^4.1.0'}
+pytest-lazy-fixture = {version='^0.6.3'}
+pytest-order = {version='^1.1.0'}
+pytest = {version='^7.4.0'}
+testfixtures = {version='^7.1.0'}
 
 [project.optional-dependencies.dev]
 # NOTE: depends on name of project!
 herz = {extras=['test']}
 # models
-datamodel-code-generator = {version = '^0.21.2'}
-openapi-generator-cli = {version = '^4.3.1'}
-openapi-generator = {version = '^1.0.6'}
+datamodel-code-generator = {version='^0.21.2'}
+openapi-generator-cli = {version='^4.3.1'}
+openapi-generator = {version='^1.0.6'}
 # hooks and linting
 pre_commit = {version='^3.4.0'}
-black = {extras=['d', 'jupyter'], version = '^23.7.0'}
+black = {extras=['d', 'jupyter'], version='^23.7.0'}
+# decorations
+pybadges = {version='^3.0.0'}
 
 [project.urls]
 homepage = 'https://github.com/raj-open/herz'

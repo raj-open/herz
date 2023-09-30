@@ -1,0 +1,84 @@
+openapi: 3.0.3
+info:
+  version: 0.1.0
+  title: Schemata for internal models.
+servers:
+  - url: "https://define.me"
+paths: {}
+components:
+  schemas:
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - fitted infos
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FittedInfo:
+      description: |-
+        Data structure to store information about fitted curves.
+      type: object
+      required:
+        - normalisation
+      properties:
+        coefficients:
+          description: |-
+            Coefficients of polynomial that fits (pre-normalised) cycle.
+          type: array
+          items:
+            type: number
+          default: []
+        normalisation:
+          description: |-
+            Pre-normalisation of cycle before curves is fit.
+            This is used so that fitted curves for multiple cycles can be
+            compared and combined to a single curve
+            that fits all cycles simultaneously.
+          $ref: "#/components/schemas/FittedInfoNormalisation"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # DATA TYPE - fitted info (pre)normalisation
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FittedInfoNormalisation:
+      description: |-
+        Data structure to store information about (pre)normalisation.
+
+        The parameters
+
+        - period = `T`
+        - intercept = `c`
+        - gradient = `m`
+        - scale = `s`
+
+        are defined such that
+
+        - The time-series of the cycle `x` occurs on `[t₀, t₀ + T]` for some `t₀`.
+        - `z(t) := (x(t₀ + Tt) - (c + mt))/s` for `t ∈ [0, T]`
+          satisfies `z(0) = z(1) = 0` (drift-removal)
+          and (L²-norm) ‖z‖ = 1.
+      type: object
+      required: []
+      properties:
+        period:
+          type: number
+          default: 1.
+        intercept:
+          type: number
+          default: 0.
+        gradient:
+          type: number
+          default: 0.
+        scale:
+          type: number
+          default: 1.
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM Extreme Point Type
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumExtremePoints:
+      description: |-
+        Enumeration of extreme point types.
+      type: string
+      x-enum-varnames:
+        - PEAK
+        - TROUGH
+      enum:
+        - peak
+        - trough
+      default: float

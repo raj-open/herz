@@ -13,8 +13,19 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [AppConfig](.//Models/AppConfig.md)
+ - [AppConfigSettings](.//Models/AppConfigSettings.md)
  - [AppInfo](.//Models/AppInfo.md)
- - [AppUnits](.//Models/AppUnits.md)
+ - [EnumCriticalPoints](.//Models/EnumCriticalPoints.md)
+ - [MarkerSettings](.//Models/MarkerSettings.md)
+ - [MatchingConfig](.//Models/MatchingConfig.md)
+ - [PolyCritCondition](.//Models/PolyCritCondition.md)
+ - [PolyDerCondition](.//Models/PolyDerCondition.md)
+ - [PolyIntCondition](.//Models/PolyIntCondition.md)
+ - [PolynomialConfig](.//Models/PolynomialConfig.md)
+ - [SpecialPointsConfig](.//Models/SpecialPointsConfig.md)
+ - [SpecialPointsConfigs](.//Models/SpecialPointsConfigs.md)
+ - [SpecialPointsSpec](.//Models/SpecialPointsSpec.md)
+ - [TimeInterval](.//Models/TimeInterval.md)
 
 
 <a name="documentation-for-authorization"></a>

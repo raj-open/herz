@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: x.y.z
+  version: 0.1.0
   title: Schemata for user config
 servers:
   - url: "https://define.me"
@@ -16,16 +16,17 @@ components:
       type: object
       required:
         - basic
-        - paths
-        - data
       properties:
         basic:
           $ref: "#/components/schemas/UserBasicOptions"
-        data:
-          $ref: "#/components/schemas/UserData"
-        output:
-          $ref: "#/components/schemas/UserOutput"
-      additionalProperties: false
+        cases:
+          description: |-
+            List of settings for each case.
+          type: array
+          items:
+            $ref: "#/components/schemas/UserCase"
+          default: []
+      additionalProperties: true
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Config > basic
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,44 +34,122 @@ components:
       description: |-
         Basic options for running the programme.
       type: object
-      required:
-        - log-level
+      required: []
       properties:
         log-level:
           $ref: '#/components/schemas/EnumLogLevel'
-          default:
+          default: INFO
         verbose:
           type: boolean
           default: false
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > data
+    # Config > case(s)
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserCase:
+      description: |-
+        User settings for a single case of data.
+      type: object
+      required:
+        - data
+        - process
+        - output
+      properties:
+        ignore:
+          description: |-
+            Whether or not to skip the case.
+          type: boolean
+          default: false
+        label:
+          description: |-
+            Label used to refer to case and generate output files.
+            NOTE: may not contain spaces.
+          type: string
+          pattern: '^\S+$'
+        data:
+          $ref: "#/components/schemas/UserData"
+        process:
+          $ref: "#/components/schemas/UserProcess"
+        output:
+          $ref: "#/components/schemas/UserOutput"
+      additionalProperties: false
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > case > data
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     UserData:
       description: |-
         Options for structure of data files.
       type: object
       required:
-        - combine
         - pressure
         - volume
       properties:
-        combine:
-          $ref: "#/components/schemas/DataTimeSeriesCommon"
         pressure:
           $ref: "#/components/schemas/DataTimeSeries"
         volume:
           $ref: "#/components/schemas/DataTimeSeries"
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > paths
+    # Config > case > process
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    UserProcess:
+      description: |-
+        Options for process steps.
+      type: object
+      required:
+        - combine
+        - cycles
+        - fit
+      properties:
+        combine:
+          description: |-
+            Parameter options for combining time series.
+          type: object
+          required:
+            - dt
+            - unit
+          properties:
+            dt:
+              type: number
+              minimum: 0.
+              exclusiveMinimum: true
+            T-max:
+              type: number
+              minimum: 0.
+              exclusiveMinimum: true
+            unit:
+              type: string
+          additionalProperties: true
+        cycles:
+          type: object
+          required: []
+          properties:
+            remove-bad:
+              description: |-
+                Option to remove 'bad' parts at start/end of cycles.
+              type: boolean
+              default: false
+          additionalProperties: true
+        fit:
+          type: object
+          required: []
+          properties:
+            mode:
+              description: |-
+                Whether to fit for each cycle individually,
+                or to fit for all simultaneously (average).
+              $ref: "#/components/schemas/EnumFittingMode"
+              default: AVERAGE
+          additionalProperties: true
+      additionalProperties: true
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Config > case > output
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     UserOutput:
       description: |-
         Options for outputs
       type: object
       required:
-        - name
         - quantities
         - table
         - plot
@@ -80,18 +159,12 @@ components:
             Name of case.
           type: string
         quantities:
-          type: object
-          required:
-            - time
-            - pressure
-            - volume
-          properties:
-            time:
-              $ref: '#/components/schemas/DataTypeQuantity'
-            pressure:
-              $ref: '#/components/schemas/DataTypeQuantity'
-            volume:
-              $ref: '#/components/schemas/DataTypeQuantity'
+          description: |-
+            User settings for output quantities.
+          type: array
+          items:
+            $ref: '#/components/schemas/DataTypeColumn'
+          minItems: 1
         table:
           type: object
           required:
@@ -138,33 +211,18 @@ components:
                   description: |-
                     Size of title font in `pt`.
                   type: integer
-                  default: 12
+                  default: 14
+                size-legend:
+                  description: |-
+                    Size of legend font in `pt`.
+                  type: integer
+                  default: 10
               additionalProperties: false
           additionalProperties: true
       additionalProperties: true
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # Data structure for time series
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    DataTimeSeriesCommon:
-      description: |-
-        Parameter options for combining time series.
-      type: object
-      required:
-        - dt
-        - unit
-      properties:
-        dt:
-          type: number
-          minimum: 0.
-          exclusiveMinimum: true
-        T-max:
-          type: number
-          minimum: 0.
-          exclusiveMinimum: true
-        unit:
-          type: string
-      additionalProperties: true
-
     DataTimeSeries:
       description: |-
         Structure for time series.
@@ -257,6 +315,44 @@ components:
             Physical unit as string
           type: string
       additionalProperties: false
+
+    DataTypeColumn:
+      description: |-
+        Structure for physical quantity for outputs.
+      type: object
+      required:
+        - name
+        - quantity
+        - key
+        - unit
+        # - type
+      properties:
+        name:
+          description: |-
+            Desired name of column in file.
+          type: string
+        quantity:
+          description: |-
+            (Root) name of physical quantity.
+            E.g. for a column for "fitted pressure"
+            use `quantity="pressure"`.
+          type: string
+        key:
+          description: |-
+            Name of column in internal data frame.
+            E.g. for a column for "fitted pressure"
+            use `key="pressure[fit]"`.
+          type: string
+        type:
+          description: |-
+            Data type (float, int, etc.)
+          $ref: "./common.yaml/#/components/schemas/EnumType"
+          default: float
+        unit:
+          description: |-
+            Physical unit as string
+          type: string
+      additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ENUM: log level
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -268,3 +364,14 @@ components:
         - INFO
         - DEBUG
       default: INFO
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM: fitting mode
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumFittingMode:
+      description: |-
+        Enumeration of settings for log level.
+      type: string
+      enum:
+        - SINGLE
+        - AVERAGE
+      default: AVERAGE

@@ -29,17 +29,18 @@ def get_extremes(
     # first make data as symmetric as possible
     values = normalised_order_statistics(values)
     # preliminary computation of peaks
-    peaks = get_peaks_simple(values, add_end=True)
+    peaks = get_peaks_simple(abs(values))
     # estimate cycle length
+    peaks.append(N_values)
     N = estimate_cycle_duration(peaks) or N_values
     width = round(sig_width * N) or 1.0
     # re-compute peaks
-    peaks = get_peaks_simple(values, add_end=False, distance=width, prominence=1)
-    troughs = get_peaks_simple(-values, add_end=False, distance=width, prominence=1)
+    peaks = get_peaks_simple(values, distance=width, prominence=1)
+    troughs = get_peaks_simple(-values, distance=width, prominence=1)
     return peaks, troughs
 
 
-def get_peaks_simple(values: np.ndarray, add_end: bool, **kwargs) -> list[int]:
+def get_peaks_simple(values: np.ndarray, **kwargs) -> list[int]:
     N = len(values)
 
     result = sps.find_peaks(
@@ -56,8 +57,10 @@ def get_peaks_simple(values: np.ndarray, add_end: bool, **kwargs) -> list[int]:
     )
     peaks = result[0].tolist()
 
-    if add_end:
-        peaks.append(N)
+    # force list to be non-empty, if possible.
+    if len(peaks) == 0 and len(values) > 0:
+        index_max = np.asarray(values).argmax()
+        peaks = [index_max]
 
     return peaks
 

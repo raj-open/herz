@@ -173,6 +173,8 @@ githook-clean-ipynb-meta path:
     @just clean-notebook-meta "{{path}}"
 
 githook-qa:
+    @# build
+    @just build-skip-packages
     @# lint
     @just prettify
     @just check-linting
@@ -186,6 +188,11 @@ githook-qa:
 build:
     @just build-misc
     @just build-requirements
+    @just check-system-requirements
+    @just build-models
+
+build-skip-packages:
+    @just build-misc
     @just check-system-requirements
     @just build-models
 
@@ -288,6 +295,19 @@ prettify:
     @{{PYTHON}} -m {{LINTING}} --verbose notebooks/*
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# TARGES: utilities
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+create-badge-pyversion:
+    @{{PYTHON}} -m pybadges \
+        --left-text="python" \
+        --right-text="3.10, 3.11" \
+        --whole-link="https://www.python.org/" \
+        --browser \
+        --logo='https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/python.svg' \
+        >> documentation/badges/pyversion.svg
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: clean
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -301,15 +321,16 @@ clean-notebook-outputs path:
 
 clean-notebook-meta path:
     @echo "Clean metadata from python notebook {{path}}."
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
 clean-notebooks:
     @echo "Clean outputs and metadata from python notebooks."
     @# NOTE: only clean outputs in notebooks/... folder
-    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/**/*.ipynb
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
-    @- {{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
+    @# FIXME: nbconvert no longer recognises the .../**/... pattern
+    @{{PYTHON}} -m jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
+    @{{PYTHON}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
 
 clean-basic:
     @echo "All system artefacts will be force removed."

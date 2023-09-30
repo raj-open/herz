@@ -12,13 +12,13 @@ from ..generated.user import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 __all__ = [
+    'DataTypeColumn',
     'DataTimeSeries',
-    'DataTimeSeriesCommon',
     'DataTypeQuantity',
-    'EnumLogLevel',
-    'EnumType',
     'UserBasicOptions',
+    'UserCase',
     'UserConfig',
     'UserData',
     'UserOutput',
+    'UserProcess',
 ]
