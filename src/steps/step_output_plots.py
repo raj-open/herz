@@ -623,29 +623,3 @@ def save_image(fig: pgo.Figure, path: str):
     else:
         fig.write_image(path)
     return
-
-
-def get_renormalised_coordinates_of_special_points(
-    points: dict[str, SpecialPointsConfig],
-    p: list[float],
-    info: FittedInfo,
-) -> list[tuple[str, SpecialPointsConfig]]:
-    T = info.normalisation.period
-    points_ = []
-    for key, point in points.items():
-        tt = point.time
-        # if tt in [0.0, 1.0]:
-        #     point = point.copy()
-        #     point.time = 0.0
-        #     points_.append((key, point))
-        #     point = point.copy()
-        #     point.time = 1.0
-        #     points_.append((key, point))
-        point = point.copy()
-        points_.append((key, point))
-    t = [point.time for key, point in points_]
-    values = poly(t, *p)
-    for (key, point), y in zip(points_, values):
-        point.value = T * y
-        point.value = y
-    return points_

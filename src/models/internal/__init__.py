@@ -40,6 +40,7 @@ __all__ = [
     'get_renormalised_polynomial',
     'get_renormalised_polynomial_time_only',
     'get_renormalised_polynomial_values_only',
+    'get_renormalised_coordinates_of_special_points',
     'shift_conditions',
     'shift_condition',
     'shift_der_condition',
