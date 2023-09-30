@@ -73,6 +73,7 @@ settings:
       dia:
         name: "diastole"
         spec:
+          # NOTE: perhaps this definition should be reconsidered
           derivative: 0
           kind: LOCAL_MINIMUM
           after: ['sys', 'sdp']
@@ -159,7 +160,7 @@ settings:
           before: []
         marker:
           size: 6
-          colour: red
+          colour: green
           symbol: "x"
       min:
         name: "V_min"
@@ -170,7 +171,7 @@ settings:
           before: []
         marker:
           size: 6
-          colour: blue
+          colour: blueviolet
           symbol: "x"
       dV-max:
         name: "max dV/dt"
@@ -181,7 +182,7 @@ settings:
           before: []
         marker:
           size: 6
-          colour: blue
+          colour: green
           symbol: "triangle-up-open"
       dV-min:
         name: "min dV/dt"
@@ -192,27 +193,5 @@ settings:
           before: []
         marker:
           size: 6
-          colour: red
+          colour: blueviolet
           symbol: "triangle-up-open"
-      # ddV-max:
-      #   name: "max d²V/dt²"
-      #   spec:
-      #     derivative: 2
-      #     kind: MAXIMUM
-      #     after: []
-      #     before: []
-      #   marker:
-      #     size: 6
-      #     colour: red
-      #     symbol: "square-open"
-      # ddV-min:
-      #   name: "min d²V/dt²"
-      #   spec:
-      #     derivative: 2
-      #     kind: MINIMUM
-      #     after: []
-      #     before: []
-      #   marker:
-      #     size: 6
-      #     colour: blue
-      #     symbol: "square-open"
