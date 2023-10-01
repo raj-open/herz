@@ -70,16 +70,8 @@ def enter(path: str, *_):
             points_data, points_fit = step_recognise_points(case, data, fits, quantity=quantity)
             LPsub.next()
 
-            LPsub = LP.subtask(f'''RE-RECOGNITION OF CYCLES {quantity} / MATCHING''', 1)
-            data = step_shift_data_custom(case, data, points_data, quantity=quantity)
-            LPsub.next()
-
-            LPsub = LP.subtask(f'''RE-FIT CURVE {quantity}''', 1)
-            data, fits = step_refit_curve(case, data, points_fit, quantity=quantity)
-            LPsub.next()
-
-            LPsub = LP.subtask(f'''RE-CLASSIFICATION OF POINTS {quantity}''', 1)
-            _, points_fit = step_recognise_points(case, data, fits, quantity=quantity)
+            LPsub = LP.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', 1)
+            data, points_data = step_shift_data_custom(case, data, points_data, quantity=quantity)  # fmt: skip
             LPsub.next()
 
             datas[quantity] = data
@@ -101,9 +93,7 @@ def enter(path: str, *_):
             LPsub.next()
 
             LPsub = LP.subtask('''OUTPUT TIME PLOTS''', 1)
-            plt = step_output_time_plot(
-                case, data, fits, points_fit, quantity=quantity, symb=symb
-            )
+            plt = step_output_time_plot(case, data, fits, points_fit, quantity=quantity, symb=symb, shifted=True)  # fmt: skip
             # plt.show()
             LPsub.next()
             LP.next()
@@ -118,6 +108,7 @@ def enter(path: str, *_):
             data_v=datas['volume'],
             fitinfos_v=fitinfos['volume'],
             points_v=points['volume'],
+            shifted=True,
         )
         # plt.show()
         LPsub.next()
