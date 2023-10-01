@@ -249,9 +249,7 @@ def clean_time_points_for_list_of_lists_of_critical_points(
     times[-1] = t_max
 
     # rewrite time-values
-    crits = [
-        [(closest_value(t0, times), y0, kinds) for t0, y0, kinds in crit] for crit in crits
-    ]
+    crits = [ [(closest_value(t0, times), y0, kinds) for t0, y0, kinds in crit] for crit in crits ]  # fmt: skip
 
     return crits
 
@@ -279,7 +277,7 @@ def log_critical_points(
         data.append([f'{t0:.6f}'] + class_as_strs)
     table = tabulate(
         data,
-        headers=['t'] + [f'crit p{"´" * n}' for n in range(n_der + 1)],
+        headers=['t/T'] + [f'crit p{"´" * n}' for n in range(n_der + 1)],
         tablefmt='pretty',
         floatfmt='.4f',
         stralign='left',
