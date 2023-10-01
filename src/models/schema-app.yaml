@@ -330,12 +330,20 @@ components:
       description: |-
         Enumeration of critical point types.
       type: string
-      enum:
+      x-enum-varnames:
         - UNKNOWN
         - ZERO
         - MINIMUM
         - MAXIMUM
         - LOCAL_MINIMUM
         - LOCAL_MAXIMUM
+        - INFLECTION
+      enum:
+        - UNKNOWN
+        - ZERO
+        - MINIMUM
+        - MAXIMUM
+        - LOCAL-MINIMUM
+        - LOCAL-MAXIMUM
         - INFLECTION
       default: UNKNOWN

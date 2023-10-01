@@ -29,7 +29,7 @@ settings:
     pressure:
       - derivative: 2
         num-critical: 7 # NOTE: 5 for 'inside' the interval + 2 for boundaries
-      # boundary point is peak ==> LOCAL_MAX
+      # boundary point is peak ==> LOCAL MAX
       - derivative: 1
         time: 0.
       - derivative: 1
@@ -42,7 +42,7 @@ settings:
     volume:
       - derivative: 1
         num-critical: 5
-      # boundary point is peak ==> LOCAL_MAX
+      # boundary point is peak ==> LOCAL MAX
       - derivative: 1
         time: 0.
       - derivative: 1
@@ -56,7 +56,7 @@ settings:
         ignore: true
         spec: null
         marker:
-          size: 6
+          size: 9
           colour: red
           symbol: "circle"
       sys:
@@ -69,7 +69,7 @@ settings:
           after: []
           before: []
         marker:
-          size: 6
+          size: 9
           colour: red
           symbol: "x"
       dia:
@@ -77,22 +77,22 @@ settings:
         spec:
           # NOTE: perhaps this definition should be reconsidered
           derivative: 0
-          kind: LOCAL_MINIMUM
+          kind: LOCAL-MINIMUM
           after: ['sys', 'sdp']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: blue
           symbol: "x"
       edp:
         name: "edp"
         spec:
           derivative: 2
-          kind: LOCAL_MAXIMUM
+          kind: LOCAL-MAXIMUM
           after: ['dia']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: blue
           symbol: "triangle-up"
       epad:
@@ -103,51 +103,51 @@ settings:
           after: ['edp']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: black
           symbol: "square-open"
       eivc:
         name: "eivc"
         spec:
           derivative: 2
-          kind: LOCAL_MINIMUM
+          kind: LOCAL-MINIMUM
           after: ['epad']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: red
           symbol: "triangle-up-open"
       esp:
         name: "esp"
         spec:
           derivative: 2
-          kind: LOCAL_MINIMUM
+          kind: LOCAL-MINIMUM
           after: ['sys']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: red
           symbol: "triangle-up"
       anti-epad:
         name: "anti-epad"
         spec:
           derivative: 1
-          kind: LOCAL_MINIMUM
+          kind: LOCAL-MINIMUM
           after: ['esp']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: black
           symbol: "square"
       sdp:
         name: "sdp"
         spec:
           derivative: 2
-          kind: LOCAL_MAXIMUM
+          kind: LOCAL-MAXIMUM
           after: ['anti-epad']
           before: []
         marker:
-          size: 6
+          size: 9
           colour: blue
           symbol: "triangle-up-open"
     volume:
@@ -161,7 +161,7 @@ settings:
           after: []
           before: []
         marker:
-          size: 6
+          size: 9
           colour: green
           symbol: "x"
       min:
@@ -172,7 +172,7 @@ settings:
           after: []
           before: []
         marker:
-          size: 6
+          size: 9
           colour: blueviolet
           symbol: "x"
       dV-max:
@@ -183,7 +183,7 @@ settings:
           after: []
           before: []
         marker:
-          size: 6
+          size: 9
           colour: green
           symbol: "triangle-up-open"
       dV-min:
@@ -194,6 +194,6 @@ settings:
           after: []
           before: []
         marker:
-          size: 6
+          size: 9
           colour: blueviolet
           symbol: "triangle-up-open"
