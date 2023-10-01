@@ -20,8 +20,8 @@ settings:
     d[2,t]volume: 'm^3/s^2'
   # selected points in cycles for matching (alignment of multiple time series).
   matching:
-    pressure: 'edp'
-    volume: 'ddV-max'
+    pressure: 'epad'
+    volume: 'V-max'
   # settings for polynomial conditions for initial (peak-to-peak) fitting.
   polynomial:
     pressure:
