@@ -14,6 +14,7 @@ from ..core.utils import *
 from ..core.log import *
 from ..core.poly import *
 from ..core.crit import *
+from ..algorithms.onb import *
 from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
