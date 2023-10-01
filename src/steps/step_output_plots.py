@@ -254,11 +254,7 @@ def step_output_loop_plot(
     volume_fit = poly(T_v * time, *v)
 
     # set up plots
-    fig = make_subplots(
-        rows=1,
-        cols=1,
-        subplot_titles=[cfg.plot.title],
-    )
+    fig = make_subplots(rows=1, cols=1, subplot_titles=[])
 
     fig.update_layout(
         width=640,
@@ -303,6 +299,7 @@ def step_output_loop_plot(
         legend=dict(
             title='Series/Points',
         ),
+        updatemenus=[], # use to add buttons to plots
     )
 
     # fig.append_trace(
@@ -386,6 +383,8 @@ def step_output_loop_plot(
                 x=[cv['volume'] * v_],
                 y=[cv['pressure'] * p_],
                 mode='markers+text',
+                # text=[ point.name ],
+                # textposition = 'middle right', # 'top|middle|bottom left|center|right'
                 marker=dict(
                     symbol=marker.symbol,
                     size=marker.size,

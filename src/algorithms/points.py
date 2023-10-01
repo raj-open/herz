@@ -92,7 +92,7 @@ def recognise_special_points(
     t_max = crit[0][0]
 
     # shift cycle to format peak-to-peak:
-    crits = [[((t - t_max) % 1, y, kind) for t, y, kind in crit] for crit in crits]
+    crits = [[((t - t_max) % 1, y, kinds) for t, y, kinds in crit] for crit in crits]
 
     # sort critical points:
     crits = [sorted(crit, key=lambda obj: obj[0]) for crit in crits]
@@ -119,9 +119,7 @@ def recognise_special_points(
         t_before = min([t_before] + [times.get(key_, t_before) for key_ in spec.before])
 
         # find critical point
-        log_debug(
-            f'({key}) search for {t_after:.4f} < t < {t_before:.4f} s.t. p{"´" * n} @ t {spec.kind.value}.'
-        )
+        log_debug(f'({key}) search for {t_after:.4f} < t < {t_before:.4f} s.t. p{"´" * n} @ t {spec.kind.value}.')  # fmt: skip
         crit = filter_kinds(crits[n], kinds={spec.kind})
         crit = filter_times(crit, t_after=t_after, t_before=t_before)
         try:

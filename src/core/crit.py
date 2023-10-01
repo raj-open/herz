@@ -162,13 +162,13 @@ def get_critical_points_bounded(
     y_min = np.min(values)
     y_max = np.max(values)
     for k, (t0, y0, kinds) in enumerate(crit):
-        if abs(normalised_difference(x_from=y_max, x_to=y0)) < MACHINE_EPS:
+        if is_epsilon_eq(y_max, y0, eps=MACHINE_EPS):
             crit[k] = (
                 t0,
                 y_max,
                 kinds.union({EnumCriticalPoints.MAXIMUM}),
             )
-        elif abs(normalised_difference(x_from=y_min, x_to=y0)) < MACHINE_EPS:
+        elif is_epsilon_eq(y_min, y0, eps=MACHINE_EPS):
             crit[k] = (
                 t0,
                 y_min,
