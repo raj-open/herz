@@ -226,6 +226,11 @@ components:
             Option to suppress plotting.
           type: boolean
           default: false
+        found:
+          description: |-
+            Option to mark whether point successfully computed.
+          type: boolean
+          default: false
         time:
           description: |-
             Time co-ordinate of special point (initially normalised to `[0, 1]`).
@@ -258,7 +263,6 @@ components:
         NOTE: The 'before' / 'after' conditions are defined purely in terms of the peak-to-peak cycle.
       type: object
       required:
-        - derivative
         - kind
         - after
         - before
@@ -268,6 +272,7 @@ components:
             Order of the n'th derivative condition.
           type: integer
           minimum: 0
+          default: 0
         kind:
           description: |-
             Kind of n'th derivative condition: (local) min/max.

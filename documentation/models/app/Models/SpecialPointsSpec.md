@@ -3,7 +3,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**derivative** | [**Integer**](integer.md) | Order of the n&#39;th derivative condition. | [default to null]
+**derivative** | [**Integer**](integer.md) | Order of the n&#39;th derivative condition. | [optional] [default to 0]
 **kind** | [**EnumCriticalPoints**](EnumCriticalPoints.md) |  | [default to null]
 **reuse** | [**Boolean**](boolean.md) | Whether the recognised point is to be reused for the 2nd round of fitting. | [optional] [default to false]
 **strict** | [**Boolean**](boolean.md) | Whether the point is to occur strictly inside the cycle.  Default: &#x60;true&#x60;.  NOTE: Only set to &#x60;false&#x60; for a time point that is the peak value. | [optional] [default to true]
