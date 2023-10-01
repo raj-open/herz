@@ -73,11 +73,14 @@ def step_refit_curve(
     align = get_alignment_point(quantity)
     conds = get_polynomial_condition(quantity)
 
-    # add in conditions for special points:
-    conds = conds[:] + [
+    # add in conditions for special points
+    # NOTE: only used special pts marked for reuse
+    conds += [
         PolyDerCondition(derivative=point.spec.derivative + 1, time=point.time)
         for key, point in points.items()
-        if point.spec is not None and point.spec.reuse
+        if point.spec is not None
+        # and (point.spec.reuse or key == align)
+        and point.spec.reuse
     ]
 
     # shift current conditions

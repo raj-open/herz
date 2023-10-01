@@ -103,7 +103,8 @@ def recognise_special_points(
     log_debug(f'Searching for {" -> ".join([ key for key, _ in points ])}.')
 
     # iteratively identify points:
-    times = {}
+    for key, point in results.items():
+        point.found = False
     for key, point in points:
         spec = point.spec
         if spec is None:
@@ -119,18 +120,19 @@ def recognise_special_points(
         t_before = min([t_before] + [times.get(key_, t_before) for key_ in spec.before])
 
         # find critical point
-        log_debug(f'({key}) search for {t_after:.4f} < t < {t_before:.4f} s.t. p{"´" * n} @ t {spec.kind.value}.')  # fmt: skip
+        log_debug(f'({key}) search for {t_after:.4f} < t/T < {t_before:.4f} s.t. p{"´" * n} @ t is {spec.kind.value}.')  # fmt: skip
         crit = filter_kinds(crits[n], kinds={spec.kind})
         crit = filter_times(crit, t_after=t_after, t_before=t_before)
         try:
             t0 = crit[0][0]
             times[key] = t0
-            log_debug(f'({key}) found t={t0:.4f}.')
+            log_debug(f'({key}) found t={t0:.4f}·T.')
+            # unshift time-values to original format of cycle and store
+            results[key].time = (t0 + t_max) % 1
+            results[key].found = True
         except:
-            log_fatal(f'Could not find ({key})!')
-
-        # unshift time-values to original format of cycle and store
-        results[key].time = (t0 + t_max) % 1
+            log_warn(f'Could not find ({key})!')
+            results[key].found = False
 
     return results
 

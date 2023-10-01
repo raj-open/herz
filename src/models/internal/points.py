@@ -25,7 +25,6 @@ __all__ = [
     'get_renormalised_polynomial_time_only',
     'get_renormalised_polynomial_values_only',
     'get_renormalised_data',
-    'get_renormalised_coordinates_of_special_points',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -145,23 +144,3 @@ def get_renormalised_data(
         {'time[orig]': 'float', 'time': 'float', quantity: 'float'}
     )
     return data
-
-
-def get_renormalised_coordinates_of_special_points(
-    points: dict[str, SpecialPointsConfig],
-    p: list[float],
-    info: FittedInfo,
-) -> list[tuple[str, SpecialPointsConfig]]:
-    '''
-    NOTE: assumes polynomial has been renormalised.
-    '''
-    T = info.normalisation.period
-    points_ = [(key, point.copy()) for key, point in points.items()]
-
-    times = T * np.asarray([point.time for _, point in points_])
-    values = poly(times, *p)
-    for t, y, (_, point) in zip(times, values, points_):
-        point.time = t
-        point.value = y
-
-    return points_

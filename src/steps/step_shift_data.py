@@ -61,7 +61,7 @@ def step_shift_data_custom(
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
-) -> pd.DataFrame:
+) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], dict[str, int]]],]:
     align = get_alignment_point(quantity)
 
     t = data['time'].to_numpy(copy=True)
@@ -71,10 +71,11 @@ def step_shift_data_custom(
         i0 = pts.get(align, -1)
         if i0 == -1:
             continue
+        points[k] = ((i1, i2), {key: i1 + ((i - i0) % (i2 - i1)) for key, i in pts.items()})
         indices = list(range(i1, i2))
         indices = indices[i0:] + indices[:i0]
         data[i1:i2] = data.iloc[indices, :].reset_index(drop=True)
 
     data['time'] = t
 
-    return data
+    return data, points
