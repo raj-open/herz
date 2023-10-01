@@ -51,6 +51,8 @@ components:
         User settings for a single case of data.
       type: object
       required:
+        - label
+        - name
         - data
         - process
         - output
@@ -66,6 +68,10 @@ components:
             NOTE: may not contain spaces.
           type: string
           pattern: '^\S+$'
+        name:
+          description: |-
+            Name of case (can be used e.g. in titles of plots).
+          type: string
         data:
           $ref: "#/components/schemas/UserData"
         process:
@@ -185,13 +191,10 @@ components:
           type: object
           required:
             # - path
-            - title
             - font
           properties:
             path:
               $ref: "./common.yaml/#/components/schemas/PathToDirString"
-            title:
-              type: string
             legend:
               type: boolean
               default: false
