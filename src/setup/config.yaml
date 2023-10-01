@@ -21,14 +21,12 @@ settings:
   # selected points in cycles for matching (alignment of multiple time series).
   matching:
     pressure: 'edp'
-    volume: 'dV-max'
-    # pressure: 'dia'
-    # volume: 'min'
+    volume: 'ddV-max'
   # settings for polynomial conditions for initial (peak-to-peak) fitting.
   polynomial:
     pressure:
       - derivative: 2
-        num-critical: 7 # NOTE: 5 for 'inside' the interval + 2 for boundaries
+        num-critical: 5
       # boundary point is peak ==> LOCAL MAX
       - derivative: 1
         time: 0.
@@ -40,12 +38,16 @@ settings:
       - derivative: 2
         time: 1.
     volume:
-      - derivative: 1
+      - derivative: 2
         num-critical: 5
       # boundary point is peak ==> LOCAL MAX
       - derivative: 1
         time: 0.
       - derivative: 1
+        time: 1.
+      - derivative: 2
+        time: 0.
+      - derivative: 2
         time: 1.
   # settings for special points
   # for marker symbols see <https://plotly.com/python/marker-style>
@@ -62,7 +64,6 @@ settings:
       sys:
         name: "systole"
         spec:
-          derivative: 0
           kind: MAXIMUM
           reuse: true
           strict: false
@@ -76,7 +77,6 @@ settings:
         name: "diastole"
         spec:
           # NOTE: perhaps this definition should be reconsidered
-          derivative: 0
           kind: LOCAL-MINIMUM
           after: ['sys', 'sdp']
           before: []
@@ -154,7 +154,6 @@ settings:
       max:
         name: "V_max"
         spec:
-          derivative: 0
           kind: MAXIMUM
           reuse: true
           strict: false
@@ -167,7 +166,6 @@ settings:
       min:
         name: "V_min"
         spec:
-          derivative: 0
           kind: MINIMUM
           after: []
           before: []
@@ -185,7 +183,7 @@ settings:
         marker:
           size: 9
           colour: green
-          symbol: "triangle-up-open"
+          symbol: "square-open"
       dV-min:
         name: "min dV/dt"
         spec:
@@ -196,4 +194,37 @@ settings:
         marker:
           size: 9
           colour: blueviolet
+          symbol: "square-open"
+      ddV-max:
+        name: "max d²V/dt²"
+        spec:
+          derivative: 2
+          kind: LOCAL-MAXIMUM
+          after: [ 'dV-min' ]
+          before: [ 'min' ]
+        marker:
+          size: 9
+          colour: green
           symbol: "triangle-up-open"
+      ddV-max-anti:
+        name: "max d²V/dt² (2nd)"
+        spec:
+          derivative: 2
+          kind: LOCAL-MAXIMUM
+          after: [ 'min' ]
+          before: [ 'dV-max' ]
+        marker:
+          size: 9
+          colour: green
+          symbol: "triangle-up"
+      ddV-min:
+        name: "eivc"
+        spec:
+          derivative: 2
+          kind: LOCAL-MINIMUM
+          after: [ 'ddV-max' ]
+          before: [ 'ddV-max-anti' ]
+        marker:
+          size: 9
+          colour: black
+          symbol: "x"
