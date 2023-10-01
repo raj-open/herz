@@ -6,7 +6,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from ..generated.internal import *
-from .poly import *
 from .points import *
 from .conditions import *
 
@@ -45,6 +44,4 @@ __all__ = [
     'shift_condition',
     'shift_der_condition',
     'shift_int_condition',
-    'onb_conditions',
-    'onb_spectrum',
 ]

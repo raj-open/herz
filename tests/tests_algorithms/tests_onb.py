@@ -10,9 +10,9 @@ from src.thirdparty.types import *
 from tests.thirdparty.unit import *
 
 from src.core.poly import *
-from src.models.internal.poly import *
-from src.models.internal.poly import force_poly_condition
-from src.models.internal.poly import force_poly_conditions
+from src.algorithms.onb import *
+from src.algorithms.onb import force_poly_condition
+from src.algorithms.onb import force_poly_conditions
 from src.models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

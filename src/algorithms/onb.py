@@ -5,14 +5,11 @@
 # IMPORTS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-from ...thirdparty.maths import *
-from ...thirdparty.types import *
+from ..thirdparty.maths import *
+from ..thirdparty.types import *
 
-from ...core.poly import *
-
-# NOTE: foreign import
-from ..generated.app import PolyDerCondition
-from ..generated.app import PolyIntCondition
+from ..core.poly import *
+from ..models.internal import *
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # EXPORTS
@@ -30,7 +27,7 @@ __all__ = [
 #
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# METHODS - ONB
+# METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -255,7 +252,7 @@ def onb_spectrum(
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# AUXILIARY METHODS - CONDITIONS
+# AUXILIARY METHODS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -302,75 +299,3 @@ def force_poly_condition(
             p = np.asarray(range(0, deg + 1))
             row = (t2pow - t1pow) / (p + 1)
     return row.tolist()
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# AUXILIARY METHODS - INNER PROD
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def ip_poly_poly(
-    coeff1: list[float],
-    coeff2: list[float],
-    t1: float = 0,
-    t2: float = 1,
-    ip: list[np.ndarray] = [],
-) -> float:
-    d1 = len(coeff1) - 1
-    d2 = len(coeff2) - 1
-    if len(ip) == 0:
-        ip[:] = [ip_poly_generate_matrix(d1, d2, t1, t2)]
-    coeffs = coeff1[:, np.newaxis] * coeff2[np.newaxis, :].conj()
-    s = np.sum(ip[0] * coeffs)
-    return s
-
-
-def ip_basis_basis(
-    B: np.ndarray,
-    t1: float = 0.0,
-    t2: float = 1.0,
-) -> float:
-    d = B.shape[0] - 1
-    m = B.shape[1]
-    ip = []
-    S = np.zeros((m, m))
-
-    for j1 in range(m):
-        for j2 in range(j1 + 1):
-            S[j1, j2] = ip_poly_poly(B[:, j1], B[:, j2], t1=t1, t2=t2, ip=ip)
-
-    for j2 in range(m):
-        for j1 in range(j2):
-            S[j1, j2] = S[j2, j1]
-    return S
-
-
-def ip_poly_generate_matrix(
-    d1: int,
-    d2: int,
-    t2: float = 1.0,
-    t1: float = 0.0,
-):
-    powers1 = np.asarray(range(d1 + 1))
-    powers2 = np.asarray(range(d2 + 1))
-    sumpowers = powers1[:, np.newaxis] + powers2[np.newaxis, :] + 1
-
-    match t1:
-        case 0.0:
-            tt1 = np.zeros((d1 + 1, d2 + 1))
-        case 1.0:
-            tt1 = np.ones((d1 + 1, d2 + 1))
-        case _:
-            tt1 = t1**sumpowers
-
-    match t2:
-        case 0.0:
-            tt2 = np.zeros((d1 + 1, d2 + 1))
-        case 1.0:
-            tt2 = np.ones((d1 + 1, d2 + 1))
-        case _:
-            tt2 = t2**sumpowers
-
-    T = t2 - t1 or 1.0
-    ip = (tt2 - tt1) / (T * sumpowers)
-    return ip
