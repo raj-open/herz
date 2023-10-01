@@ -12,6 +12,7 @@ from .peaks import *
 from .cycles import *
 from ..core.utils import *
 from ..core.log import *
+from ..core.poly import *
 from ..core.crit import *
 from ..models.internal import *
 
@@ -65,44 +66,7 @@ def fit_poly_cycles(
         info = FittedInfo(coefficients=coeff, normalisation=params)
         fitinfos.append(((i1, i2), info))
 
-    # --------------------------------
-    # NOTE:
-    # If all cycles are to be fit simultaenously by a single polynomial,
-    # then since a method via ONB is, the optimal solution
-    # (least L²-distance) is the average.
-    # Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated+normalised) curves in C[0, T].
-    # Let x(t) := 1/n ∑ₖ x⁽ᵏ⁾(t) the avarage in C[0, T].
-    # Then
-    #
-    #    res := 1/n · ∑ₖ ‖p - x⁽ᵏ⁾‖²
-    #      = 1/n · ∑ₖ ‖p‖² + ‖x⁽ᵏ⁾‖² + 2Re ⟨x⁽ᵏ⁾, p⟩
-    #      = const + ‖p‖² + 2Re ⟨x, p⟩
-    #      = const + ‖x‖² + ‖p‖² + 2Re ⟨x, p⟩
-    #      = const + ‖p - x‖²
-    #
-    # Hence to res minimsed ⟺ p minimised for the average, x(t).
-    # We do not have access to x, since the x⁽ᵏ⁾ are not comensurable.
-    # However, letting p⁽ᵏ⁾ be minimised for each x⁽ᵏ⁾,
-    # one has via the ONB (qⱼ)ⱼ
-    #
-    #    p optimal for x
-    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨x, qⱼ⟩
-    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ x⁽ᵏ⁾, qⱼ⟩
-    #    ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨x⁽ᵏ⁾, qⱼ⟩
-    #    ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨p⁽ᵏ⁾, qⱼ⟩
-    #    ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ p⁽ᵏ⁾, qⱼ⟩
-    #    ⟺ p = 1/n ∑ₖ p⁽ᵏ⁾
-    #
-    # Hence the coefficients for p are just the average
-    # of the coefficients of the p⁽ᵏ⁾.
-    # --------------------------------
-    coeff = np.mean(np.asarray([info.coefficients for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
-    T = np.median(np.asarray([info.normalisation.period for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
-    c = np.median(np.asarray([info.normalisation.intercept for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
-    m = np.median(np.asarray([info.normalisation.gradient for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
-    s = np.median(np.asarray([info.normalisation.scale for _, info in fitinfos]), axis=0).tolist()  # fmt: skip
-    params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
-    info = FittedInfo(coefficients=coeff, normalisation=params)
+    info = compute_simultaneous_fit([info for _, info in fitinfos])
     fitinfos.append(((-1, -1), info))
 
     return fitinfos
@@ -132,6 +96,56 @@ def fit_poly_cycle(
     Q = onb_conditions(deg=deg, conds=conds)
     coeff = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
     return coeff
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# SECIONDARY METHODS
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def compute_simultaneous_fit(infos: list[FittedInfo]) -> FittedInfo:
+    '''
+    Fits a single polynomial to all (normalised) cycles simultaenously.
+
+    NOTE:
+    Since a method via ONB is used, the optimal solution
+    (least L²-distance) is the average.
+    Proof.
+        Let (x⁽ᵏ⁾(t))ₖ be the respective (interpolated+normalised) curves in C[0, T].
+        Let x(t) := 1/n ∑ₖ x⁽ᵏ⁾(t) the avarage in C[0, T].
+        Then
+
+        res := 1/n · ∑ₖ ‖p - x⁽ᵏ⁾‖²
+            = 1/n · ∑ₖ ‖p‖² + ‖x⁽ᵏ⁾‖² + 2Re ⟨x⁽ᵏ⁾, p⟩
+            = const + ‖p‖² + 2Re ⟨x, p⟩
+            = const + ‖x‖² + ‖p‖² + 2Re ⟨x, p⟩
+            = const + ‖p - x‖²
+
+        Hence to res minimsed ⟺ p minimised for the average, x(t).
+        We do not have access to x, since the x⁽ᵏ⁾ are not comensurable.
+        However, letting p⁽ᵏ⁾ be minimised for each x⁽ᵏ⁾,
+        one has via the ONB (qⱼ)ⱼ
+
+        p optimal for x
+        ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨x, qⱼ⟩
+        ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ x⁽ᵏ⁾, qⱼ⟩
+        ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨x⁽ᵏ⁾, qⱼ⟩
+        ⟺ ∀j: ⟨p, qⱼ⟩ = 1/n ∑ₖ ⟨p⁽ᵏ⁾, qⱼ⟩
+        ⟺ ∀j: ⟨p, qⱼ⟩ = ⟨1/n ∑ₖ p⁽ᵏ⁾, qⱼ⟩
+        ⟺ p = 1/n ∑ₖ p⁽ᵏ⁾
+
+        Hence the coefficients for p are just the average
+        of the coefficients of the p⁽ᵏ⁾.
+    QED
+    '''
+    coeff = np.mean(np.asarray([info.coefficients for info in infos]), axis=0).tolist()  # fmt: skip
+    T = np.median(np.asarray([info.normalisation.period for info in infos]), axis=0).tolist()  # fmt: skip
+    c = np.median(np.asarray([info.normalisation.intercept for info in infos]), axis=0).tolist()  # fmt: skip
+    m = np.median(np.asarray([info.normalisation.gradient for info in infos]), axis=0).tolist()  # fmt: skip
+    s = np.median(np.asarray([info.normalisation.scale for info in infos]), axis=0).tolist()  # fmt: skip
+    params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
+    info = FittedInfo(coefficients=coeff, normalisation=params)
+    return info
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
