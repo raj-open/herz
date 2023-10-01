@@ -75,6 +75,7 @@ def step_output_time_plot(
         height=720,
         margin=dict(l=40, r=40, t=60, b=40),
         title=dict(
+            text=case.name,
             font=dict(
                 size=cfg_font.size_title,
             ),
@@ -242,7 +243,7 @@ def step_output_loop_plot(
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         title=dict(
-            text=cfg.plot.title,
+            text=case.name,
             x=0.5,
             y=0.95,
             font=dict(
@@ -336,12 +337,12 @@ def step_output_loop_plot(
 
     points_ = []
 
-    sh = t_align_p / T_p - t_align_v / T_v
     for _, point in points_p.items():
         if point.ignore:
             continue
         t_p = point.time
-        t_v = (t_p - sh) % 1
+        t_ = (t_p - t_align_p / T_p) % 1
+        t_v = (t_ + t_align_v / T_v) % 1
         p_ = poly_single(T_p * t_p, *p)
         v_ = poly_single(T_v * t_v, *v)
         points_.append((v_, p_, point))
@@ -350,7 +351,8 @@ def step_output_loop_plot(
         if point.ignore:
             continue
         t_v = point.time
-        t_p = (t_v + sh) % 1
+        t_ = (t_v - t_align_v / T_v) % 1
+        t_p = (t_ + t_align_p / T_p) % 1
         v_ = poly_single(T_v * t_v, *v)
         p_ = poly_single(T_p * t_p, *p)
         points_.append((v_, p_, point))
