@@ -22,7 +22,7 @@ PYTHON := if os_family() == "windows" { "py -3" } else { "python3" }
 NODE := "npm"
 LINTING := "black"
 GITHOOK_PRECOMMIT := "pre_commit"
-GEN_MODELS := "datamodel-codegen"
+GEN_MODELS := "datamodel_code_generator"
 GEN_MODELS_DOCUMENTATION := "openapi-generator"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,7 +81,7 @@ _check-tool tool name:
     fi
 
 _generate-models path name:
-    @{{GEN_MODELS}} \
+    @{{PYTHON}} -m {{GEN_MODELS}} \
         --input-file-type openapi \
         --encoding "UTF-8" \
         --disable-timestamp \
@@ -99,7 +99,7 @@ _generate-models path name:
         --output {{path}}/generated/{{name}}.py
 
 _generate-models-documentation path_schema path_docs name:
-    @- {{GEN_MODELS_DOCUMENTATION}} generate \
+    @{{GEN_MODELS_DOCUMENTATION}} generate \
         --skip-validate-spec \
         --input-spec {{path_schema}}/schema-{{name}}.yaml \
         --generator-name markdown \
@@ -380,5 +380,5 @@ check-system-requirements-dev:
     @just _check-python-tool "{{GITHOOK_PRECOMMIT}}" "pre-commit"
 
 check-system-requirements:
-    @just _check-tool "{{GEN_MODELS}}" "datamodel-code-generator"
+    @just _check-python-tool "{{GEN_MODELS}}" "datamodel-code-generator"
     @just _check-tool "{{GEN_MODELS_DOCUMENTATION}}" "openapi-code-generator"
