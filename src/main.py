@@ -51,15 +51,12 @@ def enter(path: str, *_):
             data = step_normalise_data(case, data, quantity=quantity)
             LPsub.next()
 
-            LPsub = LP.subtask(f'''INITIAL RECOGNITION OF CYCLES {quantity} ({shift} -> {shift})''', 4)  # fmt: skip
+            LPsub = LP.subtask(f'''INITIAL RECOGNITION OF CYCLES {quantity} ({shift} -> {shift})''', 3)  # fmt: skip
             data = step_recognise_peaks(case, data, quantity=quantity)
             LPsub.next()
             data = step_shift_data_extremes(case, data, quantity=quantity, shift=shift)
             LPsub.next()
             data = step_recognise_cycles(case, data, quantity=quantity, shift=shift)
-            LPsub.next()
-            if case.process.cycles.remove_bad:
-                data = step_removed_marked_sections(case, data)
             LPsub.next()
 
             LPsub = LP.subtask(f'''INITIAL FIT CURVE {quantity}''', 1)
