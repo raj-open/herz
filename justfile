@@ -376,9 +376,9 @@ check-system:
 check-system-requirements-dev:
     @just check-system-requirements
     @#just _check-tool "{{NODE}}" "node package manager"
+    @just _check-python-tool "{{LINTING}}" "{{LINTING}}"
     @just _check-python-tool "{{GITHOOK_PRECOMMIT}}" "pre-commit"
 
 check-system-requirements:
-    @just _check-python-tool "{{LINTING}}" "{{LINTING}}"
     @just _check-tool "{{GEN_MODELS}}" "datamodel-code-generator"
     @just _check-tool "{{GEN_MODELS_DOCUMENTATION}}" "openapi-code-generator"
