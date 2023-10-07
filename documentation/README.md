@@ -77,7 +77,7 @@ The following points are listed out in chronological order
 
 | Symbol | Literatur | Characterisation | Further comments |
 | :----- | :-------- | :--------------- | :------------- |
-| $P_{\max}$ | `sys` | Global maximum ('peak') of $P$ (occurs at $t=0$ and $t=T$) | Directly recognisable, occurs @ $t \in \{0,T\}$. |
+| $P_{\max}$ | `sys` | Global maximum ('peak') of $P$ | Directly recognisable, occurs @ $t \in \{0,T\}$. |
 | $P_{\text{es}}$ | `esp` | (1st) Local minimum of $P^{\prime\prime}$ | Just before closure of pulmonary valve. |
 | $P_{\text{anti-epad}}$ | `anti-epad` | Local (and absolute) minimum of $P^{\prime}$ | Onset of iso-volumetric relaxation phase. |
 | $P_{\text{bd}}$ | `bdp` | (1st) Local maximum of $P^{\prime\prime}$ | Just before opening of tricuspid valve. |
@@ -97,14 +97,14 @@ The following points are listed out in chronological order
 
 | Symbol | Literature | Characterisation |
 | :----- | :--------- | :--------------- |
-| $V_{\max}$ | — | Global maximum ('peak') of $V$ (occurs at $t=0$ and $t=T$) |
+| $V_{\max}$ | — | Global maximum ('peak') of $V$ (occurs @ $t \in \{0,T\}$). |
 | $V_{\text{bs}}$ | `bsv` | (1st) Local minimum of $V^{\prime\prime}$ |
-| $V_{\text{sys}}$ | **`sv`** | Local (and absolute) minimum of $V^{\prime}$ |
-| $V_{\text{es}}$ | **`esv`** | (1st) Local maximum of $V^{\prime\prime}$ |
+| $V_{\text{sys}}$ | `sv` | Local (and absolute) minimum of $V^{\prime}$ |
+| $V_{\text{es}}$ | `esv` | (1st) Local maximum of $V^{\prime\prime}$ |
 | $V_{\min}$ | — | Global minimum of $V$ |
 | — | — | (2nd) Local minimum of $V^{\prime\prime}$ |
-| $V_{\text{bd}}$ | **`sdv`** | (2nd) Local maximum of $V^{\prime\prime}$ |
-| $V_{\text{dia}}$ | **`dv`** | Local (and absolute) maximum of $V^{\prime}$ |
+| $V_{\text{bd}}$ | `bdv` | (2nd) Local maximum of $V^{\prime\prime}$ |
+| $V_{\text{dia}}$ | `dv` | Local (and absolute) maximum of $V^{\prime}$ |
 | $V_{\text{ed}}$ | `edv` | (3rd) Local minimum of $V^{\prime\prime}$ |
 
 ## Further analysis ##
@@ -148,7 +148,7 @@ Once these these have been adjusted, we may compute
 
 | Name | Symbol | Definition |
 | :--- | :----- | :--------- |
-| End systolic elastance | `ees` | $\text{ees} \coloneqq  \frac{P^{\text{iso}}_{\max} − P_{\text{es}}}{V_{\text{ed}} - V_{\text{es}}}$ |
+| End systolic elastance | `ees` | $\text{ees} \coloneqq \frac{P^{\text{iso}}_{\max} − P_{\text{es}}}{V_{\text{ed}} - V_{\text{es}}}$ |
 | Arterial elastance | `ea` | $\text{ea} \coloneqq \frac{P_{\text{es}}}{V_{\text{ed}} - V_{\text{es}}}$ |
 | End diastolic elastance | `eed` | $\text{eed} \coloneqq \tfrac{dP}{dV}\mid_{\text{edp}} = \alpha \beta e^{\beta V_{\text{ed}}} = \beta \cdot (P_{\text{ed}} + \alpha)$ |
 
