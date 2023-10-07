@@ -23,7 +23,7 @@ NODE := "npm"
 LINTING := "black"
 GITHOOK_PRECOMMIT := "pre_commit"
 GEN_MODELS := "datamodel_code_generator"
-GEN_MODELS_DOCUMENTATION := "openapi-generator"
+GEN_OPEN_API := "openapi-generator"
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Macros
@@ -99,7 +99,7 @@ _generate-models path name:
         --output {{path}}/generated/{{name}}.py
 
 _generate-models-documentation path_schema path_docs name:
-    @{{GEN_MODELS_DOCUMENTATION}} generate \
+    @{{GEN_OPEN_API}} generate \
         --skip-validate-spec \
         --input-spec {{path_schema}}/schema-{{name}}.yaml \
         --generator-name markdown \
@@ -376,7 +376,7 @@ check-system:
 check-system-requirements-dev:
     @just check-system-requirements
     @#just _check-tool "{{NODE}}" "node package manager"
-    @just _check-tool "{{GEN_MODELS_DOCUMENTATION}}" "openapi-code-generator"
+    @just _check-tool "{{GEN_OPEN_API}}" "openapi-code-generator"
     @just _check-python-tool "{{LINTING}}" "{{LINTING}}"
     @just _check-python-tool "{{GITHOOK_PRECOMMIT}}" "pre-commit"
 
