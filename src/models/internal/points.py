@@ -21,10 +21,10 @@ from ..generated.app import SpecialPointsConfig
 
 __all__ = [
     'get_normalisation_params',
-    'get_renormalised_polynomial',
-    'get_renormalised_polynomial_time_only',
-    'get_renormalised_polynomial_values_only',
-    'get_renormalised_data',
+    'get_unnormalised_data',
+    'get_unnormalised_polynomial',
+    'get_unnormalised_polynomial_time_only',
+    'get_unnormalised_polynomial_values_only',
 ]
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,7 +49,7 @@ def get_normalisation_params(
     return T, c, m, s
 
 
-def get_renormalised_polynomial(
+def get_unnormalised_polynomial(
     info: FittedInfo,
 ) -> list[float]:
     '''
@@ -72,7 +72,7 @@ def get_renormalised_polynomial(
     return coeff_rescaled
 
 
-def get_renormalised_polynomial_time_only(
+def get_unnormalised_polynomial_time_only(
     info: FittedInfo,
 ) -> list[float]:
     coeff = info.coefficients
@@ -83,7 +83,7 @@ def get_renormalised_polynomial_time_only(
     return coeff_rescaled
 
 
-def get_renormalised_polynomial_values_only(
+def get_unnormalised_polynomial_values_only(
     info: FittedInfo,
 ) -> list[float]:
     '''
@@ -105,12 +105,17 @@ def get_renormalised_polynomial_values_only(
     return coeff_rescaled
 
 
-def get_renormalised_data(
+def get_unnormalised_data(
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
     t_split: float = 0.0,
+    renormalise: bool = False,
 ) -> pd.DataFrame:
+    '''
+    Unnormalises data series. If `renormalise=True` is set,
+    then renormalises using commmon parameters.
+    '''
     t_new = []
     x_new = []
     t = data['time'].to_numpy(copy=True)
@@ -120,16 +125,19 @@ def get_renormalised_data(
     _, info0 = fitinfos[-1]
     T0, c0, m0, s0 = get_normalisation_params(info0)
 
-    # renormalise all cycles
+    # un- and renormalise all cycles
     for (i1, i2), info in fitinfos[:-1]:
         T, c, m, s = get_normalisation_params(info)
         # normalise time and points for cycle
         # NOTE: normalise t, then x!
         tt = (t[i1:i2] - t[i1]) / T
-        xx = (x[i1:i2] - (c + m * tt)) / s
-        # unnormlalise based on common parameters
-        # NOTE: unnormalise x, then t!
-        xx = c0 + m0 * tt + s0 * xx
+        xx = x[i1:i2]
+        if renormalise:
+            xx = (xx - (c + m * tt)) / s
+        # renormalise based on common parameters
+        # NOTE: renormalise x, then t!
+        if renormalise:
+            xx = c0 + m0 * tt + s0 * xx
         tt = T0 * tt
         # store
         t_new += tt.tolist()

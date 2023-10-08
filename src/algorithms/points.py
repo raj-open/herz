@@ -64,7 +64,7 @@ def recognise_special_points(
     results = {key: point for key, point in points}
     times = {}
     n_der = max([point.spec.derivative for _, point in points if point.spec is not None])
-    # q = get_renormalised_polynomial_values_only(info)
+    # q = get_unnormalised_polynomial_values_only(info)
     q = info.coefficients
 
     # Get polynomial coefficients of n-th derivatives of curve.

@@ -56,9 +56,7 @@ def step_fit_curve(
     fitinfos = fit_poly_cycles(t=t, x=x, cycles=cycles, conds=conds)
 
     # compute n'th derivatives
-    data = compute_nth_derivatives_for_cycles(
-        case, data, fitinfos, quantity=quantity, n_der=n_der
-    )
+    data = compute_nth_derivatives_for_cycles(case, data, fitinfos, quantity=quantity, n_der=n_der)  # fmt: skip
 
     return data, fitinfos
 

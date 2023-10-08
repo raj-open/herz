@@ -54,8 +54,8 @@ def step_output_time_plot(
     cv = output_conversions(cfg.quantities)
     units = output_units(cfg.quantities)
 
-    # re-normalise data
-    data = get_renormalised_data(data, fitinfos, quantity=quantity)
+    # un-/renormalise data
+    data = get_unnormalised_data(data, fitinfos, quantity=quantity, renormalise=True)
 
     # compute series for fitted curves
     special, _, time, data_fitted = compute_fitted_curves_for_plots(info, points=points, quantity=quantity, shift=shifted, n_der=2, N=N)  # fmt: skip
@@ -217,9 +217,9 @@ def step_output_loop_plot(
     t_align_p = get_alignment_time(info_p, points_p, quantity='pressure') if shifted else 0.0
     t_align_v = get_alignment_time(info_v, points_v, quantity='volume') if shifted else 0.0
 
-    # re-normalise data
-    data_p = get_renormalised_data(data_p, fitinfos_p, quantity='pressure')
-    data_v = get_renormalised_data(data_v, fitinfos_v, quantity='volume')
+    # un-/renormalise data
+    data_p = get_unnormalised_data(data_p, fitinfos_p, quantity='pressure', renormalise=True)
+    data_v = get_unnormalised_data(data_v, fitinfos_v, quantity='volume', renormalise=True)
 
     # compute series for fitted curves
     _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
@@ -234,7 +234,7 @@ def step_output_loop_plot(
 
     fig.update_layout(
         width=640,
-        height=480,
+        height=540,
         margin=dict(l=40, r=40, t=60, b=40),
         font=dict(
             family=cfg_font.family,
@@ -347,7 +347,7 @@ def step_output_loop_plot(
         v_ = poly_single(T_v * t_v, *v)
         point = point.copy(deep=True)
         point.marker = point.marker or MarkerSettings()
-        point.marker.size += 3
+        point.marker.size += 2
         points_.append((v_, p_, point))
 
     for _, point in points_v.items():
@@ -360,7 +360,7 @@ def step_output_loop_plot(
         p_ = poly_single(T_p * t_p, *p)
         point = point.copy(deep=True)
         point.marker = point.marker or MarkerSettings()
-        point.marker.size -= 1
+        point.marker.size -= 2
         points_.append((v_, p_, point))
 
     for v_, p_, point in points_:
@@ -372,7 +372,7 @@ def step_output_loop_plot(
                 name=point.name,
                 x=[cv['volume'] * v_],
                 y=[cv['pressure'] * p_],
-                text=[ marker.text or '' ],
+                text=[marker.text or ''],
                 textposition=marker.text_position,
                 mode='markers+text',
                 marker=dict(
@@ -404,17 +404,17 @@ def quick_plot(
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
-    renormalised: bool = True,
+    renormalise: bool = True,
     N: int = 1000,
 ) -> Generator[pgo.Figure, None, None]:
     _, info = fitinfos[0]
-    if renormalised:
+    if renormalise:
         T = info.normalisation.period
-        q = get_renormalised_polynomial(info)
-        data = get_renormalised_data(data, fitinfos, quantity=quantity)
+        q = get_unnormalised_polynomial(info)
     else:
         T = 1.0
         q = info.coefficients
+    data = get_unnormalised_data(data, fitinfos, quantity=quantity, renormalise=renormalise)
 
     dq = get_derivative_coefficients(q)
     ddq = get_derivative_coefficients(dq)
@@ -475,7 +475,7 @@ def quick_plot(
             showlegend=True,
         ),
     ]
-    if renormalised:
+    if renormalise:
         plot_data.append(
             pgo.Scatter(
                 name='debug [data]',
@@ -585,7 +585,7 @@ def add_plot_time_series(
                 name=point.name,
                 x=[cv_time * point.time],
                 y=[cv_value * point.value],
-                text=[ marker.text or '' ],
+                text=[marker.text or ''],
                 textposition=marker.text_position,
                 mode='markers+text',
                 marker=dict(
@@ -634,7 +634,7 @@ def compute_fitted_curves_for_plots(
 
     # compute coefficients of (derivatives of) polynomial coefficients
     coeffs = [[]] * (n_der + 1)
-    coeffs[0] = get_renormalised_polynomial(info)
+    coeffs[0] = get_unnormalised_polynomial(info)
     for k in range(1, n_der + 1):
         coeffs[k] = get_derivative_coefficients(coeffs[k - 1])
 
