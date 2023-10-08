@@ -55,15 +55,15 @@ settings:
   points:
     pressure:
       iso-max:
-        name: '$P^{\text{iso}}_{\max}$'
+        name: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
         spec: null
         marker: &marker_special
           size: 9
           colour: green
           symbol: "x"
-          text: '$P^{\text{iso}}_{\max}$'
+          text: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
       sys:
-        name: '$\text{sys}=P_{\max}$'
+        name: 'sys = P<sub>max</sub>'
         spec:
           kind: MAXIMUM
           reuse: true
@@ -108,7 +108,7 @@ settings:
           colour: blue
           symbol: "triangle-right-open"
       min:
-        name: '$\text{dia}=P_\text{min}$'
+        name: 'dia = P<sub>min</sub>'
         spec:
           kind: MINIMUM
           after: [ 'bd' ]
@@ -160,7 +160,7 @@ settings:
           symbol: "triangle-right-open"
     volume:
       max:
-        name: '$V_{\max}$'
+        name: 'V<sub>max</sub>'
         ignore: true
         spec:
           kind: MAXIMUM
@@ -169,11 +169,11 @@ settings:
           after: []
           before: []
       V0:
-        name: '$V_{0}$'
+        name: 'V<sub>0</sub>'
         spec: null
         marker:
           <<: *marker_special
-          text: '$V_{0}$'
+          text: 'V<sub>0</sub>'
       bs:
         name: "bsv"
         spec:
@@ -185,7 +185,7 @@ settings:
           <<: *marker_bs
           text: ''
       sys:
-        name: '$\text{sys}=V^{\prime}_{\min}$'
+        name: 'sys = V´<sub>min</sub>'
         spec:
           derivative: 1
           kind: MINIMUM
@@ -205,7 +205,7 @@ settings:
           <<: *marker_es
           text: ''
       min:
-        name: '$V_\text{min}$'
+        name: 'V<sub>min</sub>'
         spec:
           kind: MINIMUM
           after: [ 'esv' ]
@@ -233,7 +233,7 @@ settings:
           <<: *marker_bd
           text: ''
       dia:
-        name: '$\text{dia}=V^{\prime}_{\max}$'
+        name: 'dia = V´<sub>max</sub>'
         spec:
           derivative: 1
           kind: MAXIMUM
