@@ -345,6 +345,9 @@ def step_output_loop_plot(
         t_v = (t_ + t_align_v / T_v) % 1
         p_ = poly_single(T_p * t_p, *p)
         v_ = poly_single(T_v * t_v, *v)
+        point = point.copy(deep=True)
+        point.marker = point.marker or MarkerSettings()
+        point.marker.size += 3
         points_.append((v_, p_, point))
 
     for _, point in points_v.items():
@@ -355,6 +358,9 @@ def step_output_loop_plot(
         t_p = (t_ + t_align_p / T_p) % 1
         v_ = poly_single(T_v * t_v, *v)
         p_ = poly_single(T_p * t_p, *p)
+        point = point.copy(deep=True)
+        point.marker = point.marker or MarkerSettings()
+        point.marker.size -= 1
         points_.append((v_, p_, point))
 
     for v_, p_, point in points_:
@@ -366,9 +372,9 @@ def step_output_loop_plot(
                 name=point.name,
                 x=[cv['volume'] * v_],
                 y=[cv['pressure'] * p_],
+                text=[ marker.text or '' ],
+                textposition=marker.text_position,
                 mode='markers+text',
-                # text=[ point.name ],
-                # textposition = 'middle right', # 'top|middle|bottom left|center|right'
                 marker=dict(
                     symbol=marker.symbol,
                     size=marker.size,
@@ -573,12 +579,14 @@ def add_plot_time_series(
     for point in points:
         if point.ignore:
             continue
-        marker = point.marker
+        marker = point.marker or MarkerSettings()
         fig.append_trace(
             pgo.Scatter(
                 name=point.name,
                 x=[cv_time * point.time],
                 y=[cv_value * point.value],
+                text=[ marker.text or '' ],
+                textposition=marker.text_position,
                 mode='markers+text',
                 marker=dict(
                     symbol=marker.symbol,

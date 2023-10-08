@@ -62,14 +62,14 @@ def shift_der_condition(cond: PolyDerCondition, t0: float) -> list[PolyDerCondit
     if cond.time == 1.0:
         pass
     elif cond.time == t0:
-        cond_ = cond.copy()
+        cond_ = cond.copy(deep=True)
         cond_.time = 0.0
         conds.append(cond_)
-        cond_ = cond.copy()
+        cond_ = cond.copy(deep=True)
         cond_.time = 1.0
         conds.append(cond_)
     else:
-        cond_ = cond.copy()
+        cond_ = cond.copy(deep=True)
         cond_.time = (cond.time - t0) % 1
         conds.append(cond_)
     return conds
