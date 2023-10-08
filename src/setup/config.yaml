@@ -7,6 +7,7 @@ info:
     Extracts time series data for pressure and volume,
     synchronises these and produces a data set and plot.
 settings:
+  # NOTE: These units must be compatible!
   units:
     cycle: '1'
     time: 's'
@@ -20,8 +21,8 @@ settings:
     d[2,t]volume: 'm^3/s^2'
   # selected points in cycles for matching (alignment of multiple time series).
   matching:
-    pressure: 'epad'
-    volume: 'V-max'
+    pressure: 'sys'
+    volume: 'sys'
   # settings for polynomial conditions for initial (peak-to-peak) fitting.
   polynomial:
     pressure:
@@ -53,178 +54,201 @@ settings:
   # for marker symbols see <https://plotly.com/python/marker-style>
   points:
     pressure:
-      max:
-        name: "P_max"
-        ignore: true
+      iso-max:
+        name: '$P^{\text{iso}}_{\max}$'
         spec: null
-        marker:
+        marker: &marker_special
           size: 9
-          colour: red
-          symbol: "circle"
+          colour: green
+          symbol: "x"
+          text: '$P^{\text{iso}}_{\max}$'
       sys:
-        name: "systole"
+        name: '$\text{sys}=P_{\max}$'
         spec:
           kind: MAXIMUM
           reuse: true
           strict: false
           after: []
           before: []
-        marker:
+        marker: &marker_sys
           size: 9
           colour: red
-          symbol: "x"
-      dia:
-        name: "diastole"
-        spec:
-          # NOTE: perhaps this definition should be reconsidered
-          kind: LOCAL-MINIMUM
-          after: ['sys', 'sdp']
-          before: []
-        marker:
-          size: 9
-          colour: blue
-          symbol: "x"
-      edp:
-        name: "edp"
-        spec:
-          derivative: 2
-          kind: LOCAL-MAXIMUM
-          after: ['dia']
-          before: []
-        marker:
-          size: 9
-          colour: blue
-          symbol: "triangle-up"
-      epad:
-        name: "epad"
-        spec:
-          derivative: 1
-          kind: MAXIMUM
-          after: ['edp']
-          before: []
-        marker:
-          size: 9
-          colour: black
-          symbol: "square-open"
-      eivc:
-        name: "eivc"
-        spec:
-          derivative: 2
-          kind: LOCAL-MINIMUM
-          after: ['epad']
-          before: []
-        marker:
-          size: 9
-          colour: red
-          symbol: "triangle-up-open"
-      esp:
+          symbol: "circle-open"
+      es:
         name: "esp"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
           after: ['sys']
           before: []
-        marker:
+        marker: &marker_es
           size: 9
           colour: red
-          symbol: "triangle-up"
+          symbol: "triangle-left-open"
       anti-epad:
         name: "anti-epad"
         spec:
           derivative: 1
           kind: LOCAL-MINIMUM
-          after: ['esp']
+          after: ['es']
           before: []
-        marker:
+        marker: &marker_anti_epad
           size: 9
           colour: black
-          symbol: "square"
-      sdp:
-        name: "sdp"
+          symbol: "triangle-left-open"
+      bd:
+        name: "bdp"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
           after: ['anti-epad']
           before: []
-        marker:
+        marker: &marker_bd
           size: 9
           colour: blue
-          symbol: "triangle-up-open"
+          symbol: "triangle-right-open"
+      min:
+        name: '$\text{dia}=P_\text{min}$'
+        spec:
+          kind: MINIMUM
+          after: [ 'bd' ]
+          before: [ 'ed' ]
+        marker: &marker_dia
+          size: 9
+          colour: blue
+          symbol: "circle-open"
+      # mid:
+      #   ignore: true
+      #   name: "P_mid"
+      #   spec:
+      #     derivative: 2
+      #     kind: LOCAL-MINIMUM
+      #     after: [ 'min' ]
+      #     before: [ 'ed' ]
+      ed:
+        name: "edp"
+        spec:
+          derivative: 2
+          kind: LOCAL-MAXIMUM
+          after: [ 'min' ]
+          before: []
+        marker: &marker_ed
+          size: 9
+          colour: blue
+          symbol: "triangle-left-open"
+      epad:
+        name: "epad"
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: [ 'edp' ]
+          before: []
+        marker: &marker_epad
+          size: 9
+          colour: black
+          symbol: "triangle-right-open"
+      bs:
+        name: "bsp"
+        spec:
+          derivative: 2
+          kind: LOCAL-MINIMUM
+          after: [ 'epad' ]
+          before: []
+        marker: &marker_bs
+          size: 9
+          colour: red
+          symbol: "triangle-right-open"
     volume:
       max:
-        name: "V_max"
+        name: '$V_{\max}$'
+        ignore: true
         spec:
           kind: MAXIMUM
           reuse: true
           strict: false
           after: []
           before: []
+      V0:
+        name: '$V_{0}$'
+        spec: null
         marker:
-          size: 9
-          colour: green
-          symbol: "x"
-      min:
-        name: "V_min"
+          <<: *marker_special
+          text: '$V_{0}$'
+      bs:
+        name: "bsv"
         spec:
-          kind: MINIMUM
-          after: []
+          derivative: 2
+          kind: LOCAL-MINIMUM
+          after: [ 'max' ]
           before: []
         marker:
-          size: 9
-          colour: blueviolet
-          symbol: "x"
-      dV-max:
-        name: "max dV/dt"
-        spec:
-          derivative: 1
-          kind: MAXIMUM
-          after: []
-          before: []
-        marker:
-          size: 9
-          colour: green
-          symbol: "square-open"
-      dV-min:
-        name: "min dV/dt"
+          <<: *marker_bs
+          text: ''
+      sys:
+        name: '$\text{sys}=V^{\prime}_{\min}$'
         spec:
           derivative: 1
           kind: MINIMUM
-          after: []
-          before: []
+          after: [ 'bs' ]
+          before: [ 'es' ]
         marker:
-          size: 9
-          colour: blueviolet
-          symbol: "square-open"
-      ddV-max:
-        name: "max d²V/dt²"
+          <<: *marker_sys
+          text: ''
+      es:
+        name: "esv"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
-          after: [ 'dV-min' ]
-          before: [ 'min' ]
+          after: [ 'sys' ]
+          before: []
         marker:
+          <<: *marker_es
+          text: ''
+      min:
+        name: '$V_\text{min}$'
+        spec:
+          kind: MINIMUM
+          after: [ 'esv' ]
+          before: [ 'bdv' ]
+        marker:
+          colour: blue
+          symbol: 'square'
           size: 9
-          colour: green
-          symbol: "triangle-up-open"
-      ddV-max-anti:
-        name: "max d²V/dt² (2nd)"
+      mid:
+        ignore: true
+        name: "mid"
+        spec:
+          derivative: 2
+          kind: LOCAL-MINIMUM
+          after: [ 'min' ]
+          before: [ 'bdv' ]
+      bd:
+        name: "bdv"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
           after: [ 'min' ]
-          before: [ 'dV-max' ]
+          before: [ ]
         marker:
-          size: 9
-          colour: green
-          symbol: "triangle-up"
-      ddV-min:
-        name: "eivc"
+          <<: *marker_bd
+          text: ''
+      dia:
+        name: '$\text{dia}=V^{\prime}_{\max}$'
+        spec:
+          derivative: 1
+          kind: MAXIMUM
+          after: [ 'bd' ]
+          before: [ 'ed' ]
+        marker:
+          <<: *marker_dia
+          text: ''
+      ed:
+        name: "edv"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
-          after: [ 'ddV-max' ]
-          before: [ 'ddV-max-anti' ]
+          after: [ 'dia' ]
+          before: [ ]
         marker:
-          size: 9
-          colour: black
-          symbol: "x"
+          <<: *marker_ed
+          text: ''

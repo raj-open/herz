@@ -215,7 +215,7 @@ components:
       required:
         - name
         # - spec
-        - marker
+        # - marker
       properties:
         name:
           description: |-
@@ -315,6 +315,11 @@ components:
         - `colour` - <string> colour of marker, can be either a name or of the form
             `'rgba(<float>,<float>,<float>,<float>)'`, `'hsla(<int>,<float>%,<float>%,<float>)'`, etc.
         - `symbol` - <string> symbool for marker, see <https://plotly.com/python/marker-style>.
+        - (optional) `text` - <string> symbol for text inside the plot
+        - `text-position` - <string> where text is to be positioned,
+
+          Values: 'top|middle|bottom left|center|right'
+
       type: object
       required: []
       properties:
@@ -323,10 +328,17 @@ components:
           default: 2
         colour:
           type: string
-          default: null
+          default: black
         symbol:
           type: string
+          default: 'x'
+        text:
+          type: string
           default: null
+        text-position:
+          type: string
+          # top/middle/bottom left/center/right
+          default: 'top center'
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ENUM Critical Point Type
