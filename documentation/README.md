@@ -150,7 +150,7 @@ Once these these have been adjusted, we may compute
 | :--- | :----- | :--------- |
 | End systolic elastance | `ees` | $\text{ees} \coloneqq \frac{P^{\text{iso}}_{\max} − P_{\text{es}}}{V_{\text{ed}} - V_{\text{es}}}$ |
 | Arterial elastance | `ea` | $\text{ea} \coloneqq \frac{P_{\text{es}}}{V_{\text{ed}} - V_{\text{es}}}$ |
-| End diastolic elastance | `eed` | $\text{eed} \coloneqq \tfrac{dP}{dV}\mid_{\text{edp}} = \alpha \beta e^{\beta V_{\text{ed}}} = \beta \cdot (P_{\text{ed}} + \alpha)$ |
+| End diastolic elastance | `eed` | $\text{eed} \coloneqq \tfrac{dP}{dV}\mid_{\text{ed}} = \alpha \beta e^{\beta V_{\text{ed}}} = \beta \cdot (P_{\text{ed}} + \alpha)$ |
 
 [^Gaertner2023PaperBeat]: Gaertner, M., Glocker, R., Glocker, F., & Hopf, H. (2023). _Pressure‐based beat‐to‐beat right ventricular ejection fraction and Tau from continuous measured ventricular pressures in COVID‐19 ARDS patients_. In Pulmonary Circulation (Vol. 13, Issue 1). Wiley. https://doi.org/10.1002/pul2.12179
 
