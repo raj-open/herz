@@ -18,7 +18,7 @@ PROJECT_NAME := "herz"
 PATH_ROOT := justfile_directory()
 CURRENT_DIR := invocation_directory()
 OS := if os_family() == "windows" { "windows" } else { "linux" }
-PYTHON := if os_family() == "windows" { "py -3" } else { "python3" }
+PYTHON := if os_family() == "windows" { "py -3.11" } else { "python3.11" }
 NODE := "npm"
 LINTING := "black"
 GITHOOK_PRECOMMIT := "pre_commit"
@@ -245,11 +245,13 @@ tests-logs:
     @just _display-logs
 
 test-unit path:
+    @just _create-logs
     @{{PYTHON}} -m pytest "{{path}}" \
         --ignore=tests/integration \
         --cov-reset \
         --cov=. \
         2> /dev/null
+    @just _display-logs
 
 tests-unit:
     @{{PYTHON}} -m pytest tests \
