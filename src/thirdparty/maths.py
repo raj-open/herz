@@ -7,6 +7,7 @@
 
 import lmfit
 import math
+from math import pi
 import numpy as np
 import random
 import scipy as sp
@@ -114,6 +115,7 @@ __all__ = [
     'nPr',
     'normalised_order_statistics',
     'np',
+    'pi',
     'random',
     'indices_non_outliers',
     'remove_outliers',
