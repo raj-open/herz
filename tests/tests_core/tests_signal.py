@@ -9,6 +9,7 @@ from src.thirdparty.maths import *
 from src.thirdparty.types import *
 from tests.thirdparty.unit import *
 
+from src.core.poly import *
 from src.core.signal import *
 from src.core.constants import *
 
@@ -29,29 +30,40 @@ from src.core.constants import *
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def test_fourier_of_monomials(
+@mark.parametrize(
+    ('p',),
+    [
+        ([1],),
+        ([0, 1],),
+        ([0, 0, 1],),
+        ([1, -2, 1],),
+        ([3, 0.5, -0.8, 1.7],),
+    ],
+)
+def test_fourier_of_polynomial_rote(
     test: TestCase,
     debug: Callable[..., None],
     module: Callable[[str], str],
+    # test parameters
+    p: list[float],
 ):
     # compute integral coefficients 'by hand':
-    k_max = 5
-    n_max = 10
+    deg = len(p) - 1
+    n_max = 3
     N = 10000
     one = np.ones(shape=(N,))
     t = np.linspace(start=0, stop=1, num=N, endpoint=False)
-    f = np.asarray(range(n_max + 1))
     dt = 1 / N
-    t_pow = np.cumprod([one] + [t] * k_max, axis=0)
-    kernel = np.exp(1j * 2 * pi * (t[:, np.newaxis] * f))
-    F_manual = (t_pow @ kernel) * dt
+    f = np.asarray(range(n_max + 1))
+    kernel = np.exp(-1j * 2 * pi * (f[:, np.newaxis] * t))
+    func_values = np.cumprod([one] + [t] * deg, axis=0).T @ np.asarray(p)
+    F_manual = (kernel @ func_values) * dt
 
     # compute using method:
-    F_monoms = list(fourier_of_monomials(k_max=k_max))
-    F_method = np.asarray([[FF(n) for n in range(n_max + 1)] for FF in F_monoms])
+    F0, coeff_top, coeff_bot = fourier_of_polynomial(p)
+    F = lambda n: poly_single(n, *coeff_top) / poly_single(n, *coeff_bot)
+    F_method = [F0] + list(map(F, range(1, n_max + 1)))
 
     # verify correctness of method:
-    for k, FF in enumerate(F_monoms):
-        test.assertEquals(FF(0), 1 / (k + 1))
     assert_arrays_close(F_method, F_manual, eps=0.5e-3)
     return
