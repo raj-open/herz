@@ -201,6 +201,9 @@ build-misc:
     @- cp -n "templates/template-config.yaml" "setup/config.yaml"
 
 build-requirements:
+    @{{PYTHON}} -m pip install --upgrade pip
+    @{{PYTHON}} -m pip install --upgrade wheel
+    @{{PYTHON}} -m pip install --upgrade toml
     @{{PYTHON}} scripts/package.py "pyproject.toml" "requirements.txt"
     @{{PYTHON}} -m pip install --no-compile --disable-pip-version-check -r requirements.txt
 
@@ -246,7 +249,7 @@ tests-logs:
 
 test-unit path:
     @just _create-logs
-    @{{PYTHON}} -m pytest "{{path}}" \
+    @- {{PYTHON}} -m pytest "{{path}}" \
         --ignore=tests/integration \
         --cov-reset \
         --cov=. \
