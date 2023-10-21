@@ -134,6 +134,7 @@ addopts = [
     "--order-group-scope=module",
     "--cache-clear",
     "--verbose",
+    "--tb=short",
     "--maxfail=1",
     "-k test_", # <- pattern for methods to count as tests
     "-k tests_", # <- pattern for methods to count as tests
