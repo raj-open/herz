@@ -69,6 +69,23 @@ components:
           default: 1.
       additionalProperties: false
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ENUM Sign
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    EnumSign:
+      description: |-
+        Enumeration of classification of signs of (possibly complex) numbers
+      type: integer
+      x-enum-varnames:
+        - ZERO
+        - REAL_NEGATIVE
+        - REAL_POSITIVE
+        - NON_ZERO
+      enum:
+        - 0
+        - -1
+        - 1
+        - 2
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # ENUM Extreme Point Type
     # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     EnumExtremePoints:

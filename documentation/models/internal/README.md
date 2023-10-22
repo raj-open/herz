@@ -13,6 +13,7 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [EnumExtremePoints](.//Models/EnumExtremePoints.md)
+ - [EnumSign](.//Models/EnumSign.md)
  - [FittedInfo](.//Models/FittedInfo.md)
  - [FittedInfoNormalisation](.//Models/FittedInfoNormalisation.md)
 

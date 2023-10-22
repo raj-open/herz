@@ -7,6 +7,7 @@
 
 # NOTE: foreign import
 from ..generated.app import EnumCriticalPoints
+from ..generated.internal import EnumSign
 from ..generated.internal import EnumExtremePoints
 from ..generated.user import EnumFittingMode
 from ..generated.user import EnumLogLevel
@@ -21,5 +22,6 @@ __all__ = [
     'EnumExtremePoints',
     'EnumFittingMode',
     'EnumLogLevel',
+    'EnumSign',
     'EnumType',
 ]
