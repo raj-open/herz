@@ -105,6 +105,9 @@ The remaining methods (esp. polynomial fitting methods)
 and corresponding code in this repository
 was developed independently by the repository owner.
 
-[^pythonversion]: one can use `python 3.10`, however the task-scripts need to be adjusted.
+[^pythonversion]: one can use `python 3.10`.
+To do so, add a file called **.env** to the root of the project
+(use [templates/template.env](templates/template.env) as a template)
+define the value `PYTHON_VERSION:="3.10"`.
 
 [^Heerdt2019]: Heerdt, Paul M et al. "A pressure-based single beat method for estimation of right ventricular ejection fraction: proof of concept." _The European respiratory journal_ vol. 55,3 1901635. 12 Mar. 2020, doi:10.1183/13993003.01635-2019

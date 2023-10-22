@@ -12,13 +12,15 @@ menu:
 # VARIABLES
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+set dotenv-load := true
+
 REPO_NAME := "herz"
 PROJECT_NAME := "herz"
 
 PATH_ROOT := justfile_directory()
 CURRENT_DIR := invocation_directory()
 OS := if os_family() == "windows" { "windows" } else { "linux" }
-PYTHON := if os_family() == "windows" { "py -3.11" } else { "python3.11" }
+PYTHON := if os_family() == "windows" { "py -${PYTHON_VERSION:-3}" } else { "python${PYTHON_VERSION:-3}" }
 NODE := "npm"
 LINTING := "black"
 GITHOOK_PRECOMMIT := "pre_commit"
@@ -198,6 +200,7 @@ build-skip-packages:
 
 build-misc:
     @just _create-folder-if-not-exists "setup"
+    @- cp -n "templates/template.env" ".env"
     @- cp -n "templates/template-config.yaml" "setup/config.yaml"
 
 build-requirements:

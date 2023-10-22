@@ -42,7 +42,7 @@
 !/dist/VERSION
 
 !/templates
-!/templates/template-*.yaml
+!/templates/template*
 
 !/src
 !/src/**/
