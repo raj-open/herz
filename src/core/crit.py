@@ -54,7 +54,7 @@ def get_critical_points(
     t_crit = get_real_polynomial_roots(dp)
 
     # remove eps-close points
-    t_crit, _ = duplicates_get_assignment_maps(t_crit, eps=eps)
+    t_crit, _ = duplicates_get_assignment_maps(t_crit, eps=eps, real_valued=True)
     N = len(t_crit)
     if N == 0:
         return []
@@ -90,12 +90,16 @@ def get_critical_points(
         # classify based on pre/post-changes:
         change_pre = sign_normalised_difference(x_from=ym_pre, x_to=y0, eps=MACHINE_EPS)
         change_post = sign_normalised_difference(x_from=y0, x_to=ym_post, eps=MACHINE_EPS)
+        print(change_pre, change_post)
         match change_pre, change_post:
-            case (-1, 1):
+            case (EnumSign.REAL_NEGATIVE, EnumSign.REAL_POSITIVE):
                 crit.append((t0, y0, {EnumCriticalPoints.LOCAL_MINIMUM}))
-            case (1, -1):
+            case (EnumSign.REAL_POSITIVE, EnumSign.REAL_NEGATIVE):
                 crit.append((t0, y0, {EnumCriticalPoints.LOCAL_MAXIMUM}))
-            case (-1, -1) | (1, 1):
+            case (EnumSign.REAL_NEGATIVE, EnumSign.REAL_NEGATIVE) | (
+                EnumSign.REAL_POSITIVE,
+                EnumSign.REAL_POSITIVE,
+            ):
                 crit.append((t0, y0, {EnumCriticalPoints.INFLECTION}))
             case _:
                 # NOTE: This case should not occur! If it does - reject!
@@ -104,17 +108,16 @@ def get_critical_points(
     # add in zeroes
     # NOTE: increase eps-value, to prevent duplicates
     t_zeroes = get_real_polynomial_roots(p)
-    t_zeroes, _ = duplicates_get_assignment_maps(
-        t_zeroes, eps=eps, boundaries_real=(t_min, t_max)
-    )
+    t_zeroes, _ = duplicates_get_assignment_maps(t_zeroes, eps=eps, boundaries_real=(t_min, t_max), real_valued=True)  # fmt: skip
     times = [t0 for t0, y0, kinds in crit]
     for t0 in t_zeroes:
-        i = closest_index(t0, times)
-        t0_, _, kinds = crit[i]
-        if is_epsilon_eq(t0_, t0, eps=100 * eps):
-            crit[i] = (t0, 0.0, kinds.union({EnumCriticalPoints.ZERO}))
-        else:
-            crit.append((t0, 0.0, {EnumCriticalPoints.ZERO}))
+        if len(times) > 0:
+            i = closest_index(t0, times)
+            t0_, _, kinds = crit[i]
+            if is_epsilon_eq(t0_, t0, eps=100 * eps):
+                crit[i] = (t0, 0.0, kinds.union({EnumCriticalPoints.ZERO}))
+                continue
+        crit.append((t0, 0.0, {EnumCriticalPoints.ZERO}))
 
     # deal with inflection points
     crit = handle_inflection_points(crit)
@@ -256,7 +259,9 @@ def get_time_grid(
     if len(t) == 0:
         return []
     # removes ε-duplicates + forces values close to boundaries to be on the boundaries
-    t, _ = duplicates_get_assignment_maps(t, eps=eps, bondaries_real=(t_min, t_max))
+    t, _ = duplicates_get_assignment_maps(
+        t, eps=eps, boundaries_real=(t_min, t_max), real_valued=True
+    )
     t = [tt for tt in t if t_min <= tt and tt <= t_max]
     # ensure finite values:
     t_min = t_min if abs(t_min) < np.inf else min(t)
@@ -301,6 +306,7 @@ def gather_multi_level_critical_points_classifications(
         *[[t0 for t0, y0, kinds in crit if len(kinds) > 0] for crit in crits],
         eps=eps,
         boundaries_real=(t_min, t_max),
+        real_valued=True,
     )
     START = [t_min] if abs(t_min) < np.inf else []
     MIDDLE = sorted([t0 for t0 in times if t_min < t0 and t0 < t_max])

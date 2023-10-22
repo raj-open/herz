@@ -67,17 +67,26 @@ def normalised_difference(x_from: NUMBER, x_to: NUMBER) -> NUMBER:
 
 def sign_normalised_difference(x_from: NUMBER, x_to: NUMBER, eps: float) -> EnumSign:
     r = normalised_difference(x_from, x_to)
-    match abs(r.imag) < eps, abs(r.real) < eps, np.sign(r.real / eps):
-        # if imaginary part is non-zero, then cannot classify in terms of real value position
-        case False, _:
-            return EnumSign.NON_ZERO
-        case True, False, 1:
-            return EnumSign.REAL_POSITIVE
-        case True, False, -1:
-            return EnumSign.REAL_NEGATIVE
-        case _:
-            # case True, True, _:
-            return EnumSign.ZERO
+    ## FIXME: this does not work in unit-tests!
+    # match abs(r.imag) < eps, abs(r.real) < eps, int(np.sign(r.real / eps)):
+    #     # if imaginary part is non-zero, then cannot classify in terms of real value position
+    #     case (False, _, _):
+    #         return EnumSign.NON_ZERO
+    #     case (True, False, 1):
+    #         return EnumSign.REAL_POSITIVE
+    #     case (True, False, -1):
+    #         return EnumSign.REAL_NEGATIVE
+    #     # case True, True, _:
+    #     case _:
+    #         return EnumSign.ZERO
+    if abs(r.imag) >= eps:
+        return EnumSign.NON_ZERO
+    elif abs(r.real) < eps:
+        return EnumSign.ZERO
+    elif np.sign(r.real / eps) == 1:
+        return EnumSign.REAL_POSITIVE
+    else:
+        return EnumSign.REAL_NEGATIVE
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -197,6 +206,7 @@ def duplicates_get_assignment_maps(
     eps: float,
     boundaries_real: tuple[float, float] = (-np.inf, np.inf),
     boundaries_imag: tuple[float, float] = (-np.inf, np.inf),
+    real_valued: bool = False,
 ) -> tuple[list[NUMBER], list[list[int]]]:
     '''
     Catalogues a list of up-to-ε unique values from multiple lists.
@@ -226,6 +236,8 @@ def duplicates_get_assignment_maps(
     catalogue = eps_clean_duplicates(catalogue, eps=eps)
     catalogue = eps_clean_zeroes(catalogue, eps=eps)
     catalogue = eps_clean_boundaries(catalogue, eps=eps, boundaries_real=boundaries_real, boundaries_imag=boundaries_imag)  # fmt: skip
+    if real_valued:
+        catalogue = [value.real for value in catalogue]
 
     # determine for each array which of the unique values is applicable
     assignments = [closest_indices(values, points=catalogue) for values in values_all]
@@ -372,11 +384,11 @@ def eps_clean_real(
     values: Iterable[NUMBER],
     x: float,
     eps: float,
-) -> list[NUMBER]:
+) -> list[complex]:
     '''
     Forces the real-part of values that are ε-close to a certain value, `x`, to be `x`.
     '''
-    values = np.asarray(values)
+    values = np.asarray(values, dtype=complex)
     d = sign_normalised_diff_matrix(x_from=[x], x_to=values.real, eps=eps)
     d = d.reshape(values.shape)
     values[d == EnumSign.ZERO] = x + 1j * values[d == EnumSign.ZERO].imag
@@ -387,11 +399,11 @@ def eps_clean_imag(
     values: Iterable[NUMBER],
     x: float,
     eps: float,
-) -> list[NUMBER]:
+) -> list[complex]:
     '''
     Forces the imag-part of values that are ε-close to a certain value, `x`, to be `x`.
     '''
-    values = np.asarray(values)
+    values = np.asarray(values, dtype=complex)
     d = sign_normalised_diff_matrix(x_from=[x], x_to=values.imag, eps=eps)
     d = d.reshape(values.shape)
     values[d == EnumSign.ZERO] = values[d == EnumSign.ZERO].real + 1j * x
