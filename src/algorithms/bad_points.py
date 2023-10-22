@@ -82,7 +82,7 @@ def mark_pinched_points_on_cycle(
         x[:, j] = normalised_order_statistics(x[:, j])
 
     # compute distance matrices
-    dt = np.abs(t[:, np.newaxis] - t)
+    dt = abs(t[:, np.newaxis] - t)
     dt = np.minimum(dt, 1 - dt)
     dx = np.linalg.norm(x[:, np.newaxis] - x, axis=2) / math.sqrt(m)
 

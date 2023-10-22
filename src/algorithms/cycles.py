@@ -52,7 +52,7 @@ def get_cycles(
     if len(ext) > 1:
         # compute order normalised statistics for gaps
         # NOTE: if len(peaks) == 2, then s = [1.]
-        s = np.abs(normalised_order_statistics(np.diff(ext)))
+        s = abs(normalised_order_statistics(np.diff(ext)))
 
         # remove cycles that are too small or too large
         gaps = list(zip(ext, ext[1:]))

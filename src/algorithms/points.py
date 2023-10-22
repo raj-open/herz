@@ -81,9 +81,7 @@ def recognise_special_points(
     ]
 
     # clean up critical points
-    crits = clean_time_points_for_list_of_lists_of_critical_points(
-        crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR
-    )
+    crits = clean_up_critical_points(crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR)  # fmt: skip
 
     # determine peak
     crit = filter_kinds(crits[0], kinds={EnumCriticalPoints.MAXIMUM})
