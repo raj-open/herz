@@ -49,7 +49,7 @@ repos:
 
         branch = bash_stdout('git rev-parse --abbrev-ref HEAD')[0];
         branch_history = bash_stdout('git show-branch -a | head -n2');
-        line = branch_history[1];
+        line = branch_history[0];
         parent = re.sub(pattern=r'^[!\*\s]*\[(.*?)\].*$', repl=r'\1', string=line);
 
         prefix = f'{branch} > {parent}: ';
