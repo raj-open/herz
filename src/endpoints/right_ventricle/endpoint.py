@@ -50,29 +50,29 @@ def endpoint(
         ('volume', 'V', case.data.volume, 'peak'),
     ]:
         subprog = prog.subtask(f'''READ DATA {quantity}''', steps=2)  # fmt: skip
-        data = step_read_data(cfg=cfg, cfg_data=cfg_data, quantity=quantity)  # fmt: skip
+        data = step_read_data(case, cfg=cfg_data, quantity=quantity)  # fmt: skip
         subprog.next()
-        data = step_normalise_data(case, cfg=cfg, data=data, quantity=quantity)  # fmt: skip
+        data = step_normalise_data(case, data=data, quantity=quantity)  # fmt: skip
         subprog.next()
 
         subprog = prog.subtask(f'''INITIAL RECOGNITION OF CYCLES {quantity} ({shift} -> {shift})''', steps=3)  # fmt: skip
-        data = step_recognise_peaks(case, cfg=cfg, data=data, quantity=quantity)
+        data = step_recognise_peaks(case, data=data, quantity=quantity)
         subprog.next()
-        data = step_shift_data_extremes(case, cfg=cfg, data=data, quantity=quantity, shift=shift)  # fmt: skip
+        data = step_shift_data_extremes(case, data=data, quantity=quantity, shift=shift)  # fmt: skip
         subprog.next()
-        data = step_recognise_cycles(case, cfg=cfg, data=data, quantity=quantity, shift=shift)  # fmt: skip
+        data = step_recognise_cycles(case, data=data, quantity=quantity, shift=shift)  # fmt: skip
         subprog.next()
 
         subprog = prog.subtask(f'''INITIAL FIT CURVE {quantity}''', steps=1)  # fmt: skip
-        data, fits = step_fit_curve(case, cfg=cfg, data=data, quantity=quantity)  # fmt: skip
+        data, fits = step_fit_curve(case, data=data, quantity=quantity)  # fmt: skip
         subprog.next()
 
         subprog = prog.subtask(f'''INITIAL CLASSIFICATION OF POINTS {quantity}''', steps=1)  # fmt: skip
-        points_data, points_fit = step_recognise_points(case, cfg=cfg, data=data, fitinfos=fits, quantity=quantity)  # fmt: skip
+        points_data, points_fit = step_recognise_points(case, data=data, fitinfos=fits, quantity=quantity)  # fmt: skip
         subprog.next()
 
         subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=1)  # fmt: skip
-        data, points_data = step_shift_data_custom(case, cfg=cfg, data=data, points=points_data, quantity=quantity)  # fmt: skip
+        data, points_data = step_shift_data_custom(case, data=data, points=points_data, quantity=quantity)  # fmt: skip
         subprog.next()
 
         datas[quantity] = data
@@ -90,11 +90,11 @@ def endpoint(
         points_fit = points[quantity]
 
         subprog = prog.subtask(f'''OUTPUT TABLES {quantity}''', steps=1)
-        step_output_single_table(case, cfg=cfg, data=data, quantity=quantity)  # fmt: skip
+        step_output_single_table(case, data=data, quantity=quantity)  # fmt: skip
         subprog.next()
 
         subprog = prog.subtask('''OUTPUT TIME PLOTS''', steps=1)
-        plt = step_output_time_plot(case, cfg=cfg, data=data, fitinfos=fits, points=points_fit, quantity=quantity, symb=symb, shifted=True)  # fmt: skip
+        plt = step_output_time_plot(case, data=data, fitinfos=fits, points=points_fit, quantity=quantity, symb=symb, shifted=True)  # fmt: skip
         # plt.show()
         subprog.next()
         prog.next()

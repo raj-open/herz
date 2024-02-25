@@ -9,6 +9,7 @@ from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.physics import *
 
+from ....setup import config
 from ....models.app import *
 from ....models.user import *
 from .methods import *
@@ -29,14 +30,11 @@ __all__ = [
 
 def step_normalise_data(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
 ) -> pd.DataFrame:
-    cfg_units = cfg.settings.units
-
     unit = case.process.combine.unit
-    cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.get('time', unit))
+    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get('time', unit))
 
     time = data['time'].to_numpy(copy=True)
     time = time - min(time)
@@ -64,14 +62,11 @@ def step_normalise_data(
 
 def step_combine_data(
     case: RequestConfig,
-    cfg: AppConfig,
     data_pressure: pd.DataFrame,
     data_volume: pd.DataFrame,
 ) -> pd.DataFrame:
-    cfg_units = cfg.settings.units
-
     unit = case.process.combine.unit
-    cv_t = convert_units(unitFrom=unit, unitTo=cfg_units.get('time', unit))
+    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get('time', unit))
 
     time_pressure = data_pressure['time'].to_numpy(copy=True)
     pressure = data_pressure['pressure'].to_numpy(copy=True)

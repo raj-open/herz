@@ -31,7 +31,6 @@ __all__ = [
 
 def step_shift_data_extremes(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str = 'peak',
@@ -60,7 +59,6 @@ def step_shift_data_extremes(
 
 def step_shift_data_custom(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
@@ -68,8 +66,7 @@ def step_shift_data_custom(
     pd.DataFrame,
     list[tuple[tuple[int, int], dict[str, int]]],
 ]:
-    cfg_matching = cfg.settings.matching
-    align = get_alignment_point(quantity, cfg=cfg_matching)
+    align = get_alignment_point(quantity, cfg=config.MATCHING)
 
     t = data['time'].to_numpy(copy=True)
 

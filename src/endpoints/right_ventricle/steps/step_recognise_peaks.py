@@ -7,6 +7,7 @@
 
 from ....thirdparty.data import *
 
+from ....setup import config
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
@@ -27,7 +28,6 @@ __all__ = [
 
 def step_recognise_peaks(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
 ) -> pd.DataFrame:

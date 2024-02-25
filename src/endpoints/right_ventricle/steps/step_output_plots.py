@@ -13,6 +13,7 @@ from ....thirdparty.plots import *
 from ....thirdparty.system import *
 from ....thirdparty.types import *
 
+from ....setup import config
 from ....core.utils import *
 from ....core.poly import *
 from ....models.app import *
@@ -38,7 +39,6 @@ __all__ = [
 
 def step_output_time_plot(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     points: dict[str, SpecialPointsConfig],
@@ -48,11 +48,10 @@ def step_output_time_plot(
     N: int = 1000,
 ) -> pgo.Figure:
     cfg_font = case.output.plot.font
-    cfg_units = cfg.settings.units
     _, info = fitinfos[-1]
     T = info.normalisation.period
 
-    cv = output_conversions(case.output.quantities, units=cfg_units)
+    cv = output_conversions(case.output.quantities, units=config.UNITS)
     units = output_units(case.output.quantities)
 
     # un-/renormalise data
@@ -60,7 +59,7 @@ def step_output_time_plot(
 
     # compute series for fitted curves
     special, _, time, data_fitted = compute_fitted_curves_for_plots(
-        cfg=cfg.settings.matching,
+        cfg=config.MATCHING,
         info=info,
         points=points,
         quantity=quantity,
@@ -215,10 +214,8 @@ def step_output_loop_plot(
     N: int = 1000,
 ) -> pgo.Figure:
     cfg_font = case.output.plot.font
-    cfg_units = cfg.settings.units
-    cfg_matching = cfg.settings.matching
 
-    cv = output_conversions(case.output.quantities, units=cfg_units)
+    cv = output_conversions(case.output.quantities, units=config.UNITS)
     units = output_units(case.output.quantities)
 
     _, info_p = fitinfos_p[-1]
@@ -226,12 +223,12 @@ def step_output_loop_plot(
     T_p = info_p.normalisation.period
     T_v = info_v.normalisation.period
     t_align_p = (
-        get_alignment_time(info_p, points_p, quantity='pressure', cfg=cfg_matching)
+        get_alignment_time(info_p, points_p, quantity='pressure', cfg=config.MATCHING)
         if shifted
         else 0.0
     )
     t_align_v = (
-        get_alignment_time(info_v, points_v, quantity='volume', cfg=cfg_matching)
+        get_alignment_time(info_v, points_v, quantity='volume', cfg=config.MATCHING)
         if shifted
         else 0.0
     )
@@ -241,8 +238,8 @@ def step_output_loop_plot(
     data_v = get_unnormalised_data(data_v, fitinfos_v, quantity='volume', renormalise=True)
 
     # compute series for fitted curves
-    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, cfg=cfg_matching, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
-    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, cfg=cfg_matching, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, cfg=config.MATCHING, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, cfg=config.MATCHING, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
 
     # fit 'other' measurement to each time-series
     data_p['volume'] = poly(T_v * ((data_p['time[orig]'] / T_p + t_align_v / T_v) % 1), *v)

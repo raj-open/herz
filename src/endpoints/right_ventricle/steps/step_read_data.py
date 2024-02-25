@@ -30,28 +30,22 @@ __all__ = [
 
 
 def step_read_data(
-    cfg: AppConfig,
-    cfg_data: DataTimeSeries,
+    case: RequestConfig,
+    cfg: DataTimeSeries,
     quantity: str,
 ) -> pd.DataFrame:
-    cfg_units = cfg.settings.units
+    unit_time: str = config.UNITS.get('time', 's')
+    unit_quantity: str = config.UNITS[quantity]
 
-    unit_time: str = cfg_units.get('time', 's')
-    unit_quantity: str = cfg_units.get(quantity)
-
-    path = cfg_data.path.root
+    path = cfg.path.root
     data = pd.read_csv(
         path,
-        sep=cfg_data.sep,
-        decimal=cfg_data.decimal,
-        skiprows=(
-            get_bool_function(cfg_data.skip)
-            if isinstance(cfg_data.skip, str)
-            else cfg_data.skip
-        ),
+        sep=cfg.sep,
+        decimal=cfg.decimal,
+        skiprows=(get_bool_function(cfg.skip) if isinstance(cfg.skip, str) else cfg.skip),
     )
-    t = get_column(data, unit=unit_time, cfg=cfg_data.time)
-    x = get_column(data, unit=unit_quantity, cfg=cfg_data.value)
+    t = get_column(data, unit=unit_time, cfg=cfg.time)
+    x = get_column(data, unit=unit_quantity, cfg=cfg.value)
 
     data = pd.DataFrame(
         {

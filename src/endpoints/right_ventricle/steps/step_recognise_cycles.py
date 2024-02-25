@@ -8,6 +8,7 @@
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
 
+from ....setup import config
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
@@ -31,7 +32,6 @@ __all__ = [
 
 def step_recognise_cycles(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str,

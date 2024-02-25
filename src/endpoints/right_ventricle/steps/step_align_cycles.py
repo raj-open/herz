@@ -8,6 +8,7 @@
 from ....thirdparty.maths import *
 from ....thirdparty.physics import *
 
+from ....setup import config
 from ....core.log import *
 from ....models.user import *
 from ....models.fitting import *

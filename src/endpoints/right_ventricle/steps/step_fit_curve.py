@@ -9,8 +9,8 @@ from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
 
-from ....core.poly import *
 from ....setup import config
+from ....core.poly import *
 from ....models.app import *
 from ....models.enums import *
 from ....models.user import *
@@ -35,7 +35,6 @@ __all__ = [
 
 def step_fit_curve(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     conds: Optional[list[PolyCritCondition | PolyDerCondition | PolyIntCondition]] = None,
@@ -48,8 +47,7 @@ def step_fit_curve(
 
     NOTE: Initial fitting runs from peak to peak.
     '''
-    cfg_poly = cfg.settings.polynomial
-    conds = conds or get_polynomial_condition(quantity, cfg=cfg_poly)
+    conds = conds or get_polynomial_condition(quantity, cfg=config.POLY)
 
     # fit polynomial
     t = data['time'].to_numpy(copy=True)
@@ -64,15 +62,14 @@ def step_fit_curve(
 
 
 def step_refit_curve(
-    cfg: AppConfig,
     case: RequestConfig,
     data: pd.DataFrame,
     points: dict[str, SpecialPointsConfig],
     quantity: str,
     n_der: int = 2,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
-    align = get_alignment_point(quantity, cfg=cfg.settings.matching)
-    conds = get_polynomial_condition(quantity, cfg=cfg.settings.polynomial)
+    align = get_alignment_point(quantity, cfg=config.MATCHING)
+    conds = get_polynomial_condition(quantity, cfg=config.POLY)
 
     # add in conditions for special points
     # NOTE: only used special pts marked for reuse

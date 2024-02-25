@@ -11,6 +11,7 @@ from ....thirdparty.physics import *
 from ....thirdparty.system import *
 from ....thirdparty.types import *
 
+from ....setup import config
 from ....models.app import *
 from ....models.user import *
 from ....queries.scientific import *
@@ -31,19 +32,16 @@ __all__ = [
 
 def step_output_single_table(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     original_time: bool = True,
 ):
-    cfg_units = cfg.settings.units
-
     path = case.output.table.path.root
     path = path.format(label=case.label, kind=f'{quantity}-time')
     if not prepare_save_table(path=path):
         return
 
-    cv = output_conversions(case.output.quantities, units=cfg_units)
+    cv = output_conversions(case.output.quantities, units=config.UNITS)
 
     if original_time:
         data = data.sort_values(by=['time[orig]']).reset_index(drop=True)
@@ -85,7 +83,6 @@ def step_output_single_table(
 
 def step_output_combined_table(
     case: RequestConfig,
-    cfg: AppConfig,
     data: pd.DataFrame,
 ):
     path = case.output.table.path.root
@@ -93,7 +90,7 @@ def step_output_combined_table(
     if not prepare_save_table(path=path):
         return
 
-    cv = output_conversions(case.output.quantities, units=cfg.settings.units)
+    cv = output_conversions(case.output.quantities, units=config.UNITS)
 
     table = pd.DataFrame(
         {col.key: cv[col.key] * data[col.key] for col in case.output.quantities}
