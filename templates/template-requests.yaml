@@ -1,14 +1,5 @@
 # ----------------------------------------------------------------
-# BASIC SETUP
-# ----------------------------------------------------------------
-basic:
-  # Logging level may be either INFO (standard) or DEBUG
-  log-level: INFO
-  # Whether or not output is to be logged
-  verbose: false
-
-# ----------------------------------------------------------------
-# USE THIS TO FOR COMMON SETTINGS
+# OPTIONAL PART FOR COMMON SETTINGS
 # ----------------------------------------------------------------
 templates:
   # ----------------------------------------------------------------
@@ -109,13 +100,14 @@ templates:
       legend: true
 
 # ----------------------------------------------------------------
-# CASES
+# LIST OF REQUESTS
 # ----------------------------------------------------------------
-cases:
+requests:
   # ----------------------------------------------------------------
-  # CASE 1
+  # REQUEST 1
   # ----------------------------------------------------------------
-  - label: 'case-1' # NOTE: label cannot contain spaces!
+  - endpoint: RIGHT-VENTRICULAR
+    label: 'case-1' # NOTE: label cannot contain spaces!
     name: "Measurements from St Martins"
     ignore: false # Set true to skip case. (Default is false if missing.)
     # ----------------------------------------------------------------
@@ -161,9 +153,10 @@ cases:
       <<: *ref_output
 
   # ----------------------------------------------------------------
-  # CASE 2
+  # REQUEST 2
   # ----------------------------------------------------------------
-  # - label: '...'
+  # - endpoint: RIGHT-VENTRICULAR
+  #   label: '...'
   #   ignore: false
   #   # ----------------------------------------------------------------
   #   # SETUP OPTIONS FOR INPUTS
