@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
-from ..thirdparty.types import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 
-from ..setup import config
-from ..core.utils import *
-from ..models.user import *
-from ..algorithms.peaks import *
+from ....core.utils import *
+from ....models.user import *
+from ....algorithms.peaks import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'get_time_aspects',
     'recocompute_time_axis',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def get_time_aspects(

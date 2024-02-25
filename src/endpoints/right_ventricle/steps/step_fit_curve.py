@@ -1,39 +1,41 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
-from ..thirdparty.types import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 
-from ..setup import config
-from ..setup.series import *
-from ..core.poly import *
-from ..models.enums import *
-from ..models.user import *
-from ..models.internal import *
-from ..algorithms.cycles import *
-from ..algorithms.fit import *
+from ....core.poly import *
+from ....setup import config
+from ....models.app import *
+from ....models.enums import *
+from ....models.user import *
+from ....models.fitting import *
+from ....queries.fitting import *
+from ....algorithms.cycles import *
+from ....algorithms.fit import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_fit_curve',
     'step_refit_curve',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_fit_curve(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     conds: Optional[list[PolyCritCondition | PolyDerCondition | PolyIntCondition]] = None,
@@ -46,8 +48,8 @@ def step_fit_curve(
 
     NOTE: Initial fitting runs from peak to peak.
     '''
-    cfg = case.process
-    conds = conds or get_polynomial_condition(quantity)
+    cfg_poly = cfg.settings.polynomial
+    conds = conds or get_polynomial_condition(quantity, cfg=cfg_poly)
 
     # fit polynomial
     t = data['time'].to_numpy(copy=True)
@@ -62,14 +64,15 @@ def step_fit_curve(
 
 
 def step_refit_curve(
-    case: UserCase,
+    cfg: AppConfig,
+    case: RequestConfig,
     data: pd.DataFrame,
     points: dict[str, SpecialPointsConfig],
     quantity: str,
     n_der: int = 2,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
-    align = get_alignment_point(quantity)
-    conds = get_polynomial_condition(quantity)
+    align = get_alignment_point(quantity, cfg=cfg.settings.matching)
+    conds = get_polynomial_condition(quantity, cfg=cfg.settings.polynomial)
 
     # add in conditions for special points
     # NOTE: only used special pts marked for reuse
@@ -96,13 +99,13 @@ def step_refit_curve(
     return data, fitinfos
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def compute_nth_derivatives_for_cycles(
-    case: UserCase,
+    case: RequestConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
@@ -111,11 +114,10 @@ def compute_nth_derivatives_for_cycles(
     '''
     Computes the n'th derivatives of the fitted curve for each cycle.
     '''
-    cfg = case.process
     N = len(data)
     t = data['time'].to_numpy(copy=True)
 
-    match cfg.fit.mode:
+    match case.process.fit.mode:
         case EnumFittingMode.AVERAGE:
             _, info_av = fitinfos[-1]
             coeffs = [info_av.coefficients[:] for _, _ in fitinfos[:-1]]

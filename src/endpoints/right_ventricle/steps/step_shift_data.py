@@ -1,35 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
 
-from ..setup import config
-from ..setup.series import *
-from ..core.utils import *
-from ..models.user import *
+from ....setup import config
+from ....core.utils import *
+from ....models.app import *
+from ....models.user import *
+from ....queries.fitting import *
 from .methods import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_shift_data_extremes',
     'step_shift_data_custom',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_shift_data_extremes(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str = 'peak',
@@ -57,12 +59,17 @@ def step_shift_data_extremes(
 
 
 def step_shift_data_custom(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
-) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], dict[str, int]]],]:
-    align = get_alignment_point(quantity)
+) -> tuple[
+    pd.DataFrame,
+    list[tuple[tuple[int, int], dict[str, int]]],
+]:
+    cfg_matching = cfg.settings.matching
+    align = get_alignment_point(quantity, cfg=cfg_matching)
 
     t = data['time'].to_numpy(copy=True)
 

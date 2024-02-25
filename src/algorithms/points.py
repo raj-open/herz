@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 from ..thirdparty.maths import *
 
@@ -12,22 +12,22 @@ from ..core.constants import *
 from ..core.graph import *
 from ..core.crit import *
 from ..core.poly import *
-from ..models.internal import *
+from ..models.fitting import *
 from ..models.enums import *
 from ..models.app import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'recognise_special_points',
     'sort_special_points_specs',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def sort_special_points_specs(
@@ -53,6 +53,7 @@ def sort_special_points_specs(
 def recognise_special_points(
     info: FittedInfo,
     points: list[tuple[str, SpecialPointsConfig]],
+    real_valued: bool = False,
 ) -> dict[str, SpecialPointsConfig]:
     '''
     NOTE: The conditions 'before' / 'after' are defined purely
@@ -81,9 +82,7 @@ def recognise_special_points(
     ]
 
     # clean up critical points
-    crits = clean_time_points_for_list_of_lists_of_critical_points(
-        crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR
-    )
+    crits = clean_up_critical_points(crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR, real_valued=real_valued)  # fmt: skip
 
     # determine peak
     crit = filter_kinds(crits[0], kinds={EnumCriticalPoints.MAXIMUM})
@@ -99,7 +98,7 @@ def recognise_special_points(
 
     # messages
     log_debug('Critical points of polynomial computed:')
-    log_debug_long(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0))
+    log_debug_wrapped(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0))
     log_debug(f'Searching for {" -> ".join([ key for key, _ in points ])}.')
 
     # iteratively identify points:
@@ -137,9 +136,9 @@ def recognise_special_points(
     return results
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def filter_kinds(

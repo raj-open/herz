@@ -1,62 +1,63 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
-from ..thirdparty.physics import *
-from ..thirdparty.system import *
-from ..thirdparty.types import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.physics import *
+from ....thirdparty.system import *
+from ....thirdparty.types import *
 
-from ..setup import config
-from ..setup.conversion import *
-from ..models.user import *
+from ....models.app import *
+from ....models.user import *
+from ....queries.scientific import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_output_single_table',
     'step_output_combined_table',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_output_single_table(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     original_time: bool = True,
 ):
-    cfg = case.output
+    cfg_units = cfg.settings.units
 
-    path = cfg.table.path.__root__
+    path = case.output.table.path.root
     path = path.format(label=case.label, kind=f'{quantity}-time')
     if not prepare_save_table(path=path):
         return
 
-    cv = output_conversions(cfg.quantities)
+    cv = output_conversions(case.output.quantities, units=cfg_units)
 
     if original_time:
         data = data.sort_values(by=['time[orig]']).reset_index(drop=True)
         data['time'] = data['time[orig]']
 
     columns = list(data.columns)
-    quantities = [col for col in cfg.quantities if col.key in columns]
+    quantities = [col for col in case.output.quantities if col.key in columns]
 
     table = pd.DataFrame({col.key: cv[col.key] * data[col.key] for col in quantities}).astype(
         {col.key: col.type.value for col in quantities}
     )
 
     with open(path, 'w') as fp:
-        sep = cfg.table.sep
+        sep = case.output.table.sep
         for header in [
             [col.name for col in quantities],
             [print_unit(col.unit, ascii=False) or '' for col in quantities],
@@ -67,7 +68,7 @@ def step_output_single_table(
         table.to_csv(
             fp,
             sep=sep,
-            decimal=cfg.table.decimal,
+            decimal=case.output.table.decimal,
             na_rep='',
             header=None,
             # header=[col.name for col in quantities],
@@ -83,28 +84,27 @@ def step_output_single_table(
 
 
 def step_output_combined_table(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
 ):
-    cfg = case.output
-
-    path = cfg.table.path.__root__
+    path = case.output.table.path.root
     path = path.format(label=case.label, kind=f'combined')
     if not prepare_save_table(path=path):
         return
 
-    cv = output_conversions(cfg.quantities)
+    cv = output_conversions(case.output.quantities, units=cfg.settings.units)
 
     table = pd.DataFrame(
-        {col.key: cv[col.key] * data[col.key] for col in cfg.quantities}
-    ).astype({col.key: col.type.value for col in cfg.quantities})
+        {col.key: cv[col.key] * data[col.key] for col in case.output.quantities}
+    ).astype({col.key: col.type.value for col in case.output.quantities})
 
     table.to_csv(
         path,
-        sep=cfg.table.sep,
-        decimal=cfg.table.decimal,
+        sep=case.output.table.sep,
+        decimal=case.output.table.decimal,
         na_rep='',
-        header=[col.name for col in cfg.quantities],
+        header=[col.name for col in case.output.quantities],
         index=False,
         mode='w',
         encoding='utf-8',
@@ -115,9 +115,9 @@ def step_output_combined_table(
     return
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def prepare_save_table(path: Optional[str]) -> bool:

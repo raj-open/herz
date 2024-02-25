@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.code import *
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
-from ..thirdparty.physics import *
-from ..thirdparty.plots import *
-from ..thirdparty.system import *
-from ..thirdparty.types import *
+from ....thirdparty.code import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.physics import *
+from ....thirdparty.plots import *
+from ....thirdparty.system import *
+from ....thirdparty.types import *
 
-from ..setup import config
-from ..setup.conversion import *
-from ..setup.series import *
-from ..core.utils import *
-from ..core.poly import *
-from ..models.app import *
-from ..models.internal import *
-from ..models.user import *
+from ....core.utils import *
+from ....core.poly import *
+from ....models.app import *
+from ....models.fitting import *
+from ....models.user import *
+from ....queries.fitting import *
+from ....queries.scientific import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_output_loop_plot',
@@ -32,13 +31,14 @@ __all__ = [
     'quick_plot',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_output_time_plot(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     points: dict[str, SpecialPointsConfig],
@@ -47,18 +47,27 @@ def step_output_time_plot(
     shifted: bool = False,
     N: int = 1000,
 ) -> pgo.Figure:
-    cfg = case.output
-    cfg_font = cfg.plot.font
+    cfg_font = case.output.plot.font
+    cfg_units = cfg.settings.units
     _, info = fitinfos[-1]
     T = info.normalisation.period
-    cv = output_conversions(cfg.quantities)
-    units = output_units(cfg.quantities)
+
+    cv = output_conversions(case.output.quantities, units=cfg_units)
+    units = output_units(case.output.quantities)
 
     # un-/renormalise data
     data = get_unnormalised_data(data, fitinfos, quantity=quantity, renormalise=True)
 
     # compute series for fitted curves
-    special, _, time, data_fitted = compute_fitted_curves_for_plots(info, points=points, quantity=quantity, shift=shifted, n_der=2, N=N)  # fmt: skip
+    special, _, time, data_fitted = compute_fitted_curves_for_plots(
+        cfg=cfg.settings.matching,
+        info=info,
+        points=points,
+        quantity=quantity,
+        shift=shifted,
+        n_der=2,
+        N=N,
+    )
 
     # set up plots
     fig = make_subplots(
@@ -86,7 +95,7 @@ def step_output_time_plot(
             color='hsla(0, 100%, 0%, 1)',
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-        showlegend=cfg.plot.legend,
+        showlegend=case.output.plot.legend,
         legend=dict(
             title='Series/Points',
             font=dict(
@@ -185,7 +194,7 @@ def step_output_time_plot(
         showlegend_points=False,
     )
 
-    path = cfg.plot.path.__root__
+    path = case.output.plot.path.root
     if path is not None:
         path = path.format(label=case.label, kind=f'{quantity}-time')
         save_image(fig=fig, path=path)
@@ -194,7 +203,8 @@ def step_output_time_plot(
 
 
 def step_output_loop_plot(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data_p: pd.DataFrame,
     fitinfos_p: list[tuple[tuple[int, int], FittedInfo]],
     points_p: dict[str, SpecialPointsConfig],
@@ -204,26 +214,35 @@ def step_output_loop_plot(
     shifted: bool = False,
     N: int = 1000,
 ) -> pgo.Figure:
-    cfg = case.output
-    cfg_font = cfg.plot.font
+    cfg_font = case.output.plot.font
+    cfg_units = cfg.settings.units
+    cfg_matching = cfg.settings.matching
 
-    cv = output_conversions(cfg.quantities)
-    units = output_units(cfg.quantities)
+    cv = output_conversions(case.output.quantities, units=cfg_units)
+    units = output_units(case.output.quantities)
 
     _, info_p = fitinfos_p[-1]
     _, info_v = fitinfos_v[-1]
     T_p = info_p.normalisation.period
     T_v = info_v.normalisation.period
-    t_align_p = get_alignment_time(info_p, points_p, quantity='pressure') if shifted else 0.0
-    t_align_v = get_alignment_time(info_v, points_v, quantity='volume') if shifted else 0.0
+    t_align_p = (
+        get_alignment_time(info_p, points_p, quantity='pressure', cfg=cfg_matching)
+        if shifted
+        else 0.0
+    )
+    t_align_v = (
+        get_alignment_time(info_v, points_v, quantity='volume', cfg=cfg_matching)
+        if shifted
+        else 0.0
+    )
 
     # un-/renormalise data
     data_p = get_unnormalised_data(data_p, fitinfos_p, quantity='pressure', renormalise=True)
     data_v = get_unnormalised_data(data_v, fitinfos_v, quantity='volume', renormalise=True)
 
     # compute series for fitted curves
-    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
-    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, cfg=cfg_matching, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, cfg=cfg_matching, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
 
     # fit 'other' measurement to each time-series
     data_p['volume'] = poly(T_v * ((data_p['time[orig]'] / T_p + t_align_v / T_v) % 1), *v)
@@ -271,7 +290,7 @@ def step_output_loop_plot(
             # autorange='reversed',
             rangemode='tozero',
         ),
-        showlegend=cfg.plot.legend,
+        showlegend=case.output.plot.legend,
         legend=dict(
             title='Series/Points',
         ),
@@ -387,7 +406,7 @@ def step_output_loop_plot(
             col=1,
         )
 
-    path = cfg.plot.path.__root__
+    path = case.output.plot.path.root
     if path is not None:
         path = path.format(label=case.label, kind='pressure-volume')
         save_image(fig=fig, path=path)
@@ -395,9 +414,9 @@ def step_output_loop_plot(
     return fig
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # SECONDARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def quick_plot(
@@ -606,9 +625,9 @@ def add_plot_time_series(
     return fig
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def save_image(fig: pgo.Figure, path: str):
@@ -623,13 +642,19 @@ def save_image(fig: pgo.Figure, path: str):
 
 def compute_fitted_curves_for_plots(
     info: FittedInfo,
+    cfg: MatchingConfig,
     points: dict[str, SpecialPointsConfig],
     quantity: str,
     shift: bool,
     n_der: int,
     N: int = 1000,
-) -> tuple[list[list[SpecialPointsConfig]], list[list[float]], np.ndarray, list[np.ndarray],]:
-    t_align = get_alignment_time(info, points, quantity=quantity) if shift else 0.0
+) -> tuple[
+    list[list[SpecialPointsConfig]],
+    list[list[float]],
+    np.ndarray,
+    list[np.ndarray],
+]:
+    t_align = get_alignment_time(info, points, quantity=quantity, cfg=cfg) if shift else 0.0
     T = info.normalisation.period
 
     # compute coefficients of (derivatives of) polynomial coefficients

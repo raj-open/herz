@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
 
-from ..setup import config
-from ..core.utils import *
-from ..models.user import *
-from ..algorithms.peaks import *
-from ..algorithms.cycles import *
+from ....core.utils import *
+from ....models.app import *
+from ....models.user import *
+from ....algorithms.peaks import *
+from ....algorithms.cycles import *
 from .methods import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_recognise_cycles',
     'step_removed_marked_sections',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_recognise_cycles(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str,
@@ -55,7 +56,7 @@ def step_recognise_cycles(
 
 
 def step_removed_marked_sections(
-    case: UserCase,
+    case: RequestConfig,
     data: pd.DataFrame,
 ):
     # compute time increment for later

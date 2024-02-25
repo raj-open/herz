@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.data import *
+from ....thirdparty.data import *
 
-from ..setup import config
-from ..setup.series import *
-from ..core.epsilon import *
-from ..algorithms.points import *
-from ..models.user import *
-from ..models.internal import *
+from ....setup import config
+from ....core.epsilon import *
+from ....models.app import *
+from ....models.user import *
+from ....models.fitting import *
+from ....queries.fitting import *
+from ....algorithms.points import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_recognise_points',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_recognise_points(
-    case: UserCase,
+    case: RequestConfig,
+    cfg: AppConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
@@ -36,18 +38,27 @@ def step_recognise_points(
     '''
     Uses fitted model to automatically recognise points based on derivative-conditions.
     '''
-    points_unsorted = get_point_settings(quantity)
+    cfg_points = cfg.settings.points
+    points_unsorted = get_point_settings(quantity, cfg=cfg_points)
     points_sorted = sort_special_points_specs(points_unsorted)
 
     match quantity:
         case 'pressure':
             window_info_points = [
-                ((i1, i2), info, recognise_special_points(info, points=points_sorted))
+                (
+                    (i1, i2),
+                    info,
+                    recognise_special_points(info, points=points_sorted, real_valued=True),
+                )
                 for (i1, i2), info in fitinfos
             ]
         case 'volume':
             window_info_points = [
-                ((i1, i2), info, recognise_special_points(info, points=points_sorted))
+                (
+                    (i1, i2),
+                    info,
+                    recognise_special_points(info, points=points_sorted, real_valued=True),
+                )
                 for (i1, i2), info in fitinfos
             ]
         case _:

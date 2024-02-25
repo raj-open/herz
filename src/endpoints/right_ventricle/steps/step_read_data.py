@@ -1,52 +1,57 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..thirdparty.code import *
-from ..thirdparty.data import *
-from ..thirdparty.maths import *
-from ..thirdparty.physics import *
-from ..thirdparty.types import *
+from ....thirdparty.code import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.physics import *
+from ....thirdparty.types import *
 
-from ..setup import config
-from ..core.utils import *
-from ..models.app import *
-from ..models.user import *
+from ....setup import config
+from ....core.utils import *
+from ....models.app import *
+from ....models.user import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'step_read_data',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def step_read_data(
-    cfg: DataTimeSeries,
+    cfg: AppConfig,
+    cfg_data: DataTimeSeries,
     quantity: str,
 ) -> pd.DataFrame:
-    cfg_units = config.UNITS
+    cfg_units = cfg.settings.units
 
     unit_time: str = cfg_units.get('time', 's')
     unit_quantity: str = cfg_units.get(quantity)
 
-    path = cfg.path.__root__
+    path = cfg_data.path.root
     data = pd.read_csv(
         path,
-        sep=cfg.sep,
-        decimal=cfg.decimal,
-        skiprows=get_bool_function(cfg.skip) if isinstance(cfg.skip, str) else cfg.skip,
+        sep=cfg_data.sep,
+        decimal=cfg_data.decimal,
+        skiprows=(
+            get_bool_function(cfg_data.skip)
+            if isinstance(cfg_data.skip, str)
+            else cfg_data.skip
+        ),
     )
-    t = get_column(data, unit=unit_time, cfg=cfg.time)
-    x = get_column(data, unit=unit_quantity, cfg=cfg.value)
+    t = get_column(data, unit=unit_time, cfg=cfg_data.time)
+    x = get_column(data, unit=unit_quantity, cfg=cfg_data.value)
 
     data = pd.DataFrame(
         {
@@ -65,9 +70,9 @@ def step_read_data(
     return data
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def get_column(
