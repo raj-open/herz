@@ -178,7 +178,7 @@ def load_user_requests(path: str) -> list[RequestConfig]:
     with open(path, 'rb') as fp:
         assets = yaml.load(fp, Loader=yaml.FullLoader)
         cfg: RequestsConfig = RequestsConfig.model_validate(assets)
-        return [ req for req in cfg.requests if not req.ignore ]
+        return [req for req in cfg.requests if not req.ignore]
 
 
 # ----------------------------------------------------------------
