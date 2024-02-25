@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# NOTE:
-# The main method in this script computes the Fourier transform
-# of polynomials.
-# To achieve this, it suffices to just consider monomials.
-#
-# Computation
-# ~~~~~~~~~~~
-#    Set
-#
-#    ```text
-#    F[tᵏ](n) := ∫_{t ∈ [0, 1]} tᵏ exp(-st) dt,
-#    ```
-#
-#    where `s = ι2πn`, `n ∈ ℤ`.
-#    Then
-#
-#    ```text
-#    s·sᵏ/k!·F[tᵏ](n) = ∫_{t ∈ [0, 1]} (st)ᵏ/k!·s·exp(-st) dt
-#        = -∫_{t ∈ [0, 1]} (st)ᵏ/k! · d/dt exp(-st) dt
-#        = -[(st)ᵏ/k! · exp(-st)] + ∫_{t ∈ [0, 1]} (d/dt (st)ᵏ/k!) exp(-st) dt
-#        = -[exp(-s) – 0]·sᵏ/k! + s·∫_{t ∈ [0, 1]} (st)ᵏ¯¹/(k-1)! exp(-st) dt
-#        = -sᵏ/k! + s·(st)ᵏ¯¹/(k-1)!·F[tᵏ¯¹](n)
-#        (since s = ι2πn, n ∈ ℤ)
-#    ```
-#
-#    The recursion resolves to:
-#
-#    ```text
-#    F[k](n) = -1/s · ∑_{j=1}^{k} sʲ/j! / (sᵏ/k!)
-#        = -1/g ·∑_{j=1}^{k} (gʲ/j!)/(gᵏ/k!) nʲ / nᵏ⁺¹
-#    ```
-#
-#    for `n ≠ 0`, and all `k ≥ 0`,
-#    where g = ι2π.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+NOTE:
+The main method in this script computes the Fourier transform
+of polynomials.
+To achieve this, it suffices to just consider monomials.
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Computation
+~~~~~~~~~~~
+   Set
+
+   ```text
+   F[tᵏ](n) := ∫_{t ∈ [0, 1]} tᵏ exp(-st) dt,
+   ```
+
+   where `s = ι2πn`, `n ∈ ℤ`.
+   Then
+
+   ```text
+   s·sᵏ/k!·F[tᵏ](n) = ∫_{t ∈ [0, 1]} (st)ᵏ/k!·s·exp(-st) dt
+       = -∫_{t ∈ [0, 1]} (st)ᵏ/k! · d/dt exp(-st) dt
+       = -[(st)ᵏ/k! · exp(-st)] + ∫_{t ∈ [0, 1]} (d/dt (st)ᵏ/k!) exp(-st) dt
+       = -[exp(-s) – 0]·sᵏ/k! + s·∫_{t ∈ [0, 1]} (st)ᵏ¯¹/(k-1)! exp(-st) dt
+       = -sᵏ/k! + s·(st)ᵏ¯¹/(k-1)!·F[tᵏ¯¹](n)
+       (since s = ι2πn, n ∈ ℤ)
+   ```
+
+   The recursion resolves to:
+
+   ```text
+   F[k](n) = -1/s · ∑_{j=1}^{k} sʲ/j! / (sᵏ/k!)
+       = -1/g ·∑_{j=1}^{k} (gʲ/j!)/(gᵏ/k!) nʲ / nᵏ⁺¹
+   ```
+
+   for `n ≠ 0`, and all `k ≥ 0`,
+   where g = ι2π.
+'''
+
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 from ..thirdparty.code import *
 from ..thirdparty.maths import *
@@ -49,17 +49,17 @@ from ..thirdparty.types import *
 # from .utils import *
 from .poly import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'fourier_of_polynomial',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def fourier_of_polynomial(
@@ -115,9 +115,9 @@ def fourier_of_polynomial(
     return F0, coeff_top, coeff_bot
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # AUXILIARY METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def normalise_leading_coeff(
