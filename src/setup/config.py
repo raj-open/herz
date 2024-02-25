@@ -1,103 +1,195 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 from ..thirdparty.config import *
-from ..thirdparty.code import *
+from ..thirdparty.io import *
+from ..thirdparty.system import *
 
-from ..paths import *
+from ..__paths__ import *
 from ..core.log import *
+from ..queries import environment
 from ..models.app import *
-from ..models.internal import *
 from ..models.user import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
-    'POINTS',
-    'POLY_INIT',
-    'POLY_FINAL',
-    'MATCHING',
-    'UNITS',
+    'INFO',
     'VERSION',
 ]
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # CONSTANTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-PATH_VERSION = 'dist/VERSION'
-PATH_ASSETS_CONFIG_USER = 'setup/config.yaml'
-PATH_ASSETS_CONFIG_API = f'{get_source_path()}/setup/config.yaml'
+_PATH_INTERNAL_CONFIG = os.path.join(get_source_path(), 'setup', 'config.yaml')
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_PID = None
+_PATH_ENV = None
+_PATH_LOGGING = None
+_PATH_SESSION = None
+
+# ----------------------------------------------------------------
 # METHODS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
-def set_user_config(path: str):
-    global PATH_ASSETS_CONFIG_USER
-    global USER_CONFIG
-    global BASIC
-    global CASES
-    global LOG_LEVEL
-
-    PATH_ASSETS_CONFIG_USER = path
-
-    USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
-    BASIC = lazy(lambda x: x.basic, USER_CONFIG)
-    CASES = lazy(lambda x: [case for case in x.cases if not case.ignore], USER_CONFIG)
-    LOG_LEVEL = lazy(lambda x: x.log_level.name, BASIC)
-
-    configure_logging(LOG_LEVEL)
+def initialise_application(
+    name: str,
+    pid: int,
+    log_pid: str | None = None,
+    debug: bool = False,
+):
+    '''
+    Initialises cli execution of application
+    '''
+    # initialise logging
+    level = LOG_LEVELS.DEBUG if debug else LOG_LEVELS.INFO
+    path = _PATH_LOGGING or ''
+    configure_logging(name=name, level=level.name, path=path)
+    # store pid as single value
+    path = log_pid or ''
+    if path != '':
+        path = get_path_in_session(path)
+        create_file_if_not_exists(path)
+        with open(path, 'w') as fp:
+            fp.write(f'{pid}\n')
+    # log infos about application and execution mode
+    log_info(f'running {INFO.name} v{INFO.version} on PID {pid}')
     return
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# LAZY LOADED RESOURCES
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
+# METHODS - getters / setters
+# ----------------------------------------------------------------
 
 
-def load_version(path: str) -> str:
-    with open(path, 'r') as fp:
-        lines = fp.readlines()
-    return ''.join(lines).strip()
+def get_pid() -> int:
+    return _PID
 
 
-@make_lazy
-def load_api_config(path: str, version: str) -> AppConfig:
-    with open(path, 'r') as fp:
+def set_pid(pid: int):
+    global _PID
+    _PID = pid
+    return
+
+
+def get_path_environment() -> str:
+    return _PATH_ENV
+
+
+def set_path_env(path: str):
+    '''
+    Set path to environment (client / server-side)
+    '''
+    global _PATH_ENV
+    _PATH_ENV = path
+    return
+
+
+def get_path_session() -> str:
+    return _PATH_SESSION
+
+
+def get_path_in_session(path: str) -> str:
+    return os.path.join(_PATH_SESSION, path)
+
+
+def get_temp_path(filename: str | None = None) -> str:
+    pid = get_pid()
+    if filename is None:
+        path = os.path.join('tmp', str(pid))
+    else:
+        path = os.path.join('tmp', str(pid), filename)
+    return get_path_in_session(path)
+
+
+def remove_temp_path() -> bool:
+    path = get_temp_path()
+    success = remove_dir_if_exists(path)
+    return success
+
+
+def set_path_session(path: str):
+    '''
+    Set path to session information (server-side).
+    '''
+    global _PATH_SESSION
+    _PATH_SESSION = path
+    return
+
+
+def get_path_logging() -> str:
+    return _PATH_LOGGING
+
+
+def set_path_logging(path: str):
+    '''
+    Set path to directory where log files are to be stored.
+    '''
+    global _PATH_LOGGING
+    _PATH_LOGGING = path
+    return
+
+
+def get_http_ip() -> str:
+    path = _PATH_ENV
+    return environment.get_http_ip(path)
+
+
+def get_http_port() -> int:
+    path = _PATH_ENV
+    return environment.get_http_port(path)
+
+
+# ----------------------------------------------------------------
+# Load methods
+# ----------------------------------------------------------------
+
+
+def load_repo_info() -> RepoInfo:
+    path = os.path.join(get_root_path(), 'pyproject.toml')
+    with open(path, 'r', encoding=ENCODING.UTF8.value) as fp:
+        config_repo = toml.load(fp)
+        assets = config_repo.get('tool', {}).get('poetry', {})
+        info = RepoInfo.model_validate(assets)
+        return info
+
+
+def get_version(info: RepoInfo) -> str:
+    return info.version
+
+
+def load_internal_config() -> AppConfig:
+    path = _PATH_INTERNAL_CONFIG
+    with open(path, 'rb') as fp:
         assets = yaml.load(fp, Loader=yaml.FullLoader)
-        assert isinstance(assets, dict)
-        api_config: AppConfig = catch_fatal(lambda: AppConfig.parse_obj(assets))
-        api_config.info.version = version
-        return api_config
+        cfg: AppConfig = AppConfig.model_validate(assets)
+        return cfg
 
 
-@make_lazy
-def load_assets_config(path: str) -> UserConfig:
-    with open(path, 'r') as fp:
+def load_user_requests(path: str) -> list[RequestConfig]:
+    with open(path, 'rb') as fp:
         assets = yaml.load(fp, Loader=yaml.FullLoader)
-        assert isinstance(assets, dict)
-        return catch_fatal(lambda: UserConfig.parse_obj(assets))
+        cfg: RequestsConfig = RequestsConfig.model_validate(assets)
+        return [ req for req in cfg.requests if not req.ignore ]
 
 
-# use lazy loading to ensure that values only loaded (once) when used
-VERSION = load_version(path=PATH_VERSION)
+# ----------------------------------------------------------------
+# LOAD RESOURCES
+# ----------------------------------------------------------------
 
-API_CONFIG = load_api_config(path=PATH_ASSETS_CONFIG_API, version=VERSION)
-INFO: AppInfo = lazy(lambda x: x.info, API_CONFIG)
-UNITS: dict[str, str] = lazy(lambda x: x.settings.units, API_CONFIG)
-MATCHING: MatchingConfig = lazy(lambda x: x.settings.matching, API_CONFIG)
-POLY: PolynomialConfig = lazy(lambda x: x.settings.polynomial, API_CONFIG)
-POINTS: SpecialPointsConfigs = lazy(lambda x: x.settings.points, API_CONFIG)
+INFO = load_repo_info()
+VERSION = get_version(INFO)
 
-USER_CONFIG = load_assets_config(path=PATH_ASSETS_CONFIG_USER)
-BASIC: UserBasicOptions = lazy(lambda x: x.basic, USER_CONFIG)
-CASES: list[UserCase] = []
-LOG_LEVEL: str = 'INFO'
+API_CONFIG = load_internal_config()
+UNITS = API_CONFIG.settings.units
+MATCHING = API_CONFIG.settings.matching
+POLY = API_CONFIG.settings.polynomial
+POINTS = API_CONFIG.settings.points
