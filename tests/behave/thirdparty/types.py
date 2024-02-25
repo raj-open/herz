@@ -9,7 +9,6 @@ from enum import Enum
 from collections.abc import Iterable
 from typing import Annotated
 from typing import Any
-from typing import Awaitable
 from typing import Callable
 from typing import ClassVar
 from typing import Concatenate
@@ -26,35 +25,32 @@ from typing import Text
 from typing import Type
 from typing import TypeAlias
 from typing import TypeVar
-from pydantic.types import AwareDatetime
-from pydantic.types import SecretStr
+from pydantic import SecretStr
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Enum',
-    'Iterable',
     'Annotated',
     'Any',
-    'Awaitable',
     'Callable',
     'ClassVar',
     'Concatenate',
     'Coroutine',
+    'Enum',
     'Generator',
     'Generic',
+    'Iterable',
     'Literal',
     'Optional',
     'ParamSpec',
     'ParamSpecArgs',
     'ParamSpecKwargs',
     'Protocol',
+    'SecretStr',
     'Text',
     'Type',
     'TypeAlias',
     'TypeVar',
-    'AwareDatetime',
-    'SecretStr',
 ]

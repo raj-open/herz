@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 import lmfit
 import math
@@ -16,9 +16,9 @@ from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # MODIFICATIONS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
 def nCr(n: int, r: int) -> int:
@@ -63,7 +63,7 @@ def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
     '''
     med = np.median(X)
     delta = X - med
-    scale = np.median(np.abs(delta)) or 1.0
+    scale = np.median(abs(delta)) or 1.0
     s = delta / scale
     return s
 
@@ -81,7 +81,7 @@ def indices_non_outliers(X: np.ndarray, sig: float = 2.0) -> list[int]:
       then the result contains at least the elements
       closest to the median.
     '''
-    s = np.abs(normalised_order_statistics(X))
+    s = abs(normalised_order_statistics(X))
     obj = np.where(s < sig)
     return obj[0].tolist()
 
@@ -103,9 +103,9 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
     return X
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'findpeaks',

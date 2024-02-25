@@ -1,45 +1,82 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 import json
 import yaml
+from pydantic_yaml import to_yaml_str
+from pydantic_yaml import to_yaml_file
+from dotenv import dotenv_values
+from dotenv import load_dotenv
+import toml
 
-import re
-from typing import Any
+# for modification, not exported
+from enum import Enum
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # MODIFICATIONS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 
-def yaml_key_to_js_key(key: str):
-    return re.sub(r'-', repl=r'_', string=key)
+def get_environment(path: str) -> dict:
+    load_dotenv(dotenv_path=path)
+    env = dotenv_values(path) or {}
+    return env
 
 
-def yaml_to_py_dictionary(data: Any, deep: bool = False):
-    if isinstance(data, dict):
-        if deep:
-            return {
-                yaml_key_to_js_key(key): yaml_to_py_dictionary(value, deep=True)
-                for key, value in data.items()
-            }
-        else:
-            return {yaml_key_to_js_key(key): value for key, value in data.items()}
-    elif isinstance(data, list):
-        return [yaml_to_py_dictionary(item, deep=deep) for item in data]
-    return data
+class EnumConfigType(Enum):
+    YAML = '.yaml'
+    JSON = '.json'
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class YamlIndentDumper(yaml.Dumper):
+    '''
+    PyYaml's `yaml.dump` for lists yields
+    ```yaml
+    key:
+    - value1
+    - value2
+    - ...
+    ```
+    which currently does not match standard style, i.e.
+    ```yaml
+    key:
+      - value1
+      - value2
+      - ...
+    ```
+    This class fixes this issue.
+
+    Usage
+    ```py
+    yaml.dump(..., Dumper=YamlIndentDumper)
+    ```
+    '''
+
+    def increase_indent(
+        self,
+        flow=False,
+        indentless=False,
+    ):
+        return super(YamlIndentDumper, self).increase_indent(flow, False)
+
+
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
+    'EnumConfigType',
+    'YamlIndentDumper',
+    'dotenv_values',
+    'get_environment',
+    'load_dotenv',
     'json',
     'yaml',
-    'yaml_to_py_dictionary',
+    'toml',
+    'to_yaml_str',
+    'to_yaml_file',
 ]

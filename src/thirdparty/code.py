@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 from pydantic import BaseModel
+from copy import copy
+from copy import deepcopy
 from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import field
@@ -25,9 +27,9 @@ from typing import Optional
 from typing import ParamSpec
 from typing import TypeVar
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # MODIFICATIONS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 KWARGS = ParamSpec('KWARGS')
 RETURN = TypeVar('RETURN')
@@ -68,17 +70,19 @@ def make_lazy(method: Callable[KWARGS, RETURN]) -> Callable[KWARGS, RETURN]:
 
 
 def value_of_model(m: MODEL):
-    return m.__root__
+    return m.root
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'Field',
     'MISSING',
     'asdict',
+    'copy',
+    'deepcopy',
     'dataclass',
     'echo_function',
     'field',

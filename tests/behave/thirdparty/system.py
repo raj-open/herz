@@ -5,14 +5,18 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+# NOTE: many of these are part of standard python library
 import os
 from pathlib import Path
 import pathspec
-import signal
+from signal import SIGINT
+from signal import SIGTERM
 import socket
+import subprocess
 import sys
 import traceback
 import warnings
+from time import sleep
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -77,6 +81,8 @@ def remove_file_if_exists(path: str) -> bool:
 
 __all__ = [
     'Path',
+    'SIGINT',
+    'SIGTERM',
     'clear_dir_if_exists',
     'create_dir_if_not_exists',
     'create_file_if_not_exists',
@@ -84,8 +90,9 @@ __all__ = [
     'pathspec',
     'remove_dir_if_exists',
     'remove_file_if_exists',
-    'signal',
+    'sleep',
     'socket',
+    'subprocess',
     'sys',
     'traceback',
     'warnings',
