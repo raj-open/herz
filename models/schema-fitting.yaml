@@ -1,15 +1,19 @@
 openapi: 3.0.3
 info:
   version: 0.1.1
-  title: Schemata for internal models.
+  title: Schemata for fitting models.
 servers:
   - url: "https://define.me"
 paths: {}
 components:
   schemas:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ----------------------------------------------------------------
+    # CLASSES
+    # ----------------------------------------------------------------
+
+    # --------------------------------
     # DATA TYPE - fitted infos
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     FittedInfo:
       description: |-
         Data structure to store information about fitted curves.
@@ -32,9 +36,10 @@ components:
             that fits all cycles simultaneously.
           $ref: "#/components/schemas/FittedInfoNormalisation"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - fitted info (pre)normalisation
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     FittedInfoNormalisation:
       description: |-
         Data structure to store information about (pre)normalisation.
@@ -68,9 +73,32 @@ components:
           type: number
           default: 1.
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # ----------------------------------------------------------------
+    # ENUMS
+    # ----------------------------------------------------------------
+
+    # --------------------------------
+    # ENUM Sign
+    # --------------------------------
+    EnumSign:
+      description: |-
+        Enumeration of classification of signs of (possibly complex) numbers
+      type: integer
+      x-enum-varnames:
+        - ZERO
+        - REAL_NEGATIVE
+        - REAL_POSITIVE
+        - NON_ZERO
+      enum:
+        - 0
+        - -1
+        - 1
+        - 2
+
+    # --------------------------------
     # ENUM Extreme Point Type
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     EnumExtremePoints:
       description: |-
         Enumeration of extreme point types.

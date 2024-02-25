@@ -1,4 +1,4 @@
-# EnumLogLevel
+# EnumProgrammeMode
 ## Properties
 
 Name | Type | Description | Notes

@@ -1,15 +1,44 @@
 openapi: 3.0.3
 info:
   version: 0.1.1
-  title: Schemata for user config
+  title: Schemata for internal application configuration.
 servers:
   - url: "https://define.me"
 paths: {}
 components:
   schemas:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # ----------------------------------------------------------------
+    # CLASSES
+    # ----------------------------------------------------------------
+
+    # --------------------------------
+    # Internal Repo Info
+    # --------------------------------
+    RepoInfo:
+      description: |-
+        Basic infos about repo
+      type: object
+      required:
+        - name
+        - description
+        - version
+        - homepage
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        version:
+          type: string
+        homepage:
+          type: string
+          format: uri
+      # NOTE: allow this, as this will be parsed from pyproject.toml
+      additionalProperties: true
+
+    # --------------------------------
     # AppConfig
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     AppConfig:
       description: |-
         Data model for all parts of the app configuration.
@@ -48,27 +77,10 @@ components:
                 Specifications used to compute special points.
               $ref: "#/components/schemas/SpecialPointsConfigs"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > info
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    AppInfo:
-      description: |-
-        Meta settings for app.
-      type: object
-      required:
-        - title
-        - description
-      properties:
-        title:
-          type: string
-        description:
-          type: string
-        version:
-          type: string
-      additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - matching settings
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     MatchingConfig:
       description: |-
         Designates to each data series the name of a special point
@@ -83,11 +95,11 @@ components:
           type: string
         volume:
           type: string
-      additionalProperties:
-        type: False
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      additionalProperties: False
+
+    # --------------------------------
     # DATA TYPE - polynomial setting
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     PolynomialConfig:
       description: |-
         Setting on for polynomial fitting for cycles within a time-series.
@@ -111,9 +123,10 @@ components:
             - $ref: "#/components/schemas/PolyDerCondition"
             - $ref: "#/components/schemas/PolyIntCondition"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - polynomial critical conditions
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     PolyCritCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -130,9 +143,10 @@ components:
           type: integer
           minimum: 0
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - polynomial derivative condition
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     PolyDerCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -151,9 +165,10 @@ components:
           # minimum: 0.
           # maximum: 1.
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - polynomial integral condition
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     PolyIntCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -169,9 +184,10 @@ components:
             $ref: "#/components/schemas/TimeInterval"
           minItems: 1
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - Time interval
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     TimeInterval:
       description: |-
         Defines end points of a time-interval (`a` to `b`).
@@ -185,9 +201,10 @@ components:
         b:
           type: number
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - special points configs
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     SpecialPointsConfigs:
       description: |-
         Configuration of special points.
@@ -205,9 +222,10 @@ components:
           additionalProperties:
             $ref: "#/components/schemas/SpecialPointsConfig"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - special points config
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     SpecialPointsConfig:
       description: |-
         Configuration of special points.
@@ -250,9 +268,10 @@ components:
             Settings for plot marker.
           $ref: "#/components/schemas/MarkerSettings"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - special points specification
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     SpecialPointsSpec:
       description: |-
         A single condition used to defined special point in terms of
@@ -304,9 +323,10 @@ components:
           items:
             type: string
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # DATA TYPE - Points display settings
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     MarkerSettings:
       description: |-
         Settings for plotting special points.
@@ -340,21 +360,18 @@ components:
           # top/middle/bottom left/center/right
           default: 'top center'
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # ----------------------------------------------------------------
+    # ENUMS
+    # ----------------------------------------------------------------
+
+    # --------------------------------
     # ENUM Critical Point Type
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     EnumCriticalPoints:
       description: |-
         Enumeration of critical point types.
       type: string
-      x-enum-varnames:
-        - UNKNOWN
-        - ZERO
-        - MINIMUM
-        - MAXIMUM
-        - LOCAL_MINIMUM
-        - LOCAL_MAXIMUM
-        - INFLECTION
       enum:
         - UNKNOWN
         - ZERO

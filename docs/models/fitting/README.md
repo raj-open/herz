@@ -1,4 +1,4 @@
-# Documentation for Schemata for internal models.
+# Documentation for Schemata for fitting models.
 
 <a name="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
@@ -13,6 +13,7 @@ Class | Method | HTTP request | Description
 ## Documentation for Models
 
  - [EnumExtremePoints](.//Models/EnumExtremePoints.md)
+ - [EnumSign](.//Models/EnumSign.md)
  - [FittedInfo](.//Models/FittedInfo.md)
  - [FittedInfoNormalisation](.//Models/FittedInfoNormalisation.md)
 

@@ -1,4 +1,4 @@
-# Documentation for Schemata for user config
+# Documentation for Schemata for user configuration.
 
 <a name="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
@@ -15,12 +15,12 @@ Class | Method | HTTP request | Description
  - [DataTimeSeries](.//Models/DataTimeSeries.md)
  - [DataTypeColumn](.//Models/DataTypeColumn.md)
  - [DataTypeQuantity](.//Models/DataTypeQuantity.md)
+ - [EnumEndpoint](.//Models/EnumEndpoint.md)
  - [EnumFittingMode](.//Models/EnumFittingMode.md)
- - [EnumLogLevel](.//Models/EnumLogLevel.md)
+ - [EnumProgrammeMode](.//Models/EnumProgrammeMode.md)
  - [EnumType](.//Models/EnumType.md)
- - [UserBasicOptions](.//Models/UserBasicOptions.md)
- - [UserCase](.//Models/UserCase.md)
- - [UserConfig](.//Models/UserConfig.md)
+ - [RequestConfig](.//Models/RequestConfig.md)
+ - [RequestsConfig](.//Models/RequestsConfig.md)
  - [UserData](.//Models/UserData.md)
  - [UserOutput](.//Models/UserOutput.md)
  - [UserProcess](.//Models/UserProcess.md)

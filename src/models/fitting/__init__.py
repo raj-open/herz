@@ -1,27 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # IMPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-from ..generated.internal import *
-from .points import *
-from .conditions import *
-
-# NOTE: foreign import
-from ..generated.app import TimeInterval
+from ..generated.fitting import FittedInfo
+from ..generated.fitting import FittedInfoNormalisation
+from ..generated.app import MarkerSettings
 from ..generated.app import PolyCritCondition
 from ..generated.app import PolyDerCondition
 from ..generated.app import PolyIntCondition
-from ..generated.app import MarkerSettings
 from ..generated.app import SpecialPointsConfig
 from ..generated.app import SpecialPointsConfigs
 from ..generated.app import SpecialPointsSpec
+from ..generated.app import TimeInterval
+from .conditions import *
+from .points import *
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # EXPORTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 __all__ = [
     'FittedInfo',

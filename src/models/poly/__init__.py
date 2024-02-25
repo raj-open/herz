@@ -5,18 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..generated.app import AppConfig
-from ..generated.app import PolynomialConfig
-from ..generated.app import MatchingConfig
-from ..generated.app import RepoInfo
+from .poly import *
+from .rational import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'AppConfig',
-    'PolynomialConfig',
-    'MatchingConfig',
-    'RepoInfo',
+    'Poly',
+    'RationalPoly',
 ]

@@ -1,56 +1,43 @@
 openapi: 3.0.3
 info:
   version: 0.1.1
-  title: Schemata for user config
+  title: Schemata for user configuration.
 servers:
   - url: "https://define.me"
 paths: {}
 components:
   schemas:
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # UserConfig
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    UserConfig:
+    # ----------------------------------------------------------------
+    # CLASSES
+    # ----------------------------------------------------------------
+
+    # --------------------------------
+    # RequestsConfig
+    # --------------------------------
+    RequestsConfig:
       description: |-
         Data model for all parts of the user configuration.
       type: object
-      required:
-        - basic
+      required: []
       properties:
-        basic:
-          $ref: "#/components/schemas/UserBasicOptions"
-        cases:
+        requests:
           description: |-
             List of settings for each case.
           type: array
           items:
-            $ref: "#/components/schemas/UserCase"
+            $ref: "#/components/schemas/RequestConfig"
           default: []
       additionalProperties: true
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Config > basic
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    UserBasicOptions:
-      description: |-
-        Basic options for running the programme.
-      type: object
-      required: []
-      properties:
-        log-level:
-          $ref: '#/components/schemas/EnumLogLevel'
-          default: INFO
-        verbose:
-          type: boolean
-          default: false
-      additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # Config > case(s)
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    UserCase:
+    # --------------------------------
+    RequestConfig:
       description: |-
         User settings for a single case of data.
       type: object
       required:
+        - endpoint
         - label
         - name
         - data
@@ -62,6 +49,8 @@ components:
             Whether or not to skip the case.
           type: boolean
           default: false
+        endpoint:
+          $ref: "#/components/schemas/EnumEndpoint"
         label:
           description: |-
             Label used to refer to case and generate output files.
@@ -79,9 +68,10 @@ components:
         output:
           $ref: "#/components/schemas/UserOutput"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # Config > case > data
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     UserData:
       description: |-
         Options for structure of data files.
@@ -95,9 +85,10 @@ components:
         volume:
           $ref: "#/components/schemas/DataTimeSeries"
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # Config > case > process
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     UserProcess:
       description: |-
         Options for process steps.
@@ -148,9 +139,10 @@ components:
               default: AVERAGE
           additionalProperties: true
       additionalProperties: true
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # Config > case > output
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     UserOutput:
       description: |-
         Options for outputs
@@ -223,9 +215,10 @@ components:
               additionalProperties: false
           additionalProperties: true
       additionalProperties: true
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    # --------------------------------
     # Data structure for time series
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     DataTimeSeries:
       description: |-
         Structure for time series.
@@ -356,20 +349,38 @@ components:
             Physical unit as string
           type: string
       additionalProperties: false
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # ENUM: log level
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    EnumLogLevel:
+
+    # ----------------------------------------------------------------
+    # ENUMS
+    # ----------------------------------------------------------------
+
+    # --------------------------------
+    # ENUM: Programme Mode
+    # --------------------------------
+    EnumProgrammeMode:
       description: |-
-        Enumeration of settings for log level.
+        Enumeration of endpoints for executing main programme.
       type: string
       enum:
-        - INFO
-        - DEBUG
-      default: INFO
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        - version
+        - requests
+      default: version
+
+    # --------------------------------
+    # ENUM: Endpoint
+    # --------------------------------
+    EnumEndpoint:
+      description: |-
+        Enumeration of endpoints for requests
+      type: string
+      enum:
+        - UNKNOWN
+        - RIGHT-VENTRICLE
+      default: version
+
+    # --------------------------------
     # ENUM: fitting mode
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # --------------------------------
     EnumFittingMode:
       description: |-
         Enumeration of settings for log level.

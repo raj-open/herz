@@ -1,9 +1,10 @@
-# UserCase
+# RequestConfig
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **ignore** | [**Boolean**](boolean.md) | Whether or not to skip the case. | [optional] [default to false]
+**endpoint** | [**EnumEndpoint**](EnumEndpoint.md) |  | [default to null]
 **label** | [**String**](string.md) | Label used to refer to case and generate output files. NOTE: may not contain spaces. | [default to null]
 **name** | [**String**](string.md) | Name of case (can be used e.g. in titles of plots). | [default to null]
 **data** | [**UserData**](UserData.md) |  | [default to null]

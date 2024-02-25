@@ -1,4 +1,4 @@
-# Documentation for Schemata for user config
+# Documentation for Schemata for internal application configuration.
 
 <a name="documentation-for-api-endpoints"></a>
 ## Documentation for API Endpoints
@@ -14,7 +14,6 @@ Class | Method | HTTP request | Description
 
  - [AppConfig](.//Models/AppConfig.md)
  - [AppConfigSettings](.//Models/AppConfigSettings.md)
- - [AppInfo](.//Models/AppInfo.md)
  - [EnumCriticalPoints](.//Models/EnumCriticalPoints.md)
  - [MarkerSettings](.//Models/MarkerSettings.md)
  - [MatchingConfig](.//Models/MatchingConfig.md)
@@ -22,6 +21,7 @@ Class | Method | HTTP request | Description
  - [PolyDerCondition](.//Models/PolyDerCondition.md)
  - [PolyIntCondition](.//Models/PolyIntCondition.md)
  - [PolynomialConfig](.//Models/PolynomialConfig.md)
+ - [RepoInfo](.//Models/RepoInfo.md)
  - [SpecialPointsConfig](.//Models/SpecialPointsConfig.md)
  - [SpecialPointsConfigs](.//Models/SpecialPointsConfigs.md)
  - [SpecialPointsSpec](.//Models/SpecialPointsSpec.md)

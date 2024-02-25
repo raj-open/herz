@@ -5,18 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..generated.app import AppConfig
-from ..generated.app import PolynomialConfig
-from ..generated.app import MatchingConfig
-from ..generated.app import RepoInfo
+from ..generated.user import DataTypeColumn
+from ..generated.user import DataTimeSeries
+from ..generated.user import DataTypeQuantity
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'AppConfig',
-    'PolynomialConfig',
-    'MatchingConfig',
-    'RepoInfo',
+    'DataTypeColumn',
+    'DataTimeSeries',
+    'DataTypeQuantity',
 ]
