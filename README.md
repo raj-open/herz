@@ -17,7 +17,7 @@ robustly using the python package [pint](https://pint.readthedocs.io).
 
 ## Examples and technical notes ##
 
-See [examples](examples) and [notes](documentation/README.md).
+See [examples](examples) and [notes](docs/README.md).
 
 ## System requirements ##
 

@@ -1,30 +1,53 @@
 *
 !/.gitignore
+!/.gitattributes
 
 # ----------------------------------------------------------------
 # ROOT
 # ----------------------------------------------------------------
 
 !/README.md
-!/CONTRIBUTING.md
 !/LICENCE
 !/justfile
 !/pyproject.toml
-!/requirements.txt
+!/poetry.lock
 !/.coveragerc
+!/.behaverc
 # for githook
 !/.pre-commit-config.yaml
-# for workflows
+# for git workflows
 !/.github
-!/.github/**/
-!/.github/**/*.yaml
+!/.github/workflows
+!/.github/workflows/*.yaml
 
 # ----------------------------------------------------------------
-# PROJECT
+# PROJECT FILES
 # ----------------------------------------------------------------
 
-!/scripts
-!/scripts/*.py
+!/templates
+!/templates/template*
+
+!/docs
+!/docs/**/
+!/docs/*.bib
+!/docs/*.png
+!/docs/**/*.md
+
+!/models
+!/models/*.yaml
+
+!/src
+!/src/**/
+!/src/**/*.py
+!/src/setup/config.yaml
+
+!/tests
+!/tests/**/
+!/tests/**/*.py
+!/tests/behave/**/*.feature
+!/tests/behave/resources/mock*
+# ensure that created data is not synchronised!
+/tests/behave/data
 
 !/examples
 !/examples/README.md
@@ -38,42 +61,24 @@
 !/examples/*.py
 !/examples/*.ipynb
 
-!/dist
-!/dist/VERSION
-
-!/templates
-!/templates/template*
-
-!/src
-!/src/**/
-!/src/**/*.py
-!/src/**/*.yaml
-/src/models/generated
-
-!/tests
-!/tests/**/
-!/tests/**/*.py
-
 !/notebooks
 !/notebooks/*.ipynb
 
-!/documentation
-!/documentation/**/
-!/documentation/*.bib
-!/documentation/*.png
-!/documentation/**/*.md
+!/dist
+!/dist/VERSION
 
 # ----------------------------------------------------------------
-# FORCE REMOVE ARTEFACTS
+# FORCE EXCLUDE
 # ----------------------------------------------------------------
 
 **/.DS_Store
-**/__pycache__
-**/*__archive__*
+**/__pycache__*
+**/__archive__*
 **/sandbox*
+**/*.tmp
 
 # ----------------------------------------------------------------
-# FORCE INCLUDE
+# FORCE RETAIN
 # ----------------------------------------------------------------
 
-!/**/.gitkeep
+!**/.gitkeep

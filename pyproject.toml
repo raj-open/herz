@@ -1,18 +1,20 @@
-[project]
+[tool.poetry]
 name = 'herz'
 version = '0.1.1'
 description = 'Computations for Pressure-Volume data series'
+homepage = 'https://github.com/raj-open/herz'
 authors = [
-    { name = 'raj-open', email='raj-open@users.noreply.github.com' },
+    'raj-open <raj-open@users.noreply.github.com>',
 ]
 maintainers = [
-    { name = 'raj-open', email='raj-open@users.noreply.github.com' },
+    'raj-open <raj-open@users.noreply.github.com>',
 ]
-license = { file = 'LICENCE' }
 readme = 'README.md'
-requires-python = '>=3.10'
 keywords = [
     'python',
+    'time-series',
+    'medicine',
+    'physics',
 ]
 # cf. https://pypi.org/classifiers
 classifiers = [
@@ -23,76 +25,112 @@ classifiers = [
     'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
-    # 'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.12',
 ]
-# NOTE do not use == in pyproject.toml only in requirements.txt
-[project.dependencies]
-pip = {version='^23.2.1'}
-wheel = {version='^0.41.0'}
-setuptools = {version='^68.0.0'}
-# code
+
+[tool.poetry.dependencies]
+# --------------------------------
+# compiler
+# --------------------------------
+python = ">=3.10.*,<4.0.0"
+pip = {version='^24.0'}
+poetry = {version='^1.7.1'}
+wheel = {version='^0.42.0'}
+setuptools = {version='^69.1.0'}
+# --------------------------------
+# code - general
+# --------------------------------
 pathlib = {version='^1.0.1'}
-pathspec = {version='^0.11.1'}
+pathspec = {version='^0.12.1'}
 typing = {version='^3.7.4.3'}
-codetiming = {version='^1.4.0'}
+# --------------------------------
+# code - async, distr. system
+# --------------------------------
 asyncio = {version='^3.4.3'}
-anyio = {version='^3.7.1'}
+anyio = {version='^4.2.0'}
+# --------------------------------
+# web
+# --------------------------------
+certifi = {version='^2024.2.2'}
+# --------------------------------
 # config
+# --------------------------------
 toml = {version='^0.10.2'}
-python-dotenv = {version='^1.0.0'}
-jsonschema = {version='^4.18.4'}
+argparse = {version='^1.4.0'}
+python-dotenv = {version='^1.0.1'}
+jsonschema = {version='^4.21.1'}
 lazy-load = {version='^0.8.3'}
 pyyaml = {version='^6.0.1'}
+pydantic-yaml = {version='~1.2'}
+# --------------------------------
 # models
-dataclasses = {version='^0.6'}
-pydantic = {version='1.10.12'} # not latest otherwise has issues with datamodel-code-generator
-pydantic-extra-types = {version='0.0.1'}
+# --------------------------------
+dataclasses = {version='^0.6,<0.8'}
+pydantic = {version='~2.6'}
+pydantic-extra-types = {version='~2.5'}
+# --------------------------------
 # maths + data
-numpy = {version='^1.24.3'}
-pandas = {version='^2.0.3'}
-scipy = {version='^0.0.0'}
-pint = {version='^0.22'}
-findpeaks = {version='^2.5.2'}
+# --------------------------------
+numpy = {version='~1,^1.24.0'} # ensures major version = 1, and version >= 1.24.0
+pandas = {version='~2.2'}
+scipy = {version='~1.11'} # findpeaks imports fft from scipy in the wrong way under latest version
+pint = {version='^0.23'}
+findpeaks = {version='^2.6.1'}
 lmfit = {version='^1.2.2'}
+# --------------------------------
 # rendering
+# --------------------------------
 tabulate = {version='^0.9.0'}
-matplotlib = {version='^3.7.2'}
-imageio = {version='^2.31.1'}
+plotly = {version='^5.19.0'}
+matplotlib = {version='^3.8.3'}
+imageio = {version='^2.34.0'}
 # notebooks
-ipython = {version='8.15.0'} # NOTE: ^8.16.0 has issues!
+ipython = {version='~8.15'} # NOTE: ^8.16.0 has issues!
 jupyter = {version='^1.0.0'}
 jupyterthemes = {version='^0.20.0'}
-widgetsnbextension = {version='^4.0.9'}
-ipywidgets = {version='^8.1.1'}
-nbconvert = {extras=['webpdf', 'qtpdf'], version='^7.2.3'}
+widgetsnbextension = {version='^4.0.10'}
+ipywidgets = {version='^8.1.2'}
+nbconvert = {extras=['webpdf', 'qtpdf'], version='^7.16.0'}
+# --------------------------------
 # miscellaneous
-datetime = {version='^5.2'}
-pendulum = {version='^2.1.2'}
-lorem = {version='^0.1.1'}
+# --------------------------------
+datetime = {version='^5.4'}
+pendulum = {version='^3.0.0'}
+pytz = {version='^2024.1'}
+lorem-text = {version='^2.1'}
+flatDict= {version='^4.0.1'}
+codetiming = {version='^1.4.0'}
+# --------------------------------
+# APIs
+# --------------------------------
+fastapi = {extras=['all'], version='~0.109'}
+fastapi-offline = {extras=['all'], version='~1.7,^1.7.1'}
+uvicorn = {version='~0.27'}
 
-[project.optional-dependencies.test]
-coverage = {extras=['toml'], version='^7.2.7'}
+[tool.poetry.dev-dependencies]
+# --------------------------------
+# testing
+# --------------------------------
+pytest = {version='^7.4.4,~7'}
+testfixtures = {version='^8.0.0'}
+coverage = {extras=['toml'], version='^7.4.1'}
 pytest-cov = {version='^4.1.0'}
 pytest-lazy-fixture = {version='^0.6.3'}
-pytest-order = {version='^1.1.0'}
-pytest = {version='^7.4.0'}
-testfixtures = {version='^7.1.0'}
-
-[project.optional-dependencies.dev]
-# NOTE: depends on name of project!
-herz = {extras=['test']}
-# models
-datamodel-code-generator = {version='^0.21.2'}
-openapi-generator-cli = {version='^4.3.1'}
+pytest-order = {version='^1.2.0'}
+behave = {version='^1.2.6'}
+behave-webdriver = {version='^0.3.1'}
+urllib3 = {version='~1.26,^1.26.18'} # needed for chrome driver to work without timeouts
+# --------------------------------
+# model
+# --------------------------------
+datamodel-code-generator = {version='~0.25'}
+openapi-generator-cli = {version='^4.3'}
 openapi-generator = {version='^1.0.6'}
+# --------------------------------
 # hooks and linting
-pre_commit = {version='^3.4.0'}
-black = {extras=['d', 'jupyter'], version='^23.7.0'}
-# decorations
-pybadges = {version='^3.0.0'}
-
-[project.urls]
-homepage = 'https://github.com/raj-open/herz'
+# --------------------------------
+pre_commit = {version='^3.6.1'}
+black = {extras=['d', 'jupyter'], version='^24.2.0'}
 
 [tool.setuptools]
 include-package-data = true
@@ -115,7 +153,7 @@ target-version = [ 'py311' ]
 # extend-ignore = [ 'E501', 'E703' ] # NOTE: this does not work!
 
 [tool.pytest.ini_options]
-minversion = "7.4.0"
+minversion = "7.4.4"
 testpaths = [
     "tests",
 ]

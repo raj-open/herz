@@ -1,0 +1,3 @@
+# Forces (staged) text files (i.e. nonbinaries)
+# to be saved with LF instead of CRLF-endings
+*    text=auto

@@ -1,13 +1,6 @@
 # ----------------------------------------------------------------
 # Automates pre-commit actions,
-# e.g. linting, prettify, removal of artefacts/sensitive data, etc.
-#
-# NOTE: To use this run
-#
-# 1. python3 -m pip install pre-commit
-# 2. python3 -m pre-commit install # in the repository
-#
-# After completing 2, upon every commit the hook will be called.
+# e.g. linting, tests, removal of artefacts, etc.
 # ----------------------------------------------------------------
 default_install_hook_types:
   - commit-msg
@@ -25,43 +18,9 @@ repos:
       description: |-
         This hook ensures that commit messages conform to the schema.
       # SIMPLER METHOD, but allows any branch name:
-      # language: pygrep
-      # args: [ '--negate' ]
-      # entry: '^\S+(-\S+)* > \S+(-\S+)*:\s+\S+(\s*\S+)*$'
-      # MORE COMPLICATED, but checks branch names:
-      language: system
-      args: []
-      entry: |-
-        python -c "
-        import os;
-        import sys;
-        import re;
-
-        def bash_stdout(cmd):
-          result = os.popen(cmd).read().strip();
-          return result.split('\n');
-
-        with open('.git/COMMIT_EDITMSG', 'r') as fp:
-          message = ''.join(fp.readlines()).strip();
-
-        if re.match(pattern=r'^Merge .* into .*$', string=message):
-          exit(0);
-
-        branch = bash_stdout('git rev-parse --abbrev-ref HEAD')[0];
-        branch_history = bash_stdout('git show-branch -a | head -n2');
-        line = branch_history[1];
-        parent = re.sub(pattern=r'^[!\*\s]*\[(.*?)\].*$', repl=r'\1', string=line);
-
-        prefix = f'{branch} > {parent}: ';
-        print('commit message matches expected:');
-        print('');
-        print(f'    {prefix}{{your message}}');
-
-        if message.startswith(prefix):
-          exit(0);
-        else:
-          exit(1);
-        "
+      language: pygrep
+      args: [ '--negate' ]
+      entry: '^(Merge remote-tracking branch .* into .*)$|^(\S+(-\S+)* > \S+(-\S+)*:\s+\S+(\s*\S+)*)$'
       verbose: true
       stages: [ commit-msg ]
 
@@ -72,58 +31,42 @@ repos:
       name: Lint files
       description: |-
         This hook performs linting on files.
-      files: '^(src|tests|notebooks|examples)/.*\.(py|ipynb)$'
+      files: '^(src|tests|examples)/.*\.(py|ipynb)$'
       pass_filenames: true
       language: system
       args: []
       entry: |-
         bash -c '
-          just githook-lint "$0";
+          just githook-lint-suggest "$0";
         '
       verbose: true
       stages: [ pre-commit ]
 
-    - id: test-py
-      name: Test python files
+    - id: utests
+      name: Unit tests
       description: |-
-        This hook performs checks to see if test in this file are green.
-      files: '^tests/(tests_[^/]+/)*tests_[^/]+\.py$'
+        This hook performs checks to see if unit tests in this file are green.
+      files: '^tests/unit(/tests_[^/]+/)*/tests_[^/]+\.py$'
       pass_filenames: true
       language: system
       args: []
       entry: |-
         bash -c '
-          just githook-test-py "$0";
+          just githook-utest "$0";
         '
-      verbose: true
-      stages: [ pre-commit ]
 
-    - id: clean-nb-outputs
-      name: Clean outputs from python notebooks
+    - id: btests
+      name: Behavioural tests
       description: |-
-        This hook cleans python notebooks.
-      files: '^notebooks/.*\.ipynb$'
+        This hook performs checks to see if behavioural tests in this file are green.
+      files: '^tests/behave(/tests_[^/]+/)*/[^/]\.feature$'
       pass_filenames: true
       language: system
       args: []
       entry: |-
         bash -c '
-          just githook-clean-ipynb-outputs "$0";
-        '
-      verbose: true
-      stages: [ pre-commit ]
-
-    - id: clean-nb-meta
-      name: Clean metadata from python notebooks
-      description: |-
-        This hook cleans python notebooks.
-      files: '^.*\.ipynb$'
-      pass_filenames: true
-      language: system
-      args: []
-      entry: |-
-        bash -c '
-          just githook-clean-ipynb-meta "$0";
+          # just githook-btest "$0";
+          echo "behavioural tests skipped - please run manually!";
         '
       verbose: true
       stages: [ pre-commit ]
