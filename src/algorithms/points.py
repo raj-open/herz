@@ -104,6 +104,7 @@ def recognise_special_points(
     # iteratively identify points:
     for key, point in results.items():
         point.found = False
+
     for key, point in points:
         spec = point.spec
         if spec is None:

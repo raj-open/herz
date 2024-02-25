@@ -55,6 +55,8 @@ from .poly import *
 
 __all__ = [
     'fourier_of_polynomial',
+    'integral_poly_trig',
+    'integral_poly_exp',
 ]
 
 # ----------------------------------------------------------------
@@ -113,6 +115,64 @@ def fourier_of_polynomial(
     coeff_bot = [0] * (deg + 1) + [1.0]
 
     return F0, coeff_top, coeff_bot
+
+
+def integral_poly_trig(
+    omega: float,
+    p: Iterable[float],
+    t1: float,
+    t2: float,
+) -> tuple[float, float]:
+    '''
+    Returns `x, y`, where
+    ```
+    x = ∫ p(t) cos(ωt) dt = Re ∫ p(t) exp(ιωt) dt
+    y = ∫ p(t) sin(ωt) dt = Im ∫ p(t) exp(ιωt) dt
+    ```
+    where the integrals are computed over `t in [t1, t2]`.
+    '''
+    I = integral_poly_exp(s=1j * omega, p=p, t1=t1, t2=t2)
+    return I.real, I.imag
+
+
+def integral_poly_exp(
+    s: complex,
+    p: Iterable[float],
+    t1: float,
+    t2: float,
+) -> complex:
+    '''
+    Computes `∫ p(t) exp(st) dt` over `t in [t1, t2]`
+    '''
+    deg = len(p) - 1
+    I = [0] * (deg + 1)
+
+    if deg < 0:
+        return 0.0
+
+    if s == 0:
+        I = [t2 ** (k + 1) / (k + 1) - t1 ** (k + 1) / (k + 1) for k in range(deg + 1)]
+    else:
+        # compute C_ij := coeff j of exp_i(-s) / coeff i of exp_i(-s)
+        # where exp_i(...) = exp-series truncated to polynomial of degree i.
+        coeffs_exp = np.cumprod(-s / np.asarray(range(1, deg + 1)))
+        coeffs_exp = np.insert(coeffs_exp, 0, 1)
+        coeffs = np.asarray([coeffs_exp] * (deg + 1))
+        indices = np.asarray(range(deg + 1))
+        mask = np.asarray([1 * (indices <= k) for k in range(deg + 1)])
+        coeffs = mask * coeffs
+        coeffs = np.diag(1 / np.diag(coeffs)) @ coeffs
+
+        # compute vectors t_j = t ^ j
+        t1pow = np.cumprod([1] + [t1] * deg)
+        t2pow = np.cumprod([1] + [t2] * deg)
+
+        # determine integals I_i := ∫ t^i exp(st) dt
+        I = coeffs @ (t2pow - t1pow)
+
+        # compute integral ∫ p(t) exp(st) dt
+        I = np.inner(p, I)
+    return
 
 
 # ----------------------------------------------------------------
