@@ -46,7 +46,6 @@ from ..thirdparty.code import *
 from ..thirdparty.maths import *
 from ..thirdparty.types import *
 
-# from .utils import *
 from .poly import *
 
 # ----------------------------------------------------------------
@@ -92,7 +91,7 @@ def fourier_of_polynomial(
     # Express Fourier transform as rational function of polynomials:
     # NOTE: We set
     #
-    #    coeffs_exp[i] = g^i / i! for 1 ≤ i ≤ deg
+    #    coeffs_exp[i] = (-g))^i / i! for 1 ≤ i ≤ deg
     #    coeffs_top[:, 0] = 0
     #    coeffs_top[i, k] =
     #      { 0  :  0 ≤ i ≤ deg - k
@@ -100,18 +99,18 @@ def fourier_of_polynomial(
     #      {    : deg - k + 1 ≤ i ≤ deg
     #    for k > 0
     #
-    # where g = ι2π.
+    # where g = -ι2π.
     # Then coeff_top[i] = ∑ₖ cₖ·Tᵏ·coeffs_top[i, k]
     # --------
-    g = 1j * 2 * pi
-    coeffs_exp = np.cumprod(g / np.asarray(range(1, deg + 1)))
+    g = -1j * 2 * pi
+    coeffs_exp = np.cumprod(-g / np.asarray(range(1, deg + 1)))
     coeffs_top = np.asarray(
         [
             [0] * (deg - k + 1) + normalise_leading_coeff(coeffs_exp[:k])
             for k in range(0, deg + 1)
         ]
     ).T
-    coeff_top = (-1 / g * (coeffs_top @ p_scaled)).tolist()
+    coeff_top = ((coeffs_top @ p_scaled) / g).tolist()
     coeff_bot = [0] * (deg + 1) + [1.0]
 
     return F0, coeff_top, coeff_bot
@@ -138,41 +137,61 @@ def integral_poly_trig(
 def integral_poly_exp(
     s: complex,
     p: Iterable[float],
-    t1: float,
-    t2: float,
+    t1: float = 0.0,
+    t2: float = 1.0,
 ) -> complex:
     '''
-    Computes `∫ p(t) exp(st) dt` over `t in [t1, t2]`
+    Computes `∫ p(t) exp(st) dt` over `t in [t₁, t₂]`
+
+    **NOTE:**
+    ```
+    ∫ p(t) exp(st) dt
+    over t in [t₁, t₂]
+    = ∆t·exp(s·t₁) · ∫ p(t₁ + ∆t·u) exp(s·∆t·u) du
+      over u in [0, 1]
+    ```
+    Thus, upon rescaling, it suffices to compute integrals from 0 to 1.
     '''
+    deg = len(p) - 1
+
+    # rescale
+    if not (t1 == 0 and t2 == 1):
+        dt = t2 - t1
+        scale = np.cumprod([1] + [dt] * deg)
+        c = dt * np.exp(s * t1)
+        p = scale * get_recentred_coefficients(coeff=p, t0=t1)
+        s = s * dt
+        return c * integral_poly_exp(s=s, p=p)
+
     deg = len(p) - 1
     I = [0] * (deg + 1)
 
-    if deg < 0:
-        return 0.0
+    # compute vectors t_j = t ^ j
+    indices = np.asarray(range(deg + 1))
+    dirac = np.asarray([1] + [0] * deg)
+    one = np.asarray([1] * (deg + 1))
 
     if s == 0:
-        I = [t2 ** (k + 1) / (k + 1) - t1 ** (k + 1) / (k + 1) for k in range(deg + 1)]
+        # determine integals I_i := ∫ t^i exp(st) dt
+        I = one / (indices + 1)
     else:
         # compute C_ij := coeff j of exp_i(-s) / coeff i of exp_i(-s)
         # where exp_i(...) = exp-series truncated to polynomial of degree i.
         coeffs_exp = np.cumprod(-s / np.asarray(range(1, deg + 1)))
         coeffs_exp = np.insert(coeffs_exp, 0, 1)
         coeffs = np.asarray([coeffs_exp] * (deg + 1))
-        indices = np.asarray(range(deg + 1))
         mask = np.asarray([1 * (indices <= k) for k in range(deg + 1)])
         coeffs = mask * coeffs
         coeffs = np.diag(1 / np.diag(coeffs)) @ coeffs
 
-        # compute vectors t_j = t ^ j
-        t1pow = np.cumprod([1] + [t1] * deg)
-        t2pow = np.cumprod([1] + [t2] * deg)
-
         # determine integals I_i := ∫ t^i exp(st) dt
-        I = coeffs @ (t2pow - t1pow)
+        u = (one * np.exp(s) - dirac) / s
+        I = coeffs @ u
 
-        # compute integral ∫ p(t) exp(st) dt
-        I = np.inner(p, I)
-    return
+    # compute integral ∫ p(t) exp(st) dt
+    I = np.inner(p, I)
+
+    return I
 
 
 # ----------------------------------------------------------------
@@ -184,7 +203,7 @@ def normalise_leading_coeff(
     p: Iterable[complex],
     c_lead: complex = 1.0,
 ) -> list[complex]:
-    if not isinstance(p, np.ndarray):
+    if not isinstance(p, np.ndarray):  # pragma: no cover
         p = np.asarray(p)
     p_scaled = p.copy()
     if len(p_scaled) > 0:

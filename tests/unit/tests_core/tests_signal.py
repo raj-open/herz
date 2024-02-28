@@ -65,5 +65,50 @@ def test_fourier_of_polynomial_rote(
     F_method = [F0] + list(map(F, range(1, n_max + 1)))
 
     # verify correctness of method:
-    assert_arrays_close(F_method, F_manual, eps=0.5e-3)
+    np.testing.assert_array_almost_equal(F_method, F_manual, decimal=4)
+    return
+
+
+@mark.parametrize(
+    ('tt', 's', 'p'),
+    itertools_product(
+        [
+            (0, 1),
+            (3.1, 3.5),
+        ],
+        [0, 1j, 2 * pi * 1j, -3],
+        [
+            [1],
+            [0, 1],
+            [0, 0, 1],
+            [1, -2, 1],
+            [3, 0.5, -0.8, 1.7],
+        ],
+    ),
+)
+def test_integral_poly_exp_rote(
+    test: TestCase,
+    debug: Callable[..., None],
+    module: Callable[[str], str],
+    # test parameters
+    tt: tuple[int, int],
+    s: complex,
+    p: list[float],
+):
+    t1, t2 = tt
+    # compute integral coefficients 'by hand':
+    deg = len(p) - 1
+    N = 10000
+    one = np.ones(shape=(N,))
+    t = np.linspace(start=t1, stop=t2, num=N, endpoint=False)
+    dt = (t2 - t1) / N
+    tpow = np.cumprod([one] + [t] * deg, axis=0)
+    func_values = (np.asarray(p).T @ tpow) * np.exp(s * t)
+    F_manual = sum(func_values * dt)
+
+    # compute using method:
+    F_method = integral_poly_exp(s=s, p=p, t1=t1, t2=t2)
+
+    # verify correctness of method:
+    test.assertAlmostEquals(F_method, F_manual, delta=4)
     return

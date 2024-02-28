@@ -61,7 +61,7 @@ def test_force_poly_condition(
 ):
     cond_ = force_poly_condition(deg=deg, cond=PolyDerCondition(derivative=n, time=t))
     C = (np.linalg.norm(cond) + np.linalg.norm(cond_)) / 2 or 1.0
-    assert_arrays_close(cond, cond_, eps=1e-6)
+    np.testing.assert_array_almost_equal(cond, cond_, decimal=6)
     return
 
 

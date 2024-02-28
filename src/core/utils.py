@@ -10,8 +10,6 @@ from ..thirdparty.maths import *
 from ..thirdparty.physics import *
 from ..thirdparty.types import *
 
-from . import signal
-
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------

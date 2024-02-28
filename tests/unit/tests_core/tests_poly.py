@@ -48,7 +48,7 @@ def test_get_recentred_coefficients_rote(
     coeff_r: list[float],
 ):
     coeff_r_ = get_recentred_coefficients(coeff, t0)
-    assert_arrays_close(coeff_r_, coeff_r, eps=1e-6)
+    np.testing.assert_array_almost_equal(coeff_r_, coeff_r, decimal=6)
     return
 
 
@@ -66,17 +66,17 @@ def test_get_real_polynomial_roots(
     )
 
     roots = get_real_polynomial_roots([0, 0, -4, 1])
-    assert_arrays_equal(
+    np.testing.assert_array_equal(
         roots,
         [0, 0, 4],
-        message='Roots of algebric multiplicity should occur repeated in list.',
+        'Roots of algebric multiplicity should occur repeated in list.',
     )
 
     roots = get_real_polynomial_roots([0, 0, 0, -4, 1])
-    assert_arrays_equal(
+    np.testing.assert_array_equal(
         roots,
         [0, 0, 0, 4],
-        message='Roots of algebric multiplicity should occur repeated in list.',
+        'Roots of algebric multiplicity should occur repeated in list.',
     )
     return
 
@@ -119,7 +119,7 @@ def test_get_real_polynomial_roots_rote(
     zeroes: list[float],
 ):
     roots = get_real_polynomial_roots(coeff)
-    assert_arrays_close(roots, zeroes, eps=1e-6)
+    np.testing.assert_array_almost_equal(roots, zeroes, decimal=6)
     return
 
 
@@ -129,7 +129,7 @@ def test_get_derivative_coefficients(
     module: Callable[[str], str],
 ):
     coeff = get_derivative_coefficients([0, 1, 1])
-    assert_arrays_equal(coeff, [1, 2])
+    np.testing.assert_array_equal(coeff, [1, 2])
     return
 
 
@@ -152,7 +152,7 @@ def test_get_derivative_coefficients_rote(
     expected: list[float],
 ):
     coeff_ = get_derivative_coefficients(coeff, n=n)
-    assert_arrays_close(coeff_, expected, eps=1e-6)
+    np.testing.assert_array_almost_equal(coeff_, expected, decimal=6)
     return
 
 
@@ -162,10 +162,12 @@ def test_get_integral_coefficients(
     module: Callable[[str], str],
 ):
     coeff = get_integral_coefficients([1, 2])
-    assert_arrays_equal(coeff, [0, 1, 1])
+    np.testing.assert_array_equal(coeff, [0, 1, 1])
 
     coeff = get_derivative_coefficients(coeff)
-    assert_arrays_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
+    np.testing.assert_array_equal(
+        coeff, [1, 2], 'Derivative should return original coefficients.'
+    )
     return
 
 
@@ -192,10 +194,13 @@ def test_get_integral_coefficients_rote(
     expected: list[float],
 ):
     coeff_ = get_integral_coefficients(coeff, n=n)
-    assert_arrays_close(coeff_, expected, eps=1e-6)
+    np.testing.assert_array_almost_equal(coeff_, expected, decimal=6)
 
     coeff_ = get_derivative_coefficients(expected, n=n)
-    assert_arrays_close(
-        coeff_, coeff, eps=1e-6, message='Derivative should return original coefficients.'
+    np.testing.assert_array_almost_equal(
+        coeff_,
+        coeff,
+        decimal=6,
+        err_msg='Derivative should return original coefficients.',
     )
     return

@@ -4,17 +4,24 @@ source="."
 [report]
 show_missing = true
 omit =
+    # ignore anythign at the root level
+    ./*.py
+    # ignore auxiliary files
+    **/__init__.py
+    **/__paths__.py
     # ignore tests folder and all files with 'tests_' prefix
     tests/*
     **/tests_*.py
-    # ignore thirdparty imports
+    # ignore thirdparty, generated models, setup
     src/thirdparty/*
-    # ignore models folder (auto generated)
     src/models/generated/**
-    # ignore __init__ files (mainly used for exports)
-    **/__init__.py
-    # ignore main.py (-> too macroscopic; should be covered by integration tests)
-    src/main.py
+    src/setup/*
+    # ignore entry and endpoints (-> too macroscopic; should be covered by integration tests)
+    src/cli.py
+    src/api.py
+    src/endpoints/*
+    # ignore ui
+    src/ui/*
 # NOTE: set to 100 if want 100% coverage!
 fail_under = 0
 precision = 1
