@@ -36,6 +36,8 @@ def step_iso_max(
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
-) -> None:
+    fitinfos: list[tuple[tuple[int, int], FittedInfo]],
+    points_fit: dict[str, SpecialPointsConfig],
+) -> dict[str, SpecialPointsConfig]:
     log_warn('Not yet implemented')
-    return
+    return points_fit

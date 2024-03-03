@@ -82,7 +82,7 @@ def endpoint(case: RequestConfig):
         subprog = prog.subtask(f'''COMPUTE ISO-MAX FOR {quantity}''', steps=2)
         data_, points_data_ = step_shift_data_custom(data, points=points_data, quantity=quantity, cfg_matching=cfg_matching_iso)  # fmt: skip
         subprog.next()
-        step_iso_max(data_, points=points_data_, quantity=quantity)
+        points_fit = step_iso_max(data_, points=points_data_, quantity=quantity, fitinfos=fits, points_fit=points_fit)
         subprog.next()
 
         subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=1)
