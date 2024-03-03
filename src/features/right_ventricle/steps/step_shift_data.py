@@ -84,4 +84,4 @@ def step_shift_data_custom(
 
     data['time'] = t
 
-    return data, points
+    return data, points_
