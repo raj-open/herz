@@ -6,19 +6,25 @@
 # ----------------------------------------------------------------
 
 from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 
-from ....setup import config
-from ....core.utils import *
+from ....core.log import *
+from ....core.poly import *
 from ....models.app import *
+from ....models.enums import *
 from ....models.user import *
-from ....algorithms.peaks import *
+from ....models.fitting import *
+from ....queries.fitting import *
+from ....algorithms.cycles import *
+from ....algorithms.fit import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_recognise_peaks',
+    'step_iso_max',
 ]
 
 # ----------------------------------------------------------------
@@ -26,14 +32,10 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def step_recognise_peaks(
-    case: RequestConfig,
+def step_iso_max(
     data: pd.DataFrame,
+    points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
-) -> pd.DataFrame:
-    N = len(data)
-    values = data[quantity]
-    peaks, troughs = get_extremes(values)
-    data[f'{quantity}[peak]'] = where_to_characteristic(peaks, N)
-    data[f'{quantity}[trough]'] = where_to_characteristic(troughs, N)
-    return data
+) -> None:
+    log_warn('Not yet implemented')
+    return

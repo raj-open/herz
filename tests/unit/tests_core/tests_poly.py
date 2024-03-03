@@ -165,9 +165,7 @@ def test_get_integral_coefficients(
     np.testing.assert_array_equal(coeff, [0, 1, 1])
 
     coeff = get_derivative_coefficients(coeff)
-    np.testing.assert_array_equal(
-        coeff, [1, 2], 'Derivative should return original coefficients.'
-    )
+    np.testing.assert_array_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
     return
 
 

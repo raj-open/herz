@@ -29,15 +29,15 @@ __all__ = [
 
 
 def step_recognise_points(
-    case: RequestConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
+    cfg_points: SpecialPointsConfigs,
 ) -> tuple[list[tuple[tuple[int, int], dict[str, int]]], dict[str, SpecialPointsConfig]]:
     '''
     Uses fitted model to automatically recognise points based on derivative-conditions.
     '''
-    points_unsorted = get_point_settings(quantity, cfg=config.POINTS)
+    points_unsorted = get_point_settings(quantity, cfg=cfg_points)
     points_sorted = sort_special_points_specs(points_unsorted)
 
     match quantity:

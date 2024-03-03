@@ -105,10 +105,7 @@ def fourier_of_polynomial(
     g = -1j * 2 * pi
     coeffs_exp = np.cumprod(-g / np.asarray(range(1, deg + 1)))
     coeffs_top = np.asarray(
-        [
-            [0] * (deg - k + 1) + normalise_leading_coeff(coeffs_exp[:k])
-            for k in range(0, deg + 1)
-        ]
+        [[0] * (deg - k + 1) + normalise_leading_coeff(coeffs_exp[:k]) for k in range(0, deg + 1)]
     ).T
     coeff_top = ((coeffs_top @ p_scaled) / g).tolist()
     coeff_bot = [0] * (deg + 1) + [1.0]

@@ -261,9 +261,7 @@ def force_poly_conditions(
     conds: list[PolyDerCondition | PolyIntCondition],
 ) -> np.ndarray:
     m = len(conds)
-    A = np.asarray(
-        [force_poly_condition(deg=deg, cond=cond) for cond in conds], dtype=float
-    ).reshape((m, deg + 1))
+    A = np.asarray([force_poly_condition(deg=deg, cond=cond) for cond in conds], dtype=float).reshape((m, deg + 1))
     return A
 
 

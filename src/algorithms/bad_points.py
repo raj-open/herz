@@ -36,9 +36,7 @@ def mark_pinched_points_on_cycles(
     # determine start and end of each cycle
     windows = cycles_to_windows(cycles)
     # mark 'bad' parts of each cycle
-    marked = np.concatenate(
-        [mark_pinched_points_on_cycle(x=x[i1:i2, :], sig_t=sig_t) for i1, i2 in windows]
-    ).tolist()
+    marked = np.concatenate([mark_pinched_points_on_cycle(x=x[i1:i2, :], sig_t=sig_t) for i1, i2 in windows]).tolist()
     return marked
 
 

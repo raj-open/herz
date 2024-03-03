@@ -13,6 +13,7 @@ from .step_recognise_cycles import *
 from .step_fit_curve import *
 from .step_recognise_points import *
 from .step_align_cycles import *
+from .step_iso_max import *
 from .step_output_tables import *
 from .step_output_plots import *
 
@@ -33,6 +34,7 @@ __all__ = [
     'step_refit_curve',
     'step_recognise_points',
     'step_align_cycles',
+    'step_iso_max',
     'step_output_single_table',
     'step_output_combined_table',
     'step_output_time_plot',

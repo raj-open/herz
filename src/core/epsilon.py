@@ -109,9 +109,7 @@ def normalised_diffs(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> np.nda
     return dx / C
 
 
-def sign_normalised_diffs(
-    x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float
-) -> np.ndarray:
+def sign_normalised_diffs(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> np.ndarray:
     r = normalised_diffs(x_from=x_from, x_to=x_to)
     check = np.full(r.shape, fill_value=EnumSign.NON_ZERO, dtype=EnumSign)
 
@@ -146,9 +144,7 @@ def normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> 
     return dx / C
 
 
-def sign_normalised_diff_matrix(
-    x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float
-) -> np.ndarray:
+def sign_normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> np.ndarray:
     r = normalised_diff_matrix(x_from=x_from, x_to=x_to)
     check = np.full(r.shape, fill_value=EnumSign.NON_ZERO, dtype=EnumSign)
 
@@ -281,15 +277,11 @@ def duplicates_get_assignment_dictionaries(
         real_valued=real_valued,
     )
     assignments_gathered = [
-        {
-            value: [k for k, ii in enumerate(indices) if ii == i]
-            for i, value in enumerate(catalogue)
-        }
+        {value: [k for k, ii in enumerate(indices) if ii == i] for i, value in enumerate(catalogue)}
         for indices in assignments
     ]
     assignments_gathered = [
-        {value: indices for value, indices in infos.items() if len(indices) > 0}
-        for infos in assignments_gathered
+        {value: indices for value, indices in infos.items() if len(indices) > 0} for infos in assignments_gathered
     ]
     return catalogue, assignments_gathered
 
@@ -329,10 +321,7 @@ def duplicates_get_assignment_counts(
         boundaries_imag=boundaries_imag,
         real_valued=real_valued,
     )
-    counts = [
-        {value: len(indices) for value, indices in assignment.items()}
-        for assignment in assignments
-    ]
+    counts = [{value: len(indices) for value, indices in assignment.items()} for assignment in assignments]
     return catalogue, counts
 
 

@@ -149,10 +149,7 @@ class Poly(PolyBase[T]):
                 return Poly(coeff=[0])
             coeff_p = np.asarray(self.coeff)
             coeff = np.sum(
-                [
-                    [0] * k + (c * coeff_p).tolist() + [0] * (q.degree - k)
-                    for k, c in enumerate(q.coeff)
-                ],
+                [[0] * k + (c * coeff_p).tolist() + [0] * (q.degree - k) for k, c in enumerate(q.coeff)],
                 axis=0,
             ).tolist()
             result = Poly(coeff=coeff)

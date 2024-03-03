@@ -15,7 +15,7 @@ from ...thirdparty.types import *
 from ...setup import config
 from ...models.app import *
 from ...models.user import *
-from ...endpoints import run
+from ...features import run
 from .decorators import *
 from .common import *
 
@@ -47,9 +47,7 @@ def add_endpoints_run(
         # DEV-NOTE: add for @add_http_auth-decorator
         http_cred: Annotated[HTTPBasicCredentials, FastAPIDepends(get_security())],
         # end of decorator arguments
-        payload: Annotated[
-            RequestsConfig, FastAPIBody(media_type='application/json;charset=utf-8')
-        ],
+        payload: Annotated[RequestsConfig, FastAPIBody(media_type='application/json;charset=utf-8')],
     ):
         cfg = config.load_internal_config()
         for request in payload.root:

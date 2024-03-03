@@ -38,28 +38,31 @@ __all__ = [
 
 
 def step_output_time_plot(
-    case: RequestConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     points: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
-    shifted: bool = False,
+    shifted: bool,
+    plot_name: str,
+    plot_label: str,
+    cfg_output: UserOutput,
+    cfg_matching: MatchingConfig,
     N: int = 1000,
 ) -> pgo.Figure:
-    cfg_font = case.output.plot.font
+    cfg_font = cfg_output.plot.font
     _, info = fitinfos[-1]
     T = info.normalisation.period
 
-    cv = output_conversions(case.output.quantities, units=config.UNITS)
-    units = output_units(case.output.quantities)
+    cv = output_conversions(cfg_output.quantities, units=config.UNITS)
+    units = output_units(cfg_output.quantities)
 
     # un-/renormalise data
     data = get_unnormalised_data(data, fitinfos, quantity=quantity, renormalise=True)
 
     # compute series for fitted curves
     special, _, time, data_fitted = compute_fitted_curves_for_plots(
-        cfg=config.MATCHING,
+        cfg=cfg_matching,
         info=info,
         points=points,
         quantity=quantity,
@@ -83,7 +86,7 @@ def step_output_time_plot(
         height=720,
         margin=dict(l=40, r=40, t=60, b=40),
         title=dict(
-            text=case.name,
+            text=plot_name,
             font=dict(
                 size=cfg_font.size_title,
             ),
@@ -94,7 +97,7 @@ def step_output_time_plot(
             color='hsla(0, 100%, 0%, 1)',
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
-        showlegend=case.output.plot.legend,
+        showlegend=cfg_output.plot.legend,
         legend=dict(
             title='Series/Points',
             font=dict(
@@ -193,53 +196,47 @@ def step_output_time_plot(
         showlegend_points=False,
     )
 
-    path = case.output.plot.path.root
+    path = cfg_output.plot.path.root
     if path is not None:
-        path = path.format(label=case.label, kind=f'{quantity}-time')
+        path = path.format(label=plot_label, kind=f'{quantity}-time')
         save_image(fig=fig, path=path)
 
     return fig
 
 
 def step_output_loop_plot(
-    case: RequestConfig,
-    cfg: AppConfig,
     data_p: pd.DataFrame,
     fitinfos_p: list[tuple[tuple[int, int], FittedInfo]],
     points_p: dict[str, SpecialPointsConfig],
     data_v: pd.DataFrame,
     fitinfos_v: list[tuple[tuple[int, int], FittedInfo]],
     points_v: dict[str, SpecialPointsConfig],
-    shifted: bool = False,
+    shifted: bool,
+    plot_name: str,
+    plot_label: str,
+    cfg_output: UserOutput,
+    cfg_matching: MatchingConfig,
     N: int = 1000,
 ) -> pgo.Figure:
-    cfg_font = case.output.plot.font
+    cfg_font = cfg_output.plot.font
 
-    cv = output_conversions(case.output.quantities, units=config.UNITS)
-    units = output_units(case.output.quantities)
+    cv = output_conversions(cfg_output.quantities, units=config.UNITS)
+    units = output_units(cfg_output.quantities)
 
     _, info_p = fitinfos_p[-1]
     _, info_v = fitinfos_v[-1]
     T_p = info_p.normalisation.period
     T_v = info_v.normalisation.period
-    t_align_p = (
-        get_alignment_time(info_p, points_p, quantity='pressure', cfg=config.MATCHING)
-        if shifted
-        else 0.0
-    )
-    t_align_v = (
-        get_alignment_time(info_v, points_v, quantity='volume', cfg=config.MATCHING)
-        if shifted
-        else 0.0
-    )
+    t_align_p = get_alignment_time(info_p, points_p, quantity='pressure', cfg=cfg_matching) if shifted else 0.0
+    t_align_v = get_alignment_time(info_v, points_v, quantity='volume', cfg=cfg_matching) if shifted else 0.0
 
     # un-/renormalise data
     data_p = get_unnormalised_data(data_p, fitinfos_p, quantity='pressure', renormalise=True)
     data_v = get_unnormalised_data(data_v, fitinfos_v, quantity='volume', renormalise=True)
 
     # compute series for fitted curves
-    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, cfg=config.MATCHING, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
-    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, cfg=config.MATCHING, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [p], time_p, [pressure_fit] = compute_fitted_curves_for_plots(info_p, cfg=cfg_matching, points=points_p, quantity='pressure', shift=shifted, n_der=0, N=N)  # fmt: skip
+    _, [v], time_v, [volume_fit] = compute_fitted_curves_for_plots(info_v, cfg=cfg_matching, points=points_v, quantity='volume', shift=shifted, n_der=0, N=N)  # fmt: skip
 
     # fit 'other' measurement to each time-series
     data_p['volume'] = poly(T_v * ((data_p['time[orig]'] / T_p + t_align_v / T_v) % 1), *v)
@@ -259,7 +256,7 @@ def step_output_loop_plot(
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         title=dict(
-            text=case.name,
+            text=plot_name,
             x=0.5,
             y=0.95,
             font=dict(
@@ -287,7 +284,7 @@ def step_output_loop_plot(
             # autorange='reversed',
             rangemode='tozero',
         ),
-        showlegend=case.output.plot.legend,
+        showlegend=cfg_output.plot.legend,
         legend=dict(
             title='Series/Points',
         ),
@@ -334,10 +331,7 @@ def step_output_loop_plot(
             # NOTE: Ensure that the cycle contains start+end points!
             x=cv['volume'] * np.concatenate([volume_fit, volume_fit[:1]]),
             y=cv['pressure'] * np.concatenate([pressure_fit, pressure_fit[:1]]),
-            text=[
-                f'{tt:.0f}{units["time"]}'
-                for tt in cv['time'] * np.concatenate([time_p, time_p[:1]])
-            ],
+            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * np.concatenate([time_p, time_p[:1]])],
             mode='lines',
             line_shape='spline',
             line=dict(
@@ -403,9 +397,9 @@ def step_output_loop_plot(
             col=1,
         )
 
-    path = case.output.plot.path.root
+    path = cfg_output.plot.path.root
     if path is not None:
-        path = path.format(label=case.label, kind='pressure-volume')
+        path = path.format(label=plot_label, kind='pressure-volume')
         save_image(fig=fig, path=path)
 
     return fig
@@ -615,9 +609,7 @@ def add_plot_time_series(
             row=row,
             col=col,
         )
-        fig.add_vline(
-            x=cv_time * point.time, line_width=0.5, line_dash='dash', line_color=marker.colour
-        )
+        fig.add_vline(x=cv_time * point.time, line_width=0.5, line_dash='dash', line_color=marker.colour)
 
     return fig
 

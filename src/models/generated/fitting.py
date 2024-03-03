@@ -67,9 +67,7 @@ class FittedInfo(BaseModel):
         extra='forbid',
         populate_by_name=True,
     )
-    coefficients: List[float] = Field(
-        [], description='Coefficients of polynomial that fits (pre-normalised) cycle.'
-    )
+    coefficients: List[float] = Field([], description='Coefficients of polynomial that fits (pre-normalised) cycle.')
     normalisation: FittedInfoNormalisation = Field(
         ...,
         description='Pre-normalisation of cycle before curves is fit.\nThis is used so that fitted curves for multiple cycles can be\ncompared and combined to a single curve\nthat fits all cycles simultaneously.',

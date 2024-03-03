@@ -156,24 +156,17 @@ class SpecialPointsSpec(BaseModel):
         populate_by_name=True,
     )
     derivative: int = Field(0, description="Order of the n'th derivative condition.", ge=0)
-    kind: EnumCriticalPoints = Field(
-        ..., description="Kind of n'th derivative condition: (local) min/max."
-    )
-    reuse: bool = Field(
-        False,
-        description='Whether the recognised point is to be reused for the 2nd round of fitting.',
-    )
+    kind: EnumCriticalPoints = Field(..., description="Kind of n'th derivative condition: (local) min/max.")
+    reuse: bool = Field(False, description='Whether the recognised point is to be reused for the 2nd round of fitting.')
     strict: bool = Field(
         True,
         description='Whether the point is to occur strictly inside the cycle.\n\nDefault: `true`.\n\nNOTE: Only set to `false` for a time point that is the peak value.',
     )
     after: List[str] = Field(
-        ...,
-        description='The currently specified point has to occur after this list of named points.',
+        ..., description='The currently specified point has to occur after this list of named points.'
     )
     before: List[str] = Field(
-        ...,
-        description='The currently specified point has to occur before this list of named points.',
+        ..., description='The currently specified point has to occur before this list of named points.'
     )
 
 
@@ -201,12 +194,8 @@ class SpecialPointsConfig(BaseModel):
     )
     name: str = Field(..., description='Name of special point.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
-    found: bool = Field(
-        False, description='Option to mark whether point successfully computed.'
-    )
-    time: float = Field(
-        -1, description='Time co-ordinate of special point (initially normalised to `[0, 1]`).'
-    )
+    found: bool = Field(False, description='Option to mark whether point successfully computed.')
+    time: float = Field(-1, description='Time co-ordinate of special point (initially normalised to `[0, 1]`).')
     value: float = Field(-1, description='Value of special point.')
     spec: Optional[SpecialPointsSpec] = Field(
         None, description='Optional specifications for computation of special point.'
@@ -240,9 +229,7 @@ class Settings(BaseModel):
     polynomial: PolynomialConfig = Field(
         ..., description='Conditions for initial fitting (polynomial) curves to raw data.'
     )
-    points: SpecialPointsConfigs = Field(
-        ..., description='Specifications used to compute special points.'
-    )
+    points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
 
 
 class AppConfig(BaseModel):

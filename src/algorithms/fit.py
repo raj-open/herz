@@ -162,15 +162,8 @@ def refine_conditions_determine_degree(
     conds_int = [cond for cond in conds if isinstance(cond, PolyIntCondition)]
 
     # determine the number of unique ZEROES being forced by derivative conditions:
-    n_max = max(
-        [0]
-        + [cond.derivative for cond in conds_der]
-        + [cond.derivative + 1 for cond in conds_crit]
-    )
-    num_zeroes = [
-        len(np.unique([cond.time for cond in conds_der if cond.derivative == n]))
-        for n in range(n_max + 1)
-    ]
+    n_max = max([0] + [cond.derivative for cond in conds_der] + [cond.derivative + 1 for cond in conds_crit])
+    num_zeroes = [len(np.unique([cond.time for cond in conds_der if cond.derivative == n])) for n in range(n_max + 1)]
 
     # ensure the number of forced CRITICAL POINTS on n'th derivatives:
     deg = 0

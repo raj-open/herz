@@ -30,7 +30,6 @@ __all__ = [
 
 
 def step_shift_data_extremes(
-    case: RequestConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str = 'peak',
@@ -58,16 +57,19 @@ def step_shift_data_extremes(
 
 
 def step_shift_data_custom(
-    case: RequestConfig,
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
+    cfg_matching: MatchingConfig,
 ) -> tuple[
     pd.DataFrame,
     list[tuple[tuple[int, int], dict[str, int]]],
 ]:
-    align = get_alignment_point(quantity, cfg=config.MATCHING)
+    align = get_alignment_point(quantity, cfg=cfg_matching)
 
+    # create copies so that original data not affected
+    data = data.copy(True)
+    points_ = points[:]
     t = data['time'].to_numpy(copy=True)
 
     # shift times in each cycle
@@ -75,7 +77,7 @@ def step_shift_data_custom(
         i0 = pts.get(align, -1)
         if i0 == -1:
             continue
-        points[k] = ((i1, i2), {key: i1 + ((i - i0) % (i2 - i1)) for key, i in pts.items()})
+        points_[k] = ((i1, i2), {key: i1 + ((i - i0) % (i2 - i1)) for key, i in pts.items()})
         indices = list(range(i1, i2))
         indices = indices[i0:] + indices[:i0]
         data[i1:i2] = data.iloc[indices, :].reset_index(drop=True)

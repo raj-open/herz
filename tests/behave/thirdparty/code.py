@@ -87,9 +87,7 @@ def make_safe(
     def dec(f: Callable[PARAMS, RETURN]) -> Callable[PARAMS, RETURN | E]:
         @wraps(f)
         def wrapped_fct(*_: PARAMS.args, **__: PARAMS.kwargs) -> RETURN | E:
-            return safe_unwrap(
-                lambda: f(*_, **__), default=default, default_factory=default_factory
-            )
+            return safe_unwrap(lambda: f(*_, **__), default=default, default_factory=default_factory)
 
         return wrapped_fct
 

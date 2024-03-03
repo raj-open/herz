@@ -92,9 +92,9 @@ def step_output_combined_table(
 
     cv = output_conversions(case.output.quantities, units=config.UNITS)
 
-    table = pd.DataFrame(
-        {col.key: cv[col.key] * data[col.key] for col in case.output.quantities}
-    ).astype({col.key: col.type.value for col in case.output.quantities})
+    table = pd.DataFrame({col.key: cv[col.key] * data[col.key] for col in case.output.quantities}).astype(
+        {col.key: col.type.value for col in case.output.quantities}
+    )
 
     table.to_csv(
         path,

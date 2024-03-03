@@ -53,7 +53,7 @@ def process(cfg: AppConfig, case: RequestConfig):
     match case.endpoint:
         case EnumEndpoint.RIGHT_VENTRICLE as ep:
             timer.start()
-            right_ventricle.endpoint(case=case, cfg=cfg)
+            right_ventricle.endpoint(case=case)
             timer.stop()
 
         case _ as ep if isinstance(ep, EnumEndpoint):

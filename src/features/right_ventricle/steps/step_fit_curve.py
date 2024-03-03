@@ -34,11 +34,11 @@ __all__ = [
 
 
 def step_fit_curve(
-    case: RequestConfig,
     data: pd.DataFrame,
     quantity: str,
-    conds: Optional[list[PolyCritCondition | PolyDerCondition | PolyIntCondition]] = None,
-    n_der: int = 2,
+    conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+    mode: EnumFittingMode,
+    n_der: int,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
     Fits polynomial to cycles in time-series, forcing certain conditions
@@ -47,8 +47,6 @@ def step_fit_curve(
 
     NOTE: Initial fitting runs from peak to peak.
     '''
-    conds = conds or get_polynomial_condition(quantity, cfg=config.POLY)
-
     # fit polynomial
     t = data['time'].to_numpy(copy=True)
     x = data[quantity].to_numpy(copy=True)
@@ -56,24 +54,29 @@ def step_fit_curve(
     fitinfos = fit_poly_cycles(t=t, x=x, cycles=cycles, conds=conds)
 
     # compute n'th derivatives
-    data = compute_nth_derivatives_for_cycles(case, data, fitinfos, quantity=quantity, n_der=n_der)  # fmt: skip
+    data = compute_nth_derivatives_for_cycles(data, fitinfos, quantity=quantity, n_der=n_der, mode=mode)
 
     return data, fitinfos
 
 
 def step_refit_curve(
-    case: RequestConfig,
     data: pd.DataFrame,
     points: dict[str, SpecialPointsConfig],
     quantity: str,
-    n_der: int = 2,
+    conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+    n_der: int,
+    mode: EnumFittingMode,
+    cfg_matching: MatchingConfig,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
-    align = get_alignment_point(quantity, cfg=config.MATCHING)
-    conds = get_polynomial_condition(quantity, cfg=config.POLY)
+    '''
+    Refits polynomials, by additionally forcing derivative conditions
+    of previously determined special points to be retained.
+    '''
+    align = get_alignment_point(quantity, cfg=cfg_matching)
 
     # add in conditions for special points
     # NOTE: only used special pts marked for reuse
-    conds += [
+    conds = conds[:] + [
         PolyDerCondition(derivative=point.spec.derivative + 1, time=point.time)
         for key, point in points.items()
         if point.spec is not None
@@ -86,11 +89,11 @@ def step_refit_curve(
     conds = shift_conditions(conds, t0=t_align)
 
     data, fitinfos = step_fit_curve(
-        case=case,
         data=data,
         quantity=quantity,
         conds=conds,
         n_der=n_der,
+        mode=mode,
     )
 
     return data, fitinfos
@@ -102,11 +105,11 @@ def step_refit_curve(
 
 
 def compute_nth_derivatives_for_cycles(
-    case: RequestConfig,
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
     quantity: str,
     n_der: int,
+    mode: EnumFittingMode,
 ) -> pd.DataFrame:
     '''
     Computes the n'th derivatives of the fitted curve for each cycle.
@@ -114,7 +117,7 @@ def compute_nth_derivatives_for_cycles(
     N = len(data)
     t = data['time'].to_numpy(copy=True)
 
-    match case.process.fit.mode:
+    match mode:
         case EnumFittingMode.AVERAGE:
             _, info_av = fitinfos[-1]
             coeffs = [info_av.coefficients[:] for _, _ in fitinfos[:-1]]

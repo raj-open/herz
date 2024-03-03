@@ -31,7 +31,6 @@ __all__ = [
 
 
 def step_recognise_cycles(
-    case: RequestConfig,
     data: pd.DataFrame,
     quantity: str,
     shift: str,

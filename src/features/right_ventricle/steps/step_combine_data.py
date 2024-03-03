@@ -53,9 +53,7 @@ def step_normalise_data(
     time_uniform = np.linspace(start=0, stop=T, num=N, endpoint=False)
     values = interpolate_curve(time_uniform, x=time, y=values, T_max=T, periodic=True)
 
-    data = pd.DataFrame({'time': time_uniform, quantity: values}).astype(
-        {'time': float, quantity: float}
-    )
+    data = pd.DataFrame({'time': time_uniform, quantity: values}).astype({'time': float, quantity: float})
 
     return data
 

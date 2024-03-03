@@ -163,9 +163,7 @@ def get_recentred_coefficients(coeff: list[float], t0: float) -> list[float]:
     for each k.
     '''
     deg = len(coeff) - 1
-    A = np.asarray(
-        [[nCr(k + j, k) * a for j, a in enumerate(coeff[k:])] + [0] * k for k in range(deg + 1)]
-    )
+    A = np.asarray([[nCr(k + j, k) * a for j, a in enumerate(coeff[k:])] + [0] * k for k in range(deg + 1)])
     u = np.cumprod([1] + [t0] * deg)
     coeff_recentred = (A @ u).tolist()
     return coeff_recentred

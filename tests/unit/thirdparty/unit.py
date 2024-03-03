@@ -38,8 +38,7 @@ def assert_array_close_to_zero(
     x__ = x_.flatten()
     dist = np.linalg.norm(x__)
     assert dist < eps, (
-        message
-        or f'Array must be sufficiently close to 0. Recieved\n    x={x_}\nfor which\n    ‖x‖ = {dist} > {eps}'
+        message or f'Array must be sufficiently close to 0. Recieved\n    x={x_}\nfor which\n    ‖x‖ = {dist} > {eps}'
     )
     return
 

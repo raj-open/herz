@@ -29,9 +29,7 @@ class Cycles(BaseModel):
         populate_by_name=True,
     )
     remove_bad: bool = Field(
-        False,
-        alias='remove-bad',
-        description="Option to remove 'bad' parts at start/end of cycles.",
+        False, alias='remove-bad', description="Option to remove 'bad' parts at start/end of cycles."
     )
 
 
@@ -43,9 +41,7 @@ class Font(BaseModel):
     family: str = 'Tahoma'
     size: int = Field(12, description='Size of font (in entire plot) in `pt`.')
     size_title: int = Field(14, alias='size-title', description='Size of title font in `pt`.')
-    size_legend: int = Field(
-        10, alias='size-legend', description='Size of legend font in `pt`.'
-    )
+    size_legend: int = Field(10, alias='size-legend', description='Size of legend font in `pt`.')
 
 
 class PathToDirString(RootModel[str]):
@@ -64,9 +60,7 @@ class FileString(RootModel[str]):
         populate_by_name=True,
     )
     root: str = Field(
-        ...,
-        description='Data type for a string to be the base name of a file.',
-        pattern='^[^\\\\\\/]*\\.[^\\\\\\/]+$',
+        ..., description='Data type for a string to be the base name of a file.', pattern='^[^\\\\\\/]*\\.[^\\\\\\/]+$'
     )
 
 
@@ -221,9 +215,7 @@ class UserOutput(BaseModel):
         populate_by_name=True,
     )
     name: Optional[str] = Field(None, description='Name of case.')
-    quantities: List[DataTypeColumn] = Field(
-        ..., description='User settings for output quantities.', min_length=1
-    )
+    quantities: List[DataTypeColumn] = Field(..., description='User settings for output quantities.', min_length=1)
     table: Table
     plot: Plot
 
@@ -245,10 +237,7 @@ class DataTimeSeries(BaseModel):
         description='Which row indexes to skip.\nEither provide\n\n- a string of a lambda function (mapping integers to boolean values)\n- an integer, indicating how many rows to skip from the top\n- an array\n\nNoted that row numbers are **0-based**!',
         examples={
             'simple': {'value': 3, 'summary': 'Rows `0,1,2` will be skipped.'},
-            'function': {
-                'value': '`lambda i: i % 3 == 1`',
-                'summary': 'Skips every 3rd rwo starting from row-index 1',
-            },
+            'function': {'value': '`lambda i: i % 3 == 1`', 'summary': 'Skips every 3rd rwo starting from row-index 1'},
             'array': {
                 'value': [0, 1, 2, 4, 5],
                 'summary': 'In this case in the file\n- extra headers are on lines `0, 1, 2``,\n- headers are on row `3`\n- rows 4 and 5 contain further skippable content\n\nNOTE: negative values will be ignored.',

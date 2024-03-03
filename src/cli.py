@@ -19,7 +19,7 @@ from .setup import config
 from .models.app import *
 from .models.user import *
 from .queries.console.cli import *
-from .endpoints import *
+from .features import *
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS, SETTINGS

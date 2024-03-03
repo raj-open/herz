@@ -22,9 +22,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def get_extremes(
-    values: np.ndarray, sig_width: float = 1 / math.sqrt(2)
-) -> tuple[list[int], list[int]]:
+def get_extremes(values: np.ndarray, sig_width: float = 1 / math.sqrt(2)) -> tuple[list[int], list[int]]:
     N_values = len(values)
     # first make data as symmetric as possible
     values = normalised_order_statistics(values)

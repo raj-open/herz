@@ -205,10 +205,7 @@ def log_critical_points(
     )
     data = []
     for t0, classif in classifications:
-        class_as_strs = [
-            ', '.join([kind.value for kind in kinds]) if len(kinds) > 0 else None
-            for kinds in classif
-        ]
+        class_as_strs = [', '.join([kind.value for kind in kinds]) if len(kinds) > 0 else None for kinds in classif]
         data.append([f'{t0:.6f}'] + class_as_strs)
     table = tabulate(
         data,
@@ -268,9 +265,7 @@ def get_time_grid(
     if len(t) == 0:
         return []
     # removes ε-duplicates + forces values close to boundaries to be on the boundaries
-    t, _ = duplicates_get_assignment_maps(
-        t, eps=eps, boundaries_real=(t_min, t_max), real_valued=True
-    )
+    t, _ = duplicates_get_assignment_maps(t, eps=eps, boundaries_real=(t_min, t_max), real_valued=True)
     t = [tt for tt in t if t_min <= tt and tt <= t_max]
     # ensure finite values:
     t_min = t_min if abs(t_min) < np.inf else min(t)

@@ -30,13 +30,9 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def sort_special_points_specs(
-    points: dict[str, SpecialPointsConfig]
-) -> list[tuple[str, SpecialPointsConfig]]:
+def sort_special_points_specs(points: dict[str, SpecialPointsConfig]) -> list[tuple[str, SpecialPointsConfig]]:
     nodes = points.keys()
-    points_with_specs = [
-        (key, point) for key, point in points.items() if point.spec is not None
-    ]
+    points_with_specs = [(key, point) for key, point in points.items() if point.spec is not None]
     edges = [
         (u1, u2)
         for u1, point1 in points_with_specs
