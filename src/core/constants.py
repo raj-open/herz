@@ -5,9 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.types import *
-
-from ..models.generated.app import *
+#
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -16,7 +14,8 @@ from ..models.generated.app import *
 __all__ = [
     'FLOAT_ERR',
     'MACHINE_EPS',
-    'SOLVE_ERR',
+    'POLY_RESOLUTION',
+    'SOLVE_TOLERANCE',
 ]
 
 # ----------------------------------------------------------------
@@ -24,5 +23,6 @@ __all__ = [
 # ----------------------------------------------------------------
 
 FLOAT_ERR = 0.5e-6
-SOLVE_ERR = 1e-5
+POLY_RESOLUTION = 0.5e-3
+SOLVE_TOLERANCE = 0.5e-6
 MACHINE_EPS = 1e-10
