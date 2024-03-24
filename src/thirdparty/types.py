@@ -26,35 +26,39 @@ from typing import Text
 from typing import Type
 from typing import TypeAlias
 from typing import TypeVar
+from pydantic import RootModel
 from pydantic.types import AwareDatetime
 from pydantic.types import SecretStr
+from numpy.typing import NDArray
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Enum',
-    'Iterable',
     'Annotated',
     'Any',
     'Awaitable',
+    'AwareDatetime',
     'Callable',
     'ClassVar',
     'Concatenate',
     'Coroutine',
+    'Enum',
     'Generator',
     'Generic',
+    'Iterable',
     'Literal',
+    'NDArray',
     'Optional',
     'ParamSpec',
     'ParamSpecArgs',
     'ParamSpecKwargs',
     'Protocol',
+    'RootModel',
+    'SecretStr',
     'Text',
     'Type',
     'TypeAlias',
     'TypeVar',
-    'AwareDatetime',
-    'SecretStr',
 ]

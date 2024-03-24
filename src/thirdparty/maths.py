@@ -9,6 +9,7 @@ import lmfit
 import math
 from math import pi
 import numpy as np
+import networkx as nx
 import random
 import scipy as sp
 from scipy import linalg as spla
@@ -115,6 +116,7 @@ __all__ = [
     'nPr',
     'normalised_order_statistics',
     'np',
+    'nx',
     'pi',
     'random',
     'indices_non_outliers',
