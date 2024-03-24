@@ -5,8 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.maths import *
-from ..thirdparty.types import *
+from ...thirdparty.maths import *
+from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

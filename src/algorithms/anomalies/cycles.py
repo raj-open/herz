@@ -5,9 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.maths import *
+from ...thirdparty.maths import *
 
-from ..core.utils import *
+from ...core.utils import *
 from .peaks import *
 
 # ----------------------------------------------------------------
@@ -29,8 +29,8 @@ def cycles_to_windows(cycles: list[int]) -> list[tuple[int, int]]:
     Turns a list indicating cycle indexes into a list
     of pairs of endpoints of the cycles.
 
-    E.g. if the input is `[0, 0, 0, 1, 1, 2, 2, 2]`,
-    the output is `[(0, 3), (3, 5), (5, 8)]`.
+    E.g. if the input is `[0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2]`,
+    the output is `[(0, 4), (4, 6), (6, 11)]`.
     '''
     c_min = min(cycles + [0])
     c_max = max(cycles + [0])

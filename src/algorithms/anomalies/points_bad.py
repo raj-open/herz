@@ -5,9 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.maths import *
+from ...thirdparty.maths import *
 
-from ..core.utils import *
+from ...core.utils import *
 from .cycles import *
 from .peaks import *
 
