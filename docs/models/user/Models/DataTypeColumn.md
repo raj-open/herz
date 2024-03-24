@@ -3,6 +3,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ignore** | [**Boolean**](boolean.md) | If &#x60;ignore &#x3D; false&#x60;, then column will be included in combined output. Otherwise just used for internal computations. | [optional] [default to false]
 **name** | [**String**](string.md) | Desired name of column in file. | [default to null]
 **quantity** | [**String**](string.md) | (Root) name of physical quantity. E.g. for a column for \&quot;fitted pressure\&quot; use &#x60;quantity&#x3D;\&quot;pressure\&quot;&#x60;. | [default to null]
 **key** | [**String**](string.md) | Name of column in internal data frame. E.g. for a column for \&quot;fitted pressure\&quot; use &#x60;key&#x3D;\&quot;pressure[fit]\&quot;&#x60;. | [default to null]

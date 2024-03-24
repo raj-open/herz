@@ -74,6 +74,58 @@ components:
           default: 1.
       additionalProperties: false
 
+    # --------------------------------
+    # DATA TYPE - fitted info trig curve
+    # --------------------------------
+
+    FittedInfoTrig:
+      description: |-
+        Parameters of a fitted model
+        ```
+        f(t) = A + R·cos(ω(t - t₀))
+        ```
+      required:
+        - hshift
+        - hscale
+        - vshift
+        - vscale
+        - drift
+      properties:
+        hshift:
+          type: number
+        hscale:
+          type: number
+        vshift:
+          type: number
+        vscale:
+          type: number
+        drift:
+          type: number
+      additionalProperties: false
+
+    # --------------------------------
+    # DATA TYPE - fitted info trig curve
+    # --------------------------------
+
+    FittedInfoExp:
+      description: |-
+        Parameters of a fitted model
+        ```
+        P(V) = A + B·exp(β·V)
+        ```
+      required:
+        - hscale
+        - vshift
+        - vscale
+      properties:
+        hscale:
+          type: number
+        vshift:
+          type: number
+        vscale:
+          type: number
+      additionalProperties: false
+
     # ----------------------------------------------------------------
     # ENUMS
     # ----------------------------------------------------------------

@@ -58,6 +58,8 @@ components:
             - matching
             - polynomial
             - points
+            - trigonometric
+            - exponential
           properties:
             units:
               description: |-
@@ -76,6 +78,23 @@ components:
               description: |-
                 Specifications used to compute special points.
               $ref: "#/components/schemas/SpecialPointsConfigs"
+            trigonometric:
+              description: |-
+                Settings to fit trigonometric model.
+              type: object
+              required:
+                - pressure
+                # - volume
+              properties:
+                pressure:
+                  $ref: "#/components/schemas/FitTrigConfig"
+                volume:
+                  $ref: "#/components/schemas/FitTrigConfig"
+              additionalProperties: false
+            exponential:
+              description: |-
+                Settings to fit exponential model.
+              $ref: "#/components/schemas/FitExpConfig"
       additionalProperties: false
 
     # --------------------------------
@@ -232,12 +251,17 @@ components:
       type: object
       required:
         - name
+        # - name-simple <- if empty defaults to value of 'name'
         # - spec
         # - marker
       properties:
         name:
           description: |-
             Name of special point.
+          type: string
+        name-simple:
+          description: |-
+            A table-friendly version of the name.
           type: string
         ignore:
           description: |-
@@ -361,6 +385,237 @@ components:
           default: 'top center'
       additionalProperties: false
 
+    # --------------------------------
+    # DATA TYPE - Trig Fitting
+    # --------------------------------
+
+    FitTrigConfig:
+      description: |-
+        Settings used to fit trigonometric curve to parts of model.
+      type: object
+      required:
+        - solver
+        - points
+        - intervals
+        - initial
+      properties:
+        solver:
+          description: |-
+            Settings for the solver.
+          type: object
+          required:
+            - n-max
+          properties:
+            n-max:
+              type: integer
+              minimum: 0
+            model:
+              description: |-
+                Indicates whether to fit against the data or another model.
+              $ref: "#/components/schemas/EnumModelKind"
+              default: DATA
+            mode:
+              description: |-
+                Determines the mode in which the fitting algorithm is executed.
+              $ref: "#/components/schemas/EnumSolver"
+              default: BRUTE-FORCE
+          additionalProperties: False
+        points:
+          description: |-
+            Schema for values to be used in intervals and conditions
+          type: object
+          additionalProperties:
+            type: string
+        intervals:
+          description: |-
+            Defines the spatial domain over which the model is to be defined.
+          type: array
+          items:
+            $ref: "#/components/schemas/PairString"
+          minItems: 1
+        conditions:
+          description: |-
+            Provides restrictions on the frequency.
+          type: array
+          items:
+            $ref: "#/components/schemas/FitTrigCondition"
+          default: []
+        initial:
+          $ref: "#/components/schemas/FitTrigIntialisation"
+      additionalProperties: False
+
+    FitTrigCondition:
+      description: |-
+        Conditions to define bounds on the frequency.
+      type: object
+      required:
+        - kind
+        - value
+      properties:
+        kind:
+          description: |-
+            Kind of bound.
+          $ref: "#/components/schemas/EnumBoundKind"
+        value:
+          description: |-
+            Parseable expression for the value of the bound.
+          type: string
+      additionalProperties: False
+
+    FitTrigIntialisation:
+      description: |-
+        Provides initial estimates for model parameters
+        as parseable expressions.
+      required: []
+      properties:
+        omega:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: '2 * math.pi / 2'
+        hshift:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 0
+        vscale:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 1
+        vshift:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 0
+        drift:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 0
+      additionalProperties: False
+
+    # --------------------------------
+    # DATA TYPE - Exp Fitting
+    # --------------------------------
+
+    FitExpConfig:
+      description: |-
+        Settings used to fit exponential curve to parts of model.
+      type: object
+      required:
+        - solver
+        - points
+        - intervals
+        - initial
+      properties:
+        solver:
+          description: |-
+            Settings for the solver.
+          type: object
+          required:
+            - n-max
+          properties:
+            n-max:
+              description: |-
+                Maximum number of iterations
+              type: integer
+              minimum: 0
+            model:
+              description: |-
+                Indicates whether to fit against the data or another model.
+              $ref: "#/components/schemas/EnumModelKind"
+              default: DATA
+            mode:
+              description: |-
+                Determines the mode in which the fitting algorithm is executed.
+              $ref: "#/components/schemas/EnumSolver"
+              default: BRUTE-FORCE
+          additionalProperties: False
+        points:
+          description: |-
+            Schema for values to be used in intervals and conditions
+          type: object
+          additionalProperties:
+            type: string
+        intervals:
+          description: |-
+            Defines the spatial domain over which the model is to be defined.
+          type: array
+          items:
+            $ref: "#/components/schemas/PairString"
+          minItems: 1
+        conditions:
+          description: |-
+            Provides restrictions on the exponential coefficient.
+          type: array
+          items:
+            $ref: "#/components/schemas/FitExpCondition"
+          default: []
+        initial:
+          $ref: "#/components/schemas/FitExpIntialisation"
+      additionalProperties: False
+
+    FitExpCondition:
+      description: |-
+        Conditions to define bounds on the frequency.
+      type: object
+      required:
+        - kind
+        - value
+      properties:
+        kind:
+          description: |-
+            Kind of bound.
+          $ref: "#/components/schemas/EnumBoundKind"
+        value:
+          description: |-
+            Parseable expression for the value of the bound.
+          type: string
+      additionalProperties: False
+
+    FitExpIntialisation:
+      description: |-
+        Provides initial estimates for model parameters
+        as parseable expressions.
+      required: []
+      properties:
+        beta:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 0
+        vshift:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 1
+        vscale:
+          anyOf:
+            - type: string
+            - type: integer
+            - type: number
+          default: 0
+      additionalProperties: False
+
+    # --------------------------------
+    # DATA TYPE - Pair String
+    # --------------------------------
+
+    PairString:
+      type: array
+      items:
+        type: string
+      minItems: 2
+      maxItems: 2
+
     # ----------------------------------------------------------------
     # ENUMS
     # ----------------------------------------------------------------
@@ -381,3 +636,40 @@ components:
         - LOCAL-MAXIMUM
         - INFLECTION
       default: UNKNOWN
+
+    # --------------------------------
+    # ENUM Kind of bound
+    # --------------------------------
+    EnumBoundKind:
+      description: |-
+        Enumeration bound types.
+      type: string
+      enum:
+        - HSCALE-LOWER-BOUND
+        - HSCALE-UPPER-BOUND
+
+    # --------------------------------
+    # ENUM Mode for model
+    # --------------------------------
+
+    EnumModelKind:
+      description: |-
+        Enuemration of kinds of models
+      type: string
+      enum:
+        - DATA # original data
+        - POLY-MODEL
+        - TRIG-MODEL
+
+    # --------------------------------
+    # ENUM Mode for solver
+    # --------------------------------
+
+    EnumSolver:
+      description: |-
+        Enuemration of modi for solver.
+      type: string
+      enum:
+        - BRUTE-FORCE
+        - GRADIENT
+        - HYBRID-GRADIENT

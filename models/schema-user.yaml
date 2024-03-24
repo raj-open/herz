@@ -323,6 +323,12 @@ components:
         - unit
         # - type
       properties:
+        ignore:
+          description: |-
+            If `ignore = false`, then column will be included in combined output.
+            Otherwise just used for internal computations.
+          type: boolean
+          default: false
         name:
           description: |-
             Desired name of column in file.
