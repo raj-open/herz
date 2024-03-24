@@ -34,17 +34,17 @@ if __name__ == '__main__':
     info = config.INFO
     args = CliArguments(info=info).parse(*sys.argv[1:])
 
-    config.set_pid(PID)
-    config.set_path_env(args.env)
-    config.set_path_logging(args.log)
-    config.set_path_session(args.session)
+    config.pid.set(PID)
+    config.path_env.set(args.env)
+    config.path_logging.set(args.log)
+    config.path_session.set(args.session)
 
-    config.initialise_application(name='api', pid=PID, log_pid='PIDs', debug=args.debug)
+    config.initialise_application(name='api', log_pid='PIDs', debug=args.debug)
 
     app = create_ui(debug=args.debug)
 
     uvicorn.run(
         app=app,
-        host=config.get_http_ip(),
-        port=config.get_http_port(),
+        host=config.http_ip(),
+        port=config.http_port(),
     )

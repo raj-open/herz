@@ -41,11 +41,11 @@ if __name__ == '__main__':
         exit(0)
 
     # initialise app
-    config.set_pid(PID)
-    config.set_path_env(args.env)
-    config.set_path_logging(args.log)
-    config.set_path_session(args.session)
-    config.initialise_application(name='app', pid=PID, log_pid='PIDs', debug=args.debug)
+    config.pid.set(PID)
+    config.path_env.set(args.env)
+    config.path_logging.set(args.log)
+    config.path_session.set(args.session)
+    config.initialise_application(name='app', log_pid='PIDs', debug=args.debug)
 
     # get configurations once
     cfg = config.load_internal_config()

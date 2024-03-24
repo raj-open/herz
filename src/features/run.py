@@ -30,7 +30,6 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(tag='ENDPOINT {case.endpoint}', level=LOG_LEVELS.INFO)
 def process(cfg: AppConfig, case: RequestConfig):
     '''
     The main process.
@@ -51,13 +50,13 @@ def process(cfg: AppConfig, case: RequestConfig):
     )
 
     match case.endpoint:
-        case EnumEndpoint.RIGHT_VENTRICLE as ep:
+        case EnumEndpoint.RIGHT_VENTRICLE as feature:
             timer.start()
-            right_ventricle.endpoint(case=case)
+            right_ventricle.endpoint(feature=feature, case=case)
             timer.stop()
 
-        case _ as ep if isinstance(ep, EnumEndpoint):
-            raise ValueError(f'No endpoint established for `{ep.value}`.')
+        case _ as feature if isinstance(feature, EnumEndpoint):
+            raise ValueError(f'No endpoint established for `{feature.value}`.')
 
         case _ as value:
             raise ValueError(f'No endpoint established for `{value}`.')

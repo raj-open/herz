@@ -7,10 +7,15 @@ info:
     Extracts time series data for pressure and volume,
     synchronises these and produces a data set and plot.
 settings:
-  # NOTE: These units must be compatible!
+
+  # --------------------------------
+  # UNITS
+  # --------------------------------
+  # NOTE: must be compatible/coherent!
   units:
     cycle: '1'
     time: 's'
+    frequency: 'Hz'
     pressure: 'Pa'
     d[1,t]pressure: 'Pa/s'
     d[2,t]pressure: 'Pa/s^2'
@@ -19,11 +24,26 @@ settings:
     volume: 'm^3'
     d[1,t]volume: 'm^3/s'
     d[2,t]volume: 'm^3/s^2'
-  # selected points in cycles for matching (alignment of multiple time series).
+    'pressure/volume': 'Pa/m^3'
+
+  # --------------------------------
+  # POINTS IN CYCLES FOR MATCHING
+  # --------------------------------
+  # (alignment of multiple time series).
+  # matching:
+  #   pressure: 'sys'
+  #   volume: 'sys'
+  # matching:
+  #   pressure: 'bd'
+  #   volume: 'anti-es'
   matching:
-    pressure: 'sys'
-    volume: 'sys'
-  # settings for polynomial conditions for initial (peak-to-peak) fitting.
+    pressure: 'ed'
+    volume: 'ed'
+
+  # --------------------------------
+  # FOR FITTING MODELS
+  # --------------------------------
+  # polynomial conditions for initial (peak-to-peak) fitting.
   polynomial:
     pressure:
       - derivative: 2
@@ -50,12 +70,17 @@ settings:
         time: 0.
       - derivative: 2
         time: 1.
-  # settings for special points
+
+  # --------------------------------
+  # SETTINGS FOR COMPUTING SPECIAL POINTS
+  # --------------------------------
   # for marker symbols see <https://plotly.com/python/marker-style>
   points:
     pressure:
       iso-max:
+        ignore: true
         name: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
+        name-simple: 'P^iso_max'
         spec: null
         marker: &marker_special
           size: 9
@@ -64,6 +89,7 @@ settings:
           text: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
       sys:
         name: 'sys = P<sub>max</sub>'
+        name-simple: "sys"
         spec:
           kind: MAXIMUM
           reuse: true
@@ -76,6 +102,7 @@ settings:
           symbol: "circle-open"
       es:
         name: "esp"
+        name-simple: "esp"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -87,6 +114,7 @@ settings:
           symbol: "triangle-left-open"
       anti-epad:
         name: "anti-epad"
+        name-simple: "anti-epad"
         spec:
           derivative: 1
           kind: LOCAL-MINIMUM
@@ -98,6 +126,7 @@ settings:
           symbol: "triangle-left-open"
       bd:
         name: "bdp"
+        name-simple: "bdp"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
@@ -109,6 +138,7 @@ settings:
           symbol: "triangle-right-open"
       min:
         name: 'dia = P<sub>min</sub>'
+        name-simple: "dia"
         spec:
           kind: MINIMUM
           after: [ 'bd' ]
@@ -117,16 +147,20 @@ settings:
           size: 9
           colour: blue
           symbol: "circle-open"
-      # mid:
-      #   ignore: true
-      #   name: "P_mid"
-      #   spec:
-      #     derivative: 2
-      #     kind: LOCAL-MINIMUM
-      #     after: [ 'min' ]
-      #     before: [ 'ed' ]
+      anti-bd:
+        name: "anti-bdp"
+        spec:
+          derivative: 2
+          kind: LOCAL-MINIMUM
+          after: [ 'min' ]
+          before: [ 'ed' ]
+        marker: &marker_anti_bd
+          size: 9
+          colour: blue
+          symbol: "triangle-left"
       ed:
         name: "edp"
+        name-simple: "edp"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
@@ -138,10 +172,11 @@ settings:
           symbol: "triangle-left-open"
       epad:
         name: "epad"
+        name-simple: "epad"
         spec:
           derivative: 1
           kind: MAXIMUM
-          after: [ 'edp' ]
+          after: [ 'ed' ]
           before: []
         marker: &marker_epad
           size: 9
@@ -149,6 +184,7 @@ settings:
           symbol: "triangle-right-open"
       bs:
         name: "bsp"
+        name-simple: "bsp"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -161,6 +197,7 @@ settings:
     volume:
       max:
         name: 'V<sub>max</sub>'
+        name-simple: "V_max"
         ignore: true
         spec:
           kind: MAXIMUM
@@ -168,14 +205,9 @@ settings:
           strict: false
           after: []
           before: []
-      V0:
-        name: 'V<sub>0</sub>'
-        spec: null
-        marker:
-          <<: *marker_special
-          text: 'V<sub>0</sub>'
       bs:
         name: "bsv"
+        name-simple: "bsv"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -186,6 +218,7 @@ settings:
           text: ''
       sys:
         name: 'sys = V´<sub>min</sub>'
+        name-simple: 'sys = V´_min'
         spec:
           derivative: 1
           kind: MINIMUM
@@ -196,6 +229,7 @@ settings:
           text: ''
       es:
         name: "esv"
+        name-simple: "esv"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
@@ -206,24 +240,28 @@ settings:
           text: ''
       min:
         name: 'V<sub>min</sub>'
+        name-simple: "V_min"
         spec:
           kind: MINIMUM
-          after: [ 'esv' ]
-          before: [ 'bdv' ]
+          after: [ 'es' ]
+          before: [ 'bd' ]
         marker:
           colour: blue
           symbol: 'square'
           size: 9
-      mid:
-        ignore: true
-        name: "mid"
+      anti-es:
+        name: "anti-esv"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
           after: [ 'min' ]
-          before: [ 'bdv' ]
+          before: [ 'bd' ]
+        marker:
+          <<: *marker_anti_bd
+          text: ''
       bd:
         name: "bdv"
+        name-simple: "bdv"
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
@@ -234,6 +272,7 @@ settings:
           text: ''
       dia:
         name: 'dia = V´<sub>max</sub>'
+        name-simple: 'dia = V´_max'
         spec:
           derivative: 1
           kind: MAXIMUM
@@ -244,6 +283,7 @@ settings:
           text: ''
       ed:
         name: "edv"
+        name-simple: "edv"
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -252,3 +292,73 @@ settings:
         marker:
           <<: *marker_ed
           text: ''
+
+  # --------------------------------
+  # SETTINGS FOR FITTING TRIG-MODEL
+  # --------------------------------
+
+  trigonometric:
+    pressure:
+      solver:
+        model: DATA
+        # model: POLY-MODEL
+        # mode: BRUTE-FORCE
+        mode: HYBRID-GRADIENT
+        # mode: GRADIENT
+        n-max: 1000
+      points:
+        a1: "P['ed'].time - T_p"
+        y11: "P['ed'].value"
+        b1: "P['epad'].time - T_p"
+        y12: "P['epad'].value"
+        a2: "P['anti-epad'].time"
+        y21: "P['anti-epad'].value"
+        b2: "P['bd'].time"
+        y22: "P['bd'].value"
+      intervals:
+        - [ a1, b1 ]
+        - [ a2, b2 ]
+      initial:
+        omega: '(omega_min + omega_max)/2'
+        hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
+        # since data is normalised with L²-norm = 1, assume 2 x amplitude
+        vscale: '2 * 1/math.sqrt(2)'
+        # since data is shift with peak = 0
+        vshift: '-1/math.sqrt(2)'
+        drift: 0
+      conditions:
+        - kind: HSCALE-LOWER-BOUND
+          value: '1*(b2 - a1)'
+        - kind: HSCALE-UPPER-BOUND
+          value: '2*(a2 - b1)'
+    # volume:
+
+  # --------------------------------
+  # SETTINGS FOR FITTING EXP-MODEL
+  # --------------------------------
+
+  exponential:
+    solver:
+      model: DATA
+      # model: POLY-MODEL
+      mode: HYBRID-GRADIENT
+      # mode: GRADIENT
+      n-max: 1000
+    points:
+      # vmin: "V['anti-es'].value"
+      vmin: "V['bd'].value"
+      vmax: "V['ed'].value"
+      # pmin: "P['bd'].value"
+      pmin: "P['anti-bd'].value"
+      pmax: "P['ed'].value"
+    intervals:
+      - [ vmin, vmax ]
+    initial:
+      beta: 1
+      vscale: 1
+      vshift: 'pmin'
+    conditions:
+      - kind: HSCALE-LOWER-BOUND
+        value: '(vmax - vmin)/5'
+      - kind: HSCALE-UPPER-BOUND
+        value: '5*(vmax - vmin)'
