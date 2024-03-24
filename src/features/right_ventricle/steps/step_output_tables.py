@@ -6,13 +6,12 @@
 # ----------------------------------------------------------------
 
 from ....thirdparty.data import *
-from ....thirdparty.maths import *
 from ....thirdparty.physics import *
 from ....thirdparty.system import *
 from ....thirdparty.types import *
 
 from ....setup import config
-from ....models.app import *
+from ....core.log import *
 from ....models.user import *
 from ....queries.scientific import *
 
@@ -30,6 +29,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP output table for {quantity}', level=LOG_LEVELS.INFO)
 def step_output_single_table(
     case: RequestConfig,
     data: pd.DataFrame,
@@ -81,6 +81,7 @@ def step_output_single_table(
     return
 
 
+@echo_function(message='STEP output table for P + V', level=LOG_LEVELS.INFO)
 def step_output_combined_table(
     case: RequestConfig,
     data: pd.DataFrame,
@@ -92,9 +93,9 @@ def step_output_combined_table(
 
     cv = output_conversions(case.output.quantities, units=config.UNITS)
 
-    table = pd.DataFrame({col.key: cv[col.key] * data[col.key] for col in case.output.quantities}).astype(
-        {col.key: col.type.value for col in case.output.quantities}
-    )
+    table = pd.DataFrame(
+        {col.key: cv[col.key] * data[col.key] for col in case.output.quantities if not col.ignore}
+    ).astype({col.key: col.type.value for col in case.output.quantities if not col.ignore})
 
     table.to_csv(
         path,

@@ -11,7 +11,7 @@ from ....thirdparty.types import *
 
 from ....core.utils import *
 from ....models.user import *
-from ....algorithms.peaks import *
+from ....algorithms.anomalies import *
 
 # ----------------------------------------------------------------
 # EXPORTS

@@ -8,12 +8,11 @@
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
 
-from ....setup import config
+from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
-from ....algorithms.peaks import *
-from ....algorithms.cycles import *
+from ....algorithms.anomalies import *
 from .methods import *
 
 # ----------------------------------------------------------------
@@ -30,6 +29,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP recognise cycles', level=LOG_LEVELS.INFO)
 def step_recognise_cycles(
     data: pd.DataFrame,
     quantity: str,
@@ -54,6 +54,7 @@ def step_recognise_cycles(
     return data
 
 
+@echo_function(message='STEP remove marked sections', level=LOG_LEVELS.INFO)
 def step_removed_marked_sections(
     case: RequestConfig,
     data: pd.DataFrame,

@@ -5,10 +5,6 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.maths import *
-from ....thirdparty.physics import *
-
-from ....setup import config
 from ....core.log import *
 from ....models.user import *
 from ....models.fitting import *
@@ -26,6 +22,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP align cycles', level=LOG_LEVELS.INFO)
 def step_align_cycles(
     case: RequestConfig,
     fitinfos_p: list[tuple[tuple[int, int], FittedInfo]],

@@ -7,13 +7,13 @@
 
 from ....thirdparty.data import *
 
-from ....setup import config
-from ....core.epsilon import *
+from ....core.log import *
 from ....models.app import *
 from ....models.user import *
+from ....models.epsilon import *
 from ....models.fitting import *
 from ....queries.fitting import *
-from ....algorithms.points import *
+from ....algorithms.critical import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -28,42 +28,21 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP recognise special points', level=LOG_LEVELS.INFO)
 def step_recognise_points(
     data: pd.DataFrame,
     fitinfos: list[tuple[tuple[int, int], FittedInfo]],
-    quantity: str,
-    cfg_points: SpecialPointsConfigs,
-) -> tuple[list[tuple[tuple[int, int], dict[str, int]]], dict[str, SpecialPointsConfig]]:
+    special: dict[str, SpecialPointsConfig],
+) -> tuple[dict[str, SpecialPointsConfig], list[tuple[tuple[int, int], dict[str, int]]]]:
     '''
     Uses fitted model to automatically recognise points based on derivative-conditions.
     '''
-    points_unsorted = get_point_settings(quantity, cfg=cfg_points)
-    points_sorted = sort_special_points_specs(points_unsorted)
-
-    match quantity:
-        case 'pressure':
-            window_info_points = [
-                (
-                    (i1, i2),
-                    info,
-                    recognise_special_points(info, points=points_sorted, real_valued=True),
-                )
-                for (i1, i2), info in fitinfos
-            ]
-        case 'volume':
-            window_info_points = [
-                (
-                    (i1, i2),
-                    info,
-                    recognise_special_points(info, points=points_sorted, real_valued=True),
-                )
-                for (i1, i2), info in fitinfos
-            ]
-        case _:
-            raise ValueError(f'No methods developed for quantity {quantity}!')
+    special_ = sort_special_points_specs(special)
+    N = len(fitinfos[:-1])
+    window_info_points = [recognise_special_points(info, special=special_) for _, info in fitinfos]
 
     # final window contains point-information for fitted cycle:
-    _, _, points_fit = window_info_points[-1]
+    points_fit = window_info_points[-1]
 
     # adjust classified points in each cycle:
     t = data['time'].to_numpy(copy=True)
@@ -75,7 +54,7 @@ def step_recognise_points(
                 for key, point in points.items()
             },
         )
-        for (i1, i2), info, points in window_info_points[:-1]
+        for ((i1, i2), info), points in zip(fitinfos[:-1], window_info_points[:-1])
     ]
 
-    return points_data, points_fit
+    return points_fit, points_data

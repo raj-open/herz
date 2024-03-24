@@ -8,7 +8,7 @@
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
 
-from ....setup import config
+from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
@@ -29,6 +29,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP shift data to extremes ({shift})', level=LOG_LEVELS.INFO)
 def step_shift_data_extremes(
     data: pd.DataFrame,
     quantity: str,
@@ -56,20 +57,17 @@ def step_shift_data_extremes(
     return data
 
 
+@echo_function(message='STEP shift data to matching points', level=LOG_LEVELS.INFO)
 def step_shift_data_custom(
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
     quantity: str,
     cfg_matching: MatchingConfig,
-) -> tuple[
-    pd.DataFrame,
-    list[tuple[tuple[int, int], dict[str, int]]],
-]:
+) -> pd.DataFrame:
     align = get_alignment_point(quantity, cfg=cfg_matching)
 
     # create copies so that original data not affected
     data = data.copy(True)
-    points_ = points[:]
     t = data['time'].to_numpy(copy=True)
 
     # shift times in each cycle
@@ -77,11 +75,10 @@ def step_shift_data_custom(
         i0 = pts.get(align, -1)
         if i0 == -1:
             continue
-        points_[k] = ((i1, i2), {key: i1 + ((i - i0) % (i2 - i1)) for key, i in pts.items()})
         indices = list(range(i1, i2))
         indices = indices[i0:] + indices[:i0]
         data[i1:i2] = data.iloc[indices, :].reset_index(drop=True)
 
     data['time'] = t
 
-    return data, points_
+    return data

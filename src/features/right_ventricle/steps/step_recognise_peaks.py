@@ -7,11 +7,11 @@
 
 from ....thirdparty.data import *
 
-from ....setup import config
+from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
-from ....algorithms.peaks import *
+from ....algorithms.anomalies import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -26,6 +26,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP recognise peaks', level=LOG_LEVELS.INFO)
 def step_recognise_peaks(
     data: pd.DataFrame,
     quantity: str,

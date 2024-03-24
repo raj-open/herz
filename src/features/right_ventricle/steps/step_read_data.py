@@ -12,6 +12,7 @@ from ....thirdparty.physics import *
 from ....thirdparty.types import *
 
 from ....setup import config
+from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
@@ -29,6 +30,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP read data from csv', level=LOG_LEVELS.INFO)
 def step_read_data(
     case: RequestConfig,
     cfg: DataTimeSeries,

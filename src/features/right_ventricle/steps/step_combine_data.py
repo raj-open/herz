@@ -10,6 +10,7 @@ from ....thirdparty.maths import *
 from ....thirdparty.physics import *
 
 from ....setup import config
+from ....core.log import *
 from ....models.app import *
 from ....models.user import *
 from .methods import *
@@ -28,6 +29,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+@echo_function(message='STEP normalise data', level=LOG_LEVELS.INFO)
 def step_normalise_data(
     case: RequestConfig,
     data: pd.DataFrame,
@@ -41,23 +43,24 @@ def step_normalise_data(
     values = data[quantity].to_numpy(copy=True)
 
     # get total duration
-    N, dt, T = get_time_aspects(time)
-    T = max(T, cv_t * (case.process.combine.t_max or 0.0))
+    N, dt, T_max = get_time_aspects(time)
+    T_max = max(T_max, cv_t * (case.process.combine.t_max or 0.0))
 
     # compute num points and update T (ensure dt is as set)
     dt = cv_t * case.process.combine.dt or dt
-    N = math.ceil(T / dt)
-    T = N * dt
+    N = math.ceil(T_max / dt)
+    T_max = N * dt
 
     # interpolate data
-    time_uniform = np.linspace(start=0, stop=T, num=N, endpoint=False)
-    values = interpolate_curve(time_uniform, x=time, y=values, T_max=T, periodic=True)
+    time_uniform = np.linspace(start=0, stop=T_max, num=N, endpoint=False)
+    values = interpolate_curve(time_uniform, x=time, y=values, T_max=T_max, periodic=True)
 
     data = pd.DataFrame({'time': time_uniform, quantity: values}).astype({'time': float, quantity: float})
 
     return data
 
 
+@echo_function(message='STEP combine data', level=LOG_LEVELS.INFO)
 def step_combine_data(
     case: RequestConfig,
     data_pressure: pd.DataFrame,
