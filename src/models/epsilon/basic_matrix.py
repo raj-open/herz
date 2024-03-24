@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+'''
+Methods for eps-differences for non-aligned arrays.
+To deal with their non-alignment outputs are computed as matrices.
+'''
+
+# ----------------------------------------------------------------
+# IMPORTS
+# ----------------------------------------------------------------
+
+from ...thirdparty.maths import *
+from ...thirdparty.types import *
+
+from ..enums import *
+
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    'normalised_diff_matrix',
+    'sign_normalised_diff_matrix',
+]
+
+# ----------------------------------------------------------------
+# CONSTANTS
+# ----------------------------------------------------------------
+
+NUMBER = TypeVar('NUMBER', float, complex)
+
+# ----------------------------------------------------------------
+# METHODS - non-aligned arrays
+# ----------------------------------------------------------------
+
+
+def normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> np.ndarray:
+    '''
+    Computes difference `x_to - x_from` relativised.
+
+    NOTE:
+    - For large numbers it is the same as a relative difference.
+    - For small numbers this is the same as an ordinary difference.
+    '''
+    x_from = np.asarray(x_from)
+    x_to = np.asarray(x_to)
+    dx = x_to[:, np.newaxis] - x_from
+    C = np.maximum(1.0, (abs(x_from) + abs(x_to[:, np.newaxis])) / 2)
+    return dx / C
+
+
+def sign_normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> np.ndarray:
+    r = normalised_diff_matrix(x_from=x_from, x_to=x_to)
+    check = np.full(r.shape, fill_value=EnumSign.NON_ZERO, dtype=EnumSign)
+
+    cond_is_real = abs(r.imag) < eps
+    cond_is_real_zero = cond_is_real & (abs(r.real) < eps)
+    cond_sign_real = np.sign(r.real / eps)
+    cond_is_real_nonzero = cond_is_real & ~cond_is_real_zero
+
+    check[cond_is_real_nonzero & (cond_sign_real == 1)] = EnumSign.REAL_POSITIVE
+    check[cond_is_real_nonzero & (cond_sign_real == -1)] = EnumSign.REAL_NEGATIVE
+    check[cond_is_real_zero] = EnumSign.ZERO
+    return check
