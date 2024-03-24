@@ -34,9 +34,9 @@ classifiers = [
 # --------------------------------
 python = ">=3.10.*,<4.0.0"
 pip = {version='^24.0'}
-poetry = {version='^1.7.1'}
-wheel = {version='^0.42.0'}
-setuptools = {version='^69.1.0'}
+poetry = {version='^1.8.2'}
+wheel = {version='^0.43.0'}
+setuptools = {version='^69.2.0'}
 # --------------------------------
 # code - general
 # --------------------------------
@@ -114,10 +114,9 @@ uvicorn = {version='~0.27'}
 # testing
 # --------------------------------
 pytest = {version='^7.4.4,~7'}
-testfixtures = {version='^8.0.0'}
-coverage = {extras=['toml'], version='^7.4.1'}
-pytest-cov = {version='^4.1.0'}
-pytest-lazy-fixture = {version='^0.6.3'}
+testfixtures = {version='~8.1'}
+coverage = {extras=['toml'], version='^7.4.4'}
+pytest-cov = {version='^5.0.0'}
 pytest-order = {version='^1.2.0'}
 behave = {version='^1.2.6'}
 behave-webdriver = {version='^0.3.1'}

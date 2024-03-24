@@ -21,8 +21,8 @@ PROJECT_NAME := "herz"
 PATH_ROOT := justfile_directory()
 CURRENT_DIR := invocation_directory()
 OS := if os_family() == "windows" { "windows" } else { "linux" }
-PYTHON := if os_family() == "windows" { "${PYTHON_PATH:-py -3.11}" } else { "${PYTHON_PATH:-python3.11}" }
-PYVENV := if os_family() == "windows" { "${PYTHON_PATH_VENV:-python}" } else { "${PYTHON_PATH_VENV:-python3}" }
+PYVENV_ON := if os_family() == "windows" { ". .venv/Scripts/activate" } else { ". .venv/bin/activate" }
+PYVENV := if os_family() == "windows" { "python" } else { "python3" }
 LINTING := "black"
 GITHOOK_PRECOMMIT := "pre_commit"
 GEN_MODELS := "datamodel_code_generator"
@@ -92,8 +92,8 @@ _check-python-bin tool name:
 _check-tool tool name:
     #!/usr/bin/env bash
     success=false
-    ${ACTIVATE_VENV:-echo "venv:off"} && {{tool}} --version >> /dev/null 2> /dev/null && success=true;
-    ${ACTIVATE_VENV:-echo "venv:off"} && {{tool}} --help >> /dev/null 2> /dev/null && success=true;
+    {{PYVENV_ON}} && {{tool}} --version >> /dev/null 2> /dev/null && success=true;
+    {{PYVENV_ON}} && {{tool}} --help >> /dev/null 2> /dev/null && success=true;
     # NOTE: if exitcode is 251 (= help or print version), then render success.
     if [[ "$?" == "251" ]]; then success=true; fi
     # FAIL tool not installed
@@ -107,7 +107,7 @@ _check-tool tool name:
     fi
 
 _generate-documentation path_schema target_path name:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{GEN_APIS}} generate \
+    @{{PYVENV_ON}} && {{GEN_APIS}} generate \
         --skip-validate-spec \
         --input-spec {{path_schema}}/schema-{{name}}.yaml \
         --generator-name markdown \
@@ -128,7 +128,7 @@ _generate-documentation-recursively path_schema target_path:
     exit 0;
 
 _generate-models path_schema target_path name:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{GEN_MODELS}} \
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{GEN_MODELS}} \
         --input-file-type openapi \
         --output-model-type pydantic_v2.BaseModel \
         --encoding "UTF-8" \
@@ -173,7 +173,7 @@ setup:
     @echo "TASK: SETUP"
     @mkdir -p setup
     @- cp -n "templates/template.env" ".env"
-    @- cp -n "templates/template-config.yaml" "setup/config.yaml"
+    @- cp -n "templates/template-requests.yaml" "setup/requests.yaml"
 
 build:
     @echo "TASK: BUILD"
@@ -191,7 +191,9 @@ build-skip-requirements:
     @just build-githook-pc
 
 build-venv:
-    @- {{PYTHON}} -m venv .venv
+    @just check-system
+    @echo "SUBTASK: build venv"
+    @- ${PYTHON_PATH} -m venv .venv
 
 # cf. https://pre-commit.com
 build-githook-pc:
@@ -199,7 +201,7 @@ build-githook-pc:
     echo "SUBTASK: build githook"
     if [[ -d ".git" ]]; then
         git config --unset-all core.hooksPath
-        ${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m pre_commit install
+        {{PYVENV_ON}} && {{PYVENV}} -m pre_commit install
     fi
     exit 0;
 
@@ -209,12 +211,12 @@ build-requirements:
     @just build-requirements-dependencies
 
 build-requirements-basics:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m pip install --upgrade pip
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m pip install --upgrade certifi wheel toml poetry
+    @{{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade pip
+    @{{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade certifi wheel toml poetry
 
 build-requirements-dependencies:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m poetry lock --no-update
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m poetry install --no-interaction --no-root
+    @{{PYVENV_ON}} && {{PYVENV}} -m poetry lock --no-update
+    @{{PYVENV_ON}} && {{PYVENV}} -m poetry install --no-interaction --no-root
 
 build-models:
     @echo "SUBTASK: build data models from schemata."
@@ -251,13 +253,11 @@ dist branch="main":
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 run *args:
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} -m src.cli {{args}}
+    @{{PYVENV_ON}} && {{PYVENV}} -m src.cli {{args}}
 
 run-cli mode="requests" requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
     @just _reset-logs "{{log_path}}"
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYTHON}} -m src.cli \
+    @{{PYVENV_ON}} && {{PYVENV}} -m src.cli \
         "{{mode}}" \
         --requests "{{requests}}" \
         --env "{{env_path}}" \
@@ -266,8 +266,7 @@ run-cli mode="requests" requests="setup/requests.yaml" env_path=".env" log_path=
 
 run-cli-debug mode="requests" requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
     @just _reset-logs "{{log_path}}"
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYTHON}} -m src.cli \
+    @{{PYVENV_ON}} && {{PYVENV}} -m src.cli \
         "{{mode}}" \
         --debug \
         --requests "{{requests}}" \
@@ -280,8 +279,7 @@ run-api env_path=".env" log_path="logs" session_path=".session" IP="${HTTP_IP:-l
     @# kill anything running on port
     @just kill-port "{{PORT}}"
     @echo "START API"
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} -m src.api \
+    @{{PYVENV_ON}} && {{PYVENV}} -m src.api \
         --env "{{env_path}}" \
         --log "{{log_path}}" \
         --session "{{session_path}}"
@@ -291,8 +289,7 @@ run-api-debug env_path=".env" log_path="logs" session_path=".session" IP="${HTTP
     @# kill anything running on port
     @just kill-port "{{PORT}}"
     @echo "START API"
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} -m src.api \
+    @{{PYVENV_ON}} && {{PYVENV}} -m src.api \
         --debug \
         --env "{{env_path}}" \
         --log "{{log_path}}" \
@@ -305,8 +302,7 @@ run-api-debug env_path=".env" log_path="logs" session_path=".session" IP="${HTTP
 # Recipe only works if local file test.py exists
 dev *args:
     @just _reset-logs
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} test.py {{args}}
+    @{{PYVENV_ON}} && {{PYVENV}} test.py {{args}}
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: terminate execution
@@ -351,7 +347,7 @@ tests-unit:
 
 test-unit path:
     @just _reset-test-logs "unit"
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m pytest "{{path}}" \
+    @{{PYVENV_ON}} && {{PYVENV}} -m pytest "{{path}}" \
         --cov-reset \
         --cov=.
 
@@ -360,8 +356,7 @@ tests-behave:
 
 test-behave path:
     @just _reset-test-logs "behave"
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} -m {{TOOL_TEST_BDD}} \
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{TOOL_TEST_BDD}} \
         --define http-user="${HTTP_USER}" \
         --define http-password="${HTTP_PASSWORD}" \
         --color \
@@ -387,11 +382,11 @@ test-integration path:
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 qa:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m coverage report -m
+    @{{PYVENV_ON}} && {{PYVENV}} -m coverage report -m
 
 coverage source_path tests_path log_path="logs":
     @just _reset-logs "{{log_path}}"
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m pytest {{tests_path}} \
+    @{{PYVENV_ON}} && {{PYVENV}} -m pytest {{tests_path}} \
         --ignore=tests/integration \
         --cov-reset \
         --cov={{source_path}} \
@@ -404,23 +399,22 @@ coverage source_path tests_path log_path="logs":
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 lint path:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose "{{path}}"
 
 lint-check path:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{LINTING}} --check --verbose "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --check --verbose "{{path}}"
 
 prettify:
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{LINTING}} --verbose src/*
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{LINTING}} --verbose tests/*
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m {{LINTING}} --verbose notebooks/*
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose src/*
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose tests/*
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose notebooks/*
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGES: utilities
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 create-badge-pyversion:
-    @${ACTIVATE_VENV:-echo "venv:off"} \
-    && {{PYVENV}} -m pybadges \
+    @{{PYVENV_ON}} && {{PYVENV}} -m pybadges \
         --left-text="python" \
         --right-text="3.10, 3.11, 3.12" \
         --whole-link="https://www.python.org/" \
@@ -461,18 +455,18 @@ clean-notebooks:
     @echo "Clean outputs and metadata from python notebooks."
     @# NOTE: only clean outputs in notebooks/... folder
     @# FIXME: nbconvert no longer recognises the .../**/... pattern
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupyter nbconvert --clear-output --inplace notebooks/*.ipynb
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":""}' **/*.ipynb 2> /dev/null
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":null}' **/*.ipynb 2> /dev/null
 
 clean-notebook-outputs path:
     @echo "Clean outputs from python notebook {{path}}."
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupyter nbconvert --clear-output --inplace "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupyter nbconvert --clear-output --inplace "{{path}}"
 
 clean-notebook-meta path:
     @echo "Clean metadata from python notebook {{path}}."
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
-    @${ACTIVATE_VENV:-echo "venv:off"} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
+    @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: logging, session
@@ -527,9 +521,9 @@ watch-logs-all n="10" log_path="logs":
 
 check-system:
     @echo "Operating System detected:  {{os_family()}}"
-    @echo "Python command used:        {{PYTHON}}"
+    @echo "Python command used:        ${PYTHON_PATH}"
     @echo "Python command for venv:    {{PYVENV}}"
-    @echo "Python path for venv:       $( ${ACTIVATE_VENV:-echo "venv:off"} && which {{PYVENV}} )"
+    @echo "Python path for venv:       $( {{PYVENV_ON}} && which {{PYVENV}} )"
 
 check-system-requirements:
     @just _check-python-tool "{{GEN_MODELS}}" "datamodel-code-generator"
