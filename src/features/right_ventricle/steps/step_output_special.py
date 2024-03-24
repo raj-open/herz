@@ -140,8 +140,8 @@ def step_output_special_points(
             },
             {
                 'name': 'μ',
-                'value': (cv[quantity] / cv['time']) * drift,
-                'unit-x': f"{units[quantity]}/{units['time']}",
+                'value': cv[f'd[1,t]{quantity}'] * drift,
+                'unit-x': units[f'd[1,t]{quantity}'],
             },
         ]
 
