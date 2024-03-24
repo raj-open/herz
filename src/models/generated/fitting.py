@@ -38,6 +38,42 @@ class FittedInfoNormalisation(BaseModel):
     scale: float = 1.0
 
 
+class FittedInfoTrig(BaseModel):
+    """
+    Parameters of a fitted model
+    ```
+    f(t) = A + R·cos(ω(t - t₀))
+    ```
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    hshift: float
+    hscale: float
+    vshift: float
+    vscale: float
+    drift: float
+
+
+class FittedInfoExp(BaseModel):
+    """
+    Parameters of a fitted model
+    ```
+    P(V) = A + B·exp(β·V)
+    ```
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    hscale: float
+    vshift: float
+    vscale: float
+
+
 class EnumSign(int, Enum):
     """
     Enumeration of classification of signs of (possibly complex) numbers

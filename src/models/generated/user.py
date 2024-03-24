@@ -120,6 +120,10 @@ class DataTypeColumn(BaseModel):
         extra='forbid',
         populate_by_name=True,
     )
+    ignore: bool = Field(
+        False,
+        description='If `ignore = false`, then column will be included in combined output.\nOtherwise just used for internal computations.',
+    )
     name: str = Field(..., description='Desired name of column in file.')
     quantity: str = Field(
         ...,

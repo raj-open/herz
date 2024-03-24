@@ -106,6 +106,45 @@ class MarkerSettings(BaseModel):
     text_position: str = Field('top center', alias='text-position')
 
 
+class FitTrigIntialisation(BaseModel):
+    """
+    Provides initial estimates for model parameters
+    as parseable expressions.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    omega: Union[str, int, float] = '2 * math.pi / 2'
+    hshift: Union[str, int, float] = 0
+    vscale: Union[str, int, float] = 1
+    vshift: Union[str, int, float] = 0
+    drift: Union[str, int, float] = 0
+
+
+class FitExpIntialisation(BaseModel):
+    """
+    Provides initial estimates for model parameters
+    as parseable expressions.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    beta: Union[str, int, float] = 0
+    vshift: Union[str, int, float] = 1
+    vscale: Union[str, int, float] = 0
+
+
+class PairString(RootModel[List[str]]):
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
+    root: List[str] = Field(..., max_length=2, min_length=2)
+
+
 class EnumCriticalPoints(str, Enum):
     """
     Enumeration of critical point types.
@@ -118,6 +157,35 @@ class EnumCriticalPoints(str, Enum):
     LOCAL_MINIMUM = 'LOCAL-MINIMUM'
     LOCAL_MAXIMUM = 'LOCAL-MAXIMUM'
     INFLECTION = 'INFLECTION'
+
+
+class EnumBoundKind(str, Enum):
+    """
+    Enumeration bound types.
+    """
+
+    HSCALE_LOWER_BOUND = 'HSCALE-LOWER-BOUND'
+    HSCALE_UPPER_BOUND = 'HSCALE-UPPER-BOUND'
+
+
+class EnumModelKind(str, Enum):
+    """
+    Enuemration of kinds of models
+    """
+
+    DATA = 'DATA'
+    POLY_MODEL = 'POLY-MODEL'
+    TRIG_MODEL = 'TRIG-MODEL'
+
+
+class EnumSolver(str, Enum):
+    """
+    Enuemration of modi for solver.
+    """
+
+    BRUTE_FORCE = 'BRUTE-FORCE'
+    GRADIENT = 'GRADIENT'
+    HYBRID_GRADIENT = 'HYBRID-GRADIENT'
 
 
 class AppInfo(RootModel[Any]):
@@ -170,6 +238,68 @@ class SpecialPointsSpec(BaseModel):
     )
 
 
+class Solver(BaseModel):
+    """
+    Settings for the solver.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    n_max: int = Field(..., alias='n-max', ge=0)
+    model: EnumModelKind = Field(
+        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
+    )
+    mode: EnumSolver = Field(
+        EnumSolver.BRUTE_FORCE, description='Determines the mode in which the fitting algorithm is executed.'
+    )
+
+
+class FitTrigCondition(BaseModel):
+    """
+    Conditions to define bounds on the frequency.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    kind: EnumBoundKind = Field(..., description='Kind of bound.')
+    value: str = Field(..., description='Parseable expression for the value of the bound.')
+
+
+class Solver1(BaseModel):
+    """
+    Settings for the solver.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    n_max: int = Field(..., alias='n-max', description='Maximum number of iterations', ge=0)
+    model: EnumModelKind = Field(
+        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
+    )
+    mode: EnumSolver = Field(
+        EnumSolver.BRUTE_FORCE, description='Determines the mode in which the fitting algorithm is executed.'
+    )
+
+
+class FitExpCondition(BaseModel):
+    """
+    Conditions to define bounds on the frequency.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    kind: EnumBoundKind = Field(..., description='Kind of bound.')
+    value: str = Field(..., description='Parseable expression for the value of the bound.')
+
+
 class PolynomialConfig(BaseModel):
     """
     Setting on for polynomial fitting for cycles within a time-series.
@@ -193,6 +323,7 @@ class SpecialPointsConfig(BaseModel):
         populate_by_name=True,
     )
     name: str = Field(..., description='Name of special point.')
+    name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
     time: float = Field(-1, description='Time co-ordinate of special point (initially normalised to `[0, 1]`).')
@@ -201,6 +332,55 @@ class SpecialPointsConfig(BaseModel):
         None, description='Optional specifications for computation of special point.'
     )
     marker: Optional[MarkerSettings] = Field(None, description='Settings for plot marker.')
+
+
+class FitTrigConfig(BaseModel):
+    """
+    Settings used to fit trigonometric curve to parts of model.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    solver: Solver = Field(..., description='Settings for the solver.')
+    points: Dict[str, str] = Field(..., description='Schema for values to be used in intervals and conditions')
+    intervals: List[PairString] = Field(
+        ..., description='Defines the spatial domain over which the model is to be defined.', min_length=1
+    )
+    conditions: List[FitTrigCondition] = Field([], description='Provides restrictions on the frequency.')
+    initial: FitTrigIntialisation
+
+
+class FitExpConfig(BaseModel):
+    """
+    Settings used to fit exponential curve to parts of model.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    solver: Solver1 = Field(..., description='Settings for the solver.')
+    points: Dict[str, str] = Field(..., description='Schema for values to be used in intervals and conditions')
+    intervals: List[PairString] = Field(
+        ..., description='Defines the spatial domain over which the model is to be defined.', min_length=1
+    )
+    conditions: List[FitExpCondition] = Field([], description='Provides restrictions on the exponential coefficient.')
+    initial: FitExpIntialisation
+
+
+class Trigonometric(BaseModel):
+    """
+    Settings to fit trigonometric model.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    pressure: FitTrigConfig
+    volume: Optional[FitTrigConfig] = None
 
 
 class SpecialPointsConfigs(BaseModel):
@@ -230,6 +410,8 @@ class Settings(BaseModel):
         ..., description='Conditions for initial fitting (polynomial) curves to raw data.'
     )
     points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
+    trigonometric: Trigonometric = Field(..., description='Settings to fit trigonometric model.')
+    exponential: FitExpConfig = Field(..., description='Settings to fit exponential model.')
 
 
 class AppConfig(BaseModel):
