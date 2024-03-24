@@ -82,6 +82,34 @@ templates:
         unit: "mL/s^2"
         type: float
 
+      # NOTE: currently needed for output of special points
+      - name: "Frequency"
+        ignore: true
+        key: "frequency"
+        quantity: "frequency"
+        unit: "kHz" # NOTE: can also use Hz, but if using ms above, makes sense to use kHz here
+        type: float
+
+      - name: "(d/dt)P"
+        ignore: true
+        key: "d[1,t]pressure"
+        quantity: "pressure"
+        unit: "mmHg/s"
+        type: float
+
+      - name: "(d/dt)V"
+        ignore: true
+        key: "d[1,t]volume"
+        quantity: "volume"
+        unit: "mL/s"
+        type: float
+
+      - name: "Pressure/Volume"
+        ignore: true
+        key: 'pressure/volume'
+        quantity: 'pressure/volume'
+        unit: 'mmHg/mL'
+
     table:
       # NOTE: include '{label}' + '{kind}' in path name, as this is a schema!
       path: "output/{label}-table-{kind}.csv"
