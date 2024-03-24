@@ -39,8 +39,6 @@ from src.core.log import *
 )
 def test_log_configure(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     level: Any,
 ):

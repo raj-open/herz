@@ -39,8 +39,6 @@ from src.core.utils import *
 )
 def test_characteristic_function(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     N: int,
     indices: list[int],

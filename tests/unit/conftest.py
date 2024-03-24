@@ -11,7 +11,7 @@ from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.core.log import *
-from .__paths__ import *
+from tests.unit.__paths__ import *
 
 # ----------------------------------------------------------------
 # SETTINGS
@@ -42,8 +42,3 @@ def debug() -> Callable[..., None]:
     Logs to file 'logs/debug.log'.
     '''
     return log_dev
-
-
-@fixture(scope='module', autouse=True)
-def module() -> Callable[[str], str]:
-    return get_module

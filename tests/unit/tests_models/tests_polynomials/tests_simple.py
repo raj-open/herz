@@ -10,19 +10,7 @@ from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.enums import *
-from src.core.poly import *
-
-# ----------------------------------------------------------------
-# LOCAL VARIABLES / CONSTANTS
-# ----------------------------------------------------------------
-
-#
-
-# ----------------------------------------------------------------
-# FIXTURES
-# ----------------------------------------------------------------
-
-#
+from src.models.polynomials import *
 
 # ----------------------------------------------------------------
 # TESTS
@@ -38,41 +26,39 @@ from src.core.poly import *
         ([1, 2, 1], -1, [0, 0, 1]),
     ],
 )
-def test_get_recentred_coefficients_rote(
+def test_get_recentred_coefficients_CASES(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     coeff: list[float],
     t0: float,
     coeff_r: list[float],
 ):
-    coeff_r_ = get_recentred_coefficients(coeff, t0)
-    np.testing.assert_array_almost_equal(coeff_r_, coeff_r, decimal=6)
+    p = Poly(coeff=coeff)
+    p_recentred = p.rescale(t0=t0)
+    np.testing.assert_array_almost_equal(p_recentred.coefficients, coeff_r)
     return
 
 
-def test_get_real_polynomial_roots(
+def test_real_polynomial_roots(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
 ):
-    coeff = [-3, 0, 8, 1]
-    roots = get_real_polynomial_roots(coeff)
+    p = Poly(coeff=[-3, 0, 8, 1])
+    roots = p.real_roots
     assert_array_close_to_zero(
-        [poly_single(t, *coeff) for t in roots],
-        eps=1e-10,
+        [p(t) for t in roots],
         message='The values computes should be roots of the polynomial.',
     )
 
-    roots = get_real_polynomial_roots([0, 0, -4, 1])
+    p = Poly(coeff=[0, 0, -4, 1])
+    roots = p.real_roots
     np.testing.assert_array_equal(
         roots,
         [0, 0, 4],
         'Roots of algebric multiplicity should occur repeated in list.',
     )
 
-    roots = get_real_polynomial_roots([0, 0, 0, -4, 1])
+    p = Poly(coeff=[0, 0, 0, -4, 1])
+    roots = p.real_roots
     np.testing.assert_array_equal(
         roots,
         [0, 0, 0, 4],
@@ -110,25 +96,24 @@ def test_get_real_polynomial_roots(
         ),
     ],
 )
-def test_get_real_polynomial_roots_rote(
+def test_real_polynomial_roots_CASES(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     coeff: list[float],
     zeroes: list[float],
 ):
-    roots = get_real_polynomial_roots(coeff)
+    p = Poly(coeff=coeff)
+    roots = p.real_roots
     np.testing.assert_array_almost_equal(roots, zeroes, decimal=6)
     return
 
 
-def test_get_derivative_coefficients(
+def test_derivative_coefficients(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
 ):
-    coeff = get_derivative_coefficients([0, 1, 1])
+    p = Poly(coeff=[0, 1, 1])
+    p = p.derivative()
+    coeff = p.coefficients
     np.testing.assert_array_equal(coeff, [1, 2])
     return
 
@@ -142,30 +127,28 @@ def test_get_derivative_coefficients(
         ([4, 5, 6, -10], 3, [-10 * 3 * 2]),
     ],
 )
-def test_get_derivative_coefficients_rote(
+def test_derivative_coefficients_CASES(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     coeff: list[float],
     n: int,
     expected: list[float],
 ):
-    coeff_ = get_derivative_coefficients(coeff, n=n)
-    np.testing.assert_array_almost_equal(coeff_, expected, decimal=6)
+    p = Poly(coeff=coeff)
+    q = p.derivative(n)
+    np.testing.assert_array_almost_equal(q.coefficients, expected)
     return
 
 
-def test_get_integral_coefficients(
+def test_integral_coefficients(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
 ):
-    coeff = get_integral_coefficients([1, 2])
-    np.testing.assert_array_equal(coeff, [0, 1, 1])
+    p = Poly(coeff=[1, 2])
+    q = p.integral()
+    np.testing.assert_array_equal(q.coefficients, [0, 1, 1])
 
-    coeff = get_derivative_coefficients(coeff)
-    np.testing.assert_array_equal(coeff, [1, 2], 'Derivative should return original coefficients.')
+    p_ = q.derivative()
+    np.testing.assert_array_equal(p_.coefficients, [1, 2], 'Derivative should return original coefficients.')
     return
 
 
@@ -182,23 +165,21 @@ def test_get_integral_coefficients(
         ),
     ],
 )
-def test_get_integral_coefficients_rote(
+def test_integral_coefficients_CASES(
     test: TestCase,
-    debug: Callable[..., None],
-    module: Callable[[str], str],
     # test parameters
     coeff: list[float],
     n: int,
     expected: list[float],
 ):
-    coeff_ = get_integral_coefficients(coeff, n=n)
-    np.testing.assert_array_almost_equal(coeff_, expected, decimal=6)
+    p = Poly(coeff=coeff)
+    q = p.integral(n)
+    np.testing.assert_array_almost_equal(q.coefficients, expected)
 
-    coeff_ = get_derivative_coefficients(expected, n=n)
+    p_ = q.derivative(n)
     np.testing.assert_array_almost_equal(
-        coeff_,
+        p_.coefficients,
         coeff,
-        decimal=6,
         err_msg='Derivative should return original coefficients.',
     )
     return

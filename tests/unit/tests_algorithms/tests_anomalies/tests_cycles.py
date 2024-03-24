@@ -5,8 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from src.thirdparty.log import *
 from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
+
+from src.algorithms.anomalies.cycles import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
@@ -19,3 +22,14 @@ from tests.unit.thirdparty.unit import *
 # ----------------------------------------------------------------
 
 #
+
+# ----------------------------------------------------------------
+# TESTS
+# ----------------------------------------------------------------
+
+
+def test_hello(
+    test: TestCase,
+):
+    test.assertEqual(1 + 1, 2)
+    return

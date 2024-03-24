@@ -9,7 +9,7 @@ from src.thirdparty.log import *
 from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
-from src.algorithms.peaks import *
+from src.algorithms.anomalies.peaks import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS

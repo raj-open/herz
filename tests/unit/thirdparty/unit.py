@@ -31,15 +31,15 @@ from typing import Optional
 
 def assert_array_close_to_zero(
     x: Iterable,
-    eps: float = 1e-10,
+    decimals: float = 7,
     message: Optional[str] = None,
 ):
+    eps = 10**-decimals
     x_ = np.asarray(x)
     x__ = x_.flatten()
     dist = np.linalg.norm(x__)
-    assert dist < eps, (
-        message or f'Array must be sufficiently close to 0. Recieved\n    x={x_}\nfor which\n    ‖x‖ = {dist} > {eps}'
-    )
+    message or f'Array must be sufficiently close to 0. Recieved\n    x={x_}\nfor which\n    ‖x‖ = {dist} > 10^-{decimals}'
+    assert dist < eps, message
     return
 
 

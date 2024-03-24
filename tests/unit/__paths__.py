@@ -56,7 +56,7 @@ def get_module(path: str, root='src', prefix=r'^tests_(.*)') -> str:
     # remove extension
     path = os.path.splitext(path)[0]
     # remove test-prefixes
-    parts = re.split(pattern=r'/', string=path)
+    parts = re.split(pattern=r'[/\\]', string=path)
     parts = [re.sub(pattern=prefix, repl=r'\1', string=part) for part in parts]
     # join to form module name
     m = '.'.join([root] + parts)
