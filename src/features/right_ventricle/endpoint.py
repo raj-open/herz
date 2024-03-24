@@ -97,7 +97,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
             subprog = prog.subtask(f'''FIT TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
             data_anon = data.rename(columns={quantity: 'value'})
             T, offset = info.normalisation.period, 0
-            fit_trig, intervals = step_fit_trig(data_anon, p, offset=offset, period=T, special=special, cfg_trig=cfg_trig_, symb=symb)  # fmt: skip
+            fit_trig, intervals = step_fit_trig(data_anon, p, offset=offset, period=T, special=special, cfg_fit=cfg_trig_, symb=symb)  # fmt: skip
             subprog.next()
             special = step_recognise_iso_max(fit_trig, special=special)
             info_trig = (fit_trig, intervals)
@@ -112,12 +112,16 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         specials[quantity] = special
         prog.next()
 
-    subprog = prog.subtask(f'''FIT EXP-CURVE TO P-V''', steps=3)
-    step_fit_exp_pressure()
-    subprog.next()
-    step_fit_exp_volume()
-    subprog.next()
-    step_fit_exp_pv()
+    subprog = prog.subtask(f'''FIT EXP-CURVE TO P-V''', steps=1)
+    step_fit_exp(
+        data_p=datas['pressure'],
+        data_v=datas['volume'],
+        info_p=infos['pressure'],
+        info_v=infos['pressure'],
+        special_p=specials['pressure'],
+        special_v=specials['volume'],
+        cfg_fit=config.EXP,
+    )
     subprog.next()
     prog.next()
 

@@ -57,7 +57,7 @@ def step_fit_trig(
     period: float,
     special: dict[str, SpecialPointsConfig],
     symb: str,
-    cfg_trig: FitTrigConfig,
+    cfg_fit: FitTrigConfig,
 ) -> tuple[
     FittedInfoTrig,
     list[tuple[float, float]],
@@ -69,26 +69,25 @@ def step_fit_trig(
     # NOTE: polynomial must be rendered cyclic
     # to allow for consistent values upon shifting
 
-    conf_ = cfg_trig.points
+    conf_ = cfg_fit.points
     env = {
         f'{symb.upper()}': special,
         f'T_{symb.lower()}': period,
     }
+    env = get_schema_from_settings(conf_, env=env)
 
-    env = get_schema_from_settings(conf_, special=special, env=env)
-
-    conf_ = cfg_trig.intervals
+    conf_ = cfg_fit.intervals
     intervals = get_spatial_domain_from_settings(conf_, env=env)
 
-    conf_ = cfg_trig.conditions
+    conf_ = cfg_fit.conditions
     omega_min, omega_max = get_bounds_from_settings(conf_, env=env)
 
     env = env | {'omega_min': omega_min, 'omega_max': omega_max}
 
-    conf_ = cfg_trig.initial
+    conf_ = cfg_fit.initial
     fit_init = get_initialisation_from_settings(conf_, env=env)
 
-    conf_ = cfg_trig.solver
+    conf_ = cfg_fit.solver
     match conf_.model:
         case EnumModelKind.DATA:
             data = restrict_data_to_intervals(

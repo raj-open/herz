@@ -31,7 +31,6 @@ __all__ = [
 
 def get_schema_from_settings(
     schema: dict[str, str],
-    special: dict[str, SpecialPointsConfig],
     env: dict[str, float],
 ) -> dict[str, float]:
     '''
