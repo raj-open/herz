@@ -9,23 +9,23 @@ from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
 
-from ....setup import config
-from ....core.poly import *
+from ....core.log import *
 from ....models.app import *
 from ....models.enums import *
-from ....models.user import *
 from ....models.fitting import *
+from ....models.polynomials import *
+from ....models.user import *
 from ....queries.fitting import *
-from ....algorithms.cycles import *
-from ....algorithms.fit import *
+from ....algorithms.anomalies import *
+from ....algorithms.fitting.polynomials import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_fit_curve',
-    'step_refit_curve',
+    'step_fit_poly',
+    'step_refit_poly',
 ]
 
 # ----------------------------------------------------------------
@@ -33,7 +33,8 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def step_fit_curve(
+@echo_function(message='STEP fit polynomial-model to data', level=LOG_LEVELS.INFO)
+def step_fit_poly(
     data: pd.DataFrame,
     quantity: str,
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
@@ -51,7 +52,8 @@ def step_fit_curve(
     t = data['time'].to_numpy(copy=True)
     x = data[quantity].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
-    fitinfos = fit_poly_cycles(t=t, x=x, cycles=cycles, conds=conds)
+    windows = cycles_to_windows(cycles)
+    fitinfos = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds)
 
     # compute n'th derivatives
     data = compute_nth_derivatives_for_cycles(data, fitinfos, quantity=quantity, n_der=n_der, mode=mode)
@@ -59,10 +61,11 @@ def step_fit_curve(
     return data, fitinfos
 
 
-def step_refit_curve(
+@echo_function(message='STEP refit polynomial-model to data', level=LOG_LEVELS.INFO)
+def step_refit_poly(
     data: pd.DataFrame,
-    points: dict[str, SpecialPointsConfig],
     quantity: str,
+    points: dict[str, SpecialPointsConfig],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     n_der: int,
     mode: EnumFittingMode,
@@ -88,7 +91,7 @@ def step_refit_curve(
     t_align = points[align].time if align in points else 0.0
     conds = shift_conditions(conds, t0=t_align)
 
-    data, fitinfos = step_fit_curve(
+    data, fitinfos = step_fit_poly(
         data=data,
         quantity=quantity,
         conds=conds,
@@ -130,16 +133,17 @@ def compute_nth_derivatives_for_cycles(
         # loop over all time-subintervals:
         for k, ((i1, i2), info) in enumerate(fitinfos[:-1]):
             # get coefficients for (n-1)th derivative polynomial for cycle k:
-            coeff = coeffs[k]
+            p = Poly[float](coeff=coeffs[k])
             # get drift-values:
             T, c, m, s = get_normalisation_params(info)
             # scale time
             tt = (t[i1:i2] - t[i1]) / T
             # compute nth-derivative of fitted polynom to normalise cycle
             if n > 0:
-                coeff = get_derivative_coefficients(coeff)
-                coeffs[k] = coeff
-            xx = poly(tt, *coeff)
+                p = p.derivative()
+                coeffs[k] = p.coefficients
+            xx = p.values(tt)
+
             # undo effects of time-scaling and drift-removal
             # NOTE: from 2nd derivative onwards, drift-removal has no effect)
             match n:
