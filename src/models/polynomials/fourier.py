@@ -38,7 +38,7 @@ def fourier_of_polynomial(
     After renormalising, one can assume `t₁=0` and `t₂=1`.
 
     Consider `p(t) = tᵏ` for some `k ∈ ℕ₀`.
-    For `n ∈ ℤ \ {0}` one has
+    For `n ∈ ℤ \\ {0}` one has
 
     ```
     F(n) = ∫ tᵏ·e^{-ι2πnt} dt

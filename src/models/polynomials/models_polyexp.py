@@ -239,7 +239,7 @@ class PolyExp(PolyExpBase[T]):
             = exp_{n}(-st)/(s·(-s)ⁿ/n!) e^{st}
             ```
 
-            for all `n ∈ ℕ₀`, `s ∈ ℂ \ {0}`.
+            for all `n ∈ ℕ₀`, `s ∈ ℂ \\ {0}`.
         '''
         if n == 0:
             return self.__copy__()
