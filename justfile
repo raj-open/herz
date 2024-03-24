@@ -164,39 +164,6 @@ _generate-models-recursively path_schema target_path:
 # TARGETS
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# TARGETS: hooks
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-githook-lint-check path:
-    @# performs check without changing
-    @just lint-check "{{path}}"
-
-githook-lint-suggest path:
-    @# performs changes without git adding
-    @just lint "{{path}}"
-
-githook-lint-force path:
-    @# force lint if possible and add to commit
-    @just lint "{{path}}"
-    @git add "{{path}}"
-
-githook-utest path:
-    @# run unit test
-    @just test-unit "{{path}}"
-
-githook-btest path:
-    @# run behavioural test
-    @just test-behave "{{path}}"
-
-githook-qa:
-    @# run build
-    @just build-skip-requirements
-    @# run linting
-    @just lint "src"
-    @just lint "tests"
-    @# run tests
-    @just tests-unit
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # TARGETS: build
@@ -287,7 +254,8 @@ run *args:
     @${ACTIVATE_VENV:-echo "venv:off"} \
     && {{PYVENV}} -m src.cli {{args}}
 
-run-cli mode requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
+run-cli mode="requests" requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
+    @just _reset-logs "{{log_path}}"
     @${ACTIVATE_VENV:-echo "venv:off"} \
     && {{PYTHON}} -m src.cli \
         "{{mode}}" \
@@ -296,7 +264,8 @@ run-cli mode requests="setup/requests.yaml" env_path=".env" log_path="logs" sess
         --log "{{log_path}}" \
         --session "{{session_path}}"
 
-run-cli-debug mode requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
+run-cli-debug mode="requests" requests="setup/requests.yaml" env_path=".env" log_path="logs" session_path=".session":
+    @just _reset-logs "{{log_path}}"
     @${ACTIVATE_VENV:-echo "venv:off"} \
     && {{PYTHON}} -m src.cli \
         "{{mode}}" \
