@@ -5,17 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.maths import *
-from ..thirdparty.types import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 
-from .peaks import *
-from .cycles import *
-from ..core.utils import *
-from ..core.log import *
-from ..core.poly import *
-from ..core.crit import *
-from ..algorithms.onb import *
-from ..models.fitting import *
+from ....models.polynomials import *
+from ....models.fitting import *
+from ...interpolations import *
+from .geometry import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -34,7 +30,7 @@ __all__ = [
 def fit_poly_cycles(
     t: np.ndarray,
     x: np.ndarray,
-    cycles: list[int],
+    windows: list[tuple[int, int]],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
 ) -> list[tuple[tuple[int, int], FittedInfo]]:
     '''
@@ -42,9 +38,6 @@ def fit_poly_cycles(
     - minimises wrt. the L²-norm
     - forces certain conditions on n'th-derivatives at certain time points
     '''
-    # determine start and end of each cycle
-    windows = cycles_to_windows(cycles)
-
     # due to normalisation (drift-removal), force extra boundary conditions
     conds = conds[:]
     conds.append(PolyDerCondition(derivative=0, time=0.0))
@@ -62,9 +55,9 @@ def fit_poly_cycles(
         # remove drift
         c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1, periodic=True)
         # compute fitted curve
-        coeff = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
+        p_fit = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
         params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
-        info = FittedInfo(coefficients=coeff, normalisation=params)
+        info = FittedInfo(coefficients=p_fit.coefficients, normalisation=params)
         fitinfos.append(((i1, i2), info))
 
     info = compute_simultaneous_fit([info for _, info in fitinfos])
@@ -78,7 +71,7 @@ def fit_poly_cycle(
     x: np.ndarray,
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-) -> list[float]:
+) -> Poly:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
     that special attributes can be extracted.
@@ -95,8 +88,8 @@ def fit_poly_cycle(
     - the fit polynomial
     '''
     Q = onb_conditions(deg=deg, conds=conds)
-    coeff = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
-    return coeff
+    p = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
+    return p
 
 
 # ----------------------------------------------------------------
@@ -157,6 +150,9 @@ def compute_simultaneous_fit(infos: list[FittedInfo]) -> FittedInfo:
 def refine_conditions_determine_degree(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
 ) -> tuple[list[PolyDerCondition | PolyIntCondition], int]:
+    '''
+    Extracts the minimum model size needed to satisfy all criteria.
+    '''
     conds_crit = [cond for cond in conds if isinstance(cond, PolyCritCondition)]
     conds_der = [cond for cond in conds if isinstance(cond, PolyDerCondition)]
     conds_int = [cond for cond in conds if isinstance(cond, PolyIntCondition)]
@@ -174,85 +170,3 @@ def refine_conditions_determine_degree(
         deg = max(deg, n + 1 + h)
 
     return conds_der + conds_int, deg
-
-
-def effective_coefficients_pq(n: int, *coeff_q: float) -> list[float]:
-    '''
-    Determines coefficients of `p(t)·q(t)`,
-    based on coefficients of `q(t)`,
-    where `p(t) = t·(t - 1)`.
-    '''
-    m = len(coeff_q)
-    coeff_q = np.asarray(coeff_q, dtype=float)
-    coeff_pq = np.zeros(shape=(m + 2,), dtype=float)
-    coeff_pq[2:] += coeff_q
-    coeff_pq[1:-1] -= coeff_q
-    return coeff_pq
-
-
-def effective_coefficients(n: int, *coeff: float) -> list[float]:
-    '''
-    Determines coefficients of `x(t)` based on algebraic constraints
-    on coefficients that occur in polynomial for `x´´´(t)`.
-    '''
-    coeff_x_nth = effective_coefficients_pq(n, *coeff[n:])
-    coeff_x = list(coeff[:n]) + [c / (k + n) for k, c in enumerate(coeff_x_nth)]
-    # force x(0) = 0
-    coeff_x[0] = 0
-    # force x(1) = 0
-    coeff_x[2] = 0
-    coeff_x[2] = -sum(coeff_x)
-    # force x´(0) = 0
-    coeff_x[1] = 0
-    # # force x´(1) = 0
-    # coeff_x[2] = 0
-    # coef_x_1st = [k * c for k, c in enumerate(coeff_x)]
-    # coeff_x[2] = -1 / 2 * sum(coef_x_1st)
-    return coeff_x
-
-
-def objective_function(n: int):
-    fct = fit_function(n)
-
-    def obj(params: lmfit.Parameters, t: np.ndarray, x: np.ndarray):
-        coeff = [params[key].value for key in params]
-        # coeff_d1 = get_derivative_coefficients(coeff, n=1)
-        # coeff_dn = get_derivative_coefficients(coeff, n=n)
-        # # polynomial x´(0) and x´(1) must be 0 and x⁽ⁿ⁾(0) and x⁽ⁿ⁾(1) must be 0:
-        # values = np.asarray([
-        #     coeff_d1[0],
-        #     sum(coeff_d1),
-        #     coeff_dn[0],
-        #     sum(coeff_dn),
-        # ]);
-        # d = np.linalg.norm(values)
-        # fit curve should be close to original data:
-        # x_fit = poly(t, *coeff)
-        # res = max(d, 1) * x - x_fit
-        x_fit = fct(t, *coeff)
-        res = x - x_fit
-        return res
-
-    return obj
-
-
-def fit_function(n: int):
-    '''
-    Polynomial function for `x(t)` based on
-    coefficients that occur in polynomial for `x⁽ⁿ⁾(t)`
-    plus coefficients that arised during integration.
-
-    NOTE: assumes time is normalised to `[0, 1]`
-
-    Forces:
-
-    - x´(t) = 0 for t ∈ {0, 1}
-    - x⁽ⁿ⁾(t) = 0 for t ∈ {0, 1}
-    '''
-
-    def fct(t: float, *coeff: float):
-        coeff_x = effective_coefficients(n, *coeff)
-        x = poly(t, *coeff_x)
-        return x
-
-    return fct

@@ -5,15 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.types import *
+from ....thirdparty.types import *
 
-from ...core.utils import *
-
-# NOTE: foreign import
-from ..generated.app import PolyCritCondition
-from ..generated.app import PolyDerCondition
-from ..generated.app import PolyIntCondition
-from ..generated.app import TimeInterval
+from ....core.utils import *
+from ....models.fitting import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -27,13 +22,7 @@ __all__ = [
 ]
 
 # ----------------------------------------------------------------
-# LOCAL VARIABLES / CONSTANTS
-# ----------------------------------------------------------------
-
-#
-
-# ----------------------------------------------------------------
-# METHODS - shifts
+# METHODS
 # ----------------------------------------------------------------
 
 

@@ -15,15 +15,8 @@ from ...models.fitting import *
 __all__ = [
     'get_polynomial_condition',
     'get_alignment_point',
-    'get_alignment_time',
     'get_point_settings',
 ]
-
-# ----------------------------------------------------------------
-# CONSTANTS
-# ----------------------------------------------------------------
-
-#
 
 # ----------------------------------------------------------------
 # METHODS
@@ -54,18 +47,6 @@ def get_alignment_point(
             return cfg.volume
         case _:
             raise Exception(f'No matching settings defined for {quantity}!')
-
-
-def get_alignment_time(
-    info: FittedInfo,
-    points: dict[str, SpecialPointsConfig],
-    quantity: str,
-    cfg: MatchingConfig,
-) -> float:
-    align = get_alignment_point(quantity, cfg=cfg)
-    T = info.normalisation.period
-    t_align = T * points[align].time if align in points else 0.0
-    return t_align
 
 
 def get_point_settings(
