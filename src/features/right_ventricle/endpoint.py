@@ -38,12 +38,16 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     '''
     Processes right ventricular data
     '''
-    prog = LogProgress(name=f'RUN CASE {case.label}', steps=9, logger=log_info)
+    prog = LogProgress(name=f'RUN CASE {case.label}', steps=10, logger=log_info)
 
     datas = dict()
     infos = dict()
     fits_trig = dict()
-    specials = dict()
+    specials = {
+        'pressure': {},
+        'volume': {},
+        'pv': {},
+    }
     dataparts = dict()
 
     # set configs / settings
@@ -125,6 +129,29 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     subprog.next()
     prog.next()
 
+    subprog = prog.subtask(f'''COMPUTE SPECIAL POINTS FOR P-V''', steps=3)
+    step_compute_pv_ees(
+        special_p=specials['pressure'],
+        special_v=specials['volume'],
+        special_pv=specials['pv'],
+    )
+    subprog.next()
+    step_compute_pv_ea(
+        special_p=specials['pressure'],
+        special_v=specials['volume'],
+        special_pv=specials['pv'],
+    )
+    subprog.next()
+    step_compute_pv_eed(
+        info_p=infos['pressure'],
+        info_v=infos['volume'],
+        special_p=specials['pressure'],
+        special_v=specials['volume'],
+        special_pv=specials['pv'],
+    )
+    subprog.next()
+    prog.next()
+
     for quantity in ['pressure', 'volume']:
         points_data = dataparts[quantity]
         data = datas[quantity]
@@ -141,6 +168,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         case,
         special_p=specials['pressure'],
         special_v=specials['volume'],
+        special_pv=specials['pv'],
         fit_trig_p=(fits_trig['pressure'] or (None, None))[0],
         fit_trig_v=(fits_trig['volume'] or (None, None))[0],
         info_p=infos['pressure'],
@@ -182,6 +210,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         data_v=datas['volume'],
         info_v=infos['volume'],
         special_v=specials['volume'],
+        special_pv=specials['pv'],
         plot_name=case.name,
         plot_label=case.label,
         cfg_output=case.output,
