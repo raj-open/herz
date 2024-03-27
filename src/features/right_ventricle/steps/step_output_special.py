@@ -13,6 +13,7 @@ from ....setup import config
 from ....core.log import *
 from ....models.fitting import *
 from ....models.user import *
+from ....models.polynomials import *
 from ....queries.fitting import *
 from ....queries.scientific import *
 
@@ -34,6 +35,7 @@ def step_output_special_points(
     case: RequestConfig,
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
+    special_pv: dict[str, SpecialPointsConfigPV],
     fit_trig_p: FittedInfoTrig | None,
     fit_trig_v: FittedInfoTrig | None,
     info_p: FittedInfo,
@@ -146,22 +148,23 @@ def step_output_special_points(
         ]
 
     data.append({'name': 'P-V', 'description': 'Parameters computed for P-V curve'})
-    ees = compute_ees(special_p, special_v)
-    ea = compute_ea(special_p, special_v)
-    data.append(
+    data += [
         {
             'name': 'ees',
-            'value': cv['pressure/volume'] * ees,
+            'value': cv['pressure/volume'] * special_pv['ees'].value,
             'unit-x': units['pressure/volume'],
-        }
-    )
-    data.append(
+        },
         {
             'name': 'ea',
-            'value': cv['pressure/volume'] * ea,
+            'value': cv['pressure/volume'] * special_pv['ea'].value,
             'unit-x': units['pressure/volume'],
-        }
-    )
+        },
+        {
+            'name': 'eed',
+            'value': cv['pressure/volume'] * special_pv['eed'].value,
+            'unit-x': units['pressure/volume'],
+        },
+    ]
 
     # log to console
     log_debug_wrapped(
@@ -207,40 +210,3 @@ def step_output_special_points(
         float_format=lambda x: f'{x:.6f}',
     )
     pass
-
-
-# ----------------------------------------------------------------
-# AUXILIARY METHODS
-# ----------------------------------------------------------------
-
-
-def compute_ees(
-    special_p: dict[str, SpecialPointsConfig],
-    special_v: dict[str, SpecialPointsConfig],
-) -> float:
-    P_isomax = special_p['iso-max'].value
-    P_es = special_p['es'].value
-    V_ed = special_v['ed'].value
-    V_es = special_v['es'].value
-    ees = (P_isomax - P_es) / (V_ed - V_es)
-    return ees
-
-
-def compute_ea(
-    special_p: dict[str, SpecialPointsConfig],
-    special_v: dict[str, SpecialPointsConfig],
-) -> float:
-    P_es = special_p['es'].value
-    V_ed = special_v['ed'].value
-    V_es = special_v['es'].value
-    ea = P_es / (V_ed - V_es)
-    return ea
-
-
-def unnormalise(
-    key: str,
-    special: SpecialPointsConfig,
-    info: FittedInfo,
-) -> tuple[float, float]:
-    point = special[key]
-    return get_unnormalised_point(point.time, point.value, info=info)
