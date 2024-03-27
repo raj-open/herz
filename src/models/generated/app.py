@@ -279,12 +279,13 @@ class Solver(BaseModel):
         populate_by_name=True,
     )
     n_max: int = Field(..., alias='n-max', ge=0)
-    model: EnumModelKind = Field(
-        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
-    )
     mode: EnumSolver = Field(
         EnumSolver.BRUTE_FORCE, description='Determines the mode in which the fitting algorithm is executed.'
     )
+    model: EnumModelKind = Field(
+        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
+    )
+    drift: bool = Field(..., description='Indicates whether to include drift term in model.')
 
 
 class FitTrigCondition(BaseModel):

@@ -114,7 +114,7 @@ components:
           type: string
         volume:
           type: string
-      additionalProperties: False
+      additionalProperties: false
 
     # --------------------------------
     # DATA TYPE - polynomial setting
@@ -462,21 +462,26 @@ components:
           type: object
           required:
             - n-max
+            - drift
           properties:
             n-max:
               type: integer
               minimum: 0
-            model:
-              description: |-
-                Indicates whether to fit against the data or another model.
-              $ref: "#/components/schemas/EnumModelKind"
-              default: DATA
             mode:
               description: |-
                 Determines the mode in which the fitting algorithm is executed.
               $ref: "#/components/schemas/EnumSolver"
               default: BRUTE-FORCE
-          additionalProperties: False
+            model:
+              description: |-
+                Indicates whether to fit against the data or another model.
+              $ref: "#/components/schemas/EnumModelKind"
+              default: DATA
+            drift:
+              description: |-
+                Indicates whether to include drift term in model.
+              type: boolean
+          additionalProperties: false
         points:
           description: |-
             Schema for values to be used in intervals and conditions
@@ -499,7 +504,7 @@ components:
           default: []
         initial:
           $ref: "#/components/schemas/FitTrigIntialisation"
-      additionalProperties: False
+      additionalProperties: false
 
     FitTrigCondition:
       description: |-
@@ -517,7 +522,7 @@ components:
           description: |-
             Parseable expression for the value of the bound.
           type: string
-      additionalProperties: False
+      additionalProperties: false
 
     FitTrigIntialisation:
       description: |-
@@ -555,7 +560,7 @@ components:
             - type: integer
             - type: number
           default: 0
-      additionalProperties: False
+      additionalProperties: false
 
     # --------------------------------
     # DATA TYPE - Exp Fitting
@@ -593,7 +598,7 @@ components:
                 Determines the mode in which the fitting algorithm is executed.
               $ref: "#/components/schemas/EnumSolver"
               default: BRUTE-FORCE
-          additionalProperties: False
+          additionalProperties: false
         points:
           description: |-
             Schema for values to be used in intervals and conditions
@@ -616,7 +621,7 @@ components:
           default: []
         initial:
           $ref: "#/components/schemas/FitExpIntialisation"
-      additionalProperties: False
+      additionalProperties: false
 
     FitExpCondition:
       description: |-
@@ -634,7 +639,7 @@ components:
           description: |-
             Parseable expression for the value of the bound.
           type: string
-      additionalProperties: False
+      additionalProperties: false
 
     FitExpIntialisation:
       description: |-
@@ -660,7 +665,7 @@ components:
             - type: integer
             - type: number
           default: 0
-      additionalProperties: False
+      additionalProperties: false
 
     # --------------------------------
     # DATA TYPE - Pair String

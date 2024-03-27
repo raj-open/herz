@@ -40,6 +40,7 @@ def normalise_interpolated_drift(
     periodic: bool = False,
 ) -> tuple[float, float, float, np.ndarray]:
     m = (x[-1] - x[0]) / (t[-1] - t[0])
+    m = 0
     c = x[0] - m * t[0]
     x = x - (c + m * t)
     x_max = np.max(abs(x))

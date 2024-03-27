@@ -300,12 +300,13 @@ settings:
   trigonometric:
     pressure:
       solver:
-        model: DATA
-        # model: POLY-MODEL
+        n-max: 1000
         # mode: BRUTE-FORCE
         mode: HYBRID-GRADIENT
         # mode: GRADIENT
-        n-max: 1000
+        model: DATA
+        # model: POLY-MODEL
+        drift: false
       points:
         a1: "P['ed'].time - T_p"
         y11: "P['ed'].value"

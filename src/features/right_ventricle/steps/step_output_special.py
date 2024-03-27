@@ -115,11 +115,21 @@ def step_output_special_points(
         hshift = fit.hshift
         hscale = fit.hscale
         drift = fit.drift
+        if drift == 0:
+            data.append(
+                {
+                    'name': f'Trig {quantity.title()}',
+                    'description': f'L²-fitted model for parts of {symb}-curve:\nA·cos(ω·(t - t₀)) + C',
+                }
+            )
+        else:
+            data.append(
+                {
+                    'name': f'Trig {quantity.title()}',
+                    'description': f'L²-fitted model for parts of {symb}-curve:\nA·cos(ω·(t - t₀)) + C + μ·t',
+                }
+            )
         data += [
-            {
-                'name': f'Trig {quantity.title()}',
-                'description': f'L²-fitted model for parts of {symb}-curve:\nA·cos(ω·(t - t₀)) + C + μ·t',
-            },
             {
                 'name': 'A',
                 'value': cv[quantity] * vscale,
@@ -140,12 +150,15 @@ def step_output_special_points(
                 'value': cv[quantity] * vshift,
                 'unit-x': units[quantity],
             },
-            {
-                'name': 'μ',
-                'value': cv[f'd[1,t]{quantity}'] * drift,
-                'unit-x': units[f'd[1,t]{quantity}'],
-            },
         ]
+        if drift != 0:
+            data.append(
+                {
+                    'name': 'μ',
+                    'value': cv[f'd[1,t]{quantity}'] * drift,
+                    'unit-x': units[f'd[1,t]{quantity}'],
+                }
+            )
 
     data.append({'name': 'P-V', 'description': 'Parameters computed for P-V curve'})
     data += [

@@ -97,12 +97,12 @@ def step_fit_trig(
                 period=period,
             )
             scale = fit_options_scale_data(data)
-            gen_grad = fit_options_gradients_data(data)
+            gen_grad = fit_options_gradients_data(data, drift=conf_.drift)
 
         case EnumModelKind.POLY_MODEL:
             models, intervals = resolve_to_piecewise_functions(p=p, intervals=intervals)
             scale = fit_options_scale_poly_model(models, intervals)
-            gen_grad = fit_options_gradients_poly_model(models, intervals)
+            gen_grad = fit_options_gradients_poly_model(models, intervals, drift=conf_.drift)
 
         case _ as m:
             raise ValueError(f'No method available for running trig-fit algorithm for {m.value}.')

@@ -30,6 +30,7 @@ __all__ = [
 
 def inner_product_matrix(
     ip: dict[set, float],
+    drift: bool,
 ) -> NDArray[np.float64]:
     '''
     Computes inner product matrix, useful for computing
@@ -40,7 +41,7 @@ def inner_product_matrix(
     NOTE: mathematically, `G` is a positive matrix!
     (Verified numerically.)
     '''
-    return np.asarray(
+    G = np.asarray(
         [
             [
                 ip['1'],
@@ -80,14 +81,23 @@ def inner_product_matrix(
         ]
     )
 
+    # deactivate contribute by drift term
+    if not drift:
+        G[1, :] = 0
+        G[:, 1] = 0
+        G[1, 1] = 1
+
+    return G
+
 
 def inner_product_matrix_derivative(
     ip: dict[set, float],
+    drift: bool,
 ) -> NDArray[np.float64]:
     '''
     Computes derivative of the inner product matrix wrt. ω.
     '''
-    return np.asarray(
+    DG = np.asarray(
         [
             [
                 0,
@@ -126,6 +136,13 @@ def inner_product_matrix_derivative(
             ],
         ]
     )
+
+    # deactivate contribute by drift term
+    if not drift:
+        DG[1, :] = 0
+        DG[:, 1] = 0
+
+    return DG
 
 
 # ----------------------------------------------------------------
