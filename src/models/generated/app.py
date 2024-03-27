@@ -81,6 +81,19 @@ class TimeInterval(BaseModel):
     b: float
 
 
+class PointPV(BaseModel):
+    """
+    Structure of a point in the P-V space.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    pressure: float
+    volume: float
+
+
 class MarkerSettings(BaseModel):
     """
     Settings for plotting special points.
@@ -207,6 +220,24 @@ class PolyIntCondition(BaseModel):
         populate_by_name=True,
     )
     times: List[TimeInterval] = Field(..., min_length=1)
+
+
+class SpecialPointsConfigPV(BaseModel):
+    """
+    Information associated with the computation of a special point
+    on the PV-curve.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    name: str = Field(..., description='Name of special point.')
+    name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
+    ignore: bool = Field(False, description='Option to suppress plotting.')
+    found: bool = Field(False, description='Option to mark whether point successfully computed.')
+    value: float
+    data: List[PointPV] = []
 
 
 class SpecialPointsSpec(BaseModel):

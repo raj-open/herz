@@ -104,7 +104,7 @@ components:
       additionalProperties: false
 
     # --------------------------------
-    # DATA TYPE - fitted info trig curve
+    # DATA TYPE - fitted info exp curve
     # --------------------------------
 
     FittedInfoExp:

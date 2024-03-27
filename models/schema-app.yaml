@@ -224,6 +224,7 @@ components:
     # --------------------------------
     # DATA TYPE - special points configs
     # --------------------------------
+
     SpecialPointsConfigs:
       description: |-
         Configuration of special points.
@@ -245,6 +246,7 @@ components:
     # --------------------------------
     # DATA TYPE - special points config
     # --------------------------------
+
     SpecialPointsConfig:
       description: |-
         Configuration of special points.
@@ -294,8 +296,62 @@ components:
       additionalProperties: false
 
     # --------------------------------
+    # DATA TYPE - Special Points 2D
+    # --------------------------------
+
+    SpecialPointsConfigPV:
+      description: |-
+        Information associated with the computation of a special point
+        on the PV-curve.
+      required:
+        - name
+        - value
+      properties:
+        name:
+          description: |-
+            Name of special point.
+          type: string
+        name-simple:
+          description: |-
+            A table-friendly version of the name.
+          type: string
+        ignore:
+          description: |-
+            Option to suppress plotting.
+          type: boolean
+          default: false
+        found:
+          description: |-
+            Option to mark whether point successfully computed.
+          type: boolean
+          default: false
+        value:
+          type: number
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/PointPV"
+          default: []
+      additionalProperties: false
+
+    PointPV:
+      description: |-
+        Structure of a point in the P-V space.
+      type: object
+      required:
+        - pressure
+        - volume
+      properties:
+        pressure:
+          type: number
+        volume:
+          type: number
+      additionalProperties: false
+
+    # --------------------------------
     # DATA TYPE - special points specification
     # --------------------------------
+
     SpecialPointsSpec:
       description: |-
         A single condition used to defined special point in terms of
@@ -351,6 +407,7 @@ components:
     # --------------------------------
     # DATA TYPE - Points display settings
     # --------------------------------
+
     MarkerSettings:
       description: |-
         Settings for plotting special points.
