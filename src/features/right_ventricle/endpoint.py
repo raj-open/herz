@@ -129,25 +129,12 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     subprog.next()
     prog.next()
 
-    subprog = prog.subtask(f'''COMPUTE SPECIAL POINTS FOR P-V''', steps=3)
-    step_compute_pv_ees(
-        special_p=specials['pressure'],
-        special_v=specials['volume'],
-        special_pv=specials['pv'],
-    )
-    subprog.next()
-    step_compute_pv_ea(
-        special_p=specials['pressure'],
-        special_v=specials['volume'],
-        special_pv=specials['pv'],
-    )
-    subprog.next()
-    step_compute_pv_eed(
+    subprog = prog.subtask(f'''COMPUTE SPECIAL POINTS FOR P-V''', steps=1)
+    specials['pv'] = step_compute_pv(
         info_p=infos['pressure'],
         info_v=infos['volume'],
         special_p=specials['pressure'],
         special_v=specials['volume'],
-        special_pv=specials['pv'],
     )
     subprog.next()
     prog.next()

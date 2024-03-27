@@ -24,9 +24,7 @@ from ....algorithms.fitting.exponential import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_compute_pv_ees',
-    'step_compute_pv_ea',
-    'step_compute_pv_eed',
+    'step_compute_pv',
 ]
 
 # ----------------------------------------------------------------
@@ -34,80 +32,52 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP compute "ees" from fitted P-V curve', level=LOG_LEVELS.INFO)
-def step_compute_pv_ees(
+@echo_function(message='STEP compute special points from fitted P-V curve', level=LOG_LEVELS.INFO)
+def step_compute_pv(
+    info_p: FittedInfo,
+    info_v: FittedInfo,
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
-    special_pv: dict[str, SpecialPointsConfigPV],
-):
-    P_isomax = special_p['iso-max'].value
+) -> dict[str, SpecialPointsConfigPV]:
+    special_pv = {}
+
+    poly_p = Poly[float](coeff=info_p.coefficients)
+    poly_v = Poly[float](coeff=info_v.coefficients)
+    dP = poly_p.derivative()
+    dV = poly_v.derivative()
+
+    t_edp = special_p['ed'].time
+    P_ed = special_p['ed'].value
     P_es = special_p['es'].value
+    P_isomax = special_p['iso-max'].value
+
+    t_edv = special_v['ed'].time
     V_ed = special_v['ed'].value
     V_es = special_v['es'].value
-
-    m = (P_isomax - P_es) / (V_ed - V_es)
-    # V_0 = V_ed - P_isomax/m
 
     special_pv['ees'] = SpecialPointsConfigPV(
         name='ees',
         found=True,
-        value=m,
+        value=(P_isomax - P_es) / (V_ed - V_es),
         data=[
             # PointPV(pressure=0, volume=V_0),
             PointPV(pressure=P_es, volume=V_es),
             PointPV(pressure=P_isomax, volume=V_ed),
         ],
     )
-    return
-
-
-@echo_function(message='STEP compute "ea" from fitted P-V curve', level=LOG_LEVELS.INFO)
-def step_compute_pv_ea(
-    special_p: dict[str, SpecialPointsConfig],
-    special_v: dict[str, SpecialPointsConfig],
-    special_pv: dict[str, SpecialPointsConfigPV],
-):
-    P_es = special_p['es'].value
-    V_ed = special_v['ed'].value
-    V_es = special_v['es'].value
-
-    m = P_es / (V_ed - V_es)
 
     special_pv['ea'] = SpecialPointsConfigPV(
         name='ea',
         found=True,
-        value=m,
+        value=P_es / (V_ed - V_es),
         data=[
             PointPV(pressure=0, volume=V_ed),
             PointPV(pressure=P_es, volume=V_es),
         ],
     )
-    return
 
-
-@echo_function(message='STEP compute "eed" from fitted P-V curve', level=LOG_LEVELS.INFO)
-def step_compute_pv_eed(
-    info_p: FittedInfo,
-    info_v: FittedInfo,
-    special_p: dict[str, SpecialPointsConfig],
-    special_v: dict[str, SpecialPointsConfig],
-    special_pv: dict[str, SpecialPointsConfigPV],
-):
-    poly_p = Poly[float](coeff=info_p.coefficients)
-    poly_v = Poly[float](coeff=info_v.coefficients)
-
-    t_edp = special_p['ed'].time
-    t_edv = special_v['ed'].time
-
-    P_ed = special_p['ed'].value
-    V_ed = special_v['ed'].value
-
-    dP = poly_p.derivative()
-    dV = poly_v.derivative()
-
+    # compute gradient + intercept
     m = dP(t_edp) / dV(t_edv)
-
-    # compute intercept
     V_0 = V_ed - P_ed / m
 
     special_pv['eed'] = SpecialPointsConfigPV(
@@ -119,4 +89,5 @@ def step_compute_pv_eed(
             PointPV(pressure=P_ed, volume=V_ed),
         ],
     )
-    return
+
+    return special_pv
