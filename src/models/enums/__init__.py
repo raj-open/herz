@@ -7,8 +7,9 @@
 
 # NOTE: foreign import
 from ..generated.app import EnumCriticalPoints
-from ..generated.app import EnumSolver
 from ..generated.app import EnumModelKind
+from ..generated.app import EnumSolver
+from ..generated.app import EnumSpecialPointPVKind
 from ..generated.fitting import EnumExtremePoints
 from ..generated.fitting import EnumSign
 from ..generated.user import EnumEndpoint
@@ -29,5 +30,6 @@ __all__ = [
     'EnumProgrammeMode',
     'EnumSign',
     'EnumSolver',
+    'EnumSpecialPointPVKind',
     'EnumType',
 ]

@@ -417,39 +417,70 @@ def step_output_loop_plot(
 
     # plot special P-V points:
     for _, point in special_pv.items():
-        value = cv['pressure/volume'] * point.value
-        unit = units['pressure/volume']
         data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
-        # insert mid point
-        N_pts = len(point.data)
-        N_mid = int(len(point.data) / 2)
-        data_mid = np.mean(data, axis=0)
-        data = np.row_stack([data[:N_mid, :], [data_mid], data[N_mid:, :]])
-        # create text label
-        text_data = f'{point.name} = {value:.4g} {unit}'
-        # plot geometric line + value
-        fig.append_trace(
-            pgo.Scatter(
-                name=point.name,
-                x=cv['volume'] * data[:, 0],
-                y=cv['pressure'] * data[:, 1],
-                # FIXME: This is inefficient!
-                # There has to be a better way to annotate
-                # + make the text disappear when disabling the curve.
-                text=[''] * N_mid + [text_data] + [''] * (N_pts - N_mid),
-                textposition='middle center',
-                mode='lines+text',
-                line=dict(
-                    width=1,
-                    color='black',
-                    dash='dot',  # 'dash', 'dot', 'dotdash'
-                ),
-                visible=True if point.found else 'legendonly',
-                showlegend=True,
-            ),
-            row=1,
-            col=1,
-        )
+        match point.kind:
+            case EnumSpecialPointPVKind.PRESSURE | EnumSpecialPointPVKind.VOLUME as kind:
+                quantity = kind.value.lower()
+                value = cv[quantity] * point.value
+                unit = units[quantity]
+                # create text label
+                text_data = f'{point.name} = {value:.4g} {unit}'
+                # plot point
+                fig.append_trace(
+                    pgo.Scatter(
+                        name=point.name,
+                        x=cv['volume'] * data[:, 0],
+                        y=cv['pressure'] * data[:, 1],
+                        text=[text_data],
+                        textposition='top left',
+                        mode='markers+text',
+                        # TODO: This should be placed in the src/setup/config.yaml!
+                        marker=dict(
+                            symbol='x',
+                            size=9,
+                            color='green',
+                        ),
+                        visible=True,  # if point.found else 'legendonly',
+                        showlegend=True,
+                    ),
+                    row=1,
+                    col=1,
+                )
+
+            case EnumSpecialPointPVKind.GRADIENT:
+                value = cv['pressure/volume'] * point.value
+                unit = units['pressure/volume']
+                data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
+                # insert mid point
+                N_pts = len(point.data)
+                N_mid = int(len(point.data) / 2)
+                data_mid = np.mean(data, axis=0)
+                data = np.row_stack([data[:N_mid, :], [data_mid], data[N_mid:, :]])
+                # create text label
+                text_data = f'{point.name} = {value:.4g} {unit}'
+                # plot geometric line + value
+                fig.append_trace(
+                    pgo.Scatter(
+                        name=point.name,
+                        x=cv['volume'] * data[:, 0],
+                        y=cv['pressure'] * data[:, 1],
+                        # TODO: This is inefficient!
+                        # There has to be a better way to annotate
+                        # + make the text disappear when disabling the curve.
+                        text=[''] * N_mid + [text_data] + [''] * (N_pts - N_mid),
+                        textposition='middle center',
+                        mode='lines+text',
+                        line=dict(
+                            width=1,
+                            color='black',
+                            dash='dot',  # 'dash', 'dot', 'dotdash'
+                        ),
+                        visible=True if point.found else 'legendonly',
+                        showlegend=True,
+                    ),
+                    row=1,
+                    col=1,
+                )
 
     # save
     path = cfg_output.plot.path.root

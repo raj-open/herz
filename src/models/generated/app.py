@@ -183,7 +183,7 @@ class EnumBoundKind(str, Enum):
 
 class EnumModelKind(str, Enum):
     """
-    Enuemration of kinds of models
+    Enumeration of kinds of models
     """
 
     DATA = 'DATA'
@@ -191,9 +191,19 @@ class EnumModelKind(str, Enum):
     TRIG_MODEL = 'TRIG-MODEL'
 
 
+class EnumSpecialPointPVKind(str, Enum):
+    """
+    Enumeration of kinds of special points on P-V curve
+    """
+
+    GRADIENT = 'GRADIENT'
+    PRESSURE = 'PRESSURE'
+    VOLUME = 'VOLUME'
+
+
 class EnumSolver(str, Enum):
     """
-    Enuemration of modi for solver.
+    Enumeration of modi for solver.
     """
 
     BRUTE_FORCE = 'BRUTE-FORCE'
@@ -236,6 +246,7 @@ class SpecialPointsConfigPV(BaseModel):
     name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
+    kind: EnumSpecialPointPVKind
     value: float
     data: List[PointPV] = []
 

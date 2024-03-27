@@ -28,6 +28,7 @@ from ..generated.app import FitTrigIntialisation
 from ..generated.app import EnumBoundKind
 from ..generated.app import EnumModelKind
 from ..generated.app import EnumSolver
+from ..generated.app import EnumSpecialPointPVKind
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -37,6 +38,7 @@ __all__ = [
     'EnumBoundKind',
     'EnumModelKind',
     'EnumSolver',
+    'EnumSpecialPointPVKind',
     'FitExpCondition',
     'FitExpConfig',
     'FitExpIntialisation',

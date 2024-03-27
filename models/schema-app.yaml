@@ -305,6 +305,7 @@ components:
         on the PV-curve.
       required:
         - name
+        - kind
         - value
       properties:
         name:
@@ -325,6 +326,9 @@ components:
             Option to mark whether point successfully computed.
           type: boolean
           default: false
+        kind:
+          $ref: "#/components/schemas/EnumSpecialPointPVKind"
+          default: GRADIENT
         value:
           type: number
         data:
@@ -685,6 +689,7 @@ components:
     # --------------------------------
     # ENUM Critical Point Type
     # --------------------------------
+
     EnumCriticalPoints:
       description: |-
         Enumeration of critical point types.
@@ -702,6 +707,7 @@ components:
     # --------------------------------
     # ENUM Kind of bound
     # --------------------------------
+
     EnumBoundKind:
       description: |-
         Enumeration bound types.
@@ -716,7 +722,7 @@ components:
 
     EnumModelKind:
       description: |-
-        Enuemration of kinds of models
+        Enumeration of kinds of models
       type: string
       enum:
         - DATA # original data
@@ -724,12 +730,25 @@ components:
         - TRIG-MODEL
 
     # --------------------------------
+    # ENUM Kind of Special Pt
+    # --------------------------------
+
+    EnumSpecialPointPVKind:
+      description: |-
+        Enumeration of kinds of special points on P-V curve
+      type: string
+      enum:
+        - GRADIENT
+        - PRESSURE
+        - VOLUME
+
+    # --------------------------------
     # ENUM Mode for solver
     # --------------------------------
 
     EnumSolver:
       description: |-
-        Enuemration of modi for solver.
+        Enumeration of modi for solver.
       type: string
       enum:
         - BRUTE-FORCE

@@ -55,9 +55,21 @@ def step_compute_pv(
     V_ed = special_v['ed'].value
     V_es = special_v['es'].value
 
+    special_pv['iso-max'] = SpecialPointsConfigPV(
+        name='P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>',
+        name_simple='P^iso_max',
+        found=True,
+        kind=EnumSpecialPointPVKind.PRESSURE,
+        value=P_isomax,
+        data=[
+            PointPV(pressure=P_isomax, volume=V_ed),
+        ],
+    )
+
     special_pv['ees'] = SpecialPointsConfigPV(
         name='ees',
         found=True,
+        kind=EnumSpecialPointPVKind.GRADIENT,
         value=(P_isomax - P_es) / (V_ed - V_es),
         data=[
             # PointPV(pressure=0, volume=V_0),
@@ -69,6 +81,7 @@ def step_compute_pv(
     special_pv['ea'] = SpecialPointsConfigPV(
         name='ea',
         found=True,
+        kind=EnumSpecialPointPVKind.GRADIENT,
         value=P_es / (V_ed - V_es),
         data=[
             PointPV(pressure=0, volume=V_ed),
@@ -83,6 +96,7 @@ def step_compute_pv(
     special_pv['eed'] = SpecialPointsConfigPV(
         name='eed',
         found=True,
+        kind=EnumSpecialPointPVKind.GRADIENT,
         value=m,
         data=[
             PointPV(pressure=0, volume=V_0),
