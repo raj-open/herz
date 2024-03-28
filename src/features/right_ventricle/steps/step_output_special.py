@@ -63,6 +63,7 @@ def step_output_special_points(
             point.value,
         )
         for key, point in special_p.items()
+        if point.found
     ]
     points = sorted(points, key=lambda x: x[2])
     for key, name, t, x in points:
@@ -88,6 +89,7 @@ def step_output_special_points(
             point.value,
         )
         for key, point in special_v.items()
+        if point.found
     ]
     points = sorted(points, key=lambda x: x[2])
     for key, name, t, x in points:
@@ -161,23 +163,25 @@ def step_output_special_points(
             )
 
     data.append({'name': 'P-V', 'description': 'Parameters computed for P-V curve'})
-    data += [
-        {
-            'name': 'ees',
-            'value': cv['pressure/volume'] * special_pv['ees'].value,
-            'unit-x': units['pressure/volume'],
-        },
-        {
-            'name': 'ea',
-            'value': cv['pressure/volume'] * special_pv['ea'].value,
-            'unit-x': units['pressure/volume'],
-        },
-        {
-            'name': 'eed',
-            'value': cv['pressure/volume'] * special_pv['eed'].value,
-            'unit-x': units['pressure/volume'],
-        },
-    ]
+    for _, point in special_pv.items():
+        if not point.found:
+            continue
+        match point.kind:
+            case EnumSpecialPointPVKind.PRESSURE:
+                quantity = 'pressure'
+            case EnumSpecialPointPVKind.VOLUME:
+                quantity = 'volume'
+            case EnumSpecialPointPVKind.GRADIENT:
+                quantity = 'pressure/volume'
+            case _:
+                continue
+        data.append(
+            {
+                'name': point.name_simple or point.name,
+                'value': cv[quantity] * point.value,
+                'unit-x': units[quantity],
+            }
+        )
 
     # log to console
     log_debug_wrapped(

@@ -144,6 +144,10 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     specials['pv'] = step_compute_pv(
         info_p=infos['pressure'],
         info_v=infos['volume'],
+        # fit_trig_p=fits_trig['pressure'],
+        # fit_trig_v=fits_trig['volume'],
+        fit_trig_p=None,
+        fit_trig_v=None,
         special_p=specials['pressure'],
         special_v=specials['volume'],
         special_pv=specials['pv'],

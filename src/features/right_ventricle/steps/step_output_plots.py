@@ -418,6 +418,8 @@ def step_output_loop_plot(
     # plot special P-V points:
     for _, point in special_pv.items():
         data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
+        if len(data) == 0:
+            continue
         match point.kind:
             case EnumSpecialPointPVKind.PRESSURE | EnumSpecialPointPVKind.VOLUME as kind:
                 quantity = kind.value.lower()
@@ -432,7 +434,7 @@ def step_output_loop_plot(
                         x=cv['volume'] * data[:, 0],
                         y=cv['pressure'] * data[:, 1],
                         text=[text_data],
-                        textposition='top left',
+                        textposition=point.format.text_position,
                         mode='markers+text',
                         marker=dict(
                             symbol=point.format.symbol,
@@ -467,7 +469,7 @@ def step_output_loop_plot(
                         # There has to be a better way to annotate
                         # + make the text disappear when disabling the curve.
                         text=[''] * N_mid + [text_data] + [''] * (N_pts - N_mid),
-                        textposition='middle center',
+                        textposition=point.format.text_position,
                         mode='lines+text',
                         line=dict(
                             width=point.format.size,
