@@ -38,9 +38,8 @@ def step_compute_pv(
     info_v: FittedInfo,
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
+    special_pv: dict[str, SpecialPointsConfigPV],
 ) -> dict[str, SpecialPointsConfigPV]:
-    special_pv = {}
-
     poly_p = Poly[float](coeff=info_p.coefficients)
     poly_v = Poly[float](coeff=info_v.coefficients)
     dP = poly_p.derivative()
@@ -49,59 +48,44 @@ def step_compute_pv(
     t_edp = special_p['ed'].time
     P_ed = special_p['ed'].value
     P_es = special_p['es'].value
-    P_isomax = special_p['iso-max'].value
+    P_isomax = special_p['iso'].value
 
     t_edv = special_v['ed'].time
     V_ed = special_v['ed'].value
     V_es = special_v['es'].value
 
-    special_pv['iso-max'] = SpecialPointsConfigPV(
-        name='P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>',
-        name_simple='P^iso_max',
-        found=True,
-        kind=EnumSpecialPointPVKind.PRESSURE,
-        value=P_isomax,
-        data=[
-            PointPV(pressure=P_isomax, volume=V_ed),
-        ],
-    )
+    point = special_pv['iso']
+    point.found = True
+    point.value = P_isomax
+    point.data = [PointPV(pressure=P_isomax, volume=V_ed)]
 
-    special_pv['ees'] = SpecialPointsConfigPV(
-        name='ees',
-        found=True,
-        kind=EnumSpecialPointPVKind.GRADIENT,
-        value=(P_isomax - P_es) / (V_ed - V_es),
-        data=[
-            # PointPV(pressure=0, volume=V_0),
-            PointPV(pressure=P_es, volume=V_es),
-            PointPV(pressure=P_isomax, volume=V_ed),
-        ],
-    )
+    point = special_pv['ees']
+    point.found = True
+    point.value = (P_isomax - P_es) / (V_ed - V_es)
+    point.data = [
+        # PointPV(pressure=0, volume=V_0),
+        PointPV(pressure=P_es, volume=V_es),
+        PointPV(pressure=P_isomax, volume=V_ed),
+    ]
 
-    special_pv['ea'] = SpecialPointsConfigPV(
-        name='ea',
-        found=True,
-        kind=EnumSpecialPointPVKind.GRADIENT,
-        value=P_es / (V_ed - V_es),
-        data=[
-            PointPV(pressure=0, volume=V_ed),
-            PointPV(pressure=P_es, volume=V_es),
-        ],
-    )
+    point = special_pv['ea']
+    point.found = True
+    point.value = P_es / (V_ed - V_es)
+    point.data = [
+        PointPV(pressure=0, volume=V_ed),
+        PointPV(pressure=P_es, volume=V_es),
+    ]
 
     # compute gradient + intercept
     m = dP(t_edp) / dV(t_edv)
     V_0 = V_ed - P_ed / m
 
-    special_pv['eed'] = SpecialPointsConfigPV(
-        name='eed',
-        found=True,
-        kind=EnumSpecialPointPVKind.GRADIENT,
-        value=m,
-        data=[
-            PointPV(pressure=0, volume=V_0),
-            PointPV(pressure=P_ed, volume=V_ed),
-        ],
-    )
+    point = special_pv['eed']
+    point.found = True
+    point.value = m
+    point.data = [
+        PointPV(pressure=0, volume=V_0),
+        PointPV(pressure=P_ed, volume=V_ed),
+    ]
 
     return special_pv

@@ -61,10 +61,8 @@ def step_shift_data_extremes(
 def step_shift_data_custom(
     data: pd.DataFrame,
     points: list[tuple[tuple[int, int], dict[str, int]]],
-    quantity: str,
-    cfg_matching: MatchingConfig,
+    key_align: str,
 ) -> pd.DataFrame:
-    align = get_alignment_point(quantity, cfg=cfg_matching)
 
     # create copies so that original data not affected
     data = data.copy(True)
@@ -72,7 +70,7 @@ def step_shift_data_custom(
 
     # shift times in each cycle
     for k, ((i1, i2), pts) in enumerate(points):
-        i0 = pts.get(align, -1)
+        i0 = pts.get(key_align, -1)
         if i0 == -1:
             continue
         indices = list(range(i1, i2))

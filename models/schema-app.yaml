@@ -57,9 +57,9 @@ components:
             - units
             - matching
             - polynomial
-            - points
             - trigonometric
             - exponential
+            - points
           properties:
             units:
               description: |-
@@ -74,10 +74,6 @@ components:
               description: |-
                 Conditions for initial fitting (polynomial) curves to raw data.
               $ref: "#/components/schemas/PolynomialConfig"
-            points:
-              description: |-
-                Specifications used to compute special points.
-              $ref: "#/components/schemas/SpecialPointsConfigs"
             trigonometric:
               description: |-
                 Settings to fit trigonometric model.
@@ -95,6 +91,10 @@ components:
               description: |-
                 Settings to fit exponential model.
               $ref: "#/components/schemas/FitExpConfig"
+            points:
+              description: |-
+                Specifications used to compute special points.
+              $ref: "#/components/schemas/SpecialPointsConfigs"
       additionalProperties: false
 
     # --------------------------------
@@ -232,6 +232,7 @@ components:
       required:
         - pressure
         - volume
+        - pv
       properties:
         pressure:
           type: object
@@ -241,6 +242,10 @@ components:
           type: object
           additionalProperties:
             $ref: "#/components/schemas/SpecialPointsConfig"
+        pv:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/SpecialPointsConfigPV"
       additionalProperties: false
 
     # --------------------------------
@@ -289,10 +294,10 @@ components:
           description: |-
             Optional specifications for computation of special point.
           $ref: "#/components/schemas/SpecialPointsSpec"
-        marker:
+        format:
           description: |-
             Settings for plot marker.
-          $ref: "#/components/schemas/MarkerSettings"
+          $ref: "#/components/schemas/PointFormat"
       additionalProperties: false
 
     # --------------------------------
@@ -306,7 +311,7 @@ components:
       required:
         - name
         - kind
-        - value
+        - format
       properties:
         name:
           description: |-
@@ -331,11 +336,16 @@ components:
           default: GRADIENT
         value:
           type: number
+          default: -1
         data:
           type: array
           items:
             $ref: "#/components/schemas/PointPV"
           default: []
+        format:
+          description: |-
+            Settings for plot marker/line.
+          $ref: "#/components/schemas/PointFormat"
       additionalProperties: false
 
     PointPV:
@@ -412,29 +422,35 @@ components:
     # DATA TYPE - Points display settings
     # --------------------------------
 
-    MarkerSettings:
+    PointFormat:
       description: |-
-        Settings for plotting special points.
+        Style settings for plotting special points/lines.
 
-        - `size` - <int> size of marker
-        - `colour` - <string> colour of marker, can be either a name or of the form
+        - `size` - <int> size of marker or width of line.
+        - `colour` - <string> colour of marker/line.
+            can be either a name or of the form
             `'rgba(<float>,<float>,<float>,<float>)'`, `'hsla(<int>,<float>%,<float>%,<float>)'`, etc.
-        - `symbol` - <string> symbool for marker, see <https://plotly.com/python/marker-style>.
+        - `symbol` - <string> see <https://plotly.com/python/marker-style>.
         - (optional) `text` - <string> symbol for text inside the plot
         - `text-position` - <string> where text is to be positioned,
-
-          Values: 'top|middle|bottom left|center|right'
+            Values: 'top|middle|bottom left|center|right'
 
       type: object
       required: []
       properties:
         size:
+          description: |-
+            In the case of marker settings this determines the symbol-size.
+            In the case of line settings this determines the line-width.
           type: integer
           default: 2
         colour:
           type: string
           default: black
         symbol:
+          description: |-
+            In the case of marker settings this determines the symbol.
+            In the case of line settings this determines the line-style.
           type: string
           default: 'x'
         text:

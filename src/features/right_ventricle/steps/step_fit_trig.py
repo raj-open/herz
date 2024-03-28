@@ -36,12 +36,12 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP recognise iso-max', level=LOG_LEVELS.INFO)
+@echo_function(message='STEP recognise iso', level=LOG_LEVELS.INFO)
 def step_recognise_iso_max(
     fit: FittedInfoTrig,
     special: dict[str, SpecialPointsConfig],
 ) -> dict[str, SpecialPointsConfig]:
-    point = special['iso-max']
+    point = special['iso']
     t0 = fit.hshift
     point.time = t0
     point.value = fit.vshift + fit.drift * t0 + fit.vscale

@@ -40,26 +40,40 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     '''
     prog = LogProgress(name=f'RUN CASE {case.label}', steps=10, logger=log_info)
 
+    # set configs / settings
     datas = dict()
     infos = dict()
     fits_trig = dict()
+    cfg_points = config.POINTS.model_copy(deep=True)
     specials = {
-        'pressure': {},
-        'volume': {},
-        'pv': {},
+        'pressure': cfg_points.pressure,
+        'volume': cfg_points.volume,
+        'pv': cfg_points.pv,
     }
     dataparts = dict()
-
-    # set configs / settings
-    cfg_poly = config.POLY
     mode_fit = case.process.fit.mode
-    cfg_matching = config.MATCHING
-    cfg_points = config.POINTS
-    cfg_trig = config.TRIG
 
-    for quantity, symb, cfg_data, cfg_trig_, shift in [
-        ('pressure', 'P', case.data.pressure, cfg_trig.pressure, 'peak'),
-        ('volume', 'V', case.data.volume, cfg_trig.volume, 'peak'),
+    for quantity, symb, shift, cfg_data, conds, cfg_points, cfg_trig, key_align in [
+        (
+            'pressure',
+            'P',
+            'peak',
+            case.data.pressure,
+            config.POLY.pressure,
+            specials['pressure'],
+            config.TRIG.pressure,
+            config.MATCHING.pressure,
+        ),
+        (
+            'volume',
+            'V',
+            'peak',
+            case.data.volume,
+            config.POLY.volume,
+            specials['volume'],
+            config.TRIG.volume,
+            config.MATCHING.volume,
+        ),
     ]:
         subprog = prog.subtask(f'''READ DATA {quantity}''', steps=2)
         data = step_read_data(case, cfg=cfg_data, quantity=quantity)
@@ -76,14 +90,12 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         subprog.next()
 
         subprog = prog.subtask(f'''FIT POLY-CURVE FOR {quantity}''', steps=1)
-        conds = get_polynomial_condition(quantity, cfg=cfg_poly)
         data, fitinfos = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode_fit)
         _, info = fitinfos[-1]
         subprog.next()
 
         subprog = prog.subtask(f'''RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=1)
-        settings = get_point_settings(quantity, cfg=cfg_points)
-        special, points_data = step_recognise_points(data, fitinfos=fitinfos, special=settings)
+        special, points_data = step_recognise_points(data, fitinfos=fitinfos, special=cfg_points)
         subprog.next()
 
         subprog = prog.subtask(f'''RENORMALISE DATA + POLY-FITTING FOR {quantity}''', steps=3)
@@ -93,15 +105,14 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         info.coefficients = p.coefficients
         subprog.next()
         # NOTE: just renormalises, but does not realign.
-        key_align = get_alignment_point(quantity, cfg=cfg_matching)
         special = get_unnormalised_special(special, info=info, key_align=key_align)
         subprog.next()
 
-        if cfg_trig_ is not None:
+        if cfg_trig is not None:
             subprog = prog.subtask(f'''FIT TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
             data_anon = data.rename(columns={quantity: 'value'})
             T, offset = info.normalisation.period, 0
-            fit_trig, intervals = step_fit_trig(data_anon, p, offset=offset, period=T, special=special, cfg_fit=cfg_trig_, symb=symb)  # fmt: skip
+            fit_trig, intervals = step_fit_trig(data_anon, p, offset=offset, period=T, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
             subprog.next()
             special = step_recognise_iso_max(fit_trig, special=special)
             info_trig = (fit_trig, intervals)
@@ -135,6 +146,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         info_v=infos['volume'],
         special_p=specials['pressure'],
         special_v=specials['volume'],
+        special_pv=specials['pv'],
     )
     subprog.next()
     prog.next()
@@ -144,7 +156,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         data = datas[quantity]
 
         subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=1)
-        data = step_shift_data_custom(data, points_data, quantity=quantity, cfg_matching=cfg_matching)
+        data = step_shift_data_custom(data, points_data, key_align=key_align)
         subprog.next()
 
         datas[quantity] = data

@@ -9,7 +9,7 @@ from ..generated.fitting import FittedInfo
 from ..generated.fitting import FittedInfoNormalisation
 from ..generated.fitting import FittedInfoTrig
 from ..generated.fitting import FittedInfoExp
-from ..generated.app import MarkerSettings
+from ..generated.app import PointFormat
 from ..generated.app import PolyCritCondition
 from ..generated.app import PolyDerCondition
 from ..generated.app import PolyIntCondition
@@ -49,7 +49,6 @@ __all__ = [
     'FitTrigCondition',
     'FitTrigConfig',
     'FitTrigIntialisation',
-    'MarkerSettings',
     'PointPV',
     'PolyCritCondition',
     'PolyDerCondition',
@@ -58,5 +57,6 @@ __all__ = [
     'SpecialPointsConfigPV',
     'SpecialPointsConfigs',
     'SpecialPointsSpec',
+    'PointFormat',
     'TimeInterval',
 ]

@@ -374,8 +374,8 @@ def step_output_loop_plot(
         p_ = model_p(t_p)
         v_ = model_v(t_v)
         point = point.copy(deep=True)
-        point.marker = point.marker or MarkerSettings()
-        point.marker.size += 2
+        point.format = point.format or PointFormat()
+        point.format.size += 2
         points_.append((v_, p_, point))
 
     for _, point in special_v.items():
@@ -387,26 +387,26 @@ def step_output_loop_plot(
         p_ = model_p(t_p)
         v_ = model_v(t_v)
         point = point.copy(deep=True)
-        point.marker = point.marker or MarkerSettings()
-        point.marker.size -= 2
+        point.format = point.format or PointFormat()
+        point.format.size -= 2
         points_.append((v_, p_, point))
 
     for v_, p_, point in points_:
         if point.ignore:
             continue
-        marker = point.marker
+        fmt = point.format
         fig.append_trace(
             pgo.Scatter(
                 name=point.name,
                 x=[cv['volume'] * v_],
                 y=[cv['pressure'] * p_],
-                text=[marker.text or ''],
-                textposition=marker.text_position,
+                text=[fmt.text or ''],
+                textposition=fmt.text_position,
                 mode='markers+text',
                 marker=dict(
-                    symbol=marker.symbol,
-                    size=marker.size,
-                    color=marker.colour,
+                    symbol=fmt.symbol,
+                    size=fmt.size,
+                    color=fmt.colour,
                 ),
                 visible=True if point.found else 'legendonly',
                 showlegend=True,
@@ -434,13 +434,12 @@ def step_output_loop_plot(
                         text=[text_data],
                         textposition='top left',
                         mode='markers+text',
-                        # TODO: This should be placed in the src/setup/config.yaml!
                         marker=dict(
-                            symbol='x',
-                            size=9,
-                            color='green',
+                            symbol=point.format.symbol,
+                            size=point.format.size,
+                            color=point.format.colour,
                         ),
-                        visible=True,  # if point.found else 'legendonly',
+                        visible=True if point.found else 'legendonly',
                         showlegend=True,
                     ),
                     row=1,
@@ -471,9 +470,10 @@ def step_output_loop_plot(
                         textposition='middle center',
                         mode='lines+text',
                         line=dict(
-                            width=1,
-                            color='black',
-                            dash='dot',  # 'dash', 'dot', 'dotdash'
+                            width=point.format.size,
+                            color=point.format.colour,
+                            # 'dash', 'dot', 'dotdash'
+                            dash=point.format.symbol,
                         ),
                         visible=True if point.found else 'legendonly',
                         showlegend=True,
@@ -673,19 +673,19 @@ def add_plot_time_series(
     for _, point in special.items():
         if point.ignore:
             continue
-        marker = point.marker or MarkerSettings()
+        fmt = point.format or PointFormat()
         fig.append_trace(
             pgo.Scatter(
                 name=point.name,
                 x=[cv_time * point.time],
                 y=[cv_value * point.value],
-                text=[marker.text or ''],
-                textposition=marker.text_position,
+                text=[fmt.text or ''],
+                textposition=fmt.text_position,
                 mode='markers+text',
                 marker=dict(
-                    symbol=marker.symbol,
-                    size=marker.size,
-                    color=marker.colour,
+                    symbol=fmt.symbol,
+                    size=fmt.size,
+                    color=fmt.colour,
                 ),
                 visible=True if point.found else 'legendonly',
                 showlegend=showlegend_points,
@@ -697,7 +697,7 @@ def add_plot_time_series(
             x=cv_time * point.time,
             line_width=0.5,
             line_dash='dash',
-            line_color=marker.colour,
+            line_color=fmt.colour,
         )
 
     return fig

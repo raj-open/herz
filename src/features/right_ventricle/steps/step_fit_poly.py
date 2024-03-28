@@ -69,26 +69,24 @@ def step_refit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     n_der: int,
     mode: EnumFittingMode,
-    cfg_matching: MatchingConfig,
+    key_align: str,
 ) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfo]]]:
     '''
     Refits polynomials, by additionally forcing derivative conditions
     of previously determined special points to be retained.
     '''
-    align = get_alignment_point(quantity, cfg=cfg_matching)
-
     # add in conditions for special points
     # NOTE: only used special pts marked for reuse
     conds = conds[:] + [
         PolyDerCondition(derivative=point.spec.derivative + 1, time=point.time)
-        for key, point in points.items()
+        for _, point in points.items()
         if point.spec is not None
-        # and (point.spec.reuse or key == align)
+        # and (point.spec.reuse or key == key_align)
         and point.spec.reuse
     ]
 
     # shift current conditions
-    t_align = points[align].time if align in points else 0.0
+    t_align = points[key_align].time if key_align in points else 0.0
     conds = shift_conditions(conds, t0=t_align)
 
     data, fitinfos = step_fit_poly(

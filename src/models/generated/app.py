@@ -94,27 +94,33 @@ class PointPV(BaseModel):
     volume: float
 
 
-class MarkerSettings(BaseModel):
+class PointFormat(BaseModel):
     """
-    Settings for plotting special points.
+    Style settings for plotting special points/lines.
 
-    - `size` - <int> size of marker
-    - `colour` - <string> colour of marker, can be either a name or of the form
+    - `size` - <int> size of marker or width of line.
+    - `colour` - <string> colour of marker/line.
+        can be either a name or of the form
         `'rgba(<float>,<float>,<float>,<float>)'`, `'hsla(<int>,<float>%,<float>%,<float>)'`, etc.
-    - `symbol` - <string> symbool for marker, see <https://plotly.com/python/marker-style>.
+    - `symbol` - <string> see <https://plotly.com/python/marker-style>.
     - (optional) `text` - <string> symbol for text inside the plot
     - `text-position` - <string> where text is to be positioned,
-
-      Values: 'top|middle|bottom left|center|right'
+        Values: 'top|middle|bottom left|center|right'
     """
 
     model_config = ConfigDict(
         extra='forbid',
         populate_by_name=True,
     )
-    size: int = 2
+    size: int = Field(
+        2,
+        description='In the case of marker settings this determines the symbol-size.\nIn the case of line settings this determines the line-width.',
+    )
     colour: str = 'black'
-    symbol: str = 'x'
+    symbol: str = Field(
+        'x',
+        description='In the case of marker settings this determines the symbol.\nIn the case of line settings this determines the line-style.',
+    )
     text: str = None
     text_position: str = Field('top center', alias='text-position')
 
@@ -247,8 +253,9 @@ class SpecialPointsConfigPV(BaseModel):
     ignore: bool = Field(False, description='Option to suppress plotting.')
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
     kind: EnumSpecialPointPVKind
-    value: float
+    value: float = -1
     data: List[PointPV] = []
+    format: PointFormat = Field(..., description='Settings for plot marker/line.')
 
 
 class SpecialPointsSpec(BaseModel):
@@ -374,7 +381,7 @@ class SpecialPointsConfig(BaseModel):
     spec: Optional[SpecialPointsSpec] = Field(
         None, description='Optional specifications for computation of special point.'
     )
-    marker: Optional[MarkerSettings] = Field(None, description='Settings for plot marker.')
+    format: Optional[PointFormat] = Field(None, description='Settings for plot marker.')
 
 
 class FitTrigConfig(BaseModel):
@@ -437,6 +444,7 @@ class SpecialPointsConfigs(BaseModel):
     )
     pressure: Dict[str, SpecialPointsConfig]
     volume: Dict[str, SpecialPointsConfig]
+    pv: Dict[str, SpecialPointsConfigPV]
 
 
 class Settings(BaseModel):
@@ -452,9 +460,9 @@ class Settings(BaseModel):
     polynomial: PolynomialConfig = Field(
         ..., description='Conditions for initial fitting (polynomial) curves to raw data.'
     )
-    points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
     trigonometric: Trigonometric = Field(..., description='Settings to fit trigonometric model.')
     exponential: FitExpConfig = Field(..., description='Settings to fit exponential model.')
+    points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
 
 
 class AppConfig(BaseModel):
