@@ -15,6 +15,7 @@ from ..queries import environment
 from ..models.app import *
 from ..models.internal import *
 from ..models.user import *
+from .register import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -116,17 +117,14 @@ def get_version(info: RepoInfo) -> str:
 
 
 def load_internal_config() -> AppConfig:
-    path = path_app_config()
-    with open(path, 'rb') as fp:
-        assets = yaml.load(fp, Loader=yaml.FullLoader)
-        return AppConfig.model_validate(assets)
+    assets = read_yaml(path=path_app_config())
+    return AppConfig.model_validate(assets)
 
 
 def load_user_requests(path: str) -> list[RequestConfig]:
-    with open(path, 'rb') as fp:
-        assets = yaml.load(fp, Loader=yaml.FullLoader)
-        cfg = RequestsConfig.model_validate(assets)
-        return [req for req in cfg.requests if not req.ignore]
+    assets = read_yaml(path=path)
+    cfg = RequestsConfig.model_validate(assets)
+    return [req for req in cfg.requests if not req.ignore]
 
 
 # ----------------------------------------------------------------
