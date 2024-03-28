@@ -36,36 +36,95 @@ __all__ = [
 def step_compute_pv(
     info_p: FittedInfo,
     info_v: FittedInfo,
+    fit_trig_p: FittedInfoTrig | None,
+    fit_trig_v: FittedInfoTrig | None,
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
 ) -> dict[str, SpecialPointsConfigPV]:
+    '''
+    Combines knowledge obtain from point recognition on the individual curves
+    together with the fitted models
+    in order to compute certain "special points" on the P-V curve.
+    '''
+    # get poly models
     poly_p = Poly[float](coeff=info_p.coefficients)
     poly_v = Poly[float](coeff=info_v.coefficients)
-    dP = poly_p.derivative()
-    dV = poly_v.derivative()
+    dP_poly = poly_p.derivative()
+    dV_poly = poly_v.derivative()
+
+    # get trig models
+    dP_osc = None
+    dV_osc = None
+    if isinstance(fit_trig_p, FittedInfoTrig):
+        hshift = fit_trig_p.hshift
+        hscale = fit_trig_p.hscale
+        # vshift = fit_trig_p.vshift
+        vscale = fit_trig_p.vscale
+        drift = fit_trig_p.drift
+        omega = 2 * pi / hscale
+        # osc_p = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
+        dP_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
+    if isinstance(fit_trig_v, FittedInfoTrig):
+        hshift = fit_trig_v.hshift
+        hscale = fit_trig_v.hscale
+        # vshift = fit_trig_v.vshift
+        vscale = fit_trig_v.vscale
+        drift = fit_trig_v.drift
+        omega = 2 * pi / hscale
+        # osc_v = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
+        dV_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
 
     t_edp = special_p['ed'].time
+    t_esp = special_p['es'].time
     P_ed = special_p['ed'].value
     P_es = special_p['es'].value
-    P_isomax = special_p['iso'].value
+    P_iso = special_p['iso'].value
 
     t_edv = special_v['ed'].time
+    t_esv = special_v['es'].time
     V_ed = special_v['ed'].value
     V_es = special_v['es'].value
+    V_iso = special_v['iso'].value
 
-    point = special_pv['iso']
+    point = special_pv['piso']
     point.found = True
-    point.value = P_isomax
-    point.data = [PointPV(pressure=P_isomax, volume=V_ed)]
+    point.value = P_iso
+    point.data = [PointPV(pressure=P_iso, volume=V_ed)]
+
+    # NOTE: This value seems wrong. Leave it out.
+    point = special_pv['viso']
+    point.found = True
+    point.value = V_iso
+    point.data = [PointPV(pressure=P_ed, volume=V_iso)]
+
+    match dP_osc, dV_osc:
+        case None, None:
+            m = (P_iso - P_es) / (V_ed - V_es)
+        case _, None:
+            m = dP_osc(t_esp) / dV_poly(t_esv)
+        case None, _:
+            m = dP_poly(t_esp) / dV_osc(t_esv)
+        case _, _:
+            m = dP_osc(t_esp) / dV_osc(t_esv)
+    lin = lambda p: V_es + (p - P_es) / m
+    V_0 = lin(0)
+    V_1 = lin(P_iso)
 
     point = special_pv['ees']
     point.found = True
-    point.value = (P_isomax - P_es) / (V_ed - V_es)
+    point.value = m
     point.data = [
-        # PointPV(pressure=0, volume=V_0),
+        PointPV(pressure=0, volume=V_0),
         PointPV(pressure=P_es, volume=V_es),
-        PointPV(pressure=P_isomax, volume=V_ed),
+        PointPV(pressure=P_iso, volume=V_1),
+    ]
+
+    point = special_pv['V0']
+    point.found = True
+    point.value = V_0
+    point.data = [
+        PointPV(pressure=0, volume=V_0),
     ]
 
     point = special_pv['ea']
@@ -77,7 +136,7 @@ def step_compute_pv(
     ]
 
     # compute gradient + intercept
-    m = dP(t_edp) / dV(t_edv)
+    m = dP_poly(t_edp) / dV_poly(t_edv)
     V_0 = V_ed - P_ed / m
 
     point = special_pv['eed']

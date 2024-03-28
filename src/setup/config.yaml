@@ -113,6 +113,40 @@ settings:
           value: '1*(b2 - a1)'
         - kind: HSCALE-UPPER-BOUND
           value: '2*(a2 - b1)'
+    volume:
+      solver:
+        n-max: 1000
+        # mode: BRUTE-FORCE
+        mode: HYBRID-GRADIENT
+        # mode: GRADIENT
+        model: DATA
+        # model: POLY-MODEL
+        drift: false
+      points:
+        a1: "V['anti-es'].time - T_v"
+        y11: "V['anti-es'].value"
+        b1: "V['bd'].time - T_v"
+        y12: "V['bd'].value"
+        a2: "V['sys'].time"
+        y21: "V['sys'].value"
+        b2: "V['es'].time"
+        y22: "V['es'].value"
+      intervals:
+        - [ a1, b1 ]
+        - [ a2, b2 ]
+      initial:
+        omega: '(omega_min + omega_max)/2'
+        hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
+        # since data is normalised with L²-norm = 1, assume 2 x amplitude
+        vscale: '2 * 1/math.sqrt(2)'
+        # since data is shift with peak = 0
+        vshift: '-1/math.sqrt(2)'
+        drift: 0
+      conditions:
+        - kind: HSCALE-LOWER-BOUND
+          value: '1*(b2 - a1)'
+        - kind: HSCALE-UPPER-BOUND
+          value: '2*(a2 - b1)'
 
   # --------------------------------
   # SETTINGS FOR FITTING EXP-MODEL
@@ -272,12 +306,12 @@ settings:
     volume:
       iso:
         ignore: true
-        name: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">min</sub>'
-        name-simple: 'P^iso_max'
+        name: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
+        name-simple: 'V^iso_max'
         spec: null
         format:
           <<: *marker_iso
-          text: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">min</sub>'
+          text: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
       max:
         name: 'V<sub>max</sub>'
         name-simple: "V_max"
@@ -328,7 +362,7 @@ settings:
           kind: MINIMUM
           after: [ 'es' ]
           before: [ 'bd' ]
-        format:
+        format: &marker_min
           colour: blue
           symbol: 'square'
           size: 9
@@ -377,13 +411,29 @@ settings:
           text: ''
 
     pv:
-      iso:
+      piso:
         name: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
         name-simple: 'P^iso_max'
         kind: PRESSURE
         format:
           <<: *marker_iso
-          text-position: 'top left'
+          text-position: "top left"
+
+      viso:
+        name: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
+        name-simple: 'V^iso_max'
+        kind: VOLUME
+        format:
+          <<: *marker_iso
+          text-position: "top left"
+
+      V0:
+        name: 'V<sub>0</sub>'
+        name-simple: 'V_0'
+        kind: VOLUME
+        format:
+          <<: *marker_min
+          text-position: "top right"
 
       ees:
         name: ees
@@ -393,6 +443,7 @@ settings:
           size: 1
           colour: "black"
           symbol: "dot"
+          text-position: "middle center"
 
       ea:
         name: ea
@@ -402,6 +453,7 @@ settings:
           size: 1
           colour: "black"
           symbol: "dot"
+          text-position: "middle center"
 
       eed:
         name: eed
@@ -411,3 +463,4 @@ settings:
           size: 1
           colour: "black"
           symbol: "dot"
+          text-position: "middle center"
