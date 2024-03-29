@@ -151,6 +151,11 @@ def step_output_time_plot(
         time=cv['time'] * data['time'],
         values=cv[quantity] * data[quantity],
         mode='markers',
+        marker=dict(
+            size=2,
+            color='hsla(0, 100%, 0%, 0.5)',
+            symbol='cross',
+        ),
         row=1,
         col=1,
         special={},
@@ -171,7 +176,7 @@ def step_output_time_plot(
             mode='markers',
             marker=dict(
                 size=3,
-                color='hsla(100, 100%, 25%, 0.3)',
+                color='hsla(100, 100%, 25%, 0.5)',
             ),
             special={},
             showlegend=True,
@@ -232,6 +237,7 @@ def step_output_time_plot(
 def step_output_loop_plot(
     data_p: pd.DataFrame,
     data_v: pd.DataFrame,
+    data_pv: pd.DataFrame,
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
     fit_poly_p: FittedInfoPoly,
@@ -251,6 +257,7 @@ def step_output_loop_plot(
 
     T_p = info_p.period
     T_v = info_v.period
+    T_pv = (T_p + T_v) / 2
     t_align_p = special_p['align'].time
     t_align_v = special_v['align'].time
 
@@ -313,13 +320,32 @@ def step_output_loop_plot(
 
     fig.append_trace(
         pgo.Scatter(
+            name='P vs. V [data/data]',
+            x=cv['volume'] * data_pv['volume'],
+            y=cv['pressure'] * data_pv['pressure'],
+            text=[f"ca. {cv['time'] * T_pv * tt:.0f}{units['time']} ({tt:.2%})" for tt in data_pv['time']],
+            mode='markers',
+            marker=dict(
+                size=3,
+                color='hsla(0, 100%, 0%, 0.5)',
+                symbol='cross',
+            ),
+            visible='legendonly',
+            showlegend=True,
+        ),
+        row=1,
+        col=1,
+    )
+
+    fig.append_trace(
+        pgo.Scatter(
             name='P vs. V(P) [data/poly-fit]',
             x=cv['volume'] * data_p['volume'],
             y=cv['pressure'] * data_p['pressure'],
             text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_p['time']],
             mode='markers',
             marker=dict(
-                size=4,
+                size=3,
                 color='hsla(180, 75%, 50%, 1)',
                 symbol='x',
             ),
@@ -337,7 +363,7 @@ def step_output_loop_plot(
             text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * data_v['time']],
             mode='markers',
             marker=dict(
-                size=4,
+                size=3,
                 color='hsla(300, 75%, 50%, 1)',
                 symbol='x',
             ),
@@ -357,8 +383,8 @@ def step_output_loop_plot(
             mode='lines',
             line_shape='spline',
             line=dict(
-                width=1,
-                color='black',
+                width=3,
+                color='hsla(0, 100%, 0%, 0.75)',
             ),
             showlegend=True,
         ),

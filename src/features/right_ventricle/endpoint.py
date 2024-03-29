@@ -116,7 +116,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
             intervals_trig = []
 
         subprog = prog.subtask(f'''RENORMALISE DATA + FITTINGS FOR {quantity}''', steps=4)
-        data = get_unnormalised_data(data, infos=infos_, quantity=quantity, renormalise=True)
+        data = get_unnormalised_data(data, infos=infos_, quantity=quantity, renormalise=False)
         subprog.next()
         # NOTE: just renormalises, but does not realign.
         special = get_unnormalised_special(special, info=info)
@@ -130,6 +130,10 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
             intervals_trig = [(T * a, T * b) for a, b in intervals_trig]
         subprog.next()
 
+        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=2)
+        data = step_shift_data_custom(data, points_data)
+        subprog.next()
+
         datas[quantity] = data
         dataparts[quantity] = points_data
         infos[quantity] = info
@@ -139,6 +143,10 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         prog.next()
 
     subprog = prog.subtask(f'''FIT EXP-CURVE TO P-V''', steps=1)
+    data_pv = step_interpolate_pv(
+        data_p=datas['pressure'],
+        data_v=datas['volume'],
+    )
     step_fit_exp(
         data_p=datas['pressure'],
         data_v=datas['volume'],
@@ -167,15 +175,6 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     )
     subprog.next()
     prog.next()
-
-    for quantity in ['pressure', 'volume']:
-        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=2)
-        points_data = dataparts[quantity]
-        data = datas[quantity]
-        data = step_shift_data_custom(data, points_data)
-        datas[quantity] = data
-        subprog.next()
-        prog.next()
 
     subprog = prog.subtask(f'''OUTPUT SPECIAL POINTS FOR {quantity}''', steps=1)
     step_output_special_points(
@@ -221,6 +220,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     step_output_loop_plot(
         data_p=datas['pressure'],
         data_v=datas['volume'],
+        data_pv=data_pv,
         info_p=infos['pressure'],
         info_v=infos['volume'],
         fit_poly_p=fits_poly['pressure'],
