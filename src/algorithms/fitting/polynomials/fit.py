@@ -28,11 +28,11 @@ __all__ = [
 
 
 def fit_poly_cycles(
-    t: np.ndarray,
-    x: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
     windows: list[tuple[int, int]],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
-) -> list[tuple[tuple[int, int], FittedInfo]]:
+) -> list[tuple[tuple[int, int], FittedInfoPoly]]:
     '''
     Fits polynomial to cycles of a time-series:
     - minimises wrt. the L²-norm
@@ -48,30 +48,24 @@ def fit_poly_cycles(
     conds, deg = refine_conditions_determine_degree(conds)
 
     # fit each cycle
-    fitinfos = []
+    fits = []
     for i1, i2 in windows:
-        # scale time
-        tt, T = normalise_to_unit_interval(t[i1:i2])
-        # remove drift
-        c, m, s, xx = normalise_interpolated_drift(tt, x[i1:i2], T=1, periodic=True)
-        # compute fitted curve
-        p_fit = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds)
-        params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
-        info = FittedInfo(coefficients=p_fit.coefficients, normalisation=params)
-        fitinfos.append(((i1, i2), info))
+        p = fit_poly_cycle(t=t[i1:i2], x=x[i1:i2], deg=deg, conds=conds)
+        fit = FittedInfoPoly(coefficients=p.coefficients)
+        fits.append(((i1, i2), fit))
 
-    info = compute_simultaneous_fit([info for _, info in fitinfos])
-    fitinfos.append(((-1, -1), info))
+    fit = compute_simultaneous_fit([fit for _, fit in fits])
+    fits.append(((-1, -1), fit))
 
-    return fitinfos
+    return fits
 
 
 def fit_poly_cycle(
-    t: np.ndarray,
-    x: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-) -> Poly:
+) -> Poly[float]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
     that special attributes can be extracted.
@@ -97,9 +91,9 @@ def fit_poly_cycle(
 # ----------------------------------------------------------------
 
 
-def compute_simultaneous_fit(infos: list[FittedInfo]) -> FittedInfo:
+def compute_simultaneous_fit(fits: list[FittedInfoPoly]) -> FittedInfoPoly:
     '''
-    Fits a single polynomial to all (normalised) cycles simultaenously.
+    Fits a single polynomial to all cycles simultaenously.
 
     NOTE:
     Since a method via ONB is used, the optimal solution
@@ -132,13 +126,8 @@ def compute_simultaneous_fit(infos: list[FittedInfo]) -> FittedInfo:
         of the coefficients of the p⁽ᵏ⁾.
     QED
     '''
-    coeff = np.mean(np.asarray([info.coefficients for info in infos]), axis=0).tolist()  # fmt: skip
-    T = np.median(np.asarray([info.normalisation.period for info in infos]), axis=0).tolist()  # fmt: skip
-    c = np.median(np.asarray([info.normalisation.intercept for info in infos]), axis=0).tolist()  # fmt: skip
-    m = np.median(np.asarray([info.normalisation.gradient for info in infos]), axis=0).tolist()  # fmt: skip
-    s = np.median(np.asarray([info.normalisation.scale for info in infos]), axis=0).tolist()  # fmt: skip
-    params = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
-    info = FittedInfo(coefficients=coeff, normalisation=params)
+    coeff = np.mean(np.asarray([fit.coefficients for fit in fits]), axis=0).tolist()
+    info = FittedInfoPoly(coefficients=coeff)
     return info
 
 
