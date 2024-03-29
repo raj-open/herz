@@ -6,6 +6,7 @@
 # ----------------------------------------------------------------
 
 from ...thirdparty.maths import *
+from ...thirdparty.types import *
 
 from ...core.utils import *
 from .peaks import *
@@ -24,7 +25,9 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def cycles_to_windows(cycles: list[int]) -> list[tuple[int, int]]:
+def cycles_to_windows(
+    cycles: Iterable[int],
+) -> list[tuple[int, int]]:
     '''
     Turns a list indicating cycle indexes into a list
     of pairs of endpoints of the cycles.
@@ -34,7 +37,7 @@ def cycles_to_windows(cycles: list[int]) -> list[tuple[int, int]]:
     '''
     c_min = min(cycles + [0])
     c_max = max(cycles + [0])
-    cycles = [c_min - 1] + cycles + [c_max + 1]
+    cycles = [c_min - 1] + list(cycles) + [c_max + 1]
     peaks = characteristic_to_where(np.diff(cycles) != 0)
     windows = list(zip(peaks, peaks[1:]))
     return windows
