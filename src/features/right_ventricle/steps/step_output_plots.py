@@ -170,8 +170,8 @@ def step_output_time_plot(
             col=1,
             mode='markers',
             marker=dict(
-                size=1,
-                color='hsla(100, 100%, 25%, 1)',
+                size=3,
+                color='hsla(100, 100%, 25%, 0.3)',
             ),
             special={},
             showlegend=True,
