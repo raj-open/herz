@@ -32,15 +32,21 @@ settings:
   # POINTS IN CYCLES FOR MATCHING
   # --------------------------------
   # (alignment of multiple time series).
+  # NOTE: for computation of cycles + poly-fitting
   # matching:
   #   pressure: 'sys'
   #   volume: 'sys'
+  # NOTE: for computation of exp-curve
   # matching:
   #   pressure: 'bd'
   #   volume: 'anti-es'
+  # matching:
+  #   pressure: 'ed'
+  #   volume: 'ed'
+  # NOTE: for aesthetic look
   matching:
-    pressure: 'ed'
-    volume: 'ed'
+    pressure: anti-bd
+    volume: bd
 
   # --------------------------------
   # FOR FITTING MODELS
