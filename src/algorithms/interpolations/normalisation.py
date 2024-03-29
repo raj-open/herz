@@ -27,10 +27,14 @@ __all__ = [
 def normalise_to_unit_interval(
     t: NDArray[np.float64],
 ) -> tuple[NDArray[np.float64], float]:
-    t_min = min(t)
-    t_max = max(t)
-    T = t_max - t_min
-    t = (t - t_min) / (T or 1.0)
+    if len(t) == 0:
+        return t
+    if len(t) == 1:
+        return np.asarray([0.0])
+    t = t - t[0]
+    dt = np.mean(np.diff(t))
+    T = t[-1] + dt
+    t = t / (T or 1.0)
     return t, T
 
 
