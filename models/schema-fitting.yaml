@@ -12,32 +12,6 @@ components:
     # ----------------------------------------------------------------
 
     # --------------------------------
-    # DATA TYPE - fitted infos
-    # --------------------------------
-    FittedInfo:
-      description: |-
-        Data structure to store information about fitted curves.
-      type: object
-      required:
-        - normalisation
-      properties:
-        coefficients:
-          description: |-
-            Coefficients of polynomial that fits (pre-normalised) cycle.
-          type: array
-          items:
-            type: number
-          default: []
-        normalisation:
-          description: |-
-            Pre-normalisation of cycle before curves is fit.
-            This is used so that fitted curves for multiple cycles can be
-            compared and combined to a single curve
-            that fits all cycles simultaneously.
-          $ref: "#/components/schemas/FittedInfoNormalisation"
-      additionalProperties: false
-
-    # --------------------------------
     # DATA TYPE - fitted info (pre)normalisation
     # --------------------------------
     FittedInfoNormalisation:
@@ -72,6 +46,25 @@ components:
         scale:
           type: number
           default: 1.
+      additionalProperties: false
+
+    # --------------------------------
+    # DATA TYPE - fitted infos
+    # --------------------------------
+    FittedInfoPoly:
+      description: |-
+        Data structure to store information about fitted polynomials.
+      type: object
+      required:
+        - normalisation
+      properties:
+        coefficients:
+          description: |-
+            Coefficients of polynomial model.
+          type: array
+          items:
+            type: number
+          default: []
       additionalProperties: false
 
     # --------------------------------

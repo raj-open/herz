@@ -375,6 +375,8 @@ class SpecialPointsConfig(BaseModel):
     name: str = Field(..., description='Name of special point.')
     name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
+    ignore_2_d: bool = Field(False, alias='ignore-2D', description='Option to suppress plotting in 2D Plot.')
+    derivatives: Optional[List[int]] = None
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
     time: float = Field(-1, description='Time co-ordinate of special point (initially normalised to `[0, 1]`).')
     value: float = Field(-1, description='Value of special point.')

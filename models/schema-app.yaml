@@ -275,6 +275,20 @@ components:
             Option to suppress plotting.
           type: boolean
           default: false
+        ignore-2D:
+          description: |-
+            Option to suppress plotting in 2D Plot.
+          type: boolean
+          default: false
+        derivatives:
+          descriptions: |-
+            Set for which derivatives the point is to appear.
+
+            - If `[]`, then will display for none.
+            - If `null`, then will display for all.
+          type: array
+          items:
+            type: integer
         found:
           description: |-
             Option to mark whether point successfully computed.

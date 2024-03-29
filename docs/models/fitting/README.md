@@ -14,9 +14,9 @@ Class | Method | HTTP request | Description
 
  - [EnumExtremePoints](.//Models/EnumExtremePoints.md)
  - [EnumSign](.//Models/EnumSign.md)
- - [FittedInfo](.//Models/FittedInfo.md)
  - [FittedInfoExp](.//Models/FittedInfoExp.md)
  - [FittedInfoNormalisation](.//Models/FittedInfoNormalisation.md)
+ - [FittedInfoPoly](.//Models/FittedInfoPoly.md)
  - [FittedInfoTrig](.//Models/FittedInfoTrig.md)
 
 

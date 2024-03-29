@@ -5,8 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..generated.fitting import FittedInfo
 from ..generated.fitting import FittedInfoNormalisation
+from ..generated.fitting import FittedInfoPoly
 from ..generated.fitting import FittedInfoTrig
 from ..generated.fitting import FittedInfoExp
 from ..generated.app import PointFormat
@@ -42,8 +42,8 @@ __all__ = [
     'FitExpCondition',
     'FitExpConfig',
     'FitExpIntialisation',
-    'FittedInfo',
     'FittedInfoExp',
+    'FittedInfoPoly',
     'FittedInfoNormalisation',
     'FittedInfoTrig',
     'FitTrigCondition',
