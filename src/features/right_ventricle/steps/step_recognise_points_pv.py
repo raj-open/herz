@@ -80,6 +80,7 @@ def step_compute_pv(
     P_ed = special_p['ed'].value
     P_es = special_p['es'].value
     P_iso = special_p['iso'].value
+    P_min = special_p['min'].value
 
     t_edv = special_v['ed'].time
     t_esv = special_v['es'].time
@@ -138,13 +139,14 @@ def step_compute_pv(
 
     # compute gradient + intercept
     m = dP_poly(t_edp) / dV_poly(t_edv)
-    V_0 = V_ed - P_ed / m
+    P_axis = min(P_min, 0)
+    V_axis = V_ed + (P_axis - P_ed) / m
 
     point = special_pv['eed']
     point.found = True
     point.value = m
     point.data = [
-        PointPV(pressure=0, volume=V_0),
+        PointPV(pressure=P_min, volume=V_axis),
         PointPV(pressure=P_ed, volume=V_ed),
     ]
 
