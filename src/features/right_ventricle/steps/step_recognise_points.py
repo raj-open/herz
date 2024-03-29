@@ -40,7 +40,10 @@ def step_recognise_points(
     Uses fitted model to automatically recognise points based on derivative-conditions.
     '''
     search = sort_special_points_specs(cfg)
-    window_info_points = [recognise_special_points(info, search=search) for _, info in fits]
+    N = len(fits)
+    window_info_points = [
+        recognise_special_points(info, search=search, skip_errors=i < N - 1) for i, (_, info) in enumerate(fits)
+    ]
 
     # adjust classified points in each cycle:
     t = data['time'].to_numpy(copy=True)

@@ -55,6 +55,7 @@ def sort_special_points_specs(
 def recognise_special_points(
     fit_poly: FittedInfoPoly,
     search: list[tuple[str, SpecialPointsConfig]],
+    skip_errors: bool,
 ) -> dict[str, SpecialPointsConfig]:
     '''
     NOTE: The conditions 'before' / 'after' are defined purely
@@ -135,9 +136,13 @@ def recognise_special_points(
             results[key].value = x
             results[key].found = True
 
-        except:
-            log_warn(f'Could not find ({key})!')
+        except Exception as err:
             results[key].found = False
+            if skip_errors:
+                log_warn(f'Could not find special point "{key}"! (non critical)')
+            else:
+                log_error(f'Could not find special point "{key}"!')
+                raise err
 
     return results
 
