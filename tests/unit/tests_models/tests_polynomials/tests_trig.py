@@ -25,7 +25,7 @@ _module = get_module(__file__)
 
 def test_trig_ALGEBRA(test: TestCase, omega: float, C: float, C2: float):
     f = PolyTrig(omega=omega, coeff=[0, -8, 5, 3], lead=C * C2)
-    p = Poly(coeff=[-1, 1], lead=C)
+    p = Poly[float](coeff=[-1, 1], lead=C)
     xi = PolyTrig(omega=omega, lead=C2, coeff=[0, 8, 3])
     g = xi * p
     test.assertIsInstance(g, PolyTrig)

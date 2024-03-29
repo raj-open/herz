@@ -120,7 +120,7 @@ def test_compute_overlaps_BASIC(
     intervals: list[tuple[float, float]],
     expected: list[set[int]],
 ):
-    conn = list(compute_overlaps(*intervals))
+    conn = list(compute_overlaps(intervals))
     test.assertSetEqual(set(conn), set(expected))
     return
 
@@ -158,7 +158,7 @@ def test_resolve_interval_TRANSITIVITY(
     intervals: list[tuple[float, float]],
     expected: list[set[int]],
 ):
-    conn = list(compute_overlaps(*intervals))
+    conn = list(compute_overlaps(intervals))
     test.assertSetEqual(set(conn), set(expected))
     return
 
@@ -198,6 +198,6 @@ def test_merge_intervals_TRANSIVITIY(
     intervals: list[tuple[float, float]],
     expected: list[set[int]],
 ):
-    results = list(merge_intervals(*intervals))
+    results = list(merge_intervals(intervals))
     test.assertSetEqual(set(results), set(expected))
     return
