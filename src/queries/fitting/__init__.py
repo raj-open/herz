@@ -5,6 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from .alignment import *
 from .normalisation import *
 
 # ----------------------------------------------------------------
@@ -12,14 +13,11 @@ from .normalisation import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_normalisation_params',
-    'get_normalised_data',
+    'get_realignment_intervals',
     'get_unnormalised_data',
-    'get_unnormalised_fit_trig',
     'get_unnormalised_point',
     'get_unnormalised_polynomial',
-    'get_unnormalised_polynomial_time_only',
-    'get_unnormalised_polynomial_values_only',
     'get_unnormalised_special',
     'get_unnormalised_time',
+    'get_unnormalised_trig',
 ]

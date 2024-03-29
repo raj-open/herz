@@ -23,11 +23,10 @@ __all__ = [
 
 
 def integral_interpolated(
-    t: np.ndarray,
-    x: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
     T: float,
     periodic: bool = False,
-    average: bool = False,
 ) -> float:
     '''
     Computes integral based on piecewise linear interpolation
@@ -45,26 +44,26 @@ def integral_interpolated(
     dt = np.diff(t)
     x_m = (x[:-1] + x[1:]) / 2
     I = sum(x_m * dt)
-    if average:
-        I = I / T
     return I
 
 
 def innerproduct_interpolated(
-    t: np.ndarray,
-    x: np.ndarray,
-    y: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
     T: float,
     periodic: bool = False,
     average: bool = True,
 ) -> float:
-    s = integral_interpolated(t, x * y, T=T, periodic=periodic, average=average)
+    s = integral_interpolated(t, x * y.conjugate(), T=T, periodic=periodic)
+    if average:
+        s = s / T
     return s
 
 
 def norm_interpolated(
-    t: np.ndarray,
-    x: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
     T: float,
     periodic: bool = False,
     average: bool = True,

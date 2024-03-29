@@ -7,6 +7,7 @@
 
 from .geometry import *
 from .normalisation import *
+from .statistics import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -15,7 +16,9 @@ from .normalisation import *
 __all__ = [
     'innerproduct_interpolated',
     'integral_interpolated',
+    'mean_interpolated',
     'norm_interpolated',
-    'normalise_interpolated_drift',
+    'normalise_interpolated_cycle',
     'normalise_to_unit_interval',
+    'sd_interpolated',
 ]
