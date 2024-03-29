@@ -23,12 +23,12 @@ __all__ = [
 
 
 def merge_intervals(
-    *intervals: tuple[float, float],
+    intervals: Iterable[tuple[float, float]],
 ) -> Generator[tuple[float, float], None, None]:
     '''
     Recursively merges all overlapping intervals yielding the simplified intervals.
     '''
-    for group in compute_overlaps(*intervals):
+    for group in compute_overlaps(intervals):
         if len(group) == 0:
             continue
         left = [intervals[i][0] for i in group]
@@ -41,7 +41,7 @@ def merge_intervals(
 
 
 def compute_overlaps(
-    *intervals: tuple[float, float],
+    intervals: Iterable[tuple[float, float]],
 ) -> Generator[set[int], None, None]:
     '''
     Determines groups of indices of intervals that overlap up to transivitiy.

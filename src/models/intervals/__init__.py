@@ -5,6 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from .cycles import *
 from .resolve import *
 from .merge import *
 
@@ -17,4 +18,5 @@ __all__ = [
     'merge_intervals',
     'resolve_interval',
     'resolve_intervals',
+    'collapse_intervals_to_cycle',
 ]
