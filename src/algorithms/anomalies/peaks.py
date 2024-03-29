@@ -22,7 +22,10 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def get_extremes(values: np.ndarray, sig_width: float = 1 / math.sqrt(2)) -> tuple[list[int], list[int]]:
+def get_extremes(
+    values: NDArray[np.float64],
+    sig_width: float = 1 / math.sqrt(2),
+) -> tuple[list[int], list[int]]:
     N_values = len(values)
     # first make data as symmetric as possible
     values = normalised_order_statistics(values)
@@ -38,7 +41,7 @@ def get_extremes(values: np.ndarray, sig_width: float = 1 / math.sqrt(2)) -> tup
     return peaks, troughs
 
 
-def get_peaks_simple(values: np.ndarray, **kwargs) -> list[int]:
+def get_peaks_simple(values: NDArray[np.float64], **kwargs) -> list[int]:
     N = len(values)
 
     result = sps.find_peaks(

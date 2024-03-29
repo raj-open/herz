@@ -9,6 +9,7 @@ import lmfit
 import math
 from math import pi
 import numpy as np
+from numpy.typing import NDArray
 import networkx as nx
 import random
 import scipy as sp
@@ -40,7 +41,7 @@ def nPr(n: int, r: int) -> int:
     return math.factorial(r) * math.comb(n, r)
 
 
-def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
+def normalised_order_statistics(X: NDArray[np.float64]) -> NDArray[np.float64]:
     '''
     Computes
 
@@ -69,7 +70,7 @@ def normalised_order_statistics(X: np.ndarray) -> np.ndarray:
     return s
 
 
-def indices_non_outliers(X: np.ndarray, sig: float = 2.0) -> list[int]:
+def indices_non_outliers(X: NDArray[np.float64], sig: float = 2.0) -> list[int]:
     '''
     Computes indices of all elements in an array,
     bar those which are significantly far away from the median.
@@ -87,7 +88,7 @@ def indices_non_outliers(X: np.ndarray, sig: float = 2.0) -> list[int]:
     return obj[0].tolist()
 
 
-def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
+def remove_outliers(X: NDArray[np.float64], sig: float = 2.0) -> NDArray[np.float64]:
     '''
     Removes elements from an array which are significantly far away from the median.
 
@@ -109,6 +110,7 @@ def remove_outliers(X: np.ndarray, sig: float = 2.0) -> np.ndarray:
 # ----------------------------------------------------------------
 
 __all__ = [
+    'NDArray',
     'findpeaks',
     'lmfit',
     'math',

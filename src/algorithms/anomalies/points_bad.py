@@ -26,7 +26,7 @@ __all__ = [
 
 
 def mark_pinched_points_on_cycles(
-    x: np.ndarray,
+    x: NDArray[np.float64],
     cycles: list[int],
     sig_t: float = 0.05,
 ) -> list[bool]:
@@ -41,7 +41,7 @@ def mark_pinched_points_on_cycles(
 
 
 def mark_pinched_points_on_cycle(
-    x: np.ndarray,
+    x: NDArray[np.float64],
     sig_t: float = 0.05,
 ) -> list[bool]:
     '''

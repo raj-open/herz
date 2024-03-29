@@ -92,6 +92,7 @@ class PolyExp(PolyExpBase[T]):
             else:
                 result = self * PolyExp(coeff=[1], lead=q, **self.params)
                 result.roots = self.roots[:]
+                return result
 
         if isinstance(q, PolyExp):
             params = self.params
@@ -120,6 +121,7 @@ class PolyExp(PolyExpBase[T]):
             )
             result.roots = self.roots[:] + q.roots[:]
             return result
+
         raise TypeError(f'No multiplication method for Poly x {type(q)}!')
 
     def __rmul__(self, q: Any) -> PolyExp:
@@ -424,7 +426,7 @@ class PolyExp(PolyExpBase[T]):
         - before algebraically combining current model with non-cyclic models
         - before computing integral / stem functions
         '''
-        intervals = merge_intervals(*intervals)
+        intervals = merge_intervals(intervals)
         if not self.cyclic:
             for a, b in intervals:
                 yield self.__copy__(), a, b

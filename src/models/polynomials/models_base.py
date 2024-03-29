@@ -91,7 +91,7 @@ class PolyExpBase(Generic[T]):
         return len(self.coeff) - 1
 
     @property
-    def coefficients(self) -> list[complex]:
+    def coefficients(self) -> list[T]:
         return [self.lead * c for c in self.coeff]
 
     @property

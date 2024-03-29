@@ -83,9 +83,10 @@ def inner_product_matrix(
 
     # deactivate contribute by drift term
     if not drift:
+        val = G[1, 1]
         G[1, :] = 0
         G[:, 1] = 0
-        G[1, 1] = 1
+        G[1, 1] = val
 
     return G
 

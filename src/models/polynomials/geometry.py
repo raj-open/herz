@@ -65,7 +65,7 @@ def norm_poly_exp(
 
 
 def inner_product_polybasis(
-    B: np.ndarray,
+    B: NDArray[np.float64],
     t1: float = 0.0,
     t2: float = 1.0,
 ) -> float:

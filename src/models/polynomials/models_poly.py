@@ -53,6 +53,15 @@ class Poly(PolyExp[T]):
     def __deepcopy__(self) -> Poly[T]:
         return self.__copy__()
 
+    def __mul__(self, q: Any) -> Poly:
+        result = super().__mul__(q)
+        if isinstance(q, (Poly, int, float, complex)):
+            result = Poly.cast(result)
+        return result
+
+    def __rmul__(self, q: Any) -> Poly:
+        return self * q
+
     def __add__(self, q: Any) -> Poly:
         if isinstance(q, (int, float, complex)):
             result = self + Poly(coeff=[q], accuracy=self.accuracy)
@@ -70,7 +79,7 @@ class Poly(PolyExp[T]):
 
             coeff, coeff_q = pre_compare(self, q)
             params = params | {'accuracy': max(self.accuracy, q.accuracy)}
-            result = Poly(load=1, coeff=[c + cc for c, cc in zip(coeff, coeff_q)], **params)
+            result = Poly(coeff=[c + cc for c, cc in zip(coeff, coeff_q)], **params)
             match self.lead == 0, q.lead == 0:
                 case True, True:
                     result.roots = []

@@ -30,7 +30,7 @@ def onb_conditions(
     conds: list[PolyDerCondition | PolyIntCondition],
     t1: float = 0.0,
     t2: float = 1.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     '''
     Let A be the condition-matrix.
     We first compute an ONB, B, in ℝ^{d+1} of the nullspace of A.
@@ -105,7 +105,7 @@ def onb_conditions(
 
 
 def onb_spectrum(
-    Q: np.ndarray,
+    Q: NDArray[np.float64],
     x: list[float],
     t: Optional[list[float]] = None,
     T: float = 1.0,
@@ -269,7 +269,7 @@ def onb_spectrum(
 def force_poly_conditions(
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     '''
     Linear condition on coefficients to determine if
     the `n`th derivate of a polynomial `p` of degree `deg` at point `t`

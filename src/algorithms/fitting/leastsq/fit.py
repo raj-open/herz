@@ -30,7 +30,7 @@ def fit_least_sq(
     # initialisation
     x_init: NDArray[np.float64],
     # generators
-    gen_space: Callable[[], NDArray[np.float64]],
+    gen_space: Callable[[], Generator[NDArray[np.float64], None, None]],
     gen_grad: Callable[[NDArray[np.float64]], tuple[NDArray[np.float64], NDArray[np.float64]]],
     gen_init: Callable[[NDArray[np.float64]], NDArray[np.float64]],
     # solver/loss

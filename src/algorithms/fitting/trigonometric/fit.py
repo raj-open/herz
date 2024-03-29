@@ -51,7 +51,7 @@ def fit_trigonometric_curve(
         mode=mode,
         scale=scale,
         x_init=x_init,
-        gen_space=lambda: np.linspace(start=omega_min, stop=omega_max, endpoint=True, num=N_max),
+        gen_space=partial(generate_space, omega_min=omega_min, omega_max=omega_max, N_max=N_max, x_init=x_init),
         gen_grad=gen_grad,
         gen_init=partial(generate_random_init, omega_min=omega_min, omega_max=omega_max),
         solve_linear_part=solve_linear_part,
@@ -70,6 +70,18 @@ def fit_trigonometric_curve(
 # ----------------------------------------------------------------
 # AUXILIARY METHODS
 # ----------------------------------------------------------------
+
+
+def generate_space(
+    omega_min: float,
+    omega_max: float,
+    x_init: NDArray[np.float64],
+    N_max: int,
+) -> Generator[NDArray[np.float64], None, None]:
+    x_init = x_init.copy()
+    for omega in np.linspace(start=omega_min, stop=omega_max, endpoint=True, num=N_max):
+        x_init[-1] = omega
+        yield x_init
 
 
 def generate_random_init(

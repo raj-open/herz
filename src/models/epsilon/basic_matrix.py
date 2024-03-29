@@ -35,7 +35,7 @@ NUMBER = TypeVar('NUMBER', float, complex)
 # ----------------------------------------------------------------
 
 
-def normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> np.ndarray:
+def normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> NDArray[np.float64]:
     '''
     Computes difference `x_to - x_from` relativised.
 
@@ -50,7 +50,7 @@ def normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> 
     return dx / C
 
 
-def sign_normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> np.ndarray:
+def sign_normalised_diff_matrix(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> NDArray[np.float64]:
     r = normalised_diff_matrix(x_from=x_from, x_to=x_to)
     check = np.full(r.shape, fill_value=EnumSign.NON_ZERO, dtype=EnumSign)
 

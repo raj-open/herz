@@ -34,7 +34,9 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def sort_special_points_specs(points: dict[str, SpecialPointsConfig]) -> list[tuple[str, SpecialPointsConfig]]:
+def sort_special_points_specs(
+    points: dict[str, SpecialPointsConfig],
+) -> list[tuple[str, SpecialPointsConfig]]:
     nodes = points.keys()
     points_with_specs = [(key, point) for key, point in points.items() if point.spec is not None]
     edges = [
@@ -51,22 +53,21 @@ def sort_special_points_specs(points: dict[str, SpecialPointsConfig]) -> list[tu
 
 
 def recognise_special_points(
-    info: FittedInfo,
-    special: list[tuple[str, SpecialPointsConfig]],
+    fit_poly: FittedInfoPoly,
+    search: list[tuple[str, SpecialPointsConfig]],
 ) -> dict[str, SpecialPointsConfig]:
     '''
     NOTE: The conditions 'before' / 'after' are defined purely
     in terms of the peak-to-peak cycle.
     '''
-    if len(special) == 0:
+    if len(search) == 0:
         return {}
 
-    results = {key: point for key, point in special}
+    results = {key: point for key, point in search}
     times = {}
-    n_der = max([point.spec.derivative for _, point in special if point.spec is not None])
+    n_der = max([point.spec.derivative for _, point in search if point.spec is not None])
 
-    # q = get_unnormalised_polynomial_values_only(info)
-    q0 = Poly(coeff=info.coefficients, accuracy=POLY_RESOLUTION)
+    q0 = Poly(coeff=fit_poly.coefficients, accuracy=POLY_RESOLUTION)
 
     # Get polynomial coefficients of n-th derivatives of curve.
     # NOTE: polys[k] = coeff's of k-th derivative of polynomial x(t)
@@ -97,13 +98,13 @@ def recognise_special_points(
     # messages
     log_debug('Critical points of polynomial computed:')
     log_debug_wrapped(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0, polys=polys, real_valued=True))
-    log_debug(f'Searching for {" -> ".join([ key for key, _ in special ])}.')
+    log_debug(f'Searching for {" -> ".join([ key for key, _ in search ])}.')
 
     # iteratively identify points:
     for key, point in results.items():
         point.found = False
 
-    for key, point in special:
+    for key, point in search:
         spec = point.spec
         if spec is None:
             continue
