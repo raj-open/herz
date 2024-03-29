@@ -113,7 +113,6 @@ def step_compute_pv(
     V_1 = lin(P_iso)
 
     point = special_pv['ees']
-    point.ignore = True  # NOTE: value currently not stable
     point.found = True
     point.value = m
     point.data = [
@@ -123,7 +122,6 @@ def step_compute_pv(
     ]
 
     point = special_pv['V0']
-    point.ignore = True  # NOTE: value currently not stable
     point.found = True
     point.value = V_0
     point.data = [
