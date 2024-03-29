@@ -39,8 +39,9 @@ __all__ = [
 @echo_function(message='STEP output time-plot', level=LOG_LEVELS.INFO)
 def step_output_time_plot(
     data: pd.DataFrame,
-    info: FittedInfo,
-    fits_trig: tuple[FittedInfoTrig, list[tuple[float, float]]] | None,
+    info: FittedInfoNormalisation,
+    fit_poly: FittedInfoPoly,
+    fits_trig: tuple[list[tuple[float, float]], FittedInfoTrig | None],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
@@ -52,19 +53,20 @@ def step_output_time_plot(
     cfg_font = cfg_output.plot.font
     cv = output_conversions(cfg_output.quantities, units=config.UNITS)
     units = output_units(cfg_output.quantities)
-    T = info.normalisation.period
+    T = info.period
 
     # compute series for fitted curves
     specials, _, time, data_poly = compute_fitted_curves_poly(
         info=info,
+        fit=fit_poly,
         special=special,
         n_der=2,
         N=N,
     )
 
     time_trig = data_trig = None
-    if fits_trig is not None:
-        fit_trig, intervals = fits_trig
+    intervals, fit_trig = fits_trig
+    if fit_trig is not None:
         time_trig, data_trig = compute_fitted_curves_trig(
             info=info,
             fit_trig=fit_trig,
@@ -229,10 +231,12 @@ def step_output_time_plot(
 @echo_function(message='STEP output P-V loop plot', level=LOG_LEVELS.INFO)
 def step_output_loop_plot(
     data_p: pd.DataFrame,
-    info_p: FittedInfo,
-    special_p: dict[str, SpecialPointsConfig],
     data_v: pd.DataFrame,
-    info_v: FittedInfo,
+    info_p: FittedInfoNormalisation,
+    info_v: FittedInfoNormalisation,
+    fit_poly_p: FittedInfoPoly,
+    fit_poly_v: FittedInfoPoly,
+    special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
     plot_name: str,
@@ -245,14 +249,14 @@ def step_output_loop_plot(
     cv = output_conversions(cfg_output.quantities, units=config.UNITS)
     units = output_units(cfg_output.quantities)
 
-    T_p = info_p.normalisation.period
-    T_v = info_v.normalisation.period
+    T_p = info_p.period
+    T_v = info_v.period
     t_align_p = special_p['align'].time
     t_align_v = special_v['align'].time
 
     # compute series for fitted curves
-    _, [model_p], time_p, [pressure_fit] = compute_fitted_curves_poly(info_p, special=special_p, n_der=0, N=N)  # fmt: skip
-    _, [model_v], time_v, [volume_fit] = compute_fitted_curves_poly(info_v, special=special_v, n_der=0, N=N)  # fmt: skip
+    _, [model_p], time_p, [pressure_fit] = compute_fitted_curves_poly(info_p, fit_poly_p, special=special_p, n_der=0, N=N)  # fmt: skip
+    _, [model_v], time_v, [volume_fit] = compute_fitted_curves_poly(info_v, fit_poly_v, special=special_v, n_der=0, N=N)  # fmt: skip
 
     # fit 'other' measurement to each time-series
     data_p['volume'] = model_v.values(((T_v / T_p) * data_p['time'] + t_align_v) % T_v)
@@ -366,7 +370,7 @@ def step_output_loop_plot(
     points_ = []
 
     for _, point in special_p.items():
-        if point.ignore:
+        if point.ignore or point.ignore_2_d:
             continue
         t_p = point.time
         t_ = (t_p - t_align_p) % T_p
@@ -379,7 +383,7 @@ def step_output_loop_plot(
         points_.append((v_, p_, point))
 
     for _, point in special_v.items():
-        if point.ignore:
+        if point.ignore or point.ignore_2_d:
             continue
         t_v = point.time
         t_ = (t_v - t_align_v) % T_v
@@ -392,8 +396,6 @@ def step_output_loop_plot(
         points_.append((v_, p_, point))
 
     for v_, p_, point in points_:
-        if point.ignore:
-            continue
         fmt = point.format
         fig.append_trace(
             pgo.Scatter(
@@ -417,6 +419,8 @@ def step_output_loop_plot(
 
     # plot special P-V points:
     for _, point in special_pv.items():
+        if point.ignore:
+            continue
         data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
         if len(data) == 0:
             continue
@@ -500,20 +504,21 @@ def step_output_loop_plot(
 
 def quick_plot(
     data: pd.DataFrame,
-    fits: list[tuple[tuple[int, int], FittedInfo]],
+    infos: list[tuple[tuple[int, int], FittedInfoNormalisation]],
+    fit_poly: FittedInfoPoly,
     quantity: str,
     renormalise: bool = True,
     N: int = 1000,
 ) -> Generator[pgo.Figure, None, None]:
-    _, fit = fits[0]
+    _, info = infos[0]
     if renormalise:
-        T = fit.normalisation.period
-        q = get_unnormalised_polynomial(fit)
+        T = info.period
+        q = get_unnormalised_polynomial(fit_poly, info=info)
     else:
         T = 1.0
-        q = Poly(coeff=fit.coefficients)
+        q = Poly(coeff=fit_poly.coefficients)
 
-    data = get_unnormalised_data(data, fits, quantity=quantity, renormalise=renormalise)
+    data = get_unnormalised_data(data, infos, quantity=quantity, renormalise=renormalise)
 
     dq = q.derivative()
     ddq = dq.derivative()
@@ -721,7 +726,8 @@ def save_image(fig: pgo.Figure, path: str):
 
 
 def compute_fitted_curves_poly(
-    info: FittedInfo,
+    info: FittedInfoNormalisation,
+    fit: FittedInfoPoly,
     special: dict[str, SpecialPointsConfig],
     n_der: int,
     N: int = 1000,
@@ -732,10 +738,10 @@ def compute_fitted_curves_poly(
     list[NDArray[np.float64]],
 ]:
     t_align = special['align'].time
-    T = info.normalisation.period
+    T = info.period
 
     # compute coefficients of (derivatives of) polynomial coefficients
-    p = Poly[float](coeff=info.coefficients)
+    p = Poly[float](coeff=fit.coefficients)
     polys = [p]
     for _ in range(1, n_der + 1):
         p = p.derivative()
@@ -750,13 +756,16 @@ def compute_fitted_curves_poly(
     # compute and shift special points
     specials = []
     for k, p in enumerate(polys):
-        special_ = {key: point.model_copy(deep=True) for key, point in special.items()}
+        special_ = {
+            key: point.model_copy(deep=True)
+            for key, point in special.items()
+            if key == 'align' or (not point.ignore and (point.derivatives is None or k in point.derivatives))
+        }
         for key, point in special_.items():
-            if key == 'align' or k > 0 and point.ignore:
+            if key == 'align':
                 continue
             if k == 0:
                 t = (point.time - t_align) % T
-                point.ignore = False
                 point.time = t
             else:
                 t = (point.time - t_align) % T
@@ -770,7 +779,7 @@ def compute_fitted_curves_poly(
 
 
 def compute_fitted_curves_trig(
-    info: FittedInfo,
+    info: FittedInfoNormalisation,
     fit_trig: FittedInfoTrig,
     intervals: list[tuple[float, float]],
     special: dict[str, SpecialPointsConfig],
@@ -780,7 +789,7 @@ def compute_fitted_curves_trig(
     NDArray[np.float64],
 ]:
     t_align = special['align'].time
-    T = info.normalisation.period
+    T = info.period
 
     t_min = min([min(I) for I in intervals] or [0])
     t_max = max([max(I) for I in intervals] or [1])

@@ -27,7 +27,6 @@ from ....algorithms.fitting.trigonometric import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_recognise_iso_max',
     'step_fit_trig',
 ]
 
@@ -36,25 +35,10 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP recognise iso', level=LOG_LEVELS.INFO)
-def step_recognise_iso_max(
-    fit: FittedInfoTrig,
-    special: dict[str, SpecialPointsConfig],
-) -> dict[str, SpecialPointsConfig]:
-    point = special['iso']
-    t0 = fit.hshift
-    point.time = t0
-    point.value = fit.vshift + fit.drift * t0 + fit.vscale
-    point.found = True
-    return special
-
-
 @echo_function(message='STEP fit trigonometric-model to data/poly-model', level=LOG_LEVELS.INFO)
 def step_fit_trig(
     data: pd.DataFrame,
-    p: Poly[float],
-    offset: float,
-    period: float,
+    fit_poly: FittedInfoPoly,
     special: dict[str, SpecialPointsConfig],
     symb: str,
     cfg_fit: FitTrigConfig,
@@ -65,6 +49,15 @@ def step_fit_trig(
     '''
     Fits trig curve to normalised model.
     '''
+
+    offset = 0
+    period = 1
+    p = Poly[float](
+        coeff=fit_poly.coefficients,
+        cyclic=True,
+        period=period,
+        offset=0,
+    )
 
     # NOTE: polynomial must be rendered cyclic
     # to allow for consistent values upon shifting
@@ -128,7 +121,7 @@ def step_fit_trig(
 
 
 def message_result(
-    info: FittedInfo,
+    info: FitTrigConfig,
     loss: float,
     dx: float,
 ):

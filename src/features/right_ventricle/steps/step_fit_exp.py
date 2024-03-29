@@ -38,8 +38,10 @@ __all__ = [
 def step_fit_exp(
     data_p: pd.DataFrame,
     data_v: pd.DataFrame,
-    info_p: FittedInfo,
-    info_v: FittedInfo,
+    info_p: FittedInfoNormalisation,
+    info_v: FittedInfoNormalisation,
+    fit_p: FittedInfoPoly,
+    fit_v: FittedInfoPoly,
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     cfg_fit: FitExpConfig,
@@ -48,8 +50,8 @@ def step_fit_exp(
     env = {
         f'P': special_p,
         f'V': special_v,
-        f'T_p': info_p.normalisation.period,
-        f'T_v': info_v.normalisation.period,
+        f'T_p': info_p.period,
+        f'T_v': info_v.period,
     }
     env = get_schema_from_settings(conf_, env=env)
 

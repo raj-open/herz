@@ -36,17 +36,19 @@ def step_output_special_points(
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
+    info_p: FittedInfoNormalisation,
+    info_v: FittedInfoNormalisation,
+    # fit_poly_p: FittedInfoPoly,
+    # fit_poly_v: FittedInfoPoly,
     fit_trig_p: FittedInfoTrig | None,
     fit_trig_v: FittedInfoTrig | None,
-    info_p: FittedInfo,
-    info_v: FittedInfo,
 ):
     path = case.output.table.path.root
     path = path.format(label=case.label, kind=f'special')
     t_align_p = special_p['align'].time
     t_align_v = special_v['align'].time
-    T_p = info_p.normalisation.period
-    T_v = info_v.normalisation.period
+    T_p = info_p.period
+    T_v = info_v.period
 
     # place special points in table
     units = output_units(case.output.quantities)

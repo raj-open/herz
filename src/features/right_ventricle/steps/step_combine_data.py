@@ -20,7 +20,7 @@ from .methods import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_normalise_data',
+    'step_clean_cycles',
     'step_combine_data',
 ]
 
@@ -29,8 +29,8 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP normalise data', level=LOG_LEVELS.INFO)
-def step_normalise_data(
+@echo_function(message='STEP clean cycles', level=LOG_LEVELS.INFO)
+def step_clean_cycles(
     case: RequestConfig,
     data: pd.DataFrame,
     quantity: str,
@@ -113,12 +113,12 @@ def step_combine_data(
 
 
 def interpolate_curve(
-    t: np.ndarray,
-    x: np.ndarray,
-    y: np.ndarray,
+    t: NDArray[np.float64],
+    x: NDArray[np.float64],
+    y: NDArray[np.float64],
     T_max: float,
     periodic: bool,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     return np.interp(
         t,
         x,

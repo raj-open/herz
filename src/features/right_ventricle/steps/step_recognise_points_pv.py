@@ -34,8 +34,8 @@ __all__ = [
 
 @echo_function(message='STEP compute special points from fitted P-V curve', level=LOG_LEVELS.INFO)
 def step_compute_pv(
-    info_p: FittedInfo,
-    info_v: FittedInfo,
+    fit_poly_p: FittedInfoPoly,
+    fit_poly_v: FittedInfoPoly,
     fit_trig_p: FittedInfoTrig | None,
     fit_trig_v: FittedInfoTrig | None,
     special_p: dict[str, SpecialPointsConfig],
@@ -48,8 +48,8 @@ def step_compute_pv(
     in order to compute certain "special points" on the P-V curve.
     '''
     # get poly models
-    poly_p = Poly[float](coeff=info_p.coefficients)
-    poly_v = Poly[float](coeff=info_v.coefficients)
+    poly_p = Poly[float](coeff=fit_poly_p.coefficients)
+    poly_v = Poly[float](coeff=fit_poly_v.coefficients)
     dP_poly = poly_p.derivative()
     dV_poly = poly_v.derivative()
 
@@ -87,16 +87,17 @@ def step_compute_pv(
     V_es = special_v['es'].value
     V_iso = special_v['iso'].value
 
-    point = special_pv['piso']
-    point.found = True
-    point.value = P_iso
-    point.data = [PointPV(pressure=P_iso, volume=V_ed)]
+    if special_p['iso'].found:
+        point = special_pv['piso']
+        point.found = True
+        point.value = P_iso
+        point.data = [PointPV(pressure=P_iso, volume=V_ed)]
 
-    # NOTE: This value seems wrong. Leave it out.
-    point = special_pv['viso']
-    point.found = True
-    point.value = V_iso
-    point.data = [PointPV(pressure=P_ed, volume=V_iso)]
+    if special_v['iso'].found:
+        point = special_pv['viso']
+        point.found = True
+        point.value = V_iso
+        point.data = [PointPV(pressure=P_ed, volume=V_iso)]
 
     match dP_osc, dV_osc:
         case None, None:
@@ -112,6 +113,7 @@ def step_compute_pv(
     V_1 = lin(P_iso)
 
     point = special_pv['ees']
+    point.ignore = True  # NOTE: value currently not stable
     point.found = True
     point.value = m
     point.data = [
@@ -121,6 +123,7 @@ def step_compute_pv(
     ]
 
     point = special_pv['V0']
+    point.ignore = True  # NOTE: value currently not stable
     point.found = True
     point.value = V_0
     point.data = [
