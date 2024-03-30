@@ -52,7 +52,10 @@ def process(cfg: AppConfig, case: RequestConfig):
     match case.endpoint:
         case EnumEndpoint.RIGHT_VENTRICLE as feature:
             timer.start()
-            right_ventricle.endpoint(feature=feature, case=case)
+            try:
+                right_ventricle.endpoint(feature=feature, case=case)
+            except Exception as err:
+                log_error(err)
             timer.stop()
 
         case _ as feature if isinstance(feature, EnumEndpoint):

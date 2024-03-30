@@ -36,14 +36,14 @@ def get_schema_from_settings(
     '''
     Determines schema for time-values
     '''
-    try:
-        env = env | {'math': math, 'np': np}
-        env_ = {}
-        for key, expr in schema.items():
+    env = env | {'math': math, 'np': np}
+    env_ = {}
+    for key, expr in schema.items():
+        try:
             env_[key] = eval(expr, env | env_)
-        return env_
-    except Exception as err:
-        raise ValueError(f'Could not determine points! {err}')
+        except Exception as err:
+            raise ValueError(f'Could not evaluate environment value {key}: {expr}. {err}')
+    return env_
 
 
 def get_spatial_domain_from_settings(
