@@ -149,7 +149,7 @@ def get_unnormalised_special(
     info: FittedInfoNormalisation,
 ):
     '''
-    Renormalises (without realignment) + adds the alignment time.
+    Renormalises (without realignment).
     '''
     for _, point in special.items():
         t, x = point.time, point.value

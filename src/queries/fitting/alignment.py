@@ -19,6 +19,8 @@ from ...models.intervals import *
 
 __all__ = [
     'get_realignment_intervals',
+    'get_realignment_special',
+    'get_realignment_polynomial',
 ]
 
 # ----------------------------------------------------------------
@@ -35,3 +37,36 @@ def get_realignment_intervals(
     intervals = [(a - t_align, b - t_align) for a, b in intervals]
     intervals = collapse_intervals_to_cycle(intervals, period=period)
     return intervals
+
+
+def get_realignment_special(
+    special: dict[str, SpecialPointsConfig],
+    info: FittedInfoNormalisation,
+):
+    '''
+    Realigns special points.
+    '''
+    T = info.period
+    t_align = special['align'].time
+    for key, point in special.items():
+        if key == 'align':
+            continue
+        t = point.time
+        point.time = (t - t_align) % T
+    return special
+
+
+def get_realignment_polynomial(
+    fit: FittedInfoPoly,
+    info: FittedInfoNormalisation,
+    special: dict[str, SpecialPointsConfig],
+) -> Poly[float]:
+    '''
+    Realigns polynomial to start at a particular timepoint.
+    Preserves periodicity.
+    '''
+    t_align = special['align'].time
+    T = info.period
+    p = Poly[float](coeff=fit.coefficients, cyclic=True, period=T, offset=0)
+    p = p.rescale(t0=t_align)
+    return p

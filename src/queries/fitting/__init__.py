@@ -14,6 +14,8 @@ from .normalisation import *
 
 __all__ = [
     'get_realignment_intervals',
+    'get_realignment_special',
+    'get_realignment_polynomial',
     'get_unnormalised_data',
     'get_unnormalised_point',
     'get_unnormalised_polynomial',
