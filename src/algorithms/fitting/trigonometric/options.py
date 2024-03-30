@@ -8,8 +8,6 @@
 from ....thirdparty.types import *
 from ....thirdparty.maths import *
 
-from ....core.log import *
-from ....models.fitting import *
 from ....models.polynomials import *
 from .geometry import *
 from .innerproducts import *
@@ -37,8 +35,9 @@ def fit_options_scale_data(
     Determines the L²-norm of the data curves.
     Useful for scaling the loss function and errors.
     '''
-    dt, x = data[:, 1], data[:, 2]
-    norm_x = math.sqrt(np.mean((x**2) * dt))
+    t, dt, x = data[:, 0], data[:, 1], data[:, -1]
+    T = max(t) - min(t) + np.mean(dt)
+    norm_x = math.sqrt(np.sum((x**2) * dt) / T)
     return norm_x
 
 

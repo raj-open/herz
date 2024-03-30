@@ -20,7 +20,6 @@ __all__ = [
     'loss_function',
     'loss_function_gradient',
     'solve_linear_part',
-    'resteer_towards_solution_linear_part',
 ]
 
 # ----------------------------------------------------------------
@@ -165,7 +164,7 @@ def loss_function(
     where
     ```
     y[:-1] = x[:-1]
-    y[-1] = 1
+    y[-1] = -1
     ```
     '''
     y = x.copy()
@@ -196,25 +195,3 @@ def solve_linear_part(
     x_sol = np.linalg.solve(M, u)
     x = np.concatenate([x_sol, [x[-1]]])
     return x
-
-
-def resteer_towards_solution_linear_part(
-    x: NDArray[np.float64],
-    sol: NDArray[np.float64],
-    dx: NDArray[np.float64],
-):
-    '''
-    Adjusts the gradient in such a way, that
-
-    1. `-grad` for the linear parameters
-        points in the direction of the exact solution.
-
-    2. `‖grad‖` is conserved.
-    '''
-    dw = dx[-1]
-    delta = sol - x[:-1]
-    C_sol = np.linalg.norm(delta)
-    C = np.linalg.norm(dx[:-1])
-    r = C / (C_sol or 1)
-    dx = np.concatenate([-r * delta, [dw]])
-    return dx

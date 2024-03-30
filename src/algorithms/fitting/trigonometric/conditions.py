@@ -37,7 +37,11 @@ def get_schema_from_settings(
     Determines schema for time-values
     '''
     try:
-        return {key: eval(expr, env) for key, expr in schema.items()}
+        env = env | {'math': math, 'np': np}
+        env_ = {}
+        for key, expr in schema.items():
+            env_[key] = eval(expr, env | env_)
+        return env_
     except Exception as err:
         raise ValueError(f'Could not determine points! {err}')
 
@@ -63,6 +67,7 @@ def get_bounds_from_settings(
     T_min = 1 / 4
     T_max = 4
     try:
+        env = env | {'math': math, 'np': np}
         for cond in conditions:
             value: float = eval(cond.value, env)
             match cond.kind:
@@ -73,6 +78,7 @@ def get_bounds_from_settings(
 
     except Exception as err:
         raise ValueError(f'Could not interpret conditions! {err}')
+
     # T ≤ ... ⟹ ω ≥ 2π/...
     omega_min = 2 * pi / T_max
     # T ≥ ... ⟹ ω ≤ 2π/...
@@ -85,8 +91,9 @@ def get_initialisation_from_settings(
     conds: FitTrigIntialisation,
     env: dict[str, float],
 ) -> NDArray[np.float64]:
-    env = env | {'xintercept': xintercept, 'yintercept': yintercept, 'math': math}
     try:
+        env = env | {'math': math, 'np': np}
+        env = env | {'xintercept': xintercept, 'yintercept': yintercept}
         omega: float = eval(str(conds.omega), env)
         hshift: float = eval(str(conds.hshift), env)
         vscale: float = eval(str(conds.vscale), env)

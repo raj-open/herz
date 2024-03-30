@@ -9,9 +9,7 @@ from ....thirdparty.code import *
 from ....thirdparty.types import *
 from ....thirdparty.maths import *
 
-from ....core.log import *
 from ....models.fitting import *
-from ....models.polynomials import *
 from ..leastsq import *
 from .geometry import *
 from .innerproducts import *
