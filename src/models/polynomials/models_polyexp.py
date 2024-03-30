@@ -142,6 +142,7 @@ class PolyExp(PolyExpBase[T]):
     def values(self, t: Iterable[float]) -> NDArray[np.complex]:
         if not isinstance(t, np.ndarray):
             t = np.asarray(t)
+        t = t.copy()
         # NOTE: only polynomial part is periodic
         exp_values = np.exp(self.alpha * t)
         # compute polynomial part
