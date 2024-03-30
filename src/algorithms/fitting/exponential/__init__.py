@@ -48,6 +48,7 @@ B := ½P₁·e^{-βV₁}
 Then the function
 ```
 P(V) := A + B·exp(β·V)
+    = P₁·(1 + exp(β·(V–V₁)))/2
 ```
 satisfies
 ```
@@ -63,7 +64,7 @@ P(V₂) = A + ½P₁·e^{β∆V}
 Hence the choice of `A`, `B`, `β`
 here suffices to fit the two points.
 
-# Bounds #
+# "Instantaneous" fitting #
 
 If `(V₁, P₁)` and `(V₂, P₂)` are distinct but "very close",
 the by the above a model which fits the points is
@@ -76,8 +77,12 @@ where
     ≈ (2∆P/P₁)/∆V
     ≈ 2·(dP/dV)/P₁
 ```
+We can view this expression as _local_ values
+of `β` in (the neighbourhood) of a given point `(V₁, P₁)`.
 
-This provides us with the means to provide bounds on the range of β-values:
+# Bounds #
+
+The above provides us with the means to provide bounds on the range of β-values:
 ```
 β_min := min 2·(P´/P) / V´
 β_max := max 2·(P´/P) / V´

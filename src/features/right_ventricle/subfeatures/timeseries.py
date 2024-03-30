@@ -129,7 +129,6 @@ def subfeature_time_series_steps_single(
 
     subprog = prog.subtask(f'''NORMALISE DATA {quantity}''', steps=2)
     data, infos_ = step_normalise(data=data, quantity=quantity)
-    infos_ = [(FittedInfoNormalisation(period=1, intercept=0, gradient=0, scale=1), win) for _, win in infos_]
     info, _ = infos_[-1]
     subprog.next()
 
