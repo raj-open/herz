@@ -51,7 +51,12 @@ def step_fit_exp(
     Fits trig curve to P-V data points.
     '''
     # get environment variables for settings
-    env = {'P': special_p, 'V': special_v}
+    env = {
+        'P': special_p,
+        'V': special_v,
+        'T_p': info_p.period,
+        'T_v': info_v.period,
+    }
     conf_ = cfg_fit.points
     env = get_schema_from_settings(conf_, env=env)
 
@@ -91,19 +96,16 @@ def step_fit_exp(
 
     # perform fitting
     conf_ = cfg_fit.solver
-    # fit, loss, dx = fit_exponential_curve(
-    #     mode=conf_.mode,
-    #     scale=scale,
-    #     gen_grad=gen_grad,
-    #     fit_init=fit_init,
-    #     beta_min=beta_min,
-    #     beta_max=beta_max,
-    #     N_max=conf_.n_max,
-    #     eps=SOLVE_TOLERANCE,
-    # )
-    fit = fit_init
-    loss = 0
-    dx = 0
+    fit, loss, dx = fit_exponential_curve(
+        mode=conf_.mode,
+        scale=scale,
+        gen_grad=gen_grad,
+        fit_init=fit_init,
+        beta_min=beta_min,
+        beta_max=beta_max,
+        N_max=conf_.n_max,
+        eps=SOLVE_TOLERANCE,
+    )
 
     log_debug_wrapped(lambda: message_result(fit, loss, dx))
     return fit, range_v, range_p
