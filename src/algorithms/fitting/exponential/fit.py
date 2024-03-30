@@ -9,9 +9,7 @@ from ....thirdparty.code import *
 from ....thirdparty.types import *
 from ....thirdparty.maths import *
 
-from ....core.log import *
 from ....models.fitting import *
-from ....models.polynomials import *
 from ..leastsq import *
 from .geometry import *
 from .innerproducts import *
@@ -22,7 +20,7 @@ from .parameters import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_trigonometric_curve',
+    'fit_exponential_curve',
 ]
 
 # ----------------------------------------------------------------
@@ -30,38 +28,41 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def fit_trigonometric_curve(
+def fit_exponential_curve(
     mode: EnumSolver,
     scale: float,
     # initialisaiton
-    x_init: NDArray[np.float64],
+    fit_init: FittedInfoTrig,
     # generators
     gen_grad: Callable[[NDArray[np.float64]], tuple[NDArray[np.float64], NDArray[np.float64]]],
     # bounds
-    omega_min: float,
-    omega_max: float,
+    beta_min: float,
+    beta_max: float,
     # learning parameters
     N_max: int = 1000,
     eta: float = 0.1,
     num_epochs: int = 10,
     eps: float = 0.5e-6,
-) -> tuple[NDArray[np.float64], float, float]:
-    return fit_least_sq(
+) -> tuple[FittedInfoExp, float, float]:
+    x_init = fit_exp_parameters_from_info(fit_init)
+    x, loss, dx = fit_least_sq(
         mode=mode,
         scale=scale,
         x_init=x_init,
-        gen_space=lambda: np.linspace(start=omega_min, stop=omega_max, endpoint=True, num=N_max),
+        gen_space=partial(generate_space, beta_min=beta_min, beta_max=beta_max, N_max=N_max, x_init=x_init),
         gen_grad=gen_grad,
-        gen_init=partial(generate_random_init, omega_min=omega_min, omega_max=omega_max),
+        gen_init=partial(generate_random_init, beta_min=beta_min, beta_max=beta_max),
         solve_linear_part=solve_linear_part,
         loss_function=loss_function,
         loss_function_grad=loss_function_gradient,
-        restrict_eta=partial(restrict_eta, omega_min=omega_min, omega_max=omega_max),
+        restrict_eta=partial(restrict_eta, beta_min=beta_min, beta_max=beta_max),
         N_max=N_max,
         eta=eta,
         num_epochs=num_epochs,
         eps=eps,
     )
+    fit = fit_exp_parameters_to_info(x)
+    return fit, loss, dx
 
 
 # ----------------------------------------------------------------
@@ -69,12 +70,24 @@ def fit_trigonometric_curve(
 # ----------------------------------------------------------------
 
 
+def generate_space(
+    beta_min: float,
+    beta_max: float,
+    x_init: NDArray[np.float64],
+    N_max: int,
+) -> Generator[NDArray[np.float64], None, None]:
+    x_init = x_init.copy()
+    for omega in np.linspace(start=beta_min, stop=beta_max, endpoint=True, num=N_max):
+        x_init[-1] = omega
+        yield x_init
+
+
 def generate_random_init(
     x: NDArray[np.float64],
-    omega_min: float,
-    omega_max: float,
+    beta_min: float,
+    beta_max: float,
 ) -> NDArray[np.float64]:
-    omega = random.uniform(omega_min, omega_max)
+    omega = random.uniform(beta_min, beta_max)
     x = np.concatenate([x[:-1], [omega]])
     return x
 
@@ -83,15 +96,15 @@ def restrict_eta(
     eta: float,
     x: NDArray[np.float64],
     dx: NDArray[np.float64],
-    omega_min: float,
-    omega_max: float,
+    beta_min: float,
+    beta_max: float,
 ) -> float:
     if dx[-1] == 0:
         return eta
     # first control how ω changes, preventing explosion
     omega = x[-1]
-    dw_max = omega_max - omega
-    dw_min = omega_min - omega
+    dw_max = beta_max - omega
+    dw_min = beta_min - omega
     dw = eta * dx[-1]
     dw = max(dw_min, min(dw, dw_max))
     # after applying bound, temporarily recompute learning rate

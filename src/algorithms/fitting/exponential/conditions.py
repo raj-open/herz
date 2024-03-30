@@ -19,7 +19,6 @@ from .parameters import *
 
 __all__ = [
     'get_schema_from_settings',
-    'get_spatial_domain_from_settings',
     'get_bounds_from_settings',
     'get_initialisation_from_settings',
 ]
@@ -37,23 +36,13 @@ def get_schema_from_settings(
     Determines schema for time-values
     '''
     try:
-        return {key: eval(expr, env) for key, expr in schema.items()}
+        env = env | {'math': math, 'np': np}
+        env_ = {}
+        for key, expr in schema.items():
+            env_[key] = eval(expr, env | env_)
+        return env_
     except Exception as err:
         raise ValueError(f'Could not determine points! {err}')
-
-
-def get_spatial_domain_from_settings(
-    intervals_schema: list[list[str]],
-    env: dict[str, float],
-) -> list[tuple[float, float]]:
-    '''
-    Determines spatial domain from settings
-    '''
-    try:
-        conv = partial(convert_dom_to_interval, env=env)
-        return list(map(conv, intervals_schema))
-    except Exception as err:
-        raise ValueError(f'Could not interpret intervals! {err}')
 
 
 def get_bounds_from_settings(
@@ -62,7 +51,9 @@ def get_bounds_from_settings(
 ) -> tuple[float, float]:
     scale_min = 0
     scale_max = np.inf
+
     try:
+        env = env | {'math': math, 'np': np}
         for cond in conditions:
             value: float = eval(cond.value, env)
             match cond.kind:
@@ -73,6 +64,7 @@ def get_bounds_from_settings(
 
     except Exception as err:
         raise ValueError(f'Could not interpret conditions! {err}')
+
     beta_min = 1 / scale_max
     beta_max = 1 / scale_min
 
@@ -84,6 +76,7 @@ def get_initialisation_from_settings(
     env: dict[str, float],
 ) -> FittedInfoExp:
     try:
+        env = env | {'math': math, 'np': np}
         beta: float = eval(str(conds.beta), env)
         vscale: float = eval(str(conds.vscale), env)
         vshift: float = eval(str(conds.vshift), env)
