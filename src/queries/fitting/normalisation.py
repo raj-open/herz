@@ -65,9 +65,7 @@ def get_unnormalised_polynomial(
     ```
     '''
     T, c, m, s = get_normalisation_params(info)
-    p = s * p.rescale(a=1 / T)
-    p = p + Poly[float](coeff=[c, m])
-    return p
+    return Poly[float](coeff=[c, m]) + s * p.rescale(a=1 / T)
 
 
 def get_unnormalised_trig(
