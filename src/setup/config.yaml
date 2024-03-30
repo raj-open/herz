@@ -204,7 +204,6 @@ settings:
           size: 9
           colour: green
           symbol: "x"
-          text: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
       sys:
         name: 'sys = P<sub>max</sub>'
         name-simple: "sys"
@@ -321,7 +320,6 @@ settings:
         spec: null
         format:
           <<: *marker_iso
-          text: 'V<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
       max:
         name: 'V<sub>max</sub>'
         name-simple: "V_max"
@@ -342,7 +340,6 @@ settings:
           before: []
         format:
           <<: *marker_bs
-          text: ''
       sys:
         name: 'sys = V´<sub>min</sub>'
         name-simple: 'sys = V´_min'
@@ -353,7 +350,6 @@ settings:
           before: [ 'es' ]
         format:
           <<: *marker_sys
-          text: ''
       es:
         name: "esv"
         name-simple: "esv"
@@ -364,7 +360,6 @@ settings:
           before: []
         format:
           <<: *marker_es
-          text: ''
       min:
         name: 'V<sub>min</sub>'
         name-simple: "V_min"
@@ -385,7 +380,6 @@ settings:
           before: [ 'bd' ]
         format:
           <<: *marker_anti_bd
-          text: ''
       bd:
         name: "bdv"
         name-simple: "bdv"
@@ -396,7 +390,6 @@ settings:
           before: [ ]
         format:
           <<: *marker_bd
-          text: ''
       dia:
         name: 'dia = V´<sub>max</sub>'
         name-simple: 'dia = V´_max'
@@ -407,7 +400,6 @@ settings:
           before: [ 'ed' ]
         format:
           <<: *marker_dia
-          text: ''
       ed:
         name: "edv"
         name-simple: "edv"
@@ -418,7 +410,6 @@ settings:
           before: [ ]
         format:
           <<: *marker_ed
-          text: ''
 
     pv:
       piso:
