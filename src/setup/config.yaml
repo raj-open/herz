@@ -171,17 +171,21 @@ settings:
       pmax: "P['ed'].value"
       tmin_p: "P['dia'].time"
       tmax_p: "P['ed'].time"
-      # compute successively - fit to (vmid, pmid) , (vmax, pmax)
-      pmid: '(pmin + pmax)/2'
-      vmid: '(vmin + vmax)/2'
-      dp: 'pmax - pmid'
+      # compute successively
+      vmid: "V['bd'].value"
+      pmid: "P['anti-bd'].value"
+      pmin0: '0'           # shift P-values so that P_min = 0
+      pmid0: 'pmid - pmin' # "..."
+      pmax0: 'pmax - pmin' # "..."
+      # analytic solution to interpolate between (vmid, pmid0) , (vmax, pmax0)
+      dp: 'pmax0 - pmid0'
       dv: 'vmax - vmid'
-      beta: 'math.log(1 + 2*dp/pmid)/dv'
+      beta: 'math.log(1 + 2*dp/pmid0)/dv'
 
     initial:
       beta: 'beta'
-      vscale: '(pmid/2) * math.exp(-beta * vmid)'
-      vshift: 'pmid/2'
+      vscale: '(pmid0/2) * math.exp(-beta * vmid)'
+      vshift: 'pmin + pmid0/2' # NOTE: have to shift by pmin to compensate
 
     conditions:
       - kind: INVHSCALE-LOWER-BOUND
