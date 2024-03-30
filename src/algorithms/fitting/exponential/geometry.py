@@ -134,6 +134,8 @@ def solve_linear_part(
 ) -> NDArray[np.float64]:
     M = G[:-1, :-1]
     u = G[:-1, -1]
-    x_sol = np.linalg.solve(M, u)
+    # NOTE: G is positive, but may have 0 as eigenvalue, so solve using least-sq
+    # x_sol = np.linalg.solve(M, u)
+    x_sol, _, _, _ = np.linalg.lstsq(M, u)
     x = np.concatenate([x_sol, [x[-1]]])
     return x
