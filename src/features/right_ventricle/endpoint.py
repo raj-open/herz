@@ -44,7 +44,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     datas = dict()
     infos = dict()
     polys = dict()
-    fits_trig = dict()
+    fitinfos_trig = dict()
     cfg_points = config.POINTS.model_copy(deep=True)
     specials = {
         'pressure': cfg_points.pressure,
@@ -107,12 +107,13 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         if cfg_trig is not None:
             subprog = prog.subtask(f'''FIT TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
             data_anon = data.rename(columns={quantity: 'value'})
-            fit_trig, intervals_trig = step_fit_trig(data_anon, fit_poly=fit_poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
+            fit_trig, hull_trig, intervals_trig = step_fit_trig(data_anon, fit_poly=fit_poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
             subprog.next()
             special = step_recognise_iso(fit_trig, special=special)
             subprog.next()
         else:
             fit_trig = None
+            hull_trig = []
             intervals_trig = []
 
         subprog = prog.subtask(f'''RENORMALISE DATA + FITTINGS FOR {quantity}''', steps=4)
@@ -127,22 +128,28 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         if fit_trig is not None:
             T = info.period
             fit_trig = get_unnormalised_trig(fit_trig, info=info)
+            hull_trig = [(T * a, T * b) for a, b in hull_trig]
             intervals_trig = [(T * a, T * b) for a, b in intervals_trig]
         subprog.next()
 
-        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=3)
+        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=4)
         data = step_shift_data_custom(data, points_data)
         subprog.next()
         special = get_realignment_special(special, info=info)
         subprog.next()
         p = get_realignment_polynomial(fit_poly, info=info, special=special)
         subprog.next()
+        if fit_trig is not None:
+            fit_trig = get_realignment_trig(fit_trig, info=info, special=special)
+            hull_trig = get_realignment_intervals(hull_trig, info=info, special=special)
+            intervals_trig = get_realignment_intervals(intervals_trig, info=info, special=special)
+        subprog.next()
 
         datas[quantity] = data
         dataparts[quantity] = points_data
         infos[quantity] = info
         polys[quantity] = p
-        fits_trig[quantity] = (intervals_trig, fit_trig)
+        fitinfos_trig[quantity] = (fit_trig, hull_trig, intervals_trig)
         specials[quantity] = special
         prog.next()
 
@@ -162,8 +169,6 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         special_v=specials['volume'],
         cfg_fit=config.EXP,
     )
-    fit, (vmin, vmax), (pmin, pmax) = fitinfo_exp
-    model = lambda x: fit.vshift + fit.vscale * np.exp(x / fit.hscale)
     subprog.next()
     prog.next()
 
@@ -171,8 +176,8 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     specials['pv'] = step_compute_pv(
         poly_p=polys['pressure'],
         poly_v=polys['volume'],
-        # fit_trig_p=fits_trig['pressure'][1],
-        # fit_trig_v=fits_trig['volume'][1],
+        # fit_trig_p=fitinfos_trig['pressure'][0],
+        # fit_trig_v=fitinfos_trig['volume'][0],
         fit_trig_p=None,
         fit_trig_v=None,
         fitinfo_exp=fitinfo_exp,
@@ -191,8 +196,8 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         special_pv=specials['pv'],
         info_p=infos['pressure'],
         info_v=infos['volume'],
-        fit_trig_p=fits_trig['pressure'][1],
-        fit_trig_v=fits_trig['volume'][1],
+        fit_trig_p=fitinfos_trig['pressure'][0],
+        fit_trig_v=fitinfos_trig['volume'][0],
         fitinfo_exp=fitinfo_exp,
     )
     subprog.next()
@@ -212,7 +217,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
             data=datas[quantity],
             info=infos[quantity],
             poly=polys[quantity],
-            fits_trig=fits_trig[quantity],
+            fitinfo_trig=fitinfos_trig[quantity],
             special=specials[quantity],
             quantity=quantity,
             symb=symb,
@@ -233,6 +238,8 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         info_v=infos['volume'],
         poly_p=polys['pressure'],
         poly_v=polys['volume'],
+        fitinfo_trig_p=fitinfos_trig['pressure'],
+        fitinfo_trig_v=fitinfos_trig['volume'],
         fitinfo_exp=fitinfo_exp,
         special_p=specials['pressure'],
         special_v=specials['volume'],

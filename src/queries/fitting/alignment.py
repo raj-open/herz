@@ -21,6 +21,7 @@ __all__ = [
     'get_realignment_intervals',
     'get_realignment_special',
     'get_realignment_polynomial',
+    'get_realignment_trig',
 ]
 
 # ----------------------------------------------------------------
@@ -30,12 +31,13 @@ __all__ = [
 
 def get_realignment_intervals(
     intervals: Iterable[tuple[float, float]],
-    t_align: float,
+    special: dict[str, SpecialPointsConfig],
     info: FittedInfoNormalisation,
 ) -> list[tuple[float, float]]:
+    t_align = special['align'].time
     period = info.period
     intervals = [(a - t_align, b - t_align) for a, b in intervals]
-    intervals = collapse_intervals_to_cycle(intervals, period=period)
+    intervals = collapse_intervals_to_cycle(intervals, offset=0, period=period)
     return intervals
 
 
@@ -70,3 +72,18 @@ def get_realignment_polynomial(
     p = Poly[float](coeff=fit.coefficients, cyclic=True, period=T, offset=0)
     p = p.rescale(t0=t_align)
     return p
+
+
+def get_realignment_trig(
+    fit: FittedInfoTrig,
+    info: FittedInfoNormalisation,
+    special: dict[str, SpecialPointsConfig],
+) -> Poly[float]:
+    '''
+    Realigns trigonometric model to start at a particular timepoint.
+    '''
+    T = info.period
+    t_align = special['align'].time
+    fit = fit.model_copy(deep=True)
+    fit.hshift = (fit.hshift - t_align) % T
+    return fit
