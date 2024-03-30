@@ -71,7 +71,7 @@ def step_fit_exp(
     )
 
     # add heuristics to env
-    beta_local = compute_heuristics(
+    compute_heuristics(
         data=data,
         info_p=info_p,
         info_v=info_v,
@@ -79,7 +79,7 @@ def step_fit_exp(
         poly_v=poly_v,
         y_min=pmin,
     )
-    env = env | {'beta_local': beta_local}
+    env = env | {'beta_local': data['beta']}
 
     # add bounds for non-linear part
     conf_ = cfg_fit.conditions
@@ -91,11 +91,11 @@ def step_fit_exp(
     fit_init = get_initialisation_from_settings(conf_, env=env)
 
     # reformat to numpy-array - and shift v-axis for stability
-    data = reformat_data(data, vmax)
+    arr = reformat_data(data, vmax)
 
     # perpare parts for solver depending upon settings
-    scale = fit_options_scale_data(data)
-    gen_grad = fit_options_gradients_data(data)
+    scale = fit_options_scale_data(arr)
+    gen_grad = fit_options_gradients_data(arr)
 
     # perform fitting
     conf_ = cfg_fit.solver
@@ -156,7 +156,8 @@ def compute_heuristics(
     poly_p: Poly[float],
     poly_v: Poly[float],
     y_min: float,
-) -> NDArray[np.float64]:
+    safety: float = 1,
+) -> pd.DataFrame:
     '''
     Determines the instaneous values of β
     and thereby heuristic-means for the
@@ -164,7 +165,6 @@ def compute_heuristics(
     '''
     T_p = info_p.period
     T_v = info_v.period
-
     t = data['time'].to_numpy()
     t_p = T_p * t
     t_v = T_v * t
@@ -172,9 +172,10 @@ def compute_heuristics(
     P = poly_p
     dP = poly_p.derivative()
     dV = poly_v.derivative()
-    P_values = P.values(t_p) - y_min + 1
+    P_values = P.values(t_p) - y_min + safety
     beta = 2 * (dP.values(t_p) / P_values) / dV.values(t_v)
-    return beta
+    data['beta'] = beta
+    return data
 
 
 def restrict_data_to_intervals(
