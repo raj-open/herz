@@ -64,27 +64,27 @@ def get_bounds_from_settings(
     conditions: list[FitTrigCondition],
     env: dict[str, float],
 ) -> tuple[float, float]:
-    T_min = 1 / 4
-    T_max = 4
+    invscale_min = 1 / 4
+    invscale_max = 4
+
     try:
         env = env | {'math': math, 'np': np}
         for cond in conditions:
             value: float = eval(cond.value, env)
             match cond.kind:
                 case EnumBoundKind.HSCALE_LOWER_BOUND:
-                    T_min = max(T_min, value)
+                    invscale_max = min(invscale_max, 1 / value)
+                case EnumBoundKind.INVHSCALE_UPPER_BOUND:
+                    invscale_max = min(invscale_max, value)
                 case EnumBoundKind.HSCALE_UPPER_BOUND:
-                    T_max = min(T_max, value)
+                    invscale_min = max(invscale_min, 1 / value)
+                case EnumBoundKind.INVHSCALE_LOWER_BOUND:
+                    invscale_min = max(invscale_min, value)
 
     except Exception as err:
         raise ValueError(f'Could not interpret conditions! {err}')
 
-    # T ≤ ... ⟹ ω ≥ 2π/...
-    omega_min = 2 * pi / T_max
-    # T ≥ ... ⟹ ω ≤ 2π/...
-    omega_max = 2 * pi / T_min
-
-    return omega_min, omega_max
+    return 2 * pi * invscale_min, 2 * pi * invscale_max
 
 
 def get_initialisation_from_settings(

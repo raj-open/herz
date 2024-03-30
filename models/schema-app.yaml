@@ -749,6 +749,8 @@ components:
       enum:
         - HSCALE-LOWER-BOUND
         - HSCALE-UPPER-BOUND
+        - INVHSCALE-LOWER-BOUND
+        - INVHSCALE-UPPER-BOUND
 
     # --------------------------------
     # ENUM Mode for model
