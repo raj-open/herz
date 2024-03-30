@@ -149,6 +149,7 @@ def setup_plot(
             x=0.5,
             y=0.95,
             font=dict(
+                family=cfg_font.family,
                 size=cfg_font.size_title,
             ),
         ),
@@ -176,6 +177,10 @@ def setup_plot(
         showlegend=cfg.plot.legend,
         legend=dict(
             title='Series/Points',
+            font=dict(
+                family=cfg_font.family,
+                size=cfg_font.size_legend,
+            ),
         ),
         updatemenus=[],  # use to add buttons to plots
     )

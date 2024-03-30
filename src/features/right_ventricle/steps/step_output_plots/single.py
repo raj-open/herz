@@ -125,6 +125,7 @@ def setup_plot(
         title=dict(
             text=name,
             font=dict(
+                family=cfg_font.family,
                 size=cfg_font.size_title,
             ),
         ),
@@ -138,6 +139,7 @@ def setup_plot(
         legend=dict(
             title='Series/Points',
             font=dict(
+                family=cfg_font.family,
                 size=cfg_font.size_legend,
             ),
         ),
