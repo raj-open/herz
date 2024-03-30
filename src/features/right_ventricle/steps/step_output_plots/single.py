@@ -69,7 +69,7 @@ def step_output_time_plot(
         fig.append_trace(subplot, row=1, col=1)
 
     # plot trig fit
-    for subplot in plot_trig_fit(fitinfo_trig, quantity=quantity, N=N, cv=cv, units=units):
+    for subplot in plot_trig_fit(fitinfo_trig, info=info, quantity=quantity, N=N, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
@@ -242,6 +242,7 @@ def plot_poly_fit(
 
 def plot_trig_fit(
     fitinfo: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    info: FittedInfoNormalisation,
     quantity: str,
     N: int,
     cv: dict[str, float],
@@ -254,7 +255,7 @@ def plot_trig_fit(
     if fit is None:
         return
 
-    time_trig, data_trig = compute_fitted_curves_trig(fitinfo, usehull=True, N=N)
+    time_trig, data_trig = compute_fitted_curves_trig(fitinfo, info, usehull=True, N=N)
 
     yield from add_plot_time_series(
         name=f'{quantity.title()} [trig]',

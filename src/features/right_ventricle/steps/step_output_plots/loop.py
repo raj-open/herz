@@ -325,7 +325,7 @@ def plot_trig_curve(
     fit_v, _, _ = fitinfo_trig_v
 
     if fit_p is not None:
-        time_p, paxis = compute_fitted_curves_trig(fitinfo_trig_p, usehull=usehull, N=N)
+        time_p, paxis = compute_fitted_curves_trig(fitinfo_trig_p, info_p, usehull=usehull, N=N)
         vaxis = poly_v.values((T_v / T_p) * time_p)
         yield pgo.Scatter(
             name='P(t) ~ cos(ωt)',
@@ -341,7 +341,7 @@ def plot_trig_curve(
         )
 
     if fit_v is not None:
-        time_v, vaxis = compute_fitted_curves_trig(fitinfo_trig_v, usehull=usehull, N=N)
+        time_v, vaxis = compute_fitted_curves_trig(fitinfo_trig_v, info_v, usehull=usehull, N=N)
         paxis = poly_p.values((T_p / T_v) * time_v)
         yield pgo.Scatter(
             name='V(t) ~ cos(ωt)',

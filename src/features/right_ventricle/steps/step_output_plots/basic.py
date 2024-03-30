@@ -162,6 +162,7 @@ def compute_fitted_curves_poly(
 
 def compute_fitted_curves_trig(
     fitinfo: tuple[FittedInfoTrig, list[tuple[float, float]], list[tuple[float, float]]],
+    info: FittedInfoNormalisation,
     usehull: bool,
     N: int,
 ) -> tuple[
@@ -171,6 +172,7 @@ def compute_fitted_curves_trig(
     '''
     Prepares a data-series for fitted trig curve on the entire hull.
     '''
+    T = info.period
     fit, hull, intervals = fitinfo
     if usehull:
         time = np.concatenate([np.linspace(start=a, stop=b, num=N, endpoint=False) for a, b in hull])
@@ -179,6 +181,9 @@ def compute_fitted_curves_trig(
 
     omega = 2 * pi / fit.hscale
     osc = fit.vshift + fit.drift * time + fit.vscale * np.cos(omega * (time - fit.hshift))
+
+    # put time in periodic mode
+    time = time % T
 
     return time, osc
 

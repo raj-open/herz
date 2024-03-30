@@ -113,10 +113,9 @@ def step_output_special_points(
     ]:
         if fit is None:
             continue
-        t_align = special['align'].time
         vshift = fit.vshift
         vscale = fit.vscale
-        hshift = fit.hshift
+        hshift = fit.hshift % T
         hscale = fit.hscale
         drift = fit.drift
         if drift == 0:

@@ -178,9 +178,9 @@ def subfeature_time_series_steps_single(
     poly = get_realignment_polynomial(poly, special=special)
     subprog.next()
     if fit_trig is not None:
-        fit_trig = get_realignment_trig(fit_trig, info=info, special=special)
-        hull_trig = get_realignment_intervals(hull_trig, info=info, special=special)
-        intervals_trig = get_realignment_intervals(intervals_trig, info=info, special=special)
+        fit_trig = get_realignment_trig(fit_trig, special=special)
+        hull_trig = get_realignment_intervals(hull_trig, info=info, special=special, collapse=False)
+        intervals_trig = get_realignment_intervals(intervals_trig, info=info, special=special, collapse=False)
     subprog.next()
 
     datas[quantity] = data

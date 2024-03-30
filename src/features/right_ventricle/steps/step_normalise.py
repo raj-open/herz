@@ -48,7 +48,7 @@ def step_normalise(
     t, dt, x, fitinfos = fit_normalisation(t=t, x=x, windows=windows)
 
     data['time'] = t
-    data['dt'] = t
+    data['dt'] = dt
     data[quantity] = x
 
     return data, fitinfos
