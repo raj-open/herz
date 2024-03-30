@@ -59,8 +59,7 @@ def get_realignment_special(
 
 
 def get_realignment_polynomial(
-    fit: FittedInfoPoly,
-    info: FittedInfoNormalisation,
+    p: Poly[float],
     special: dict[str, SpecialPointsConfig],
 ) -> Poly[float]:
     '''
@@ -68,9 +67,10 @@ def get_realignment_polynomial(
     Preserves periodicity.
     '''
     t_align = special['align'].time
-    T = info.period
-    p = Poly[float](coeff=fit.coefficients, cyclic=True, period=T, offset=0)
+    # first shift
     p = p.rescale(t0=t_align)
+    # then reset offset
+    p.offset = 0
     return p
 
 

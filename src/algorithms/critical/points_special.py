@@ -53,7 +53,7 @@ def sort_special_points_specs(
 
 
 def recognise_special_points(
-    fit_poly: FittedInfoPoly,
+    poly: Poly[float],
     search: list[tuple[str, SpecialPointsConfig]],
     skip_errors: bool,
 ) -> dict[str, SpecialPointsConfig]:
@@ -68,10 +68,9 @@ def recognise_special_points(
     times = {}
     n_der = max([point.spec.derivative for _, point in search if point.spec is not None])
 
-    q0 = Poly(coeff=fit_poly.coefficients, accuracy=POLY_RESOLUTION)
-
-    # Get polynomial coefficients of n-th derivatives of curve.
-    # NOTE: polys[k] = coeff's of k-th derivative of polynomial x(t)
+    # clone the polynomial and define an accuracy level for computing roots
+    q0 = Poly(coeff=poly.coefficients, accuracy=POLY_RESOLUTION)
+    # Get n-th derivatives of polynomial.
     q = q0
     polys = [q0]
     for _ in range(n_der + 1):

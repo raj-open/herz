@@ -51,7 +51,7 @@ def get_unnormalised_point(
 
 
 def get_unnormalised_polynomial(
-    fit: FittedInfoPoly,
+    p: Poly[float],
     info: FittedInfoNormalisation,
 ) -> Poly[float]:
     '''
@@ -64,10 +64,12 @@ def get_unnormalised_polynomial(
     x(t) = c + m/T · (t-t₀) + s · z((t-t₀)/T)
     ```
     '''
-    coeff = fit.coefficients
-    p = Poly[float](coeff=coeff)
     T, c, m, s = get_normalisation_params(info)
-    return Poly[float](coeff=[c, m]) + s * p.rescale(a=1 / T)
+    print(p.params)
+    p = s * p.rescale(a=1 / T)
+    p = p + Poly[float](coeff=[c, m])
+    print(p.params)
+    return p
 
 
 def get_unnormalised_trig(

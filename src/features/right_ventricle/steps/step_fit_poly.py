@@ -39,7 +39,7 @@ def step_fit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
-) -> tuple[pd.DataFrame, list[tuple[tuple[int, int], FittedInfoPoly]]]:
+) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
     '''
     Fits polynomial to cycles in time-series, forcing certain conditions
     on the `n`th-derivatives at certain time points,
@@ -67,7 +67,7 @@ def step_fit_poly(
 
 def compute_nth_derivatives_for_cycles(
     data: pd.DataFrame,
-    fits: list[tuple[tuple[int, int], FittedInfoPoly]],
+    fitsinfos: list[tuple[Poly[float], tuple[int, int]]],
     quantity: str,
     n_der: int,
     mode: EnumFittingMode,
@@ -75,25 +75,22 @@ def compute_nth_derivatives_for_cycles(
     '''
     Computes the n'th derivatives of the fitted curve for each cycle.
     '''
-    N = len(data)
     t = data['time'].to_numpy(copy=True)
 
     match mode:
         case EnumFittingMode.AVERAGE:
-            _, fit = fits[-1]
-            infos = [((i1, i2), fit.coefficients[:]) for (i1, i2), _ in fits[:-1]]
+            p, _ = fitsinfos[-1]
+            fitsinfos = [(p, win) for _, win in fitsinfos[:-1]]
         case _:
-            infos = [((i1, i2), fit.coefficients[:]) for (i1, i2), fit in fits[:-1]]
+            pass
 
     data[f'{quantity}[fit]'] = np.zeros(t.shape)
     for n in range(1, n_der + 1):
         data[f'd[{n},t]{quantity}[fit]'] = np.zeros(t.shape)
 
     # loop over all time-subintervals and compute the n'th derivatives
-    for (i1, i2), coeff in infos:
-        p = p = Poly[float](coeff=coeff)
+    for p, (i1, i2) in fitsinfos:
         tt = t[i1:i2]
-
         col = f'{quantity}[fit]'
         data[col][i1:i2] = p.values(tt)
         for n in range(1, n_der + 1):

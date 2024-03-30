@@ -96,18 +96,18 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         subprog.next()
 
         subprog = prog.subtask(f'''FIT POLY-CURVE FOR {quantity}''', steps=1)
-        data, fits = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode_fit)
-        _, fit_poly = fits[-1]
+        data, fitsinfos_poly = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode_fit)
+        poly, _ = fitsinfos_poly[-1]
         subprog.next()
 
         subprog = prog.subtask(f'''RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=1)
-        special, points_data = step_recognise_points(data, fits=fits, cfg=cfg_points, key_align=key_align)
+        special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align)
         subprog.next()
 
         if cfg_trig is not None:
             subprog = prog.subtask(f'''FIT TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
             data_anon = data.rename(columns={quantity: 'value'})
-            fit_trig, hull_trig, intervals_trig = step_fit_trig(data_anon, fit_poly=fit_poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
+            fit_trig, hull_trig, intervals_trig = step_fit_trig(data_anon, poly=poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
             subprog.next()
             special = step_recognise_iso(fit_trig, special=special)
             subprog.next()
@@ -122,7 +122,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         # NOTE: just renormalises, but does not realign.
         special = get_unnormalised_special(special, info=info)
         subprog.next()
-        p = get_unnormalised_polynomial(fit_poly, info=info)
+        poly = get_unnormalised_polynomial(poly, info=info)
         fit_poly.coefficients = p.coefficients
         subprog.next()
         if fit_trig is not None:
@@ -137,7 +137,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         subprog.next()
         special = get_realignment_special(special, info=info)
         subprog.next()
-        p = get_realignment_polynomial(fit_poly, info=info, special=special)
+        poly = get_realignment_polynomial(poly, info=info, special=special)
         subprog.next()
         if fit_trig is not None:
             fit_trig = get_realignment_trig(fit_trig, info=info, special=special)
@@ -148,7 +148,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         datas[quantity] = data
         dataparts[quantity] = points_data
         infos[quantity] = info
-        polys[quantity] = p
+        polys[quantity] = poly
         fitinfos_trig[quantity] = (fit_trig, hull_trig, intervals_trig)
         specials[quantity] = special
         prog.next()

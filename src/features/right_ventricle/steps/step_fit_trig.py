@@ -38,7 +38,7 @@ __all__ = [
 @echo_function(message='STEP fit trigonometric-model to data/poly-model', level=LOG_LEVELS.INFO)
 def step_fit_trig(
     data: pd.DataFrame,
-    fit_poly: FittedInfoPoly,
+    poly: Poly[float],
     special: dict[str, SpecialPointsConfig],
     symb: str,
     cfg_fit: FitTrigConfig,
@@ -54,12 +54,6 @@ def step_fit_trig(
     # to allow for consistent values upon shifting
     offset = 0
     period = 1
-    p = Poly[float](
-        coeff=fit_poly.coefficients,
-        cyclic=True,
-        period=period,
-        offset=0,
-    )
 
     # get environment variables for settings
     conf_ = cfg_fit.points
@@ -100,7 +94,7 @@ def step_fit_trig(
 
         case EnumModelKind.POLY_MODEL:
             # reduce model to bounds
-            models, intervals = resolve_to_piecewise_functions(p=p, intervals=intervals)
+            models, intervals = resolve_to_piecewise_functions(poly=poly, intervals=intervals)
             # compute parts
             scale = fit_options_scale_poly_model(models, intervals)
             gen_grad = fit_options_gradients_poly_model(models, intervals, drift=conf_.drift)
@@ -162,7 +156,7 @@ def convert_dom_to_interval(
 
 
 def resolve_to_piecewise_functions(
-    p: Poly[float],
+    poly: Poly[float],
     intervals: Iterable[tuple[float, float]],
 ) -> tuple[
     list[Poly[float]],
@@ -172,7 +166,7 @@ def resolve_to_piecewise_functions(
     Resolve cyclic polynomial to non-cyclic parts
     on disjoint (sub)intervals each contained within a full cycle.
     '''
-    parts = list(p.resolve_piecewise(*intervals))
+    parts = list(poly.resolve_piecewise(*intervals))
     models = [q for q, a, b in parts]
     intervals = [(a, b) for q, a, b in parts]
     return models, intervals

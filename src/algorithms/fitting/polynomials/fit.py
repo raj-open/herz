@@ -32,7 +32,7 @@ def fit_poly_cycles(
     x: NDArray[np.float64],
     windows: list[tuple[int, int]],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
-) -> list[tuple[tuple[int, int], FittedInfoPoly]]:
+) -> list[tuple[Poly[float], tuple[int, int]]]:
     '''
     Fits polynomial to cycles of a time-series:
     - minimises wrt. the L²-norm
@@ -50,12 +50,13 @@ def fit_poly_cycles(
     # fit each cycle
     fits = []
     for i1, i2 in windows:
-        p = fit_poly_cycle(t=t[i1:i2], x=x[i1:i2], deg=deg, conds=conds)
-        fit = FittedInfoPoly(coefficients=p.coefficients)
-        fits.append(((i1, i2), fit))
+        tt, _ = normalise_to_unit_interval(t[i1:i2])
+        xx = x[i1:i2]
+        p = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds, period=1, offset=0)
+        fits.append((p, (i1, i2)))
 
-    fit = compute_simultaneous_fit([fit for _, fit in fits])
-    fits.append(((-1, -1), fit))
+    p_sim = compute_simultaneous_fit([p for p, _ in fits], period=1, offset=0)
+    fits.append((p_sim, (-1, -1)))
 
     return fits
 
@@ -65,6 +66,8 @@ def fit_poly_cycle(
     x: NDArray[np.float64],
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
+    period: float,
+    offset: float,
 ) -> Poly[float]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
@@ -82,7 +85,7 @@ def fit_poly_cycle(
     - the fit polynomial
     '''
     Q = onb_conditions(deg=deg, conds=conds)
-    p = onb_spectrum(t=t, x=x, Q=Q, T=1, in_standard_basis=True)
+    p = onb_spectrum(t=t, x=x, Q=Q, cyclic=True, T=period, offset=offset, in_standard_basis=True)
     return p
 
 
@@ -91,7 +94,11 @@ def fit_poly_cycle(
 # ----------------------------------------------------------------
 
 
-def compute_simultaneous_fit(fits: list[FittedInfoPoly]) -> FittedInfoPoly:
+def compute_simultaneous_fit(
+    polys: list[Poly[float]],
+    offset: float,
+    period: float,
+) -> Poly[float]:
     '''
     Fits a single polynomial to all cycles simultaenously.
 
@@ -126,9 +133,13 @@ def compute_simultaneous_fit(fits: list[FittedInfoPoly]) -> FittedInfoPoly:
         of the coefficients of the p⁽ᵏ⁾.
     QED
     '''
-    coeff = np.mean(np.asarray([fit.coefficients for fit in fits]), axis=0).tolist()
-    info = FittedInfoPoly(coefficients=coeff)
-    return info
+    coeff = np.mean(np.asarray([p.coefficients for p in polys]), axis=0).tolist()
+    return Poly[float](
+        coeff=coeff,
+        cyclic=True,
+        offset=offset,
+        period=period,
+    )
 
 
 # ----------------------------------------------------------------

@@ -108,17 +108,18 @@ def onb_spectrum(
     Q: NDArray[np.float64],
     x: list[float],
     t: Optional[list[float]] = None,
+    cyclic: bool = False,
     T: float = 1.0,
-    periodic: bool = False,
+    offset: float = 0.0,
     in_standard_basis: bool = True,
-) -> Poly:
+) -> Poly[float]:
     '''
     @inputs
     - `Q` - a `d x m` array, where `Q[:,j]` denote the coefficients of a polynomial qⱼ
       and {qⱼ}ⱼ is an ONB
     - (`t`, `x`) - a discrete time-series
     - `T` - the total time-duration
-    - `periodic` - whether the series is periodic
+    - `cyclic` - whether the series is periodic
     - `in_standard_basis` - whether to convert the computed innerproducts
        to coefficients wrt the standard basis {tʲ}ⱼ.
 
@@ -174,8 +175,8 @@ def onb_spectrum(
     # for x(t) on [t1ᵢ, t2ᵢ].
     # --------------------------------
     t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
-    if periodic:
-        x = x.tolist() + [x[0]]
+    if cyclic:
+        x = np.concatenate([x, x[:1]])
     else:
         x1 = np.asarray(x[1:])
         x2 = np.asarray(x[:-1])
@@ -258,7 +259,12 @@ def onb_spectrum(
     if in_standard_basis:
         coeff = Q @ coeff
 
-    return Poly(coeff=coeff.tolist())
+    return Poly[float](
+        coeff=coeff.tolist(),
+        cyclic=cyclic,
+        offset=offset,
+        period=T,
+    )
 
 
 # ----------------------------------------------------------------
