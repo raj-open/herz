@@ -31,7 +31,7 @@ def step_normalise(
     quantity: str,
 ) -> tuple[
     pd.DataFrame,
-    list[tuple[tuple[int, int], FittedInfoNormalisation]],
+    list[tuple[FittedInfoNormalisation, tuple[int, int]]],
 ]:
     '''
     Fits polynomial to cycles in time-series, forcing certain conditions

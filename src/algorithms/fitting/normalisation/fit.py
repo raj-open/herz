@@ -33,7 +33,7 @@ def fit_normalisation(
     NDArray[np.float64],
     NDArray[np.float64],
     NDArray[np.float64],
-    list[tuple[tuple[int, int], FittedInfoNormalisation]],
+    list[tuple[FittedInfoNormalisation, tuple[int, int]]],
 ]:
     '''
     Fits polynomial to cycles of a time-series:
@@ -61,10 +61,10 @@ def fit_normalisation(
 
         # compute fitted curve
         info = FittedInfoNormalisation(period=T, intercept=c, gradient=m, scale=s)
-        fitinfos.append(((i1, i2), info))
+        fitinfos.append((info, (i1, i2)))
 
-    info = combine_fit([info for _, info in fitinfos])
-    fitinfos.append(((-1, -1), info))
+    info = combine_fit([info for info, _ in fitinfos])
+    fitinfos.append((info, (-1, -1)))
 
     return t, dt, x, fitinfos
 

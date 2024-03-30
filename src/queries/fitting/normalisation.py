@@ -65,10 +65,8 @@ def get_unnormalised_polynomial(
     ```
     '''
     T, c, m, s = get_normalisation_params(info)
-    print(p.params)
     p = s * p.rescale(a=1 / T)
     p = p + Poly[float](coeff=[c, m])
-    print(p.params)
     return p
 
 
@@ -100,7 +98,7 @@ def get_unnormalised_trig(
 
 def get_unnormalised_data(
     data: pd.DataFrame,
-    infos: list[tuple[tuple[int, int], FittedInfoNormalisation]],
+    infos: list[tuple[FittedInfoNormalisation, tuple[int, int]]],
     quantity: str,
     n_der: int = 0,
     renormalise: bool = True,
@@ -113,11 +111,11 @@ def get_unnormalised_data(
     data['dt'] = 0
 
     # get common parameters
-    _, fit0 = infos[-1]
+    info0, _ = infos[-1]
 
     # un/renormalise all cycles - incl. fitted models
-    for (i1, i2), fit in infos[:-1]:
-        T, c, m, s = get_normalisation_params(fit0 if renormalise else fit)
+    for info, (i1, i2) in infos[:-1]:
+        T, c, m, s = get_normalisation_params(info0 if renormalise else info)
         tt = data['time'][i1:i2]
         xx = data[quantity][i1:i2]
 

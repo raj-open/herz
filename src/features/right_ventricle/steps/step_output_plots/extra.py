@@ -29,13 +29,13 @@ __all__ = [
 
 def quick_plot(
     data: pd.DataFrame,
-    infos: list[tuple[tuple[int, int], FittedInfoNormalisation]],
+    infos: list[tuple[FittedInfoNormalisation, tuple[int, int]]],
     fit_poly: FittedInfoPoly,
     quantity: str,
     renormalise: bool = True,
     N: int = 1000,
 ) -> Generator[pgo.Figure, None, None]:
-    _, info = infos[0]
+    info, _ = infos[0]
     if renormalise:
         T = info.period
         q = get_unnormalised_polynomial(fit_poly, info=info)
