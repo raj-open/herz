@@ -79,7 +79,7 @@ def step_compute_pv(
     P_ed = special_p['ed'].value
     P_es = special_p['es'].value
     P_iso = special_p['iso'].value
-    P_min = special_p['min'].value
+    P_min = special_p['dia'].value
     P_axis = min(P_min, 0)
 
     t_edv = special_v['ed'].time

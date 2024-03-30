@@ -43,10 +43,12 @@ settings:
   # matching:
   #   pressure: 'ed'
   #   volume: 'ed'
-  # NOTE: for aesthetic look
+  # matching:
+  #   pressure: anti-bd
+  #   volume: bd
   matching:
-    pressure: anti-bd
-    volume: bd
+    pressure: dia
+    volume: anti-es
 
   # --------------------------------
   # FOR FITTING MODELS
@@ -160,14 +162,14 @@ settings:
 
     points:
       # vmin: "V['anti-es'].value"
-      vmin: "V['bd'].value"
+      vmin: "V['anti-es'].value"
       vmax: "V['ed'].value"
-      tmin_v: "V['bd'].time"
+      tmin_v: "V['anti-es'].time"
       tmax_v: "V['ed'].time"
       # pmin: "P['bd'].value"
-      pmin: "P['anti-bd'].value"
+      pmin: "P['dia'].value"
       pmax: "P['ed'].value"
-      tmin_p: "P['anti-bd'].time"
+      tmin_p: "P['dia'].time"
       tmax_p: "P['ed'].time"
       # compute successively - fit to (vmid, pmid) , (vmax, pmax)
       pmid: '(pmin + pmax)/2'
@@ -182,10 +184,10 @@ settings:
       vshift: 'pmid/2'
 
     conditions:
-      - kind: HSCALE-LOWER-BOUND
-        value: '1/np.max(beta_local)'
-      - kind: HSCALE-UPPER-BOUND
-        value: '1/np.min(beta_local)'
+      - kind: INVHSCALE-LOWER-BOUND
+        value: 'np.min(beta_local)'
+      - kind: INVHSCALE-UPPER-BOUND
+        value: 'np.max(beta_local)'
 
   # --------------------------------
   # SETTINGS FOR COMPUTING SPECIAL POINTS
@@ -255,7 +257,7 @@ settings:
           size: 9
           colour: blue
           symbol: "triangle-right-open"
-      min:
+      dia:
         name: 'dia = P<sub>min</sub>'
         name-simple: "dia"
         spec:
@@ -271,7 +273,7 @@ settings:
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
-          after: [ 'min' ]
+          after: [ 'dia' ]
           before: [ 'ed' ]
         format: &marker_anti_bd
           size: 9
@@ -283,7 +285,7 @@ settings:
         spec:
           derivative: 2
           kind: LOCAL-MAXIMUM
-          after: [ 'min' ]
+          after: [ 'dia' ]
           before: []
         format: &marker_ed
           size: 9
