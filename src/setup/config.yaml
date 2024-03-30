@@ -156,8 +156,9 @@ settings:
     solver:
       model: DATA
       # model: POLY-MODEL
-      # mode: HYBRID-GRADIENT
-      mode: GRADIENT
+      # mode: BRUTE-FORCE
+      mode: HYBRID-GRADIENT
+      # mode: GRADIENT
       n-max: 1000
 
     points:
@@ -172,20 +173,24 @@ settings:
       tmin_p: "P['dia'].time - T_p"
       tmax_p: "P['ed'].time"
       # compute successively
-      vmid: "V['bd'].value"
-      pmid: "P['anti-bd'].value"
+      vmid: "(vmin + vmax)/2"
+      pmid: "(pmin + pmax)/2"
+      vmax0: '0'           # shift V-values so that V_max = 0
+      vmid0: 'vmid - vmax' # "..."
+      vmin0: 'vmin - vmax' # "..."
       pmin0: '0'           # shift P-values so that P_min = 0
       pmid0: 'pmid - pmin' # "..."
       pmax0: 'pmax - pmin' # "..."
       # analytic solution to interpolate between (vmid, pmid0) , (vmax, pmax0)
+      dv: 'vmax0 - vmid0'
       dp: 'pmax0 - pmid0'
-      dv: 'vmax - vmid'
-      beta: 'math.log(1 + 2*dp/pmid0)/dv'
+      C: 'pmid0/2'
+      beta: 'math.log(1 + dp/C)/dv'
 
     initial:
       beta: 'beta'
-      vscale: '(pmid0/2) * math.exp(-beta * vmid)'
-      vshift: 'pmin + pmid0/2' # NOTE: have to shift by pmin to compensate
+      vscale: 'C * math.exp(-beta * vmid0)'
+      vshift: 'pmin + C' # NOTE: have to shift by pmin to compensate
 
     conditions:
       - kind: INVHSCALE-LOWER-BOUND
@@ -478,7 +483,6 @@ settings:
           text-position: "middle center"
 
       eed-exp:
-        # visible: false
         name: "eed (exp)"
         name-simple: "eed (exp)"
         kind: GRADIENT

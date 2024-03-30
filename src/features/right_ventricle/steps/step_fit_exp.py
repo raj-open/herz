@@ -59,6 +59,8 @@ def step_fit_exp(
     }
     conf_ = cfg_fit.points
     env = get_schema_from_settings(conf_, env=env)
+    pmin = env['pmin']
+    vmax = env['vmax']
 
     # reduce data to bounds - NOTE: need to do this before computing heuristics!
     data, range_v, range_p = restrict_data_to_intervals(
@@ -75,6 +77,7 @@ def step_fit_exp(
         info_v=info_v,
         poly_p=poly_p,
         poly_v=poly_v,
+        y_min=pmin,
     )
     env = env | {'beta_local': beta_local}
 
@@ -87,8 +90,8 @@ def step_fit_exp(
     conf_ = cfg_fit.initial
     fit_init = get_initialisation_from_settings(conf_, env=env)
 
-    # reformat to numpy-array
-    data = reformat_data(data)
+    # reformat to numpy-array - and shift v-axis for stability
+    data = reformat_data(data, vmax)
 
     # perpare parts for solver depending upon settings
     scale = fit_options_scale_data(data)
@@ -106,6 +109,16 @@ def step_fit_exp(
         N_max=conf_.n_max,
         eps=SOLVE_TOLERANCE,
     )
+
+    '''
+    This computes model
+    ```
+    P(V) ≈ A + B·e^{β·(V - V_max)}
+         = A + (B·e^{-β·V_max}) e^{β·V}
+    ```
+    thus need to adjust vscale.
+    '''
+    fit.vscale = fit.vscale * math.exp(-vmax / fit.hscale)
 
     log_debug_wrapped(lambda: message_result(fit, loss, dx))
     return fit, range_v, range_p
@@ -142,6 +155,7 @@ def compute_heuristics(
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
     poly_v: Poly[float],
+    y_min: float,
 ) -> NDArray[np.float64]:
     '''
     Determines the instaneous values of β
@@ -158,7 +172,8 @@ def compute_heuristics(
     P = poly_p
     dP = poly_p.derivative()
     dV = poly_v.derivative()
-    beta = 2 * (dP.values(t_p) / P.values(t_p)) / dV.values(t_v)
+    P_values = P.values(t_p) - y_min + 1
+    beta = 2 * (dP.values(t_p) / P_values) / dV.values(t_v)
     return beta
 
 
@@ -194,6 +209,7 @@ def restrict_data_to_intervals(
 
 def reformat_data(
     data: pd.DataFrame,
+    x_max: float,
 ) -> NDArray[np.float64]:
     '''
     Reformats data frame to an np-array containing
@@ -207,5 +223,5 @@ def reformat_data(
     dt = data['dt'].to_numpy()
     x = data['volume'].to_numpy()
     y = data['pressure'].to_numpy()
-    data = np.asarray([t, dt, x, y]).T
+    data = np.asarray([t, dt, x - x_max, y]).T
     return data
