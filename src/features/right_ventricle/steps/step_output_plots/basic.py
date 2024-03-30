@@ -161,39 +161,31 @@ def compute_fitted_curves_poly(
 
 
 def compute_fitted_curves_trig(
-    info: FittedInfoNormalisation,
-    fit: FittedInfoTrig,
-    intervals: list[tuple[float, float]],
-    special: dict[str, SpecialPointsConfig],
-    N: int = 1000,
+    fitinfo: tuple[FittedInfoTrig, list[tuple[float, float]], list[tuple[float, float]]],
+    usehull: bool,
+    N: int,
 ) -> tuple[
     NDArray[np.float64],
     NDArray[np.float64],
 ]:
-    t_align = special['align'].time
-    T = info.period
+    '''
+    Prepares a data-series for fitted trig curve on the entire hull.
+    '''
+    fit, hull, intervals = fitinfo
+    if usehull:
+        time = np.concatenate([np.linspace(start=a, stop=b, num=N, endpoint=False) for a, b in hull])
+    else:
+        time = np.concatenate([np.linspace(start=a, stop=b, num=N, endpoint=False) for a, b in intervals])
 
-    t_min = min([min(I) for I in intervals] or [0])
-    t_max = max([max(I) for I in intervals] or [1])
-    time = np.linspace(start=t_min, stop=t_max, num=N, endpoint=False)
-    time_mod = time % T
-    time = np.concatenate([time[time_mod >= t_align], time[time_mod < t_align]])
-    time_mod = (time - t_align) % T
+    omega = 2 * pi / fit.hscale
+    osc = fit.vshift + fit.drift * time + fit.vscale * np.cos(omega * (time - fit.hshift))
 
-    hshift = fit.hshift
-    hscale = fit.hscale
-    vshift = fit.vshift
-    vscale = fit.vscale
-    drift = fit.drift
-    omega = 2 * pi / hscale
-    osc = vshift + drift * time + vscale * np.cos(omega * (time - hshift))
-
-    return time_mod, osc
+    return time, osc
 
 
 def compute_fitted_curves_exp(
     fitinfo: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
-    N: int = 1000,
+    N: int,
 ) -> tuple[
     NDArray[np.float64],
     NDArray[np.float64],

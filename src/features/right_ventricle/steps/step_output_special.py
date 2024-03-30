@@ -146,9 +146,7 @@ def step_output_special_points(
             },
             {
                 'name': 't₀',
-                # TODO: realign trig in src/features/right_ventricle/endpoint.py
-                # and remove the shift here
-                'value': cv['time'] * ((hshift - t_align) % T),
+                'value': cv['time'] * hshift,
                 'unit-x': units['time'],
             },
             {

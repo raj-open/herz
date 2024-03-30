@@ -45,6 +45,7 @@ def step_fit_trig(
 ) -> tuple[
     FittedInfoTrig,
     list[tuple[float, float]],
+    list[tuple[float, float]],
 ]:
     '''
     Fits trig curve to normalised model.
@@ -80,6 +81,7 @@ def step_fit_trig(
     # get first part of restrictions based on environment
     conf_ = cfg_fit.intervals
     intervals = get_spatial_domain_from_settings(conf_, env=env)
+    hull = [(min(a for a, b in intervals), max(b for a, b in intervals))]
 
     # perpare parts for solver depending upon settings
     conf_ = cfg_fit.solver
@@ -119,7 +121,7 @@ def step_fit_trig(
     )
 
     log_debug_wrapped(lambda: message_result(fit, loss, dx))
-    return fit, intervals
+    return fit, hull, intervals
 
 
 # ----------------------------------------------------------------

@@ -36,7 +36,7 @@ def step_output_time_plot(
     data: pd.DataFrame,
     info: FittedInfoNormalisation,
     poly: Poly[float],
-    fits_trig: tuple[list[tuple[float, float]], FittedInfoTrig | None],
+    fitinfo_trig: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
@@ -69,7 +69,7 @@ def step_output_time_plot(
         fig.append_trace(subplot, row=1, col=1)
 
     # plot trig fit
-    for subplot in plot_trig_fit(info=info, fitinfo=fits_trig, specials=specials, quantity=quantity, N=N, cv=cv, units=units):  # fmt: skip
+    for subplot in plot_trig_fit(fitinfo_trig, quantity=quantity, N=N, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
@@ -239,9 +239,7 @@ def plot_poly_fit(
 
 
 def plot_trig_fit(
-    info: FittedInfoNormalisation,
-    fitinfo: tuple[list[tuple[float, float]], FittedInfoTrig | None],
-    specials: list[Any],
+    fitinfo: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     quantity: str,
     N: int,
     cv: dict[str, float],
@@ -250,17 +248,11 @@ def plot_trig_fit(
     '''
     Creates subplot for the trig-fitting (if given).
     '''
-    intervals, fit_trig = fitinfo
-    if fit_trig is None:
+    fit, _, _ = fitinfo
+    if fit is None:
         return
 
-    time_trig, data_trig = compute_fitted_curves_trig(
-        info=info,
-        fit=fit_trig,
-        intervals=intervals,
-        special=specials[0],
-        N=N,
-    )
+    time_trig, data_trig = compute_fitted_curves_trig(fitinfo, usehull=True, N=N)
 
     yield from add_plot_time_series(
         name=f'{quantity.title()} [trig]',

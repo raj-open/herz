@@ -38,8 +38,10 @@ def step_output_loop_plot(
     data_pv: pd.DataFrame,
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    poly_p: FittedInfoPoly,
-    poly_v: FittedInfoPoly,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
+    fitinfo_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    fitinfo_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
@@ -75,6 +77,22 @@ def step_output_loop_plot(
         fig.append_trace(subplot, row=1, col=1)
 
     for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=poly_p, poly_v=poly_v, T_pv=T_pv, N=N, cv=cv, units=units):  # fmt: skip
+        fig.append_trace(subplot, row=1, col=1)
+
+    # plot trig-curve
+    for subplot in plot_trig_curve(
+        fitinfo_trig_p,
+        fitinfo_trig_v,
+        info_p=info_p,
+        info_v=info_v,
+        poly_p=poly_p,
+        poly_v=poly_v,
+        usehull=False,
+        visible=False,
+        N=N,
+        cv=cv,
+        units=units,
+    ):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot exp-curve
@@ -195,8 +213,8 @@ def plot_data_vs_data(
 def plot_data_vs_fits(
     data_p: pd.DataFrame,
     data_v: pd.DataFrame,
-    poly_p: FittedInfoPoly,
-    poly_v: FittedInfoPoly,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
     T_p: float,
     T_v: float,
     cv: dict[str, float],
@@ -280,6 +298,62 @@ def plot_poly_fit(
     )
 
 
+def plot_trig_curve(
+    fitinfo_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    fitinfo_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    info_p: FittedInfoNormalisation,
+    info_v: FittedInfoNormalisation,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
+    usehull: bool,
+    visible: bool,
+    N: int,
+    cv: dict[str, float],
+    units: dict[str, str],
+) -> Generator[pgo.Scatter, None, None]:
+    '''
+    Plots fitted trig curves against data.
+    '''
+    T_p = info_p.period
+    T_v = info_v.period
+    fit_p, _, _ = fitinfo_trig_p
+    fit_v, _, _ = fitinfo_trig_v
+
+    if fit_p is not None:
+        time_p, paxis = compute_fitted_curves_trig(fitinfo_trig_p, usehull=usehull, N=N)
+        vaxis = poly_v.values((T_v / T_p) * time_p)
+        yield pgo.Scatter(
+            name='P(t) ~ cos(ωt)',
+            x=cv['volume'] * vaxis,
+            y=cv['pressure'] * paxis,
+            mode='markers',
+            marker=dict(
+                size=3,
+                color='hsla(100, 100%, 25%, 0.75)',
+            ),
+            visible=True if visible else 'legendonly',
+            showlegend=True,
+        )
+
+    if fit_v is not None:
+        time_v, vaxis = compute_fitted_curves_trig(fitinfo_trig_v, usehull=usehull, N=N)
+        paxis = poly_p.values((T_p / T_v) * time_v)
+        yield pgo.Scatter(
+            name='V(t) ~ cos(ωt)',
+            x=cv['volume'] * vaxis,
+            y=cv['pressure'] * paxis,
+            mode='markers',
+            marker=dict(
+                size=5,
+                color='hsla(100, 100%, 25%, 0.75)',
+            ),
+            visible=True if visible else 'legendonly',
+            showlegend=True,
+        )
+
+    return
+
+
 def plot_exp_curve(
     fitinfo: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     visible: bool,
@@ -293,8 +367,7 @@ def plot_exp_curve(
     # plot exp-curve
     vaxis, paxis = compute_fitted_curves_exp(fitinfo=fitinfo, N=N)
     yield pgo.Scatter(
-        name='P ~ exp(βV)',
-        # NOTE: Ensure that the cycle contains start+end points!
+        name='P(V) ~ exp(βV)',
         x=cv['volume'] * vaxis,
         y=cv['pressure'] * paxis,
         mode='lines',
@@ -312,8 +385,8 @@ def plot_exp_curve(
 def plot_special_points(
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    poly_p: FittedInfoPoly,
-    poly_v: FittedInfoPoly,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     cv: dict[str, float],
