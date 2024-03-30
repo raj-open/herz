@@ -27,6 +27,7 @@ __all__ = [
     'eps_clean_boundaries',
     'eps_clean_duplicates',
     'eps_clean_zeroes',
+    'eps_clean_zeroes_simple',
     'is_epsilon_eq',
     'normalised_diff_matrix',
     'normalised_difference',

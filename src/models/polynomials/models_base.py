@@ -65,6 +65,10 @@ class PolyExpBase(Generic[T]):
         else:
             self.lead *= scale
             self.coeff = [c / scale for c in self.coeff[:-1]] + [1.0]
+
+        # to prevent explosion (e.g. upon rescaling), clean up coefficients that are near 0
+        scale = np.linalg.norm(self.coeff) or 1.0
+        self.coeff = eps_clean_zeroes_simple(self.coeff, eps=scale * self.accuracy)
         return
 
     def __copy__(self) -> PolyExpBase[T]:

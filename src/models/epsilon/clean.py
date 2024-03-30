@@ -19,6 +19,7 @@ from .basic_matrix import *
 __all__ = [
     'eps_clean_duplicates',
     'eps_clean_zeroes',
+    'eps_clean_zeroes_simple',
     'eps_clean_boundaries',
 ]
 
@@ -62,13 +63,28 @@ def eps_clean_duplicates(
 def eps_clean_zeroes(
     values: Iterable[NUMBER],
     eps: float,
-) -> list[NUMBER]:
+) -> list[complex]:
     '''
     Cleans up values that are ε-close to being real-/imag-valued
     '''
     values = eps_clean_real(values, x=0, eps=eps)
     values = eps_clean_imag(values, x=0, eps=eps)
     return values
+
+
+def eps_clean_zeroes_simple(
+    values: Iterable[NUMBER],
+    eps: float,
+) -> list[NUMBER]:
+    '''
+    Cleans up values that are ε-close to being zero.
+    '''
+    if not isinstance(values, np.ndarray):
+        values = np.asarray(values)
+    d = sign_normalised_diff_matrix(x_from=[0], x_to=abs(values), eps=eps)
+    d = d.reshape(values.shape)
+    values[d == EnumSign.ZERO] = 0
+    return values.tolist()
 
 
 def eps_clean_boundaries(
