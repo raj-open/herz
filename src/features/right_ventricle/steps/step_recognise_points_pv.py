@@ -34,10 +34,11 @@ __all__ = [
 
 @echo_function(message='STEP compute special points from fitted P-V curve', level=LOG_LEVELS.INFO)
 def step_compute_pv(
-    fit_poly_p: FittedInfoPoly,
-    fit_poly_v: FittedInfoPoly,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
     fit_trig_p: FittedInfoTrig | None,
     fit_trig_v: FittedInfoTrig | None,
+    fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
@@ -48,8 +49,6 @@ def step_compute_pv(
     in order to compute certain "special points" on the P-V curve.
     '''
     # get poly models
-    poly_p = Poly[float](coeff=fit_poly_p.coefficients)
-    poly_v = Poly[float](coeff=fit_poly_v.coefficients)
     dP_poly = poly_p.derivative()
     dV_poly = poly_v.derivative()
 
@@ -81,6 +80,7 @@ def step_compute_pv(
     P_es = special_p['es'].value
     P_iso = special_p['iso'].value
     P_min = special_p['min'].value
+    P_axis = min(P_min, 0)
 
     t_edv = special_v['ed'].time
     t_esv = special_v['es'].time
@@ -139,14 +139,27 @@ def step_compute_pv(
 
     # compute gradient + intercept
     m = dP_poly(t_edp) / dV_poly(t_edv)
-    P_axis = min(P_min, 0)
     V_axis = V_ed + (P_axis - P_ed) / m
 
-    point = special_pv['eed']
+    point = special_pv['eed-poly']
     point.found = True
     point.value = m
     point.data = [
-        PointPV(pressure=P_min, volume=V_axis),
+        PointPV(pressure=P_axis, volume=V_axis),
+        PointPV(pressure=P_ed, volume=V_ed),
+    ]
+
+    # compute eed via exp-fit
+    fit_exp, (vmin, vmax), (pmin, pmax) = fitinfo_exp
+    alpha = fit_exp.vshift
+    beta = 1 / fit_exp.hscale
+    m = beta * (pmax - alpha)
+    V_axis = vmax + (P_axis - pmax) / m
+    point = special_pv['eed-exp']
+    point.found = True
+    point.value = m
+    point.data = [
+        PointPV(pressure=P_axis, volume=V_axis),
         PointPV(pressure=P_ed, volume=V_ed),
     ]
 

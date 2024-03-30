@@ -7,6 +7,7 @@
 
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
+from ....thirdparty.misc import *
 from ....thirdparty.render import *
 
 from ....setup import config
@@ -42,11 +43,10 @@ def step_output_special_points(
     # fit_poly_v: FittedInfoPoly,
     fit_trig_p: FittedInfoTrig | None,
     fit_trig_v: FittedInfoTrig | None,
+    fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
 ):
     path = case.output.table.path.root
     path = path.format(label=case.label, kind=f'special')
-    t_align_p = special_p['align'].time
-    t_align_v = special_v['align'].time
     T_p = info_p.period
     T_v = info_v.period
 
@@ -61,7 +61,7 @@ def step_output_special_points(
         (
             key,
             point.name_simple or point.name,
-            (point.time - t_align_p) % T_p,
+            point.time,
             point.value,
         )
         for key, point in special_p.items()
@@ -87,7 +87,7 @@ def step_output_special_points(
         (
             key,
             point.name_simple or point.name,
-            (point.time - t_align_v) % T_v,
+            point.time,
             point.value,
         )
         for key, point in special_v.items()
@@ -146,6 +146,8 @@ def step_output_special_points(
             },
             {
                 'name': 't₀',
+                # TODO: realign trig in src/features/right_ventricle/endpoint.py
+                # and remove the shift here
                 'value': cv['time'] * ((hshift - t_align) % T),
                 'unit-x': units['time'],
             },
@@ -163,6 +165,41 @@ def step_output_special_points(
                     'unit-x': units[f'd[1,t]{quantity}'],
                 }
             )
+
+    data.append({'name': ''})
+    fit_exp, (vmin, vmax), (pmin, pmax) = fitinfo_exp
+    vshift = fit_exp.vshift
+    vscale = fit_exp.vscale
+    hscale = fit_exp.hscale
+    data += [
+        {
+            'name': f'Exponential Fit',
+            'description': dedent(
+                f'''
+                L²-fitted model
+                P(V) ≈ α·exp(β·V) + C
+                for parts of P-V-curve in range
+                V: {cv['volume'] * vmin:.4g}–{cv['volume'] * vmax:.4g} {units['volume']};
+                P: {cv['pressure'] * pmin:.4g}–{cv['pressure'] * pmax:.4g} {units['pressure']}.
+                '''
+            ),
+        },
+        {
+            'name': 'σ',
+            'value': cv['pressure'] * vshift,
+            'unit-x': units['pressure'],
+        },
+        {
+            'name': 'β',
+            'value': 1 / (cv['volume'] * hscale),
+            'unit-x': f"1/{units['volume']}",
+        },
+        {
+            'name': 'C',
+            'value': cv['pressure'] * vshift,
+            'unit-x': units['pressure'],
+        },
+    ]
 
     data.append({'name': 'P-V', 'description': 'Parameters computed for P-V curve'})
     for _, point in special_pv.items():

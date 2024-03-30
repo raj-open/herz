@@ -49,7 +49,8 @@ def step_fit_trig(
     '''
     Fits trig curve to normalised model.
     '''
-
+    # NOTE: polynomial must be rendered cyclic
+    # to allow for consistent values upon shifting
     offset = 0
     period = 1
     p = Poly[float](
@@ -59,9 +60,7 @@ def step_fit_trig(
         offset=0,
     )
 
-    # NOTE: polynomial must be rendered cyclic
-    # to allow for consistent values upon shifting
-
+    # get environment variables for settings
     conf_ = cfg_fit.points
     env = {
         f'{symb.upper()}': special,
@@ -69,37 +68,45 @@ def step_fit_trig(
     }
     env = get_schema_from_settings(conf_, env=env)
 
-    conf_ = cfg_fit.intervals
-    intervals = get_spatial_domain_from_settings(conf_, env=env)
-
+    # add bounds for non-linear part
     conf_ = cfg_fit.conditions
     omega_min, omega_max = get_bounds_from_settings(conf_, env=env)
-
     env = env | {'omega_min': omega_min, 'omega_max': omega_max}
 
+    # determine initial guess
     conf_ = cfg_fit.initial
     fit_init = get_initialisation_from_settings(conf_, env=env)
 
+    # get first part of restrictions based on environment
+    conf_ = cfg_fit.intervals
+    intervals = get_spatial_domain_from_settings(conf_, env=env)
+
+    # perpare parts for solver depending upon settings
     conf_ = cfg_fit.solver
     match conf_.model:
         case EnumModelKind.DATA:
+            # reduce data to bounds
             data = restrict_data_to_intervals(
                 data=data,
                 intervals=intervals,
                 offset=offset,
                 period=period,
             )
+            # compute parts
             scale = fit_options_scale_data(data)
             gen_grad = fit_options_gradients_data(data, drift=conf_.drift)
 
         case EnumModelKind.POLY_MODEL:
+            # reduce model to bounds
             models, intervals = resolve_to_piecewise_functions(p=p, intervals=intervals)
+            # compute parts
             scale = fit_options_scale_poly_model(models, intervals)
             gen_grad = fit_options_gradients_poly_model(models, intervals, drift=conf_.drift)
 
         case _ as m:
             raise ValueError(f'No method available for running trig-fit algorithm for {m.value}.')
 
+    # perform fitting
     fit, loss, dx = fit_trigonometric_curve(
         mode=conf_.mode,
         scale=scale,
@@ -121,17 +128,18 @@ def step_fit_trig(
 
 
 def message_result(
-    info: FitTrigConfig,
+    fit: FittedInfoTrig,
     loss: float,
     dx: float,
 ):
     return dedent(
         f'''
         Parameters of trigonometric model:
+        (  Shift/Linear + Oscillation  )
         ----
-        period:    {info.hscale}
-        amplitude: {info.vscale}
-        iso-max:   ({info.hshift}, {info.vshift + info.vscale})
+        period:    {fit.hscale}
+        amplitude: {fit.vscale}
+        iso-max:   ({fit.hshift}, {fit.vshift + fit.vscale})
         ----
         Relativised loss of the approximation: {loss:.4g}
         Final movement of parameters during computation: {dx:.4e}

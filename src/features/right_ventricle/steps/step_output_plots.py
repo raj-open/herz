@@ -40,7 +40,7 @@ __all__ = [
 def step_output_time_plot(
     data: pd.DataFrame,
     info: FittedInfoNormalisation,
-    fit_poly: FittedInfoPoly,
+    poly: Poly[float],
     fits_trig: tuple[list[tuple[float, float]], FittedInfoTrig | None],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
@@ -56,9 +56,9 @@ def step_output_time_plot(
     T = info.period
 
     # compute series for fitted curves
-    specials, _, time, data_poly = compute_fitted_curves_poly(
+    time, data_poly, specials = compute_fitted_curves_poly(
         info=info,
-        fit=fit_poly,
+        poly=poly,
         special=special,
         n_der=2,
         N=N,
@@ -240,8 +240,9 @@ def step_output_loop_plot(
     data_pv: pd.DataFrame,
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    fit_poly_p: FittedInfoPoly,
-    fit_poly_v: FittedInfoPoly,
+    poly_p: FittedInfoPoly,
+    poly_v: FittedInfoPoly,
+    fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
@@ -262,12 +263,13 @@ def step_output_loop_plot(
     t_align_v = special_v['align'].time
 
     # compute series for fitted curves
-    _, [model_p], time_p, [pressure_fit] = compute_fitted_curves_poly(info_p, fit_poly_p, special=special_p, n_der=0, N=N)  # fmt: skip
-    _, [model_v], time_v, [volume_fit] = compute_fitted_curves_poly(info_v, fit_poly_v, special=special_v, n_der=0, N=N)  # fmt: skip
+    time_p, [pressure_fit], _ = compute_fitted_curves_poly(info_p, poly_p, special=special_p, N=N)
+    time_v, [volume_fit], _ = compute_fitted_curves_poly(info_v, poly_v, special=special_v, N=N)
+    time_pv = (T_pv / T_p) * time_p
 
     # fit 'other' measurement to each time-series
-    data_p['volume'] = model_v.values(((T_v / T_p) * data_p['time'] + t_align_v) % T_v)
-    data_v['pressure'] = model_p.values(((T_p / T_v) * data_v['time'] + t_align_p) % T_p)
+    data_p['volume'] = poly_v.values((T_v / T_p) * data_p['time'])
+    data_v['pressure'] = poly_p.values((T_p / T_v) * data_v['time'])
 
     # set up plots
     fig = make_subplots(rows=1, cols=1, subplot_titles=[])
@@ -379,7 +381,7 @@ def step_output_loop_plot(
             # NOTE: Ensure that the cycle contains start+end points!
             x=cv['volume'] * np.concatenate([volume_fit, volume_fit[:1]]),
             y=cv['pressure'] * np.concatenate([pressure_fit, pressure_fit[:1]]),
-            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * np.concatenate([time_p, time_p[:1]])],
+            text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * np.concatenate([time_pv, time_pv[:1]])],
             mode='lines',
             line_shape='spline',
             line=dict(
@@ -392,17 +394,44 @@ def step_output_loop_plot(
         col=1,
     )
 
-    # plot fit-vs-data curves:
+    # plot exp-curve
+    fit_exp, (vmin, vmax), (pmin, pmax) = fitinfo_exp
+    vaxis = np.linspace(start=vmin, stop=vmax, endpoint=True, num=N)
+    vshift = fit_exp.vshift
+    vscale = fit_exp.vscale
+    hscale = fit_exp.hscale
+    paxis = vshift + vscale * np.exp(vaxis / hscale)
+
+    fig.append_trace(
+        pgo.Scatter(
+            name='P ~ exp(βV)',
+            # NOTE: Ensure that the cycle contains start+end points!
+            x=cv['volume'] * vaxis,
+            y=cv['pressure'] * paxis,
+            mode='lines',
+            line_shape='spline',
+            line=dict(
+                width=5,
+                color='hsla(235, 100%, 50%, 0.75)',
+                # color='hsla(60, 100%, 50%, 0.5)',
+            ),
+            visible='legendonly',
+            showlegend=True,
+        ),
+        row=1,
+        col=1,
+    )
+
+    # plot spcial points
     points_ = []
 
     for _, point in special_p.items():
         if point.ignore or point.ignore_2_d:
             continue
         t_p = point.time
-        t_ = (t_p - t_align_p) % T_p
-        t_v = ((T_v / T_p) * t_ + t_align_v) % T_v
-        p_ = model_p(t_p)
-        v_ = model_v(t_v)
+        t_v = (T_v / T_p) * t_p
+        p_ = poly_p(t_p)
+        v_ = poly_v(t_v)
         point = point.copy(deep=True)
         point.format = point.format or PointFormat()
         point.format.size += 2
@@ -412,10 +441,9 @@ def step_output_loop_plot(
         if point.ignore or point.ignore_2_d:
             continue
         t_v = point.time
-        t_ = (t_v - t_align_v) % T_v
-        t_p = ((T_p / T_v) * t_ + t_align_p) % T_p
-        p_ = model_p(t_p)
-        v_ = model_v(t_v)
+        t_p = (T_p / T_v) * t_v
+        p_ = poly_p(t_p)
+        v_ = poly_v(t_v)
         point = point.copy(deep=True)
         point.format = point.format or PointFormat()
         point.format.size -= 2
@@ -447,6 +475,7 @@ def step_output_loop_plot(
     for _, point in special_pv.items():
         if point.ignore:
             continue
+        visible = point.visible and point.found
         data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
         if len(data) == 0:
             continue
@@ -455,15 +484,13 @@ def step_output_loop_plot(
                 quantity = kind.value.lower()
                 value = cv[quantity] * point.value
                 unit = units[quantity]
-                # create text label
-                text_data = f'{point.name} = {value:.4g} {unit}'
                 # plot point
                 fig.append_trace(
                     pgo.Scatter(
-                        name=point.name,
+                        name=f'{point.name} = {value:.4g} {unit}',
                         x=cv['volume'] * data[:, 0],
                         y=cv['pressure'] * data[:, 1],
-                        text=[text_data],
+                        text=[point.name],
                         textposition=point.format.text_position,
                         mode='markers+text',
                         marker=dict(
@@ -471,7 +498,7 @@ def step_output_loop_plot(
                             size=point.format.size,
                             color=point.format.colour,
                         ),
-                        visible=True if point.found else 'legendonly',
+                        visible=True if visible else 'legendonly',
                         showlegend=True,
                     ),
                     row=1,
@@ -487,18 +514,16 @@ def step_output_loop_plot(
                 N_mid = int(len(point.data) / 2)
                 data_mid = np.mean(data, axis=0)
                 data = np.row_stack([data[:N_mid, :], [data_mid], data[N_mid:, :]])
-                # create text label
-                text_data = f'{point.name} = {value:.4g} {unit}'
                 # plot geometric line + value
                 fig.append_trace(
                     pgo.Scatter(
-                        name=point.name,
+                        name=f'{point.name} = {value:.4g} {unit}',
                         x=cv['volume'] * data[:, 0],
                         y=cv['pressure'] * data[:, 1],
                         # TODO: This is inefficient!
                         # There has to be a better way to annotate
                         # + make the text disappear when disabling the curve.
-                        text=[''] * N_mid + [text_data] + [''] * (N_pts - N_mid),
+                        text=[''] * N_mid + [point.name] + [''] * (N_pts - N_mid),
                         textposition=point.format.text_position,
                         mode='lines+text',
                         line=dict(
@@ -507,7 +532,7 @@ def step_output_loop_plot(
                             # 'dash', 'dot', 'dotdash'
                             dash=point.format.symbol,
                         ),
-                        visible=True if point.found else 'legendonly',
+                        visible=True if visible else 'legendonly',
                         showlegend=True,
                     ),
                     row=1,
@@ -753,9 +778,9 @@ def save_image(fig: pgo.Figure, path: str):
 
 def compute_fitted_curves_poly(
     info: FittedInfoNormalisation,
-    fit: FittedInfoPoly,
+    poly: Poly[float],
     special: dict[str, SpecialPointsConfig],
-    n_der: int,
+    n_der: int = 0,
     N: int = 1000,
 ) -> tuple[
     list[dict[str, SpecialPointsConfig]],
@@ -763,23 +788,20 @@ def compute_fitted_curves_poly(
     NDArray[np.float64],
     list[NDArray[np.float64]],
 ]:
-    t_align = special['align'].time
     T = info.period
 
     # compute coefficients of (derivatives of) polynomial coefficients
-    p = Poly[float](coeff=fit.coefficients)
+    p = poly
     polys = [p]
     for _ in range(1, n_der + 1):
         p = p.derivative()
         polys.append(p)
 
-    # compute and shift series
+    # compute series
     time = np.linspace(start=0, stop=T, num=N, endpoint=False)
-    time = np.concatenate([time[time >= t_align], time[time < t_align]])
     data = np.row_stack([p.values(time) for p in polys])
-    time = (time - t_align) % T
 
-    # compute and shift special points
+    # compute derivatives of special points
     specials = []
     for k, p in enumerate(polys):
         special_ = {
@@ -788,20 +810,12 @@ def compute_fitted_curves_poly(
             if key == 'align' or (not point.ignore and (point.derivatives is None or k in point.derivatives))
         }
         for key, point in special_.items():
-            if key == 'align':
+            if k == 0 or key == 'align':
                 continue
-            if k == 0:
-                t = (point.time - t_align) % T
-                point.time = t
-            else:
-                t = (point.time - t_align) % T
-                point.time = t
-                # TODO: Why does this work instead of -?
-                t = (point.time + t_align) % T
-                point.value = p(t)
+            point.value = p(point.time)
         specials.append(special_)
 
-    return specials, polys, time, data
+    return time, data, specials
 
 
 def compute_fitted_curves_trig(

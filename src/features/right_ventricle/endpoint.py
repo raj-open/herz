@@ -43,7 +43,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
     # set configs / settings
     datas = dict()
     infos = dict()
-    fits_poly = dict()
+    polys = dict()
     fits_trig = dict()
     cfg_points = config.POINTS.model_copy(deep=True)
     specials = {
@@ -130,45 +130,52 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
             intervals_trig = [(T * a, T * b) for a, b in intervals_trig]
         subprog.next()
 
-        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=2)
+        subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=3)
         data = step_shift_data_custom(data, points_data)
+        subprog.next()
+        special = get_realignment_special(special, info=info)
+        subprog.next()
+        p = get_realignment_polynomial(fit_poly, info=info, special=special)
         subprog.next()
 
         datas[quantity] = data
         dataparts[quantity] = points_data
         infos[quantity] = info
-        fits_poly[quantity] = fit_poly
+        polys[quantity] = p
         fits_trig[quantity] = (intervals_trig, fit_trig)
         specials[quantity] = special
         prog.next()
 
-    subprog = prog.subtask(f'''FIT EXP-CURVE TO P-V''', steps=1)
+    subprog = prog.subtask(f'''FIT EXP-CURVE TO P-V''', steps=2)
     data_pv = step_interpolate_pv(
         data_p=datas['pressure'],
         data_v=datas['volume'],
     )
-    step_fit_exp(
-        data_p=datas['pressure'],
-        data_v=datas['volume'],
+    subprog.next()
+    fitinfo_exp = step_fit_exp(
+        data=data_pv,
         info_p=infos['pressure'],
         info_v=infos['pressure'],
-        fit_p=fits_poly['pressure'],
-        fit_v=fits_poly['volume'],
+        poly_p=polys['pressure'],
+        poly_v=polys['volume'],
         special_p=specials['pressure'],
         special_v=specials['volume'],
         cfg_fit=config.EXP,
     )
+    fit, (vmin, vmax), (pmin, pmax) = fitinfo_exp
+    model = lambda x: fit.vshift + fit.vscale * np.exp(x / fit.hscale)
     subprog.next()
     prog.next()
 
     subprog = prog.subtask(f'''COMPUTE SPECIAL POINTS FOR P-V''', steps=1)
     specials['pv'] = step_compute_pv(
-        fit_poly_p=fits_poly['pressure'],
-        fit_poly_v=fits_poly['volume'],
+        poly_p=polys['pressure'],
+        poly_v=polys['volume'],
         # fit_trig_p=fits_trig['pressure'][1],
         # fit_trig_v=fits_trig['volume'][1],
         fit_trig_p=None,
         fit_trig_v=None,
+        fitinfo_exp=fitinfo_exp,
         special_p=specials['pressure'],
         special_v=specials['volume'],
         special_pv=specials['pv'],
@@ -186,6 +193,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         info_v=infos['volume'],
         fit_trig_p=fits_trig['pressure'][1],
         fit_trig_v=fits_trig['volume'][1],
+        fitinfo_exp=fitinfo_exp,
     )
     subprog.next()
     prog.next()
@@ -203,7 +211,7 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         step_output_time_plot(
             data=datas[quantity],
             info=infos[quantity],
-            fit_poly=fits_poly[quantity],
+            poly=polys[quantity],
             fits_trig=fits_trig[quantity],
             special=specials[quantity],
             quantity=quantity,
@@ -223,8 +231,9 @@ def endpoint(feature: EnumEndpoint, case: RequestConfig):
         data_pv=data_pv,
         info_p=infos['pressure'],
         info_v=infos['volume'],
-        fit_poly_p=fits_poly['pressure'],
-        fit_poly_v=fits_poly['volume'],
+        poly_p=polys['pressure'],
+        poly_v=polys['volume'],
+        fitinfo_exp=fitinfo_exp,
         special_p=specials['pressure'],
         special_v=specials['volume'],
         special_pv=specials['pv'],

@@ -31,8 +31,6 @@ __all__ = [
     'step_clean_cycles',
     'step_combine_data',
     'step_compute_pv',
-    'step_fit_exp_pressure',
-    'step_fit_exp_volume',
     'step_fit_exp',
     'step_fit_poly',
     'step_fit_trig',
