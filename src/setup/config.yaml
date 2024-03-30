@@ -169,15 +169,17 @@ settings:
       pmax: "P['ed'].value"
       tmin_p: "P['anti-bd'].time"
       tmax_p: "P['ed'].time"
-      # compute successively
-      dp: 'pmax - pmin'
-      dv: 'vmax - vmin'
-      beta: 'math.log(1 + 2*dp/pmin)/dv'
+      # compute successively - fit to (vmid, pmid) , (vmax, pmax)
+      pmid: '(pmin + pmax)/2'
+      vmid: '(vmin + vmax)/2'
+      dp: 'pmax - pmid'
+      dv: 'vmax - vmid'
+      beta: 'math.log(1 + 2*dp/pmid)/dv'
 
     initial:
       beta: 'beta'
-      vscale: '(pmin/2) * math.exp(-beta * vmin)'
-      vshift: 'pmin/2'
+      vscale: '(pmid/2) * math.exp(-beta * vmid)'
+      vshift: 'pmid/2'
 
     conditions:
       - kind: HSCALE-LOWER-BOUND
@@ -470,7 +472,7 @@ settings:
           text-position: "middle center"
 
       eed-exp:
-        visible: false
+        # visible: false
         name: "eed (exp)"
         name-simple: "eed (exp)"
         kind: GRADIENT
