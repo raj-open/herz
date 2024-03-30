@@ -9,7 +9,6 @@ import anyio
 from contextlib import nullcontext as does_not_raise
 from itertools import product as itertools_product
 from pytest import fixture
-from pytest_lazyfixture import lazy_fixture
 from pytest import LogCaptureFixture
 from pytest import mark
 from pytest import raises as assert_raises
@@ -59,7 +58,6 @@ __all__ = [
     'does_not_raise',
     'fixture',
     'itertools_product',
-    'lazy_fixture',
     'mark',
     'patch',
 ]
