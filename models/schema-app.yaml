@@ -340,6 +340,11 @@ components:
             Option to suppress plotting.
           type: boolean
           default: false
+        visible:
+          description: |-
+            Point is shown, but deactivated by default.
+          type: boolean
+          default: true
         found:
           description: |-
             Option to mark whether point successfully computed.
@@ -607,7 +612,6 @@ components:
       required:
         - solver
         - points
-        - intervals
         - initial
       properties:
         solver:

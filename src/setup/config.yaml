@@ -154,27 +154,36 @@ settings:
     solver:
       model: DATA
       # model: POLY-MODEL
-      mode: HYBRID-GRADIENT
-      # mode: GRADIENT
+      # mode: HYBRID-GRADIENT
+      mode: GRADIENT
       n-max: 1000
+
     points:
       # vmin: "V['anti-es'].value"
       vmin: "V['bd'].value"
       vmax: "V['ed'].value"
+      tmin_v: "V['bd'].time"
+      tmax_v: "V['ed'].time"
       # pmin: "P['bd'].value"
       pmin: "P['anti-bd'].value"
       pmax: "P['ed'].value"
-    intervals:
-      - [ vmin, vmax ]
+      tmin_p: "P['anti-bd'].time"
+      tmax_p: "P['ed'].time"
+      # compute successively
+      dp: 'pmax - pmin'
+      dv: 'vmax - vmin'
+      beta: 'math.log(1 + 2*dp/pmin)/dv'
+
     initial:
-      beta: 1
-      vscale: 1
-      vshift: 'pmin'
+      beta: 'beta'
+      vscale: '(pmin/2) * math.exp(-beta * vmin)'
+      vshift: 'pmin/2'
+
     conditions:
       - kind: HSCALE-LOWER-BOUND
-        value: '(vmax - vmin)/5'
+        value: '1/np.max(beta_local)'
       - kind: HSCALE-UPPER-BOUND
-        value: '5*(vmax - vmin)'
+        value: '1/np.min(beta_local)'
 
   # --------------------------------
   # SETTINGS FOR COMPUTING SPECIAL POINTS
@@ -430,7 +439,7 @@ settings:
           text-position: "top left"
 
       V0:
-        ignore: true # NOTE: value currently not stable
+        visible: false # NOTE: value currently not stable
         name: 'V<sub>0</sub>'
         name-simple: 'V_0'
         kind: VOLUME
@@ -439,7 +448,7 @@ settings:
           text-position: "top right"
 
       ees:
-        ignore: true # NOTE: value currently not stable
+        visible: false # NOTE: value currently not stable
         name: ees
         name-simple: ees
         kind: GRADIENT
@@ -459,9 +468,20 @@ settings:
           symbol: "dot"
           text-position: "middle center"
 
-      eed:
-        name: eed
-        name-simple: eed
+      eed-poly:
+        name: "eed (poly)"
+        name-simple: "eed (poly)"
+        kind: GRADIENT
+        format:
+          size: 1
+          colour: "black"
+          symbol: "dot"
+          text-position: "middle center"
+
+      eed-exp:
+        visible: false
+        name: "eed (exp)"
+        name-simple: "eed (exp)"
         kind: GRADIENT
         format:
           size: 1

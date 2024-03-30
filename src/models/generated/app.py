@@ -251,6 +251,7 @@ class SpecialPointsConfigPV(BaseModel):
     name: str = Field(..., description='Name of special point.')
     name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
+    visible: bool = Field(True, description='Point is shown, but deactivated by default.')
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
     kind: EnumSpecialPointPVKind
     value: float = -1
@@ -415,8 +416,8 @@ class FitExpConfig(BaseModel):
     )
     solver: Solver1 = Field(..., description='Settings for the solver.')
     points: Dict[str, str] = Field(..., description='Schema for values to be used in intervals and conditions')
-    intervals: List[PairString] = Field(
-        ..., description='Defines the spatial domain over which the model is to be defined.', min_length=1
+    intervals: Optional[List[PairString]] = Field(
+        None, description='Defines the spatial domain over which the model is to be defined.', min_length=1
     )
     conditions: List[FitExpCondition] = Field([], description='Provides restrictions on the exponential coefficient.')
     initial: FitExpIntialisation
