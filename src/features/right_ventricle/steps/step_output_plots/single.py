@@ -40,7 +40,7 @@ def step_output_time_plot(
     special: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
-    plot_name: str,
+    plot_title: str,
     plot_label: str,
     cfg_output: UserOutput,
     N: int = 1000,
@@ -62,7 +62,7 @@ def step_output_time_plot(
     time, data_poly, specials = compute_fitted_curves_poly(info=info, poly=poly, special=special, n_der=2, N=N)  # fmt: skip
 
     # setup plot
-    fig = setup_plot(name=plot_name, quantity=quantity, symb=symb, T=T, specials=specials, cfg=cfg_output, cv=cv, units=units)  # fmt: skip
+    fig = setup_plot(title=plot_title, quantity=quantity, symb=symb, T=T, specials=specials, cfg=cfg_output, cv=cv, units=units)  # fmt: skip
 
     # plot data points
     for subplot in plot_data_vs_time(data, quantity=quantity, cv=cv, units=units):
@@ -94,7 +94,7 @@ def step_output_time_plot(
 
 
 def setup_plot(
-    name: str,
+    title: str,
     quantity: str,
     symb: str,
     T: float,
@@ -123,7 +123,7 @@ def setup_plot(
         height=720,
         margin=dict(l=40, r=40, t=60, b=40),
         title=dict(
-            text=name,
+            text=title,
             font=dict(
                 family=cfg_font.family,
                 size=cfg_font.size_title,

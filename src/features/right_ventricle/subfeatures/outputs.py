@@ -81,7 +81,7 @@ def subfeature_output_steps(
             special=specials[quantity],
             quantity=quantity,
             symb=symb,
-            plot_name=case.name,
+            plot_title=case.title,
             plot_label=case.label,
             cfg_output=case.output,
         )
@@ -104,7 +104,7 @@ def subfeature_output_steps(
         special_p=specials['pressure'],
         special_v=specials['volume'],
         special_pv=specials['pv'],
-        plot_name=case.name,
+        plot_title=case.title,
         plot_label=case.label,
         cfg_output=case.output,
     )

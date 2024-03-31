@@ -46,7 +46,7 @@ def step_output_loop_plot(
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
     special_pv: dict[str, SpecialPointsConfigPV],
-    plot_name: str,
+    plot_title: str,
     plot_label: str,
     cfg_output: UserOutput,
     N: int = 1000,
@@ -67,7 +67,7 @@ def step_output_loop_plot(
     T_pv = (T_p + T_v) / 2
 
     # set up plots
-    fig = setup_plot(name=plot_name, cfg=cfg_output, units=units)
+    fig = setup_plot(title=plot_title, cfg=cfg_output, units=units)
 
     # plot data / curve
     for subplot in plot_data_vs_data(data_pv, T_pv, visible=True, cv=cv, units=units):
@@ -125,7 +125,7 @@ def step_output_loop_plot(
 
 
 def setup_plot(
-    name: str,
+    title: str,
     cfg: UserOutput,
     units: dict[str, str],
 ) -> pgo.Figure:
@@ -145,7 +145,7 @@ def setup_plot(
         ),
         plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
         title=dict(
-            text=name,
+            text=title,
             x=0.5,
             y=0.95,
             font=dict(

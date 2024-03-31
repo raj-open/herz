@@ -25,7 +25,7 @@ __all__ = [
 
 
 @echo_function(tag='FEATURE {feature.value}', level=LOG_LEVELS.INFO)
-def endpoint(feature: EnumEndpoint, case: RequestConfig):
+def endpoint(feature: EnumFeature, case: RequestConfig):
     '''
     Processes right ventricular data
     '''

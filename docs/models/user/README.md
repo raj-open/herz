@@ -15,7 +15,7 @@ Class | Method | HTTP request | Description
  - [DataTimeSeries](.//Models/DataTimeSeries.md)
  - [DataTypeColumn](.//Models/DataTypeColumn.md)
  - [DataTypeQuantity](.//Models/DataTypeQuantity.md)
- - [EnumEndpoint](.//Models/EnumEndpoint.md)
+ - [EnumFeature](.//Models/EnumFeature.md)
  - [EnumFittingMode](.//Models/EnumFittingMode.md)
  - [EnumProgrammeMode](.//Models/EnumProgrammeMode.md)
  - [EnumType](.//Models/EnumType.md)

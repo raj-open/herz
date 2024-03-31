@@ -44,13 +44,13 @@ def process(cfg: AppConfig, case: RequestConfig):
     have been set
     '''
     timer = Timer(
-        name=f'Elapsed time for {case.endpoint}',
+        name=f'Elapsed time for {case.feature}',
         text='{name}: {:.2f}s',
         logger=log_info,
     )
 
-    match case.endpoint:
-        case EnumEndpoint.RIGHT_VENTRICLE as feature:
+    match case.feature:
+        case EnumFeature.RIGHT_VENTRICLE as feature:
             timer.start()
             try:
                 right_ventricle.endpoint(feature=feature, case=case)
@@ -58,7 +58,7 @@ def process(cfg: AppConfig, case: RequestConfig):
                 log_error(err)
             timer.stop()
 
-        case _ as feature if isinstance(feature, EnumEndpoint):
+        case _ as feature if isinstance(feature, EnumFeature):
             raise ValueError(f'No endpoint established for `{feature.value}`.')
 
         case _ as value:

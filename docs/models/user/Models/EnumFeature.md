@@ -1,4 +1,4 @@
-# EnumEndpoint
+# EnumFeature
 ## Properties
 
 Name | Type | Description | Notes

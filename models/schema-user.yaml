@@ -37,9 +37,10 @@ components:
         User settings for a single case of data.
       type: object
       required:
-        - endpoint
+        - feature
         - label
         - name
+        - title
         - data
         - process
         - output
@@ -49,8 +50,8 @@ components:
             Whether or not to skip the case.
           type: boolean
           default: false
-        endpoint:
-          $ref: "#/components/schemas/EnumEndpoint"
+        feature:
+          $ref: "#/components/schemas/EnumFeature"
         label:
           description: |-
             Label used to refer to case and generate output files.
@@ -59,7 +60,11 @@ components:
           pattern: '^\S+$'
         name:
           description: |-
-            Name of case (can be used e.g. in titles of plots).
+            Name of case. Should follow a standardised pattern.
+          type: string
+        title:
+          description: |-
+            Title of case, to be used e.g. in plots.
           type: string
         data:
           $ref: "#/components/schemas/UserData"
@@ -375,9 +380,9 @@ components:
     # --------------------------------
     # ENUM: Endpoint
     # --------------------------------
-    EnumEndpoint:
+    EnumFeature:
       description: |-
-        Enumeration of endpoints for requests
+        Enumeration of features
       type: string
       enum:
         - UNKNOWN

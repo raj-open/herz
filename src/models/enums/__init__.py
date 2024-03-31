@@ -12,7 +12,7 @@ from ..generated.app import EnumSolver
 from ..generated.app import EnumSpecialPointPVKind
 from ..generated.fitting import EnumExtremePoints
 from ..generated.fitting import EnumSign
-from ..generated.user import EnumEndpoint
+from ..generated.user import EnumFeature
 from ..generated.user import EnumFittingMode
 from ..generated.user import EnumProgrammeMode
 from ..generated.user import EnumType
@@ -23,8 +23,8 @@ from ..generated.user import EnumType
 
 __all__ = [
     'EnumCriticalPoints',
-    'EnumEndpoint',
     'EnumExtremePoints',
+    'EnumFeature',
     'EnumFittingMode',
     'EnumModelKind',
     'EnumProgrammeMode',

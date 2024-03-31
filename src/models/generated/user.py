@@ -146,9 +146,9 @@ class EnumProgrammeMode(str, Enum):
     REQUESTS = 'requests'
 
 
-class EnumEndpoint(str, Enum):
+class EnumFeature(str, Enum):
     """
-    Enumeration of endpoints for requests
+    Enumeration of features
     """
 
     UNKNOWN = 'UNKNOWN'
@@ -275,13 +275,14 @@ class RequestConfig(BaseModel):
         populate_by_name=True,
     )
     ignore: bool = Field(False, description='Whether or not to skip the case.')
-    endpoint: EnumEndpoint
+    feature: EnumFeature
     label: str = Field(
         ...,
         description='Label used to refer to case and generate output files.\nNOTE: may not contain spaces.',
         pattern='^\\S+$',
     )
-    name: str = Field(..., description='Name of case (can be used e.g. in titles of plots).')
+    name: str = Field(..., description='Name of case. Should follow a standardised pattern.')
+    title: str = Field(..., description='Title of case, to be used e.g. in plots.')
     data: UserData
     process: UserProcess
     output: UserOutput
