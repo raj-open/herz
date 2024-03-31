@@ -38,7 +38,6 @@ def step_shift_data_extremes(
     # compute time increment for later
     N = len(data)
     time = data['time'].to_numpy(copy=True)
-    _, dt, _ = get_time_aspects(time)
 
     # shift data
     ext = characteristic_to_where(data[f'{quantity}[{shift}]'])
@@ -52,8 +51,8 @@ def step_shift_data_extremes(
 
     # recompute time axis.
     # NOTE: We assume that time has already been homogenised.
-    N = len(data)
-    data = recocompute_time_axis(data, N=N, dt=dt)
+    _, _, dt = get_time_aspects(time)
+    data = recocompute_time_axis(data, dt=dt)
     return data
 
 

@@ -36,8 +36,8 @@ def get_time_aspects(
     Computes aspects
 
     - `N` - number of points
-    - `dt` - time increment (assuming homogeneity)
     - `T_max` - total duration
+    - `dt` - time increment (assuming homogeneity)
 
     of an ordered series of time points
     '''
@@ -53,16 +53,16 @@ def get_time_aspects(
         dt = np.median(np.diff(t))
         # correct T_max
         T_max += dt
-    # compute dt
+    # (re)compute dt
     dt = T_max / (N or 1.0)
-    return N, dt, T_max
+    return N, T_max, dt
 
 
 def recocompute_time_axis(
     data: pd.DataFrame,
-    N: int,
     dt: float,
 ) -> pd.DataFrame:
+    N = len(data)
     T_max = N * dt
     data['time[orig]'] = data['time']
     data['time'] = np.linspace(start=0.0, stop=T_max, num=N, endpoint=False)

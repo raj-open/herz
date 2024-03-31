@@ -56,20 +56,16 @@ def step_recognise_cycles(
 
 @echo_function(message='STEP remove marked sections', level=LOG_LEVELS.INFO)
 def step_removed_marked_sections(
-    case: RequestConfig,
     data: pd.DataFrame,
 ):
     # compute time increment for later
-    N = len(data)
     time = data['time'].to_numpy(copy=True)
-    _, dt, _ = get_time_aspects(time)
+    _, _, dt = get_time_aspects(time)
 
     # remove marked points
     data = data[data['marked'] == False]
 
     # recompute time axis
-    N = len(data)
-    T = N * dt
-    data = recocompute_time_axis(data, N=N, dt=dt)
+    data = recocompute_time_axis(data, dt=dt)
 
     return data

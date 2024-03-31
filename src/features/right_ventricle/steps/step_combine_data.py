@@ -43,7 +43,7 @@ def step_clean_cycles(
     values = data[quantity].to_numpy(copy=True)
 
     # get total duration
-    N, dt, T_max = get_time_aspects(time)
+    N, T_max, dt = get_time_aspects(time)
     T_max = max(T_max, cv_t * (case.process.combine.t_max or 0.0))
 
     # compute num points and update T (ensure dt is as set)
@@ -66,6 +66,11 @@ def step_combine_data(
     data_pressure: pd.DataFrame,
     data_volume: pd.DataFrame,
 ) -> pd.DataFrame:
+    '''
+    Places quantities into a common framework.
+
+    NOTE: Currently unused!
+    '''
     unit = case.process.combine.unit
     cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get('time', unit))
 
@@ -76,8 +81,8 @@ def step_combine_data(
 
     # get T_max
     T_max = cv_t * (case.process.combine.t_max or 0.0)
-    _, _, T_max_p = get_time_aspects(time_pressure)
-    _, _, T_max_v = get_time_aspects(time_volume)
+    _, T_max_p, _ = get_time_aspects(time_pressure)
+    _, T_max_v, _ = get_time_aspects(time_volume)
     T_max = max(T_max, T_max_p, T_max_v)
 
     # compute num points and update T_max (ensure dt is as set)
