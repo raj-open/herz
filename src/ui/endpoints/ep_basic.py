@@ -12,9 +12,8 @@ API endpoints basic.
 from ...thirdparty.fastapi import *
 from ...thirdparty.types import *
 
-from ...setup import config
+from ...setup import *
 from .decorators import *
-from .common import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -32,6 +31,7 @@ __all__ = [
 def add_endpoints_basic(
     app: FastAPI,
     tag: str,
+    sec: HTTPBasic,
 ):
     '''
     Adds basic endpoints.
@@ -47,29 +47,28 @@ def add_endpoints_basic(
         return RedirectResponse('/docs')
 
     @app.get(
-        '/ping',
-        summary='Ping the server',
+        '/version',
+        summary='Display the VERSION of the programme',
         tags=[tag],
+        include_in_schema=True,
+    )
+    @catch_internal_server_error
+    async def method():
+        return PlainTextResponse(status_code=200, content=config.VERSION)
+
+    @app.get(
+        '/ping',
+        summary='Ping api',
+        tags=[tag],
+        include_in_schema=True,
     )
     @add_http_auth
     @catch_internal_server_error
     async def method(
-        # DEV-NOTE: add for @add_http_auth-decorator
-        http_cred: Annotated[HTTPBasicCredentials, FastAPIDepends(get_security())],
+        http_cred: Annotated[HTTPBasicCredentials, FastAPIDepends(sec)],
         # end of decorator arguments
-        name: str,
     ):
         '''
         An endpoint for debugging.
         '''
-        return PlainTextResponse(status_code=200, content=f'Hello, {name}!')
-
-    @app.get(
-        '/version',
-        summary='Display the version of the programme',
-        tags=[tag],
-    )
-    async def method():
-        return PlainTextResponse(status_code=200, content=config.VERSION)
-
-    return
+        return PlainTextResponse(status_code=200, content=f'Server running!')

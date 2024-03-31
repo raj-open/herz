@@ -10,9 +10,13 @@ including resources and endpoints.
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.fastapi import *
+from fastapi_offline import FastAPIOffline
+from fastapi import FastAPI
+from fastapi.security import HTTPBasic
 
-from ..setup import config
+# from fastapi.staticfiles import StaticFiles
+
+from ..setup import *
 from .endpoints import *
 
 # ----------------------------------------------------------------
@@ -59,7 +63,7 @@ def add_resources(app: FastAPI):
     '''
     Connects static resources.
     '''
-    # app.mount('/index.html', StaticFiles(directory='src/ui/static', html=True), name='ui')
+    # app.mount('/index.html', StaticFiles(directory='src/python/ui/static', html=True), name='nodejs')
     return
 
 
@@ -67,6 +71,7 @@ def add_endpoints(app: FastAPI):
     '''
     Sets all the endpoints for the API.
     '''
-    add_endpoints_basic(app, tag='Basic')
-    add_endpoints_run(app, tag='Endpoints for main programme')
+    sec_http = HTTPBasic()
+    add_endpoints_basic(app, tag='Basic', sec=sec_http)
+    add_endpoints_features(app, tag='Features', sec=sec_http)
     return

@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------
 
 from .ep_basic import *
-from .ep_run import *
+from .ep_features import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -14,5 +14,5 @@ from .ep_run import *
 
 __all__ = [
     'add_endpoints_basic',
-    'add_endpoints_run',
+    'add_endpoints_features',
 ]

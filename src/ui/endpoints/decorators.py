@@ -5,9 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.code import *
-from ...thirdparty.fastapi import *
-from ...thirdparty.types import *
+from fastapi import HTTPException
+from fastapi.security import HTTPBasicCredentials
+from functools import wraps
+from typing import Awaitable
+from typing import Callable
+from typing import Concatenate
+from typing import ParamSpec
+from typing import TypeVar
 
 from ...core.log import *
 from ...guards.http import *
@@ -25,9 +30,9 @@ __all__ = [
 # LOCAL CONSTANTS/VARIABLES
 # ----------------------------------------------------------------
 
+PARAMS = ParamSpec('PARAMS')
 T1 = TypeVar('T1')
 T2 = TypeVar('T2')
-PARAMS = ParamSpec('PARAMS')
 RETURN = TypeVar('RETURN')
 
 # ----------------------------------------------------------------
