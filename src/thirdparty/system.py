@@ -71,22 +71,46 @@ def remove_file_if_exists(path: str) -> bool:
     return not ex
 
 
+def temporary_folder_name(
+    path: str,
+    template: str = '{path}_{index}',
+    create: bool = False,
+):
+    '''
+    Ensure that a temporary folder name does not exist,
+    modifying it if necessary.
+    '''
+    if os.path.exists(path):
+        index = 1
+        path_ = template.format(path=path, index=index)
+        while os.path.exists(path_):
+            index += 1
+            path__ = path_
+            path_ = template.format(path=path, index=index)
+            assert path_ != path__, 'Template must generate unique names for each index!'
+        path = path_
+    if create and not os.path.exists(path):
+        create_dir_if_not_exists(path)
+    return path
+
+
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Path',
     'clear_dir_if_exists',
     'create_dir_if_not_exists',
     'create_file_if_not_exists',
     'os',
+    'Path',
     'pathspec',
     'remove_dir_if_exists',
     'remove_file_if_exists',
     'signal',
     'socket',
     'sys',
+    'temporary_folder_name',
     'traceback',
     'warnings',
 ]
