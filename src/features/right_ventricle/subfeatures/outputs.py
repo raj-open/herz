@@ -8,6 +8,7 @@
 from ....thirdparty.data import *
 
 from ....core.log import *
+from ....setup import config
 from ....models.polynomials import *
 from ....models.user import *
 from ....models.fitting import *
@@ -52,8 +53,10 @@ def subfeature_output_steps(
         special_pv=specials['pv'],
         info_p=infos['pressure'],
         info_v=infos['volume'],
-        fit_trig_p=fitinfos_trig['pressure'][0],
-        fit_trig_v=fitinfos_trig['volume'][0],
+        fitinfos_trig_p=fitinfos_trig['pressure'],
+        fitinfos_trig_v=fitinfos_trig['volume'],
+        cfg_trig_p=config.TRIG.pressure,
+        cfg_trig_v=config.TRIG.volume,
         fitinfo_exp=fitinfo_exp,
     )
     subprog.next()

@@ -55,6 +55,7 @@ def step_compute_pv(
     # get trig models
     dP_osc = None
     dV_osc = None
+
     if isinstance(fit_trig_p, FittedInfoTrig):
         hshift = fit_trig_p.hshift
         hscale = fit_trig_p.hscale
@@ -64,6 +65,7 @@ def step_compute_pv(
         omega = 2 * pi / hscale
         # osc_p = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
         dP_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
+
     if isinstance(fit_trig_v, FittedInfoTrig):
         hshift = fit_trig_v.hshift
         hscale = fit_trig_v.hscale

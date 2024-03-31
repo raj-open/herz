@@ -15,6 +15,7 @@ from ....core.log import *
 from ....models.fitting import *
 from ....models.user import *
 from ....models.polynomials import *
+from ....models.intervals import *
 from ....queries.fitting import *
 from ....queries.scientific import *
 
@@ -39,10 +40,12 @@ def step_output_special_points(
     special_pv: dict[str, SpecialPointsConfigPV],
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    # fit_poly_p: FittedInfoPoly,
-    # fit_poly_v: FittedInfoPoly,
-    fit_trig_p: FittedInfoTrig | None,
-    fit_trig_v: FittedInfoTrig | None,
+    # poly_p: Poly[float],
+    # poly_v: Poly[float],
+    fitinfos_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    fitinfos_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    cfg_trig_p: FitTrigConfig,
+    cfg_trig_v: FitTrigConfig,
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
 ):
     path = case.output.table.path.root
@@ -55,149 +58,134 @@ def step_output_special_points(
     cv = output_conversions(case.output.quantities, units=config.UNITS)
     data = []
 
-    data.append({'name': 'Pressure', 'description': 'Special points for pressure curve'})
-    data.append({'name': 'Period', 'time': cv['time'] * T_p, 'unit-t': units['time']})
-    points = [
-        (
-            key,
-            point.name_simple or point.name,
-            point.time,
-            point.value,
-        )
-        for key, point in special_p.items()
-        if point.found
-    ]
-    points = sorted(points, key=lambda x: x[2])
-    for key, name, t, x in points:
-        if key == 'align':
-            continue
-        data.append(
-            {
-                'name': name,
-                'time': cv['time'] * t,
-                'unit-t': units['time'],
-                'value': cv['pressure'] * x,
-                'unit-x': units['pressure'],
-            }
-        )
-
-    data.append({'name': 'Volume', 'description': 'Special points for volume curve'})
-    data.append({'name': 'Period', 'time': cv['time'] * T_v, 'unit-t': units['time']})
-    points = [
-        (
-            key,
-            point.name_simple or point.name,
-            point.time,
-            point.value,
-        )
-        for key, point in special_v.items()
-        if point.found
-    ]
-    points = sorted(points, key=lambda x: x[2])
-    for key, name, t, x in points:
-        if key == 'align':
-            continue
-        data.append(
-            {
-                'name': name,
-                'time': cv['time'] * t,
-                'unit-t': units['time'],
-                'value': cv['volume'] * x,
-                'unit-x': units['volume'],
-            }
-        )
-
-    for quantity, symb, T, fit, special in [
-        ('pressure', 'P', T_p, fit_trig_p, special_p),
-        ('volume', 'V', T_v, fit_trig_v, special_v),
+    for quantity, T, special in [
+        ('pressure', T_p, special_p),
+        ('volume', T_v, special_v),
     ]:
+        data.append({})
+        data.append({'name': f'{quantity.upper()}', 'description': f'Special points for {quantity} curve'})
+        points = sorted(special.items(), key=lambda x: x[1].time)
+        for key, point in points:
+            if key == 'align' and point.found:
+                continue
+            data.append(
+                {
+                    'name': point.name_simple or point.name,
+                    'description': point.description,
+                    'time': cv['time'] * point.time,
+                    'unit-t': units['time'],
+                    'value': cv[quantity] * point.value,
+                    'unit-x': units[quantity],
+                }
+            )
+        data.append(
+            {'name': 'Period', 'time': cv['time'] * T, 'unit-t': units['time']},
+        )
+
+    for quantity, symb, T, fitinfos_trig, cfg_trig, special in [
+        ('pressure', 'P', T_p, fitinfos_trig_p, cfg_trig_p, special_p),
+        ('volume', 'V', T_v, fitinfos_trig_v, cfg_trig_v, special_v),
+    ]:
+        fit, hull, intervals = fitinfos_trig
         if fit is None:
             continue
-        vshift = fit.vshift
-        vscale = fit.vscale
-        hshift = fit.hshift % T
-        hscale = fit.hscale
-        drift = fit.drift
-        if drift == 0:
-            data.append(
-                {
-                    'name': f'Trig {quantity.title()}',
-                    'description': f'L²-fitted model for parts of {symb}-curve:\nA·cos(ω·(t - t₀)) + C',
-                }
-            )
+
+        intervals = collapse_intervals_to_cycle(intervals, offset=0, period=T)
+        intervals_expr = [f"t: {cv['time'] * a:.2f}–{cv['time'] * b:.2f} {units['time']}" for a, b in intervals]
+        omega = 2 * pi / fit.hscale
+
+        if cfg_trig.solver.drift:
+            model = 'A·cos(ω·(t - t₀)) + C + μ·t'
         else:
-            data.append(
-                {
-                    'name': f'Trig {quantity.title()}',
-                    'description': f'L²-fitted model for parts of {symb}-curve:\nA·cos(ω·(t - t₀)) + C + μ·t',
-                }
-            )
+            model = 'A·cos(ω·(t - t₀)) + C'
+
+        data.append({})
         data += [
             {
+                'name': f'TRIGONOMETRIC FIT',
+                'description': dedent(
+                    f'''
+                    L²-fitted model
+                    {symb}(t) ≈ {model}
+                    for parts of {symb}-curve in range
+                    {{ranges}}.
+                    '''
+                ).format(ranges=';\n'.join(intervals_expr)),
+            },
+            {
                 'name': 'A',
-                'value': cv[quantity] * vscale,
+                'value': cv[quantity] * fit.vscale,
                 'unit-x': units[quantity],
             },
             {
                 'name': 'ω',
-                'value': cv['frequency'] * (2 * pi / hscale),
+                'value': cv['frequency'] * omega,
                 'unit-x': units['frequency'],
             },
             {
                 'name': 't₀',
-                'value': cv['time'] * hshift,
+                'value': cv['time'] * (fit.hshift % T),
                 'unit-x': units['time'],
             },
             {
                 'name': 'C',
-                'value': cv[quantity] * vshift,
+                'value': cv[quantity] * fit.vshift,
                 'unit-x': units[quantity],
             },
         ]
-        if drift != 0:
+        if cfg_trig.solver.drift:
             data.append(
                 {
                     'name': 'μ',
-                    'value': cv[f'd[1,t]{quantity}'] * drift,
+                    'value': cv[f'd[1,t]{quantity}'] * fit.drift,
                     'unit-x': units[f'd[1,t]{quantity}'],
                 }
             )
 
-    data.append({'name': ''})
     fit_exp, (vmin, vmax), (pmin, pmax) = fitinfo_exp
-    vshift = fit_exp.vshift
-    vscale = fit_exp.vscale
-    hscale = fit_exp.hscale
+    beta = 1 / fit_exp.hscale
+    alpha = fit_exp.vscale
+    alpha0 = alpha * math.exp(beta * vmin)
+
+    data.append({})
     data += [
         {
-            'name': f'Exponential Fit',
+            'name': f'EXPONENTIAL FIT',
             'description': dedent(
                 f'''
                 L²-fitted model
                 P(V) ≈ α·exp(β·V) + C
+                or
+                P(V) ≈ α₀·exp(β·(V - V₀)) + C
                 for parts of P-V-curve in range
-                V: {cv['volume'] * vmin:.4g}–{cv['volume'] * vmax:.4g} {units['volume']};
+                V: V₀={cv['volume'] * vmin:.4g}–{cv['volume'] * vmax:.4g} {units['volume']};
                 P: {cv['pressure'] * pmin:.4g}–{cv['pressure'] * pmax:.4g} {units['pressure']}.
                 '''
             ),
         },
+        # {
+        #     'name': 'α',
+        #     'value': cv['pressure'] * fit_exp.vscale,
+        #     'unit-x': units['pressure'],
+        # },
         {
-            'name': 'σ',
-            'value': cv['pressure'] * vshift,
+            'name': 'α₀',
+            'value': cv['pressure'] * alpha0,
             'unit-x': units['pressure'],
         },
         {
             'name': 'β',
-            'value': 1 / (cv['volume'] * hscale),
+            'value': beta / cv['volume'],
             'unit-x': f"1/{units['volume']}",
         },
         {
             'name': 'C',
-            'value': cv['pressure'] * vshift,
+            'value': cv['pressure'] * fit_exp.vshift,
             'unit-x': units['pressure'],
         },
     ]
 
+    data.append({})
     data.append({'name': 'P-V', 'description': 'Parameters computed for P-V curve'})
     for _, point in special_pv.items():
         if not point.found:
@@ -214,6 +202,7 @@ def step_output_special_points(
         data.append(
             {
                 'name': point.name_simple or point.name,
+                'description': point.description,
                 'value': cv[quantity] * point.value,
                 'unit-x': units[quantity],
             }
@@ -260,6 +249,6 @@ def step_output_special_points(
         encoding='utf-8',
         quotechar='"',
         doublequote=True,
-        float_format=lambda x: f'{x:.6f}',
+        float_format=lambda x: f'{x:.4g}',
     )
     pass
