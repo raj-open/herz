@@ -57,27 +57,34 @@ def step_output_time_plot(
     cv = output_conversions(cfg_output.quantities, units=config.UNITS)
     units = output_units(cfg_output.quantities)
     T = info.period
+    cycles = [0]
+    collapse = cfg_output.plot.collapse_cycles
+    if not collapse:
+        cycles = sorted(np.unique(data['cycle'].to_numpy()))
 
     # compute series for fitted curves
-    time, data_poly, specials = compute_fitted_curves_poly(info=info, poly=poly, special=special, n_der=2, N=N)  # fmt: skip
+    time, data_poly, specials = compute_fitted_curves_poly(info=info, poly=poly, quantity=quantity, special=special, n_der=2, N=N, cycles=cycles, cv=cv, units=units)  # fmt: skip
 
     # setup plot
-    fig = setup_plot(title=plot_title, quantity=quantity, symb=symb, T=T, specials=specials, cfg=cfg_output, cv=cv, units=units)  # fmt: skip
+    fig = setup_plot(title=plot_title, quantity=quantity, symb=symb, T=T, cycles=cycles, specials=specials, cfg=cfg_output, cv=cv, units=units)  # fmt: skip
 
     # plot data points
-    for subplot in plot_data_vs_time(data, quantity=quantity, cv=cv, units=units):
+    for subplot in plot_data_vs_time(data, info=info, quantity=quantity, collapse=collapse, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot trig fit
-    for subplot in plot_trig_fit(fitinfo_trig, info=info, quantity=quantity, N=N, cv=cv, units=units):
+    for subplot in plot_trig_fit(fitinfo_trig, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
     names = [f'{quantity.title()} [fit]', f'(d/dt){symb} [fit]', f'(d/dt)²{symb} [fit]']
     quantities = [quantity, f'd[1,t]{quantity}[fit]', f'd[2,t]{quantity}[fit]']
     for k, (name, quantity_, values, special_) in enumerate(zip(names, quantities, data_poly, specials)):
-        for subplot in plot_poly_fit(fig, name=name, quantity=quantity_, time=time, values=values, special=special_, showlegend=k == 0, cv=cv, units=units):  # fmt: skip
+        for subplot in plot_poly_fit(fig, info=info, name=name, quantity=quantity_, time=time, values=values, special=special_, cycles=cycles, showlegend=k == 0, cv=cv, units=units):  # fmt: skip
             fig.append_trace(subplot, row=k + 1, col=1)
+
+    # post setup
+    setup_plot_post(fig, quantity=quantity, T=T, cv=cv, units=units)  # fmt: skip
 
     # save plot
     path = cfg_output.plot.path.root
@@ -98,7 +105,8 @@ def setup_plot(
     quantity: str,
     symb: str,
     T: float,
-    specials: list[Any],
+    cycles: list[int],
+    specials: list[dict[str, SpecialPointsConfig]],
     cfg: UserOutput,
     cv: dict[str, float],
     units: dict[str, str],
@@ -108,6 +116,10 @@ def setup_plot(
     '''
     cfg_font = cfg.plot.font
 
+    cycle_min = min(cycles)
+    cycle_max = max(cycles) + 1
+    # N_cyles = cycle_max - cycle_min
+
     # set up plots
     fig = make_subplots(
         rows=3,
@@ -116,6 +128,7 @@ def setup_plot(
             f'Time series for {name} (fitted, single cycle)'
             for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
         ],
+        shared_xaxes=True,
     )
 
     fig.update_layout(
@@ -154,7 +167,8 @@ def setup_plot(
         # range=[0, None], # FIXME: does not work!
     )
 
-    t_sp = np.unique([0, T] + [point.time for _, point in specials[0].items()])
+    t_sp = np.asarray([0] + [point.time for _, point in specials[0].items() if not point.ignore] + [T])
+    t_sp = np.unique(np.concatenate([k * T + t_sp for k in cycles]))
     t_sp = cv['time'] * t_sp  # convert units
 
     for row in range(1, 3 + 1):
@@ -164,7 +178,7 @@ def setup_plot(
             **opt,
             row=row,
             col=1,
-            range=[-0.1 * cv['time'] * T + 0, 1.1 * cv['time'] * T],
+            range=[cv['time'] * (cycle_min - 0.1) * T, cv['time'] * (cycle_min + 1 + 0.1) * T],
             tickvals=t_sp,
             ticktext=[f'{t:.3g}' for t in t_sp],
             tickangle=90,
@@ -178,22 +192,52 @@ def setup_plot(
         unit = units[key]
         fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
 
+    fig.update_layout(
+        xaxis_showticklabels=True,
+        xaxis2_showticklabels=True,
+        xaxis3_showticklabels=True,
+    )
+
     return fig
+
+
+def setup_plot_post(
+    fig: pgo.Figure,
+    quantity: str,
+    T: float,
+    cv: dict[str, float],
+    units: dict[str, str],
+):
+    ...
+    # FIXME: this places a rangeslider only for one subplot and does not control them simultaneously
+    # fig.update_layout(
+    #     xaxis_rangeslider_visible=True,
+    #     # height=600,
+    # )
 
 
 def plot_data_vs_time(
     data: pd.DataFrame,
+    info: FittedInfoNormalisation,
     quantity: str,
+    collapse: bool,
     cv: dict[str, float],
     units: dict[str, str],
 ):
     '''
     Plots raw time series (collapsed onto one period).
     '''
+    T = info.period
+    time = data['time'] % T
+    if not collapse:
+        cycles = data['cycle']
+        cycles = cycles - min(cycles)
+        time = cycles * T + time
+
     yield from add_plot_time_series(
         name=f'{quantity.title()} [data]',
         text=f'{quantity}',
-        time=cv['time'] * data['time'],
+        time=cv['time'] * time,
         values=cv[quantity] * data[quantity],
         mode='markers',
         marker=dict(
@@ -207,33 +251,35 @@ def plot_data_vs_time(
 
 def plot_poly_fit(
     fig: pgo.Figure,
+    info: FittedInfoNormalisation,
     name: str,
     quantity: str,
     time: NDArray[np.float64],
     values: NDArray[np.float64],
     showlegend: bool,
     special: dict[str, SpecialPointsConfig],
+    cycles: list[int],
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
     '''
     Plots poly-fitted curve + special points.
     '''
+    T = info.period
     yield from add_plot_time_series(
         name=name,
         time=time,
         values=values,
-        cv_time=cv['time'],
-        cv_value=cv[quantity],
         showlegend=showlegend,
     )
-    for key, point in special.items():
+    for _, point in special.items():
         if point.ignore:
             continue
         yield from add_plot_point_plus_vline(
             fig,
-            key=key,
             point=point,
+            cycles=cycles,
+            T=T,
             cv_time=cv['time'],
             cv_value=cv[quantity],
             showlegend=showlegend,
@@ -244,6 +290,7 @@ def plot_trig_fit(
     fitinfo: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     info: FittedInfoNormalisation,
     quantity: str,
+    cycles: list[int],
     N: int,
     cv: dict[str, float],
     units: dict[str, str],
@@ -255,17 +302,23 @@ def plot_trig_fit(
     if fit is None:
         return
 
-    time_trig, data_trig = compute_fitted_curves_trig(fitinfo, info, usehull=True, N=N)
+    time, values, _ = compute_fitted_curves_trig(
+        fitinfo,
+        info,
+        usehull=True,
+        cycles=cycles,
+        N=N,
+        cv_time=cv['time'],
+        cv_value=cv[quantity],
+    )
 
     yield from add_plot_time_series(
         name=f'{quantity.title()} [trig]',
-        time=time_trig,
-        values=data_trig,
-        cv_time=cv['time'],
-        cv_value=cv[quantity],
-        mode='markers',
-        marker=dict(
-            size=3,
+        time=time,
+        values=values,
+        mode='lines',
+        line=dict(
+            width=3,
             color='hsla(100, 100%, 25%, 0.5)',
         ),
         showlegend=True,

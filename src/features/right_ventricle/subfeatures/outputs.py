@@ -68,8 +68,7 @@ def subfeature_output_steps(
         ('volume', 'V'),
     ]:
         subprog = prog.subtask(f'''OUTPUT TABLES {quantity}''', steps=1)
-        data = datas[quantity]
-        step_output_single_table(case, data=data, quantity=quantity)
+        step_output_single_table(case, data=datas[quantity], quantity=quantity)
         subprog.next()
 
         subprog = prog.subtask('''OUTPUT TIME PLOTS''', steps=1)

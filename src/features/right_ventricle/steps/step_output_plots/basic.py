@@ -11,6 +11,7 @@ from .....thirdparty.system import *
 from .....thirdparty.types import *
 
 from .....models.fitting import *
+from .....models.intervals import *
 from .....models.polynomials import *
 from .....algorithms.fitting.trigonometric import *
 
@@ -36,8 +37,6 @@ def add_plot_time_series(
     name: Optional[str],
     time: NDArray[np.float64],
     values: NDArray[np.float64],
-    cv_time: float = 1.0,
-    cv_value: float = 1.0,
     mode: str = 'lines',
     line: dict = dict(
         width=1,
@@ -60,8 +59,8 @@ def add_plot_time_series(
     '''
     yield pgo.Scatter(
         name=name,
-        x=cv_time * time,
-        y=cv_value * values,
+        x=time,
+        y=values,
         text=[text or name for _ in time],
         mode=mode,
         line=line if mode == 'lines' else None,
@@ -73,8 +72,9 @@ def add_plot_time_series(
 
 def add_plot_point_plus_vline(
     fig: pgo.Figure,
-    key: str,
     point: SpecialPointsConfig,
+    T: float,
+    cycles: list[int] = [0],
     cv_time: float = 1.0,
     cv_value: float = 1.0,
     showlegend: bool = True,
@@ -85,11 +85,13 @@ def add_plot_point_plus_vline(
     # DEV-NOTE: externally, the yielded item is processed first
     # then the below effect takes place.
     fmt = point.format or PointFormat()
+    time = cv_time * (point.time + np.asarray(cycles) * T)
+    values = cv_value * np.asarray([point.value] * len(cycles))
     yield pgo.Scatter(
         name=point.name,
-        x=[cv_time * point.time],
-        y=[cv_value * point.value],
-        text=[fmt.text or ''],
+        x=time,
+        y=values,
+        text=[fmt.text or ''] * len(cycles),
         textposition=fmt.text_position,
         mode='markers+text',
         marker=dict(
@@ -100,12 +102,7 @@ def add_plot_point_plus_vline(
         visible=True if point.found else 'legendonly',
         showlegend=showlegend,
     )
-    fig.add_vline(
-        x=cv_time * point.time,
-        line_width=0.5,
-        line_dash='dash',
-        line_color=fmt.colour,
-    )
+    fig.add_vline(x=time[0], line_width=0.5, line_dash='dash', line_color=fmt.colour)
 
 
 def save_image(fig: pgo.Figure, path: str):
@@ -121,16 +118,24 @@ def save_image(fig: pgo.Figure, path: str):
 def compute_fitted_curves_poly(
     info: FittedInfoNormalisation,
     poly: Poly[float],
+    quantity: str,
     special: dict[str, SpecialPointsConfig],
-    n_der: int = 0,
-    N: int = 1000,
+    cycles: list[int],
+    n_der: int,
+    N: int,
+    cv: dict[str, float],
+    units: dict[str, str],
 ) -> tuple[
-    list[dict[str, SpecialPointsConfig]],
-    list[Poly],
     NDArray[np.float64],
-    list[NDArray[np.float64]],
+    NDArray[np.float64],
+    list[dict[str, SpecialPointsConfig]],
 ]:
+    '''
+    Creates plot data for polynomial fit incl. special points
+    '''
     T = info.period
+    cv_time = cv['time']
+    cv_value = cv[quantity]
 
     # compute coefficients of (derivatives of) polynomial coefficients
     p = poly
@@ -141,7 +146,8 @@ def compute_fitted_curves_poly(
 
     # compute series
     time = np.linspace(start=0, stop=T, num=N, endpoint=False)
-    data = np.row_stack([p.values(time) for p in polys])
+    data = np.row_stack([np.concatenate([cv_value * p.values(time), [None]] * len(cycles)) for p in polys])
+    time = np.concatenate([(cv_time * (time + k * T)).tolist() + [None] for k in cycles])
 
     # compute derivatives of special points
     specials = []
@@ -165,27 +171,39 @@ def compute_fitted_curves_trig(
     info: FittedInfoNormalisation,
     usehull: bool,
     N: int,
-) -> tuple[
-    NDArray[np.float64],
-    NDArray[np.float64],
-]:
+    cycles: list[int] = [0],
+    cv_time: float = 1.0,
+    cv_value: float = 1.0,
+    cv_aux: float = 1.0,
+    auxiliary: Callable[[NDArray[np.float64]], NDArray[np.float64]] = lambda t: t,
+) -> tuple[list[float | None], list[float | None], list[float | None]]:
     '''
     Prepares a data-series for fitted trig curve on the entire hull.
     '''
     T = info.period
     fit, hull, intervals = fitinfo
-    if usehull:
-        time = np.concatenate([np.linspace(start=a, stop=b, num=N, endpoint=False) for a, b in hull])
-    else:
-        time = np.concatenate([np.linspace(start=a, stop=b, num=N, endpoint=False) for a, b in intervals])
-
     omega = 2 * pi / fit.hscale
-    osc = fit.vshift + fit.drift * time + fit.vscale * np.cos(omega * (time - fit.hshift))
+    intervals = hull if usehull else intervals
+    # deal with parts of intervals that cross the period
+    resolution = resolve_intervals(intervals, period=T)
+    # deal with the resolved (sub)intervals
+    time = []
+    values = []
+    aux = []
+    for per, a, b in resolution:
+        # place breaks between segments
+        time_ = np.linspace(start=a, stop=b, num=N, endpoint=True)
+        values_ = fit.vshift + fit.drift * time_ + fit.vscale * np.cos(omega * (time_ - fit.hshift))
+        # put time in periodic mode
+        time_ = time_ - per * T
+        aux_ = auxiliary(time_ - per * T)
+        # yield all cycles
+        for k in cycles:
+            time += (cv_time * (time_ + k * T)).tolist() + [None]
+            values += (cv_value * values_).tolist() + [None]
+            aux += (cv_aux * aux_).tolist() + [None]
 
-    # put time in periodic mode
-    time = time % T
-
-    return time, osc
+    return time, values, aux
 
 
 def compute_fitted_curves_exp(

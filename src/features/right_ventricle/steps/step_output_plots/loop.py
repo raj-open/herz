@@ -331,15 +331,23 @@ def plot_trig_curve(
     fit_v, _, _ = fitinfo_trig_v
 
     if fit_p is not None:
-        time_p, paxis = compute_fitted_curves_trig(fitinfo_trig_p, info_p, usehull=usehull, N=N)
-        vaxis = poly_v.values((T_v / T_p) * time_p)
+        _, paxis, vaxis = compute_fitted_curves_trig(
+            fitinfo_trig_p,
+            info_p,
+            usehull=usehull,
+            N=N,
+            cv_time=cv['time'],
+            cv_value=cv['pressure'],
+            cv_aux=cv['volume'],
+            auxiliary=lambda t: poly_v.values((T_v / T_p) * t),
+        )
         yield pgo.Scatter(
             name='P(t) ~ cos(ωt)',
-            x=cv['volume'] * vaxis,
-            y=cv['pressure'] * paxis,
-            mode='markers',
-            marker=dict(
-                size=5,
+            x=vaxis,
+            y=paxis,
+            mode='lines',
+            line=dict(
+                width=5,
                 color='hsla(100, 100%, 25%, 0.75)',
             ),
             visible=True if visible else 'legendonly',
@@ -347,15 +355,23 @@ def plot_trig_curve(
         )
 
     if fit_v is not None:
-        time_v, vaxis = compute_fitted_curves_trig(fitinfo_trig_v, info_v, usehull=usehull, N=N)
-        paxis = poly_p.values((T_p / T_v) * time_v)
+        _, vaxis, paxis = compute_fitted_curves_trig(
+            fitinfo_trig_p,
+            info_p,
+            usehull=usehull,
+            N=N,
+            cv_time=cv['time'],
+            cv_value=cv['volume'],
+            cv_aux=cv['pressure'],
+            auxiliary=lambda t: poly_p.values((T_p / T_v) * t),
+        )
         yield pgo.Scatter(
             name='V(t) ~ cos(ωt)',
-            x=cv['volume'] * vaxis,
-            y=cv['pressure'] * paxis,
-            mode='markers',
-            marker=dict(
-                size=5,
+            x=vaxis,
+            y=paxis,
+            mode='lines',
+            line=dict(
+                width=5,
                 color='hsla(100, 100%, 25%, 0.75)',
             ),
             visible=True if visible else 'legendonly',
