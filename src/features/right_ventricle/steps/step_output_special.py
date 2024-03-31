@@ -58,6 +58,8 @@ def step_output_special_points(
     cv = output_conversions(case.output.quantities, units=config.UNITS)
     data = []
 
+    data.append({'name': case.name, 'description': f'Results of {case.feature.value} computations.'})
+
     for quantity, T, special in [
         ('pressure', T_p, special_p),
         ('volume', T_v, special_v),
@@ -249,6 +251,8 @@ def step_output_special_points(
         encoding='utf-8',
         quotechar='"',
         doublequote=True,
-        float_format=lambda x: f'{x:.4g}',
+        # NOTE: cannot use this together with quoting - otherwise numbers are treated as strings
+        # float_format=lambda x: f'{x:.6g}',
+        quoting=csv.QUOTE_STRINGS,
     )
     pass

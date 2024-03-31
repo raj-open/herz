@@ -365,7 +365,7 @@ settings:
           <<: *marker_bs
       sys:
         name: 'sys = V´<sub>min</sub>'
-        name-simple: 'sys = V´_min'
+        name-simple: "sys = V'_min"
         spec:
           derivative: 1
           kind: MINIMUM
@@ -417,7 +417,7 @@ settings:
           <<: *marker_bd
       dia:
         name: 'dia = V´<sub>max</sub>'
-        name-simple: 'dia = V´_max'
+        name-simple: "dia = V'_max"
         spec:
           derivative: 1
           kind: MAXIMUM
