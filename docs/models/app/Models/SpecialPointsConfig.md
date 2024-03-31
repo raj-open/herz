@@ -5,6 +5,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | [**String**](string.md) | Name of special point. | [default to null]
 **nameMinussimple** | [**String**](string.md) | A table-friendly version of the name. | [optional] [default to null]
+**description** | [**String**](string.md) | A table-friendly description of the point. | [optional] [default to null]
 **ignore** | [**Boolean**](boolean.md) | Option to suppress plotting. | [optional] [default to false]
 **ignoreMinus2D** | [**Boolean**](boolean.md) | Option to suppress plotting in 2D Plot. | [optional] [default to false]
 **derivatives** | [**List**](integer.md) |  | [optional] [default to null]

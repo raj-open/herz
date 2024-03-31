@@ -270,6 +270,10 @@ components:
           description: |-
             A table-friendly version of the name.
           type: string
+        description:
+          description: |-
+            A table-friendly description of the point.
+          type: string
         ignore:
           description: |-
             Option to suppress plotting.
@@ -334,6 +338,10 @@ components:
         name-simple:
           description: |-
             A table-friendly version of the name.
+          type: string
+        description:
+          description: |-
+            A table-friendly description of the point.
           type: string
         ignore:
           description: |-

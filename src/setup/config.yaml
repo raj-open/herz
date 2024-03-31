@@ -287,6 +287,8 @@ settings:
           symbol: "circle-open"
       anti-bd:
         name: "anti-bdp"
+        description: |-
+          local minimum of P´´, complementary part of bdp
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -394,6 +396,8 @@ settings:
           size: 9
       anti-es:
         name: "anti-esv"
+        description: |-
+          local minimum of V´´, complementary part of es
         spec:
           derivative: 2
           kind: LOCAL-MINIMUM
@@ -436,6 +440,8 @@ settings:
       piso:
         name: 'P<span style="position:relative"><sup>iso</sup><sub style="position:absolute;left:0;">max</sub>'
         name-simple: 'P^iso_max'
+        description: |-
+          computed based on trigonometric fitting
         kind: PRESSURE
         format:
           <<: *marker_iso
@@ -454,6 +460,8 @@ settings:
         visible: false # NOTE: value currently not stable
         name: 'V<sub>0</sub>'
         name-simple: 'V_0'
+        description: |-
+          computed based values of P^iso_max + ees
         kind: VOLUME
         format:
           <<: *marker_min
@@ -463,6 +471,8 @@ settings:
         visible: false # NOTE: value currently not stable
         name: ees
         name-simple: ees
+        description: |-
+          computed based on value of P^iso_max
         kind: GRADIENT
         format:
           size: 1
@@ -483,7 +493,9 @@ settings:
       eed-poly:
         visible: false
         name: "eed (poly)"
-        name-simple: "eed (poly)"
+        name-simple: "eed"
+        description: |-
+          computed based on polynomial fitting
         kind: GRADIENT
         format:
           size: 1
@@ -493,7 +505,9 @@ settings:
 
       eed-exp:
         name: "eed (exp)"
-        name-simple: "eed (exp)"
+        name-simple: "eed"
+        description: |-
+          computed based on exponential fitting
         kind: GRADIENT
         format:
           size: 1

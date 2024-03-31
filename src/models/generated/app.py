@@ -252,6 +252,7 @@ class SpecialPointsConfigPV(BaseModel):
     )
     name: str = Field(..., description='Name of special point.')
     name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
+    description: Optional[str] = Field(None, description='A table-friendly description of the point.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
     visible: bool = Field(True, description='Point is shown, but deactivated by default.')
     found: bool = Field(False, description='Option to mark whether point successfully computed.')
@@ -377,6 +378,7 @@ class SpecialPointsConfig(BaseModel):
     )
     name: str = Field(..., description='Name of special point.')
     name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
+    description: Optional[str] = Field(None, description='A table-friendly description of the point.')
     ignore: bool = Field(False, description='Option to suppress plotting.')
     ignore_2_d: bool = Field(False, alias='ignore-2D', description='Option to suppress plotting in 2D Plot.')
     derivatives: Optional[List[int]] = None
