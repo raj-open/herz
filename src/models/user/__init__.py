@@ -15,6 +15,7 @@ from ..generated.user import RequestsConfig
 from ..generated.user import UserData
 from ..generated.user import UserOutput
 from ..generated.user import UserProcess
+from .files import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -31,4 +32,5 @@ __all__ = [
     'UserData',
     'UserOutput',
     'UserProcess',
+    'get_files_manager',
 ]
