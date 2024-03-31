@@ -8,6 +8,7 @@
 from ...thirdparty.types import *
 
 from .basic import *
+from ...models.apis import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -16,8 +17,7 @@ from .basic import *
 __all__ = [
     'get_http_ip',
     'get_http_port',
-    'get_http_user',
-    'get_http_password',
+    'get_http_credentials',
 ]
 
 # ----------------------------------------------------------------
@@ -49,31 +49,14 @@ def get_http_port(
 
 
 @add_environment
-def get_http_user(
+def get_http_credentials(
     # DEV-NOTE: from decorator
     path: str,
     env: dict[str, Any],
     # end decorator args
-    default: str = 'admin',
-) -> str:
+) -> Credentials:
     '''
-    Gets http user.
+    Gets http user + token.
     If value not set in .env, will raise a (Key)Exception.
     '''
-    value = env['HTTP_USER']
-    return value
-
-
-@add_environment
-def get_http_password(
-    # DEV-NOTE: from decorator
-    path: str,
-    env: dict[str, Any],
-    # end decorator args
-) -> SecretStr:
-    '''
-    Gets http password.
-    If value not set in .env, will raise a (Key)Exception.
-    '''
-    value = env['HTTP_PASSWORD']
-    return SecretStr(value)
+    return Credentials(username=env['HTTP_USER'], token=env['HTTP_PASSWORD'])

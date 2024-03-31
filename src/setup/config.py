@@ -5,14 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ..thirdparty.code import *
 from ..thirdparty.config import *
 from ..thirdparty.io import *
+from ..thirdparty.misc import *
 from ..thirdparty.system import *
 
 from ..__paths__ import *
 from ..core.log import *
 from ..queries import environment
 from ..models.app import *
+from ..models.apis import *
 from ..models.internal import *
 from ..models.user import *
 from .register import *
@@ -37,6 +40,7 @@ path_session = Property[str]()
 path_app_config = Property[str]()
 http_ip = Property[str](lambda: environment.get_http_ip(path_env()))
 http_port = Property[int](lambda: environment.get_http_port(path_env()))
+http_creds = Property[Credentials](lambda: environment.get_http_credentials(path_env()))
 path_app_config.set(os.path.join(get_source_path(), 'setup', 'config.yaml'))
 
 
@@ -112,13 +116,21 @@ def load_repo_info() -> RepoInfo:
         return info
 
 
-def get_version(info: RepoInfo) -> str:
+@compute_once
+def get_version() -> str:
+    info = load_repo_info()
     return info.version
 
 
 def load_internal_config() -> AppConfig:
     assets = read_yaml(path=path_app_config())
     return AppConfig.model_validate(assets)
+
+
+@compute_once
+def app_timezone() -> timezone:
+    cfg_app = load_internal_config()
+    return pytz.timezone(cfg_app.settings.timezone)
 
 
 def load_user_requests(path: str) -> list[RequestConfig]:
@@ -132,7 +144,8 @@ def load_user_requests(path: str) -> list[RequestConfig]:
 # ----------------------------------------------------------------
 
 INFO = load_repo_info()
-VERSION = get_version(INFO)
+VERSION = get_version()
+TIMEZONE = app_timezone()
 
 API_CONFIG = load_internal_config()
 UNITS = API_CONFIG.settings.units

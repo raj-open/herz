@@ -5,9 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.fastapi import *
+from fastapi.security import HTTPBasicCredentials
 
-from ..queries.environment import http
 from ..setup import *
 
 # ----------------------------------------------------------------
@@ -29,8 +28,8 @@ def guard_http_user(value: str):
     '''
     A guard which checks if http username is valid.
     '''
-    path = config.get_path_environment()
-    if value != http.get_http_user(path):
+    creds = config.http_creds()
+    if value != creds.username:
         raise ValueError(f'Invalid http username')
     return
 
@@ -39,8 +38,8 @@ def guard_http_password(value: str):
     '''
     A guard which checks if http password is valid.
     '''
-    path = config.get_path_environment()
-    if value != http.get_http_password(path).get_secret_value():
+    creds = config.http_creds()
+    if value != creds.token.get_secret_value():
         raise ValueError(f'Invalid http password!')
     return
 
