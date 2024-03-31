@@ -10,7 +10,7 @@ from ....thirdparty.maths import *
 
 from ....models.polynomials import *
 from .geometry import *
-from .innerproducts import *
+from .gradients import *
 
 # ----------------------------------------------------------------
 # EXPORTS

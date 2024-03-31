@@ -15,11 +15,8 @@ from ....models.polynomials import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'inner_product_matrix',
-    'inner_product_matrix_derivative',
-    'loss_function',
-    'loss_function_gradient',
-    'solve_linear_part',
+    'compute_inner_products_from_model',
+    'compute_inner_products_from_data',
 ]
 
 # ----------------------------------------------------------------
@@ -27,173 +24,154 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def inner_product_matrix(
-    ip: dict[set, float],
-    drift: bool,
-) -> NDArray[np.float64]:
-    '''
-    Computes inner product matrix, useful for computing
+def compute_inner_products_from_model(
+    models: list[Poly[float]],
+    intervals: list[tuple[float, float]],
+    omega: float,
+) -> dict[set, float]:
+    # create models
+    ONE = Poly(coeff=[1])
+    t = Poly(coeff=[0, 1])
+    t2 = Poly(coeff=[0, 0, 1])
+    tp = [Poly[float].cast(t * q) for q in models]
+    C1 = Cos(omega=omega)
+    S1 = Sin(omega=omega)
+    C2 = Cos(omega=2 * omega)
+    S2 = Sin(omega=2 * omega)
 
-    1. loss function.
-    2. gradient of linear part of model.
+    # compute simple integrals
+    I_one = ONE.integral().evaluate(*intervals)
+    I_t = t.integral().evaluate(*intervals)
+    I_t2 = t2.integral().evaluate(*intervals)
+    I_cos = C1.integral().evaluate(*intervals)
+    I_sin = S1.integral().evaluate(*intervals)
+    I_cos2 = C2.integral().evaluate(*intervals)
+    I_sin2 = S2.integral().evaluate(*intervals)
+    I_p = sum([q.integral().evaluate(I) for q, I in zip(models, intervals)])
+    I_p2 = sum([(q * q).integral().evaluate(I) for q, I in zip(models, intervals)])
+    I_tp = sum([tq.integral().evaluate(I) for tq, I in zip(tp, intervals)])
+    I_t_cos = (C1 * t).integral().evaluate(*intervals)
+    I_t_sin = (S1 * t).integral().evaluate(*intervals)
+    I_t2_cos = (C1 * t2).integral().evaluate(*intervals)
+    I_t2_sin = (S1 * t2).integral().evaluate(*intervals)
+    I_p_cos = sum([(C1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])
+    I_p_sin = sum([(S1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])
+    I_tp_cos = sum([(C1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])
+    I_tp_sin = sum([(S1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])
+    I_t_cos2 = (C2 * t).integral().evaluate(*intervals)
+    I_t_sin2 = (S2 * t).integral().evaluate(*intervals)
 
-    NOTE: mathematically, `G` is a positive matrix!
-    (Verified numerically.)
-    '''
-    G = np.asarray(
-        [
-            [
-                ip['1'],
-                ip['t'],
-                ip['cos'],
-                ip['sin'],
-                ip['f'],
-            ],
-            [
-                ip['t'],
-                ip['t^2'],
-                ip['t*cos'],
-                ip['t*sin'],
-                ip['t*f'],
-            ],
-            [
-                ip['cos'],
-                ip['t*cos'],
-                ip['cos^2'],
-                ip['cos*sin'],
-                ip['f*cos'],
-            ],
-            [
-                ip['sin'],
-                ip['t*sin'],
-                ip['cos*sin'],
-                ip['sin^2'],
-                ip['f*sin'],
-            ],
-            [
-                ip['f'],
-                ip['t*f'],
-                ip['f*cos'],
-                ip['f*sin'],
-                ip['f^2'],
-            ],
-        ]
-    )
+    # --------------------------------
+    # compute product trig integrals
+    # NOTE:
+    # cos(ωt)cos(ωt) = ½(1 + cos(2ωt))
+    # sin(ωt)sin(ωt) = ½(1 - cos(2ωt))
+    # sin(ωt)cos(ωt) = ½·sin(2ωt)
+    # --------------------------------
+    I_cos_cos = (I_one + I_cos2) / 2
+    I_sin_sin = (I_one - I_cos2) / 2
+    I_cos_sin = I_sin2 / 2
+    I_t_cos_sin = I_t_sin2 / 2
+    I_t_cos_cos = (I_t + I_t_cos2) / 2
+    I_t_sin_sin = (I_t - I_t_cos2) / 2
 
-    # deactivate contribute by drift term
-    if not drift:
-        val = G[1, 1]
-        G[1, :] = 0
-        G[:, 1] = 0
-        G[1, 1] = val
-
-    return G
-
-
-def inner_product_matrix_derivative(
-    ip: dict[set, float],
-    drift: bool,
-) -> NDArray[np.float64]:
-    '''
-    Computes derivative of the inner product matrix wrt. ω.
-    '''
-    DG = np.asarray(
-        [
-            [
-                0,
-                0,
-                -ip['t*sin'],
-                ip['t*cos'],
-                0,
-            ],
-            [
-                0,
-                0,
-                -ip['t^2*sin'],
-                ip['t^2*cos'],
-                0,
-            ],
-            [
-                -ip['t*sin'],
-                -ip['t^2*sin'],
-                -2 * ip['t*cos*sin'],
-                ip['t*cos^2'] - ip['t*sin^2'],
-                -ip['t*f*sin'],
-            ],
-            [
-                ip['t*cos'],
-                ip['t^2*sin'],
-                ip['t*cos^2'] - ip['t*sin^2'],
-                2 * ip['t*cos*sin'],
-                ip['t*f*cos'],
-            ],
-            [
-                0,
-                0,
-                -ip['t*f*sin'],
-                ip['t*f*cos'],
-                0,
-            ],
-        ]
-    )
-
-    # deactivate contribute by drift term
-    if not drift:
-        DG[1, :] = 0
-        DG[:, 1] = 0
-
-    return DG
+    # place innerproducts in dict
+    return {
+        '1': I_one,
+        't': I_t,
+        'cos': I_cos,
+        'sin': I_sin,
+        'f': I_p,
+        't^2': I_t2,
+        'cos^2': I_cos_cos,
+        'sin^2': I_sin_sin,
+        'f^2': I_p2,
+        'cos*sin': I_cos_sin,
+        't*cos': I_t_cos,
+        't*sin': I_t_sin,
+        't*f': I_tp,
+        'f*cos': I_p_cos,
+        'f*sin': I_p_sin,
+        't*f*cos': I_tp_cos,
+        't*f*sin': I_tp_sin,
+        't*cos^2': I_t_cos_cos,
+        't*sin^2': I_t_sin_sin,
+        't*cos*sin': I_t_cos_sin,
+        't^2*cos': I_t2_cos,
+        't^2*sin': I_t2_sin,
+    }
 
 
-# ----------------------------------------------------------------
-# METHODS - LOSS FUNCTION
-# ----------------------------------------------------------------
+def compute_inner_products_from_data(
+    data: NDArray[np.float64],
+    omega: float,
+) -> dict[set, float]:
+    t, dt, x = data[:, 0], data[:, 1], data[:, 2]
+    t2 = t**2
+    tx = t * x
+    # create models
+    C1 = np.cos(omega * t)
+    S1 = np.sin(omega * t)
+    C2 = np.cos(2 * omega * t)
+    S2 = np.sin(2 * omega * t)
 
+    # compute simple integrals
+    I_one = np.sum(dt)
+    I_t = np.sum(t * dt)
+    I_t2 = np.sum(t2 * dt)
+    I_x = np.sum(x * dt)
+    I_x2 = np.sum((x**2) * dt)
+    I_tx = np.sum(tx * dt)
+    I_cos = np.sum(C1 * dt)
+    I_sin = np.sum(S1 * dt)
+    I_cos2 = np.sum(C2 * dt)
+    I_sin2 = np.sum(S2 * dt)
+    I_t_cos = np.sum(t * C1 * dt)
+    I_t_sin = np.sum(t * S1 * dt)
+    I_x_cos = np.sum(x * C1 * dt)
+    I_x_sin = np.sum(x * S1 * dt)
+    I_tx_cos = np.sum(tx * C1 * dt)
+    I_tx_sin = np.sum(tx * S1 * dt)
+    I_t_cos2 = np.sum(t * C2 * dt)
+    I_t_sin2 = np.sum(t * C2 * dt)
+    I_t2_cos = np.sum(t2 * C1 * dt)
+    I_t2_sin = np.sum(t2 * S1 * dt)
+    # --------------------------------
+    # compute product trig integrals
+    # NOTE:
+    # cos(ωt)cos(ωt) = ½(1 + cos(2ωt))
+    # sin(ωt)sin(ωt) = ½(1 - cos(2ωt))
+    # sin(ωt)cos(ωt) = ½·sin(2ωt)
+    # --------------------------------
+    I_cos_cos = (I_one + I_cos2) / 2
+    I_sin_sin = (I_one - I_cos2) / 2
+    I_cos_sin = I_sin2 / 2
+    I_t_cos_sin = I_t_sin2 / 2
+    I_t_cos_cos = (I_t + I_t_cos2) / 2
+    I_t_sin_sin = (I_t - I_t_cos2) / 2
 
-def loss_function(
-    G: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> float:
-    '''
-    We have
-    ```
-    loss := ½‖f - p‖²
-    = ½⟨f - p, f - p⟩
-    = ½⟨y, Gy⟩
-    ```
-    where
-    ```
-    y[:-1] = x[:-1]
-    y[-1] = -1
-    ```
-    '''
-    y = x.copy()
-    y[-1] = -1
-    loss = np.inner(G @ y, y) / 2
-    return loss
-
-
-def loss_function_gradient(
-    G: NDArray[np.float64],
-    DG: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    y = x.copy()
-    y[-1] = -1
-    dx_lin = G[:-1, :] @ y
-    dx_nonlin = np.inner(DG @ x, x) / 2
-    dx = np.concatenate([dx_lin, [dx_nonlin]])
-    return dx
-
-
-def solve_linear_part(
-    G: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    M = G[:-1, :-1]
-    u = G[:-1, -1]
-    # NOTE: G is positive, but may have 0 as eigenvalue, so solve using least-sq
-    # x_sol = np.linalg.solve(M, u)
-    x_sol, _, _, _ = np.linalg.lstsq(M, u)
-    x = np.concatenate([x_sol, [x[-1]]])
-    return x
+    # place innerproducts in dict
+    return {
+        '1': I_one,
+        't': I_t,
+        'cos': I_cos,
+        'sin': I_sin,
+        'f': I_x,
+        't^2': I_t2,
+        'cos^2': I_cos_cos,
+        'sin^2': I_sin_sin,
+        'f^2': I_x2,
+        'cos*sin': I_cos_sin,
+        't*cos': I_t_cos,
+        't*sin': I_t_sin,
+        't*f': I_tx,
+        'f*cos': I_x_cos,
+        'f*sin': I_x_sin,
+        't*f*cos': I_tx_cos,
+        't*f*sin': I_tx_sin,
+        't*cos^2': I_t_cos_cos,
+        't*sin^2': I_t_sin_sin,
+        't*cos*sin': I_t_cos_sin,
+        't^2*cos': I_t2_cos,
+        't^2*sin': I_t2_sin,
+    }

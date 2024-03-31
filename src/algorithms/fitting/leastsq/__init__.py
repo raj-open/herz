@@ -10,6 +10,7 @@ General Least-Sq optimisers
 # ----------------------------------------------------------------
 
 from .fit import *
+from . import loss_nonlinear_single
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -17,4 +18,5 @@ from .fit import *
 
 __all__ = [
     'fit_least_sq',
+    'loss_nonlinear_single',
 ]

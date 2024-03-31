@@ -12,7 +12,7 @@ from ....thirdparty.maths import *
 from ....models.fitting import *
 from ..leastsq import *
 from .geometry import *
-from .innerproducts import *
+from .gradients import *
 from .parameters import *
 
 # ----------------------------------------------------------------
@@ -44,24 +44,34 @@ def fit_trigonometric_curve(
     num_epochs: int = 10,
     eps: float = 0.5e-6,
 ) -> tuple[FittedInfoTrig, float, float]:
+    '''
+    Runs a least-sq fitting algorithm to fit a trigonometric curve.
+    '''
     x_init = fit_trig_parameters_from_info(fit_init)
+
+    gen_space = partial(generate_space, omega_min=omega_min, omega_max=omega_max, N_max=N_max, x_init=x_init)
+    gen_init = partial(generate_random_init, omega_min=omega_min, omega_max=omega_max)
+    restrict_eta = partial(restrict_learning, omega_min=omega_min, omega_max=omega_max)
+
     x, loss, dx = fit_least_sq(
         mode=mode,
         scale=scale,
         x_init=x_init,
-        gen_space=partial(generate_space, omega_min=omega_min, omega_max=omega_max, N_max=N_max, x_init=x_init),
+        gen_space=gen_space,
         gen_grad=gen_grad,
-        gen_init=partial(generate_random_init, omega_min=omega_min, omega_max=omega_max),
-        solve_linear_part=solve_linear_part,
-        loss_function=loss_function,
-        loss_function_grad=loss_function_gradient,
-        restrict_eta=partial(restrict_eta, omega_min=omega_min, omega_max=omega_max),
+        gen_init=gen_init,
+        solve_linear_part=loss_nonlinear_single.solve_linear_part,
+        loss_function=loss_nonlinear_single.loss_function,
+        loss_function_grad=loss_nonlinear_single.loss_function_gradient,
+        restrict_eta=restrict_eta,
         N_max=N_max,
         eta=eta,
         num_epochs=num_epochs,
         eps=eps,
     )
+
     fit = fit_trig_parameters_to_info(x)
+
     return fit, loss, dx
 
 
@@ -92,7 +102,7 @@ def generate_random_init(
     return x
 
 
-def restrict_eta(
+def restrict_learning(
     eta: float,
     x: NDArray[np.float64],
     dx: NDArray[np.float64],

@@ -15,11 +15,7 @@ from ....models.polynomials import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'inner_product_matrix',
-    'inner_product_matrix_derivative',
-    'loss_function',
-    'loss_function_gradient',
-    'solve_linear_part',
+    'compute_inner_products_from_data',
 ]
 
 # ----------------------------------------------------------------
@@ -27,115 +23,32 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-def inner_product_matrix(
-    ip: dict[set, float],
-) -> NDArray[np.float64]:
+def compute_inner_products_from_data(
+    data: NDArray[np.float64],
+    beta: float,
+) -> dict[set, float]:
     '''
-    Computes inner product matrix, useful for computing
+    Model is
 
-    1. L²-loss function
-    2. gradient of linear part of model.
+    y = A + B·exp(βx)
 
-    NOTE: mathematically, `G` is a positive matrix!
-    (Verified numerically.)
+    Thus need inner products in order to compute
+    L²-loss function + gradients.
     '''
-    return np.asarray(
-        [
-            [
-                ip['1'],
-                ip['exp'],
-                ip['f'],
-            ],
-            [
-                ip['exp'],
-                ip['exp^2'],
-                ip['f*exp'],
-            ],
-            [
-                ip['f'],
-                ip['f*exp'],
-                ip['f^2'],
-            ],
-        ]
-    )
+    dt, x, y = data[:, 1], data[:, 2], data[:, -1]
+    ones = np.ones(x.shape)
+    E = np.exp(beta * x)
+    E2 = E**2
+    y2 = y**2
 
-
-def inner_product_matrix_derivative(
-    ip: dict[set, float],
-) -> NDArray[np.float64]:
-    '''
-    Computes derivative of the inner product matrix wrt. β.
-    '''
-    return np.asarray(
-        [
-            [
-                0,
-                ip['t*exp'],
-                0,
-            ],
-            [
-                ip['t*exp'],
-                2 * ip['t*exp^2'],
-                ip['t*f*exp'],
-            ],
-            [
-                0,
-                ip['t*f*exp'],
-                0,
-            ],
-        ]
-    )
-
-
-# ----------------------------------------------------------------
-# METHODS - LOSS FUNCTION
-# ----------------------------------------------------------------
-
-
-def loss_function(
-    G: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> float:
-    '''
-    We have
-    ```
-    loss := ½‖f - p‖²
-    = ½⟨f - p, f - p⟩
-    = ½⟨y, Gy⟩
-    ```
-    where
-    ```
-    y[:-1] = x[:-1]
-    y[-1] = -1
-    ```
-    '''
-    y = x.copy()
-    y[-1] = -1
-    loss = np.inner(G @ y, y) / 2
-    return loss
-
-
-def loss_function_gradient(
-    G: NDArray[np.float64],
-    DG: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    y = x.copy()
-    y[-1] = -1
-    dx_lin = G[:-1, :] @ y
-    dx_nonlin = np.inner(DG @ x, x) / 2
-    dx = np.concatenate([dx_lin, [dx_nonlin]])
-    return dx
-
-
-def solve_linear_part(
-    G: NDArray[np.float64],
-    x: NDArray[np.float64],
-) -> NDArray[np.float64]:
-    M = G[:-1, :-1]
-    u = G[:-1, -1]
-    # NOTE: G is positive, but may have 0 as eigenvalue, so solve using least-sq
-    # x_sol = np.linalg.solve(M, u)
-    x_sol, _, _, _ = np.linalg.lstsq(M, u)
-    x = np.concatenate([x_sol, [x[-1]]])
-    return x
+    return {
+        '1': np.sum(ones * dt),
+        'exp': np.sum(E * dt),
+        'exp^2': np.sum(E2 * dt),
+        'f': np.sum(y * dt),
+        'f*exp': np.sum((y * E) * dt),
+        'f^2': np.sum(y2 * dt),
+        't*exp': np.sum((x * E) * dt),
+        't*exp^2': np.sum((x * E2) * dt),
+        't*f*exp': np.sum((x * y * E) * dt),
+    }

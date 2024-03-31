@@ -9,7 +9,7 @@ from ....thirdparty.types import *
 from ....thirdparty.maths import *
 
 from .geometry import *
-from .innerproducts import *
+from .gradients import *
 
 # ----------------------------------------------------------------
 # EXPORTS

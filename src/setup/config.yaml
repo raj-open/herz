@@ -96,6 +96,7 @@ settings:
         model: DATA
         # model: POLY-MODEL
         drift: false
+
       points:
         a1: "P['ed'].time - T_p"
         y11: "P['ed'].value"
@@ -105,9 +106,11 @@ settings:
         y21: "P['anti-epad'].value"
         b2: "P['bd'].time"
         y22: "P['bd'].value"
+
       intervals:
         - [ a1, b1 ]
         - [ a2, b2 ]
+
       initial:
         omega: '(omega_min + omega_max)/2'
         hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
@@ -115,6 +118,7 @@ settings:
         vscale: 1
         vshift: -2
         drift: 0
+
       conditions:
         - kind: HSCALE-LOWER-BOUND
           value: '1*(b2 - a1)'
@@ -123,6 +127,7 @@ settings:
 
     # volume:
     #   solver: *ref_solver
+    #
     #   points:
     #     a1: "V['anti-es'].time - T_v"
     #     y11: "V['anti-es'].value"
@@ -132,9 +137,11 @@ settings:
     #     y21: "V['sys'].value"
     #     b2: "V['es'].time"
     #     y22: "V['es'].value"
+    #
     #   intervals:
     #     - [ a1, b1 ]
     #     - [ a2, b2 ]
+    #
     #   initial:
     #     omega: '(omega_min + omega_max)/2'
     #     hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
@@ -142,6 +149,7 @@ settings:
     #     vscale: '1'
     #     vshift: '-2'
     #     drift: 0
+    #
     #   conditions:
     #     - kind: HSCALE-LOWER-BOUND
     #       value: '1*(b2 - a1)'
