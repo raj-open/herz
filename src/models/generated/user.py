@@ -205,6 +205,7 @@ class Plot(BaseModel):
         populate_by_name=True,
     )
     path: Optional[PathToDirString] = None
+    collapse_cycles: bool = Field(True, alias='collapse-cycles')
     legend: bool = False
     font: Font
 

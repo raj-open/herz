@@ -192,6 +192,9 @@ components:
           properties:
             path:
               $ref: "./common.yaml/#/components/schemas/PathToDirString"
+            collapse-cycles:
+              type: boolean
+              default: true
             legend:
               type: boolean
               default: false
