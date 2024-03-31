@@ -70,13 +70,13 @@ def step_output_loop_plot(
     fig = setup_plot(name=plot_name, cfg=cfg_output, units=units)
 
     # plot data / curve
-    for subplot in plot_data_vs_data(data_pv, T_pv, cv=cv, units=units):
+    for subplot in plot_data_vs_data(data_pv, T_pv, visible=True, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
-    for subplot in plot_data_vs_fits(data_p=data_p, data_v=data_v, poly_p=poly_p, poly_v=poly_v, T_p=T_p, T_v=T_v, cv=cv, units=units):  # fmt: skip
+    for subplot in plot_data_vs_fits(data_p=data_p, data_v=data_v, poly_p=poly_p, poly_v=poly_v, T_p=T_p, T_v=T_v, visible=False, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
-    for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=poly_p, poly_v=poly_v, T_pv=T_pv, N=N, cv=cv, units=units):  # fmt: skip
+    for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=poly_p, poly_v=poly_v, T_pv=T_pv, N=N, visible=True, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
     # plot trig-curve
@@ -190,6 +190,7 @@ def setup_plot(
 def plot_data_vs_data(
     data: pd.DataFrame,
     T_pv: float,
+    visible: bool,
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
@@ -210,7 +211,7 @@ def plot_data_vs_data(
             color='hsla(0, 100%, 0%, 0.5)',
             symbol='cross',
         ),
-        visible='legendonly',
+        visible=True if visible else 'legendonly',
         showlegend=True,
     )
 
@@ -222,6 +223,7 @@ def plot_data_vs_fits(
     poly_v: Poly[float],
     T_p: float,
     T_v: float,
+    visible: bool,
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
@@ -245,6 +247,7 @@ def plot_data_vs_fits(
             color='hsla(180, 75%, 50%, 1)',
             symbol='x',
         ),
+        visible=True if visible else 'legendonly',
         showlegend=True,
     )
 
@@ -259,6 +262,7 @@ def plot_data_vs_fits(
             color='hsla(300, 75%, 50%, 1)',
             symbol='x',
         ),
+        visible=True if visible else 'legendonly',
         showlegend=True,
     )
 
@@ -270,6 +274,7 @@ def plot_poly_fit(
     poly_v: Poly[float],
     T_pv: float,
     N: int,
+    visible: bool,
     cv: dict[str, float],
     units: dict[str, str],
 ):
@@ -297,8 +302,9 @@ def plot_poly_fit(
         line_shape='spline',
         line=dict(
             width=3,
-            color='hsla(0, 100%, 0%, 0.75)',
+            color='hsla(0, 100%, 0%, 0.5)',
         ),
+        visible=True if visible else 'legendonly',
         showlegend=True,
     )
 
@@ -333,7 +339,7 @@ def plot_trig_curve(
             y=cv['pressure'] * paxis,
             mode='markers',
             marker=dict(
-                size=3,
+                size=5,
                 color='hsla(100, 100%, 25%, 0.75)',
             ),
             visible=True if visible else 'legendonly',

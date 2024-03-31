@@ -481,6 +481,7 @@ settings:
           text-position: "middle center"
 
       eed-poly:
+        visible: false
         name: "eed (poly)"
         name-simple: "eed (poly)"
         kind: GRADIENT
