@@ -54,6 +54,7 @@ components:
             Primary settings
           type: object
           required:
+            - timezone
             - units
             - matching
             - polynomial
@@ -61,6 +62,8 @@ components:
             - exponential
             - points
           properties:
+            timezone:
+              type: string
             units:
               description: |-
                 Standard units for physical conversion.

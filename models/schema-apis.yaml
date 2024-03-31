@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  version: 0.1.1
+  title: Schemata for diverse credentials and access e.g. for apis
+servers:
+  - url: "https://define.me"
+paths: {}
+components:
+  schemas:
+    # ----------------------------------------------------------------
+    # CLASSES
+    # ----------------------------------------------------------------
+
+    # --------------------------------
+    # Data structure metadata of file
+    # --------------------------------
+
+    MetaData:
+      description: |-
+        Meta data of file
+      type: object
+      required:
+        - path
+        - filename
+        - basename
+        - ext
+        - size
+      properties:
+        path:
+          description: |-
+            Full path to file (directory + filename incl. extension).
+          type: string
+        filename:
+          description: |-
+            Filename (without path, but with extension).
+          type: string
+        basename:
+          description: |-
+            Filename without path and without extension.
+          type: string
+        ext:
+          description: |-
+            Extension of file.
+          type: string
+        size:
+          description: |-
+            Size of file in bytes
+          type: integer
+        time-created:
+          type: string
+          format: date-time
+        time-updated:
+          type: string
+          format: date-time
+      additionalProperties: false
+
+    # --------------------------------
+    # Credentials
+    # --------------------------------
+
+    Credentials:
+      description: |-
+        Stores username and token in a safe way to prevent exposure
+        e.g. in serialisations or logging.
+      type: object
+      required:
+        - username
+        - token
+      properties:
+        username:
+          type: string
+        token:
+          type: string
+          format: password
+      additionalProperties: false

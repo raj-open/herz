@@ -462,6 +462,7 @@ class Settings(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
     )
+    timezone: str
     units: Dict[str, str] = Field(..., description='Standard units for physical conversion.')
     matching: MatchingConfig
     polynomial: PolynomialConfig = Field(
