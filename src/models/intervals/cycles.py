@@ -36,7 +36,7 @@ def collapse_intervals_to_cycle(
     if not disjoint:
         intervals = list(merge_intervals(intervals))
     # make intervals "safely" fit into cycles
-    resolution = list(resolve_intervals(offset=offset, period=period, intervals=intervals))
+    resolution = list(resolve_intervals(intervals, offset=offset, period=period))
     # move all intervals to first cycle
     intervals = [(a - k * period, b - k * period) for k, a, b in resolution]
     # simplify/merge

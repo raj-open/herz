@@ -71,13 +71,7 @@ def test_resolve_intervals_CASES(
     intervals: list[tuple[float, float]],
     expected: list[tuple[int, float, float]],
 ):
-    results = list(
-        resolve_intervals(
-            offset=offset,
-            period=period,
-            intervals=intervals,
-        )
-    )
+    results = list(resolve_intervals(intervals, offset=offset, period=period))
     result = np.asarray(results)
     expected = np.asarray(expected)
     np.testing.assert_almost_equal(result, expected)

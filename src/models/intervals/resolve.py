@@ -23,18 +23,18 @@ __all__ = [
 
 
 def resolve_intervals(
-    offset: float,
-    period: float,
     intervals: Iterable[tuple[float, float]],
+    period: float,
+    offset: float = 0.0,
 ) -> Generator[tuple[int, float, float], None, None]:
     for I in intervals:
-        yield from resolve_interval(offset=offset, period=period, interval=I)
+        yield from resolve_interval(I, offset=offset, period=period)
 
 
 def resolve_interval(
-    offset: float,
-    period: float,
     interval: tuple[float, float],
+    period: float,
+    offset: float = 0.0,
 ) -> Generator[tuple[int, float, float], None, None]:
     a, b = interval
     k = math.floor((a - offset) / period)
