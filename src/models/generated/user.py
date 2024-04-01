@@ -240,14 +240,14 @@ class DataTimeSeries(BaseModel):
     skip: Union[int, List[int], str] = Field(
         [],
         description='Which row indexes to skip.\nEither provide\n\n- a string of a lambda function (mapping integers to boolean values)\n- an integer, indicating how many rows to skip from the top\n- an array\n\nNoted that row numbers are **0-based**!',
-        examples={
-            'simple': {'value': 3, 'summary': 'Rows `0,1,2` will be skipped.'},
-            'function': {'value': '`lambda i: i % 3 == 1`', 'summary': 'Skips every 3rd rwo starting from row-index 1'},
-            'array': {
+        examples=[
+            {'value': 3, 'summary': 'Rows `0,1,2` will be skipped.'},
+            {'value': '`lambda i: i % 3 == 1`', 'summary': 'Skips every 3rd rwo starting from row-index 1'},
+            {
                 'value': [0, 1, 2, 4, 5],
-                'summary': 'In this case in the file\n- extra headers are on lines `0, 1, 2``,\n- headers are on row `3`\n- rows 4 and 5 contain further skippable content\n\nNOTE: negative values will be ignored.',
+                'summary': 'In this case in the file\n- extra headers are on lines `0, 1, 2``,\n- headers are on row `3`\n- rows 4 and 5 contain further skippable content',
             },
-        },
+        ],
     )
     time: DataTypeQuantity = Field(..., description='Column name for time.')
     value: DataTypeQuantity = Field(..., description='Column name for value.')

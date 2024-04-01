@@ -262,29 +262,26 @@ components:
             - an array
 
             Noted that row numbers are **0-based**!
-          oneOf:
+          anyOf:
             - type: integer
             - type: array
               items:
                 type: integer
             - type: string
           examples:
-            simple:
-              value: 3
+            - value: 3
               summary: Rows `0,1,2` will be skipped.
-            function:
-              value: "`lambda i: i % 3 == 1`"
+            - value: "`lambda i: i % 3 == 1`"
               summary: |-
                 Skips every 3rd rwo starting from row-index 1
-            array:
-              value: [0, 1, 2, 4, 5]
+            - value: [0, 1, 2, 4, 5]
               summary: |-
                 In this case in the file
                 - extra headers are on lines `0, 1, 2``,
                 - headers are on row `3`
                 - rows 4 and 5 contain further skippable content
 
-                NOTE: negative values will be ignored.
+          #       NOTE: negative values will be ignored.
           default: []
         # columns
         time:
