@@ -23,7 +23,7 @@ class MimeType(Enum):
     JSON = 'application/json;charset=utf-8'
     # see https://learn.microsoft.com/previous-versions/office/office-2007-resource-kit/ee309278(v=office.12)
     XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    YAML = 'application/x-yaml'
+    YAML = 'application/yaml;charset=utf-8'
 
 
 # ----------------------------------------------------------------
