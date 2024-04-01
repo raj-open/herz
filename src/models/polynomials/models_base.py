@@ -69,6 +69,7 @@ class PolyExpBase(Generic[T]):
         # to prevent explosion (e.g. upon rescaling), clean up coefficients that are near 0
         scale = np.linalg.norm(self.coeff) or 1.0
         self.coeff = eps_clean_zeroes_simple(self.coeff, eps=scale * self.accuracy)
+        [self.lead] = eps_clean_zeroes_simple([self.lead], eps=scale * self.accuracy)
         return
 
     def __copy__(self) -> PolyExpBase[T]:
@@ -101,21 +102,20 @@ class PolyExpBase(Generic[T]):
     @property
     def roots(self) -> list[complex]:
         if not hasattr(self, '_roots'):
-            eps = self.accuracy
             if self.degree == 0:
-                self._roots = []
+                values = []
             else:
-                self._roots = np.roots(list(self.coeff)[::-1]).tolist()
-                self._roots = eps_clean_zeroes(self._roots, eps=eps)
+                values = np.roots(list(self.coeff)[::-1]).tolist()
+                values = clean_and_sort_complex_values(values, eps=self.accuracy)
+            self._roots = values
         return self._roots
 
     @property
     def real_roots(self) -> list[float]:
         if not hasattr(self, '_roots_reals'):
             # not necessary, as cleaning already performed!
-            # eps = self.accuracy
-            # roots = [z.real for z in self.roots if abs(z.imag) < eps]
-            roots = [z.real for z in self.roots if z.imag == 0]
+            eps = self.accuracy
+            roots = [z.real for z in self.roots if abs(z.imag) < eps]
             if self.cyclic:
                 roots = [
                     self.offset + (t - self.offset) % self.period
@@ -126,6 +126,20 @@ class PolyExpBase(Generic[T]):
         return self._roots_reals
 
     @roots.setter
-    def roots(self, values: list[complex]):
-        self._roots = sorted(values, key=lambda x: (x.real, abs(x.imag), x.imag))
+    def roots(self, values: Iterable[complex]):
+        self._roots = clean_and_sort_complex_values(values, eps=self.accuracy)
         return
+
+
+# ----------------------------------------------------------------
+# AUXILIARY METHODS
+# ----------------------------------------------------------------
+
+
+def clean_and_sort_complex_values(
+    values: Iterable[complex],
+    eps: float,
+):
+    values = eps_clean_zeroes_simple(values, eps=eps)
+    values = sorted(values, key=lambda x: (x.real, abs(x.imag), x.imag))
+    return values

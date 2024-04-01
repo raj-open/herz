@@ -41,7 +41,13 @@ class PolyTrig(PolyExp[complex]):
     @staticmethod
     def cast(model: PolyExp[complex]) -> PolyTrig:
         omega = model.alpha.imag
-        return PolyTrig(omega=omega, lead=model.lead, coeff=model.coeff, **model.params)
+        result = PolyTrig(omega=omega, lead=model.lead, coeff=model.coeff, **model.params)
+        result.roots = model.roots
+        return result
+
+    def __neg__(self) -> PolyTrig:
+        model = super().__neg__()
+        return PolyTrig.cast(model)
 
     def __mul__(self, f: Any) -> PolyTrig:
         if isinstance(f, (int, float, complex)):

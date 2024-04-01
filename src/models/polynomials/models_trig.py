@@ -44,7 +44,9 @@ class Cos(PolyTrig):
     @staticmethod
     def cast(model: PolyTrig) -> Cos:
         lead = model.lead.real
-        return Cos(omega=model.omega, lead=lead, **model.params)
+        result = Cos(omega=model.omega, lead=lead, **model.params)
+        result.roots = []
+        return result
 
     def __copy__(self) -> Cos:
         model = super().__copy__()
@@ -91,7 +93,9 @@ class Sin(PolyTrig):
     @staticmethod
     def cast(model: PolyTrig) -> Sin:
         lead = -model.lead.imag
-        return Sin(omega=model.omega, lead=lead, **model.params)
+        result = Sin(omega=model.omega, lead=lead, **model.params)
+        result.roots = []
+        return result
 
     def __copy__(self) -> Sin:
         model = super().__copy__()

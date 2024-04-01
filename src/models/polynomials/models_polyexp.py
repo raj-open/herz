@@ -47,27 +47,15 @@ class PolyExp(PolyExpBase[T]):
 
     @staticmethod
     def load_from_zeroes(
-        zeroes: dict[complex, int] | list[complex],
+        zeroes: list[complex],
         lead: complex = 1.0,
         alpha: complex = 0,
         **__,
     ) -> PolyExp[complex]:
         p = PolyExp(coeff=[lead], alpha=alpha, **__)
-        if isinstance(zeroes, list):
-            for z in zeroes:
-                p *= PolyExp(coeff=[-z, 1], **__)
-            p.roots = zeroes
-        else:
-            for z, n in zeroes.items():
-                assert n >= 0, 'Cannot multiply by negative powers!'
-                if n == 0:
-                    continue
-                z_pow = np.cumprod([1] + [-z] * n)
-                p *= PolyExp(
-                    coeff=[math.comb(n, k) * zz for k, zz in zip(range(n + 1), z_pow[::-1])],
-                    **__,
-                )
-            p.roots = flatten(*[[z] * n for z, n in zeroes.items()])
+        for z in zeroes:
+            p *= PolyExp(coeff=[-z, 1], **__)
+        p.roots = zeroes
         return p
 
     def __copy__(self) -> PolyExp[T]:
@@ -81,9 +69,14 @@ class PolyExp(PolyExpBase[T]):
         if isinstance(o, (int, float, complex)):
             return self.__eq__(PolyExp(coeff=[o]))
         if isinstance(o, PolyExp):
+            if self.alpha != o.alpha:
+                return False
             coeff_p, coeff_q = pre_compare(self, o)
             return all(c == cc for c, cc in zip(coeff_p, coeff_q))
         return False
+
+    def __neg__(self) -> PolyExp[T]:
+        return PolyExp[T](coeff=self.coeff, lead=-self.lead, alpha=self.alpha, **self.params)
 
     def __mul__(self, q: Any) -> PolyExp:
         if isinstance(q, (int, float, complex)):

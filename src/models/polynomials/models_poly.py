@@ -35,12 +35,24 @@ class Poly(PolyExp[T]):
     A class to model (possibly periodic) polynomials.
     '''
 
+    @staticmethod
+    def load_from_zeroes(
+        zeroes: list[complex],
+        lead: complex = 1.0,
+        **__,
+    ) -> Poly[complex]:
+        result = PolyExp[complex].load_from_zeroes(zeroes=zeroes, lead=lead, **__)
+        result = Poly[complex].cast(result)
+        return result
+
     def __init__(self, coeff: list[T], lead: complex = 1, **__):
         super().__init__(lead=lead, coeff=coeff, alpha=0, **__)
 
     @staticmethod
     def cast(model: PolyExp[T]) -> Poly[T]:
-        return Poly(lead=model.lead, coeff=model.coeff, **model.params)
+        result = Poly(lead=model.lead, coeff=model.coeff, **model.params)
+        result.roots = model.roots
+        return result
 
     @staticmethod
     def value(coeff: Iterable[T], t: float, **__) -> T:
@@ -52,6 +64,10 @@ class Poly(PolyExp[T]):
 
     def __deepcopy__(self) -> Poly[T]:
         return self.__copy__()
+
+    def __neg__(self) -> Poly[T]:
+        model = super().__neg__()
+        return Poly[T].cast(model)
 
     def __mul__(self, q: Any) -> Poly:
         result = super().__mul__(q)
@@ -94,6 +110,37 @@ class Poly(PolyExp[T]):
 
     def __radd__(self, q: Any) -> Poly:
         return self + q
+
+    def __sub__(self, q: Any) -> Poly:
+        if isinstance(q, Poly):
+            return self.__add__(-q)
+        raise TypeError(f'No addition method for Poly - {type(q)}!')
+
+    def __divmod__(self, q: Poly[T]) -> tuple[Poly[T], Poly[T]]:
+        coef_p = np.asarray(self.coefficients)
+        coef_q = np.asarray(q.coefficients)
+        deg_p = len(coef_p) - 1
+        deg_q = len(coef_q) - 1
+        s = deg_p - deg_q
+        coef_div = [0.0] * max(s + 1, 0)
+        while s >= 0:
+            a = coef_p[deg_q + s] / coef_q[deg_q]
+            coef_div[s] = a
+            coef_p[s:] -= a * coef_q
+            coef_p = coef_p[:-1]
+            s -= 1
+        coef_rest = coef_p
+        result_div = Poly[T](coeff=coef_div, **self.params)
+        result_rest = Poly[T](coeff=coef_rest, **self.params)
+        return result_div, result_rest
+
+    def __floordiv__(self, q: Poly[T]) -> Poly[T]:
+        p_div_q, _ = divmod(self, q)
+        return p_div_q
+
+    def __mod__(self, q: Poly[T]) -> Poly[T]:
+        _, rest = divmod(self, q)
+        return rest
 
     def __copy__(self) -> Poly[T]:
         model = super().__copy__()
