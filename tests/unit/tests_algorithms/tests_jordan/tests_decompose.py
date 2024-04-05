@@ -16,6 +16,7 @@ from src.algorithms.jordan import *
 # TESTS
 # ----------------------------------------------------------------
 
+
 def test_chevalley_polynomial(
     test: TestCase,
     # fixtures
@@ -31,6 +32,7 @@ def test_chevalley_polynomial(
         test.assertAlmostEqual(rest.coefficients[0], t, msg='expected ch % (X - t)^n = t')
     return
 
+
 def test_compute_decomposition_SMALL_CASE(
     test: TestCase,
     # fixtures
@@ -41,8 +43,11 @@ def test_compute_decomposition_SMALL_CASE(
     np.testing.assert_array_almost_equal(D, np.diag(np.diag(D)), err_msg='D should be diagonal')
     np.testing.assert_array_almost_equal(np.diag(np.diag(N)), np.zeros(N.shape), err_msg='N should be offdiagonal')
     np.testing.assert_array_almost_equal(D @ N, N @ D, err_msg='decomposition should consist of commuting matrices')
-    np.testing.assert_array_almost_equal(V @ (D + N) @ Vinv, A, err_msg='decomposition should reconstruct the original matrix')
+    np.testing.assert_array_almost_equal(
+        V @ (D + N) @ Vinv, A, err_msg='decomposition should reconstruct the original matrix'
+    )
     return
+
 
 def test_compute_decomposition_GRAPH_CASE(
     test: TestCase,
@@ -55,5 +60,7 @@ def test_compute_decomposition_GRAPH_CASE(
     np.testing.assert_array_almost_equal(D, np.diag(np.diag(D)), err_msg='D should be diagonal')
     np.testing.assert_array_almost_equal(np.diag(np.diag(N)), np.zeros(N.shape), err_msg='N should be offdiagonal')
     np.testing.assert_array_almost_equal(D @ N, N @ D, err_msg='decomposition should consist of commuting matrices')
-    np.testing.assert_array_almost_equal(V @ (D + N) @ Vinv, A, err_msg='decomposition should reconstruct the original matrix')
+    np.testing.assert_array_almost_equal(
+        V @ (D + N) @ Vinv, A, err_msg='decomposition should reconstruct the original matrix'
+    )
     return

@@ -40,7 +40,7 @@ def weights(graph_directed: nx.DiGraph) -> NDArray[np.float64]:
         i = nodes.index(u)
         j = nodes.index(v)
         deg_u = len([e for e in G.edges if e[0] == u])
-        W[j, i] = 1/deg_u
+        W[j, i] = 1 / deg_u
     return W
 
 
@@ -53,6 +53,7 @@ def generator(
     I = np.eye(N)
     A = (W - I).T
     return A
+
 
 @fixture(scope='module')
 def random_jordan_small() -> NDArray[np.float64]:
@@ -67,6 +68,7 @@ def random_jordan_small() -> NDArray[np.float64]:
         N[i:, i:][:l, :l] = np.eye(l, k=1)
     A = D + N
     return A
+
 
 @fixture(scope='module')
 def random_jordan() -> NDArray[np.float64]:
