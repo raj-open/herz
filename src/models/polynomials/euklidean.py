@@ -69,6 +69,7 @@ def euklidean_algorithm(
         else:
             d = Poly[T](coeff=p.coeff, lead=p.lead)
     else:
+        # p = p_div_q · q + r => r = p - p_div_q · q
         p_div_q, r = divmod(p, q)
         d, factor_q, factor_r = euklidean_algorithm(q, r, normalised=normalised)
         factor_q = factor_q - factor_r * p_div_q

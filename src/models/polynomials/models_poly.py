@@ -78,6 +78,10 @@ class Poly(PolyExp[T]):
     def __rmul__(self, q: Any) -> Poly:
         return self * q
 
+    def __pow__(self, n: Any) -> Poly[T]:
+        model = super().__pow__(n)
+        return Poly[T].cast(model)
+
     def __add__(self, q: Any) -> Poly:
         if isinstance(q, (int, float, complex)):
             result = self + Poly(coeff=[q], accuracy=self.accuracy)

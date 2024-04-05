@@ -52,24 +52,17 @@ class PolyExpBase(Generic[T]):
     def __post_init__(self):
         assert self.period > 0, 'Cannot use a non-positive value for the period!'
 
-        while len(self.coeff) > 0 and self.coeff[-1] == 0:
-            self.coeff = self.coeff[:-1]
-
-        if len(self.coeff) == 0:
-            self.coeff = [0]
-
+        # to prevent explosion (e.g. upon rescaling), clean up coefficients that are near 0
+        self.coeff = remove_small_polynomial_coefficients(self.coeff, eps=self.accuracy)
         scale = self.coeff[-1]
         if self.lead * scale == 0:
             self.lead = 0
             self.coeff = [1]
         else:
             self.lead *= scale
-            self.coeff = [c / scale for c in self.coeff[:-1]] + [1.0]
+            self.coeff = [c / scale for c in self.coeff[:-1]] + [1]
 
-        # to prevent explosion (e.g. upon rescaling), clean up coefficients that are near 0
-        scale = np.linalg.norm(self.coeff) or 1.0
-        self.coeff = eps_clean_zeroes_simple(self.coeff, eps=scale * self.accuracy)
-        [self.lead] = eps_clean_zeroes_simple([self.lead], eps=scale * self.accuracy)
+        [self.lead] = eps_clean_zeroes_simple([self.lead], eps=self.accuracy)
         return
 
     def __copy__(self) -> PolyExpBase[T]:
@@ -143,3 +136,51 @@ def clean_and_sort_complex_values(
     values = eps_clean_zeroes_simple(values, eps=eps)
     values = sorted(values, key=lambda x: (x.real, abs(x.imag), x.imag))
     return values
+
+
+def remove_small_polynomial_coefficients(
+    coefficients: Iterable[T],
+    eps: float,
+) -> list[T]:
+    '''
+    Renormalises coefficients `c[k]` to the form
+    ```
+    c[k] = α[k]·t^(n-k)
+    ```
+    before filtering out "small" values of `α[k]`.
+    This is more stable than directly filtering based on `c[k]`,
+    as polynomials upon shifting take on the above form.
+    '''
+    # first remove too small values
+    coefficients = np.asarray(coefficients)
+    alpha = abs(coefficients)
+    filt = alpha < eps
+    coefficients[filt] = 0
+
+    # remove all zeroes
+    while len(coefficients) > 0 and coefficients[-1] == 0:
+        coefficients = coefficients[:-1]
+    if len(coefficients) == 0:
+        coefficients = [0]
+
+    # compute least-sq fit c[k] ~ α[k]·exp(m·(deg-k))
+    deg = len(coefficients) - 1
+    coefficients = np.asarray(coefficients)
+    indices = np.asarray(range(deg + 1))
+    alpha = abs(coefficients)
+    filt = alpha >= eps
+    C = np.sum((deg - indices[filt]) ** 2)
+    m = np.sum((deg - indices[filt]) * np.log(alpha[filt])) / (C or 1)
+    alpha = alpha * np.exp(-m * (deg - indices))
+
+    # remove too small values of α[k]
+    filt = alpha < eps
+    alpha[filt] = 0
+    # remove too small _relative_ values of alpha
+    scale = np.linalg.norm(alpha) / np.sqrt(np.sum(filt) or 1) or 1
+    filt = alpha < (scale * eps)
+    # finally, set coefficients
+    # alpha[filt] = 0 # <- unnecessary
+    coefficients[filt] = 0
+
+    return coefficients

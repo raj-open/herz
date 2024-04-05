@@ -120,6 +120,17 @@ class PolyExp(PolyExpBase[T]):
     def __rmul__(self, q: Any) -> PolyExp:
         return self * q
 
+    def __pow__(self, n: Any) -> PolyExp[T]:
+        if not isinstance(n, int):
+            raise ValueError(f'cannot compute PolyExp ** {type(n)}')
+        if n < 0:
+            raise ValueError(f'cannot compute negative powers of PolyExp')
+        result = PolyExp[T](coeff=[1], lead=1, alpha=self.alpha, **self.params)
+        base = self.__copy__()
+        for _ in range(n):
+            result = result * base
+        return result
+
     def __call__(self, t: float) -> complex:
         # NOTE: only polynomial part is periodic
         exp_value = np.exp(self.alpha * t)
