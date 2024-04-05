@@ -35,6 +35,13 @@ def test() -> TestCase:
     return TestCase()
 
 
+@fixture(scope='session', autouse=True)
+def seed() -> int:
+    seed = 901372893172
+    reseed(seed)
+    return seed
+
+
 @fixture(scope='module', autouse=True)
 def debug() -> Callable[..., None]:
     '''
