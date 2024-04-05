@@ -343,13 +343,13 @@ tests-logs log_path="logs":
     @just _display-logs "{{log_path}}"
 
 tests-unit:
-    @just test-unit "tests/unit"
+    @{{PYVENV_ON}} && {{PYVENV}} -m pytest "tests/unit" \
+        --cov-reset \
+        --cov=.
 
 test-unit path:
     @just _reset-test-logs "unit"
-    @{{PYVENV_ON}} && {{PYVENV}} -m pytest "{{path}}" \
-        --cov-reset \
-        --cov=.
+    @{{PYVENV_ON}} && {{PYVENV}} -m pytest "{{path}}"
 
 tests-behave:
     @just test-behave "tests/behave"
