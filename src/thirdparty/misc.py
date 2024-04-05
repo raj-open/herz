@@ -5,6 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections import Counter
 from copy import copy
 from copy import deepcopy
 from codetiming import Timer as TimerBasic
@@ -187,6 +188,7 @@ def dedent_full(text: str) -> str:
 
 __all__ = [
     'AwareDatetime',
+    'Counter',
     'copy',
     'datetime',
     'dedent_full',

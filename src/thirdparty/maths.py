@@ -5,6 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections import Counter
 import lmfit
 import math
 from math import pi
@@ -18,9 +19,20 @@ from scipy import optimize as spo
 from scipy import signal as sps
 from findpeaks import findpeaks
 
+# for modifications only
+from numpy.random import MT19937
+from numpy.random import RandomState
+from numpy.random import SeedSequence
+
 # ----------------------------------------------------------------
 # MODIFICATIONS
 # ----------------------------------------------------------------
+
+
+def reseed(seed: int) -> RandomState:
+    rs = RandomState(MT19937(SeedSequence(seed)))
+    random.seed(seed)
+    return rs
 
 
 def nCr(n: int, r: int) -> int:
@@ -110,8 +122,10 @@ def remove_outliers(X: NDArray[np.float64], sig: float = 2.0) -> NDArray[np.floa
 # ----------------------------------------------------------------
 
 __all__ = [
+    'Counter',
     'NDArray',
     'findpeaks',
+    'indices_non_outliers',
     'lmfit',
     'math',
     'nCr',
@@ -121,8 +135,8 @@ __all__ = [
     'nx',
     'pi',
     'random',
-    'indices_non_outliers',
     'remove_outliers',
+    'reseed',
     'sp',
     'spla',
     'spo',
