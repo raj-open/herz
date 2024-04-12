@@ -62,7 +62,7 @@ class PolyExpBase(Generic[T]):
             self.lead *= scale
             self.coeff = [c / scale for c in self.coeff[:-1]] + [1]
 
-        [self.lead] = eps_clean_zeroes_simple([self.lead], eps=self.accuracy)
+        [self.lead] = eps_clean_zeroes([self.lead], eps=self.accuracy)
         return
 
     def __copy__(self) -> PolyExpBase[T]:
@@ -98,7 +98,7 @@ class PolyExpBase(Generic[T]):
             if self.degree == 0:
                 values = []
             else:
-                values = np.roots(list(self.coeff)[::-1]).tolist()
+                values = np.roots(list(self.coeff)[::-1])
                 values = clean_and_sort_complex_values(values, eps=self.accuracy)
             self._roots = values
         return self._roots
@@ -133,7 +133,7 @@ def clean_and_sort_complex_values(
     values: Iterable[complex],
     eps: float,
 ):
-    values = eps_clean_zeroes_simple(values, eps=eps)
+    values = eps_clean_pure_real_imaginary(values, eps=eps)
     values = sorted(values, key=lambda x: (x.real, abs(x.imag), x.imag))
     return values
 
@@ -176,9 +176,9 @@ def remove_small_polynomial_coefficients(
     # remove too small values of α[k]
     filt = alpha < eps
     alpha[filt] = 0
-    # remove too small _relative_ values of alpha
-    scale = np.linalg.norm(alpha) / np.sqrt(np.sum(filt) or 1) or 1
-    filt = alpha < (scale * eps)
+    # # remove too small _relative_ values of alpha
+    # scale = np.linalg.norm(alpha) / np.sqrt(np.sum(filt) or 1) or 1
+    # filt = alpha < (scale * eps)
     # finally, set coefficients
     # alpha[filt] = 0 # <- unnecessary
     coefficients[filt] = 0

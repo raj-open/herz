@@ -19,7 +19,7 @@ from .basic_matrix import *
 __all__ = [
     'eps_clean_duplicates',
     'eps_clean_zeroes',
-    'eps_clean_zeroes_simple',
+    'eps_clean_pure_real_imaginary',
     'eps_clean_boundaries',
 ]
 
@@ -61,77 +61,60 @@ def eps_clean_duplicates(
 
 
 def eps_clean_zeroes(
-    values: Iterable[NUMBER],
+    values: Iterable[float],
+    eps: float,
+) -> list[float]:
+    '''
+    Cleans up values that are ε-close to being zero.
+    '''
+    return eps_clean_value(values, x=0, eps=eps)
+
+
+def eps_clean_pure_real_imaginary(
+    values: Iterable[complex],
     eps: float,
 ) -> list[complex]:
-    '''
-    Cleans up values that are ε-close to being real-/imag-valued
-    '''
-    values = eps_clean_real(values, x=0, eps=eps)
-    values = eps_clean_imag(values, x=0, eps=eps)
-    return values
-
-
-def eps_clean_zeroes_simple(
-    values: Iterable[NUMBER],
-    eps: float,
-) -> list[NUMBER]:
     '''
     Cleans up values that are ε-close to being zero.
     '''
     if not isinstance(values, np.ndarray):
         values = np.asarray(values)
-    d = sign_normalised_diff_matrix(x_from=[0], x_to=abs(values), eps=eps)
-    d = d.reshape(values.shape)
-    values[d == EnumSign.ZERO] = 0
+    values = np.asarray(eps_clean_zeroes(values.real, eps=eps)) + 1j * np.asarray(
+        eps_clean_zeroes(values.imag, eps=eps)
+    )
     return values.tolist()
 
 
 def eps_clean_boundaries(
-    values: Iterable[NUMBER],
+    values: Iterable[float],
     eps: float,
-    boundaries_real: tuple[float, float] = (-np.inf, np.inf),
-    boundaries_imag: tuple[float, float] = (-np.inf, np.inf),
-) -> list[NUMBER]:
+    bounds: tuple[float, float] = (-np.inf, np.inf),
+) -> list[float]:
     '''
     Clean up values that are ε-close to boundaries (treated box-like)
     '''
-    for u in boundaries_real:
+    for u in bounds:
         if abs(u) < np.inf:
-            values = eps_clean_real(values, x=u, eps=eps)
-
-    for u in boundaries_imag:
-        if abs(u) < np.inf:
-            values = eps_clean_imag(values, x=u, eps=eps)
-
+            values = eps_clean_value(values, x=u, eps=eps)
     return values
 
 
-def eps_clean_real(
-    values: Iterable[NUMBER],
+# ----------------------------------------------------------------
+# AUXILIARY METHODS
+# ----------------------------------------------------------------
+
+
+def eps_clean_value(
+    values: Iterable[float],
     x: float,
     eps: float,
-) -> list[complex]:
+) -> list[float]:
     '''
     Forces the real-part of values that are ε-close to a certain value, `x`, to be `x`.
     '''
-    values = np.asarray(values, dtype=complex)
-    d = sign_normalised_diff_matrix(x_from=[x], x_to=values.real, eps=eps)
+    values = np.asarray(values)
+    values.flags.writeable = True  # DEV-NOTE: this is sometimes necessary
+    d = sign_normalised_diff_matrix(x_from=[x], x_to=values, eps=eps)
     d = d.reshape(values.shape)
-    values[d == EnumSign.ZERO] = x + 1j * values[d == EnumSign.ZERO].imag
-    return values.tolist()
-
-
-def eps_clean_imag(
-    values: Iterable[NUMBER],
-    x: float,
-    eps: float,
-) -> list[complex]:
-    '''
-    Forces the imag-part of values that are ε-close to a certain value, `x`, to be `x`.
-    '''
-    values = np.asarray(values, dtype=complex)
-    d = sign_normalised_diff_matrix(x_from=[x], x_to=values.imag, eps=eps)
-    d = d.reshape(values.shape)
-    values[d == EnumSign.ZERO] = values[d == EnumSign.ZERO].real + 1j * x
+    values[d == EnumSign.ZERO] = x
     return values.tolist()

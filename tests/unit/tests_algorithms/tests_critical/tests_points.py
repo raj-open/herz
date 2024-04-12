@@ -27,7 +27,7 @@ def test_get_critical_points(
     # p(t) = t^2 - 2t + 1
     p = Poly(coeff=[1, -2, 1])
     results = get_critical_points(p, p.derivative())
-    [results] = clean_up_critical_points([results], eps=eps, real_valued=True)
+    [results] = clean_up_critical_points([results], eps=eps)
     test.assertEqual(len(results), 1)
     pt = results[0]
     test.assertAlmostEqual(pt.x, 1.0)
@@ -36,7 +36,7 @@ def test_get_critical_points(
     # p(t) = -(t^2 - 2t + 1)
     p = Poly(coeff=[-1, 2, -1])
     results = get_critical_points(p, p.derivative())
-    [results] = clean_up_critical_points([results], eps=eps, real_valued=True)
+    [results] = clean_up_critical_points([results], eps=eps)
     test.assertEqual(len(results), 1)
     pt = results[0]
     test.assertAlmostEqual(pt.x, 1)
@@ -45,7 +45,7 @@ def test_get_critical_points(
     # p(t) = t^3
     p = Poly(coeff=[0, 0, 0, 1])
     results = get_critical_points(p, p.derivative())
-    [results] = clean_up_critical_points([results], eps=eps, real_valued=True)
+    [results] = clean_up_critical_points([results], eps=eps)
     test.assertEqual(len(results), 1)
     pt = results[0]
     test.assertAlmostEqual(pt.x, 0.0)
@@ -60,7 +60,7 @@ def test_get_critical_points(
     p = Poly(coeff=[2, -3, 1])
     q = p.integral()
     results = get_critical_points(q, q.derivative())
-    [results] = clean_up_critical_points([results], eps=eps, real_valued=True)
+    [results] = clean_up_critical_points([results], eps=eps)
     test.assertEqual(len(results), 3)
 
     pt = results[0]
@@ -85,7 +85,7 @@ def test_get_critical_points(
     p = Poly(coeff=[1, -2, 1])
     q = p.integral()
     results = get_critical_points(q, q.derivative())
-    [results] = clean_up_critical_points([results], eps=eps, real_valued=True)
+    [results] = clean_up_critical_points([results], eps=eps)
     test.assertEqual(len(results), 2)
 
     pt = results[0]

@@ -34,7 +34,6 @@ def log_critical_points(
     t_min: float,
     t_max: float,
     polys: list[Poly[float]],
-    real_valued: bool = False,
 ) -> str:
     n_der = len(crits) - 1
     classifications = gather_multi_level_critical_points_classifications(
@@ -42,7 +41,6 @@ def log_critical_points(
         eps=POLY_RESOLUTION,
         t_min=t_min,
         t_max=t_max,
-        real_valued=real_valued,
     )
 
     headers = {'time': 't/T'}
@@ -84,18 +82,16 @@ def gather_multi_level_critical_points_classifications(
     eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
-    real_valued: bool = False,
 ) -> list[tuple[float, list[set[EnumCriticalPoints]]]]:
     '''
     Consolidates and gathers information about
     '''
-    crits = clean_up_critical_points(crits, t_min=t_min, t_max=t_max, eps=eps, real_valued=real_valued)  # fmt: skip
+    crits = clean_up_critical_points(crits, t_min=t_min, t_max=t_max, eps=eps)  # fmt: skip
 
     times, _ = duplicates_get_assignment_maps(
         *[[pt.x for pt in crit if len(pt.kinds) > 0] for crit in crits],
         eps=eps,
-        boundaries_real=(t_min, t_max),
-        real_valued=True,
+        bounds=(t_min, t_max),
     )
     START = [t_min] if abs(t_min) < np.inf else []
     MIDDLE = sorted([t0 for t0 in times if t_min < t0 and t0 < t_max])

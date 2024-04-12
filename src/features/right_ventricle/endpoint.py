@@ -29,7 +29,7 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
     '''
     Processes right ventricular data
     '''
-    prog = LogProgress(name=f'RUN CASE {case.label}', steps=8, logger=log_info)
+    prog = LogProgress(name=f'CASE {case.label}', steps=8, logger=log_info)
 
     # set configs / settings
     datas = dict()

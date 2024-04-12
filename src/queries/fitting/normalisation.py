@@ -57,11 +57,11 @@ def get_unnormalised_polynomial(
     '''
     Normalisation:
     ```
-    z(t) = (x(t₀ + T·t) - (c + mt))/s
+    z(t) = (x(t₀ + T·t) - (c + m·t))/s
     ```
     Unnormalisation (but write polynomial centred on `t₀` instead of `0`):
     ```
-    x(t) = c + m/T · (t-t₀) + s · z((t-t₀)/T)
+    x(t) = c + m · t + s · z((t-t₀)/T)
     ```
     '''
     T, c, m, s = get_normalisation_params(info)
@@ -113,7 +113,8 @@ def get_unnormalised_data(
 
     # un/renormalise all cycles - incl. fitted models
     for info, (i1, i2) in infos[:-1]:
-        T, c, m, s = get_normalisation_params(info0 if renormalise else info)
+        info = info0 if renormalise else info
+        T, c, m, s = get_normalisation_params(info)
         tt = data['time'][i1:i2]
         xx = data[quantity][i1:i2]
 

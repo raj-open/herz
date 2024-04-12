@@ -29,7 +29,6 @@ def clean_up_critical_points(
     eps: float,
     t_min: float = -np.inf,
     t_max: float = np.inf,
-    real_valued: bool = False,
 ) -> list[list[CriticalPoint]]:
     '''
     Cleans up critical points
@@ -40,8 +39,7 @@ def clean_up_critical_points(
     _, assignments = duplicates_get_assignment_dictionaries(
         *times_all,
         eps=eps,
-        boundaries_real=(t_min, t_max),
-        real_valued=real_valued,
+        bounds=(t_min, t_max),
     )
 
     crits = [

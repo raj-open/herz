@@ -42,7 +42,7 @@ def get_critical_points(
     t_crit = dp.real_roots
 
     # remove eps-close points
-    t_crit, _ = duplicates_get_assignment_maps(t_crit, eps=eps, real_valued=True)
+    t_crit, _ = duplicates_get_assignment_maps(t_crit, eps=eps)
     N = len(t_crit)
     if N == 0:
         return crit
@@ -95,8 +95,8 @@ def get_critical_points(
     # add in zeroes
     # NOTE: increase eps-value, to prevent duplicates
     t_zeroes = p.real_roots
-    t_zeroes, _ = duplicates_get_assignment_maps(t_zeroes, eps=eps, boundaries_real=(t_min, t_max), real_valued=True)  # fmt: skip
-    times = [pt.x for pt in crit]
+    t_zeroes, _ = duplicates_get_assignment_maps(t_zeroes, eps=eps, bounds=(t_min, t_max))  # fmt: skip
+    # times = [pt.x for pt in crit]
     for t0 in t_zeroes:
         # NOTE: this is not necessary, as duplicate cleanup is performed later!
         # if len(times) > 0:
@@ -195,7 +195,7 @@ def get_time_grid(
     if len(t) == 0:
         return []
     # removes ε-duplicates + forces values close to boundaries to be on the boundaries
-    t, _ = duplicates_get_assignment_maps(t, eps=eps, boundaries_real=(t_min, t_max), real_valued=True)
+    t, _ = duplicates_get_assignment_maps(t, eps=eps, bounds=(t_min, t_max))
     t = [tt for tt in t if t_min <= tt and tt <= t_max]
     # ensure finite values:
     t_min = t_min if abs(t_min) < np.inf else min(t)

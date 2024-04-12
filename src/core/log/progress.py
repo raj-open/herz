@@ -27,7 +27,8 @@ __all__ = [
 
 @dataclass
 class LogProgress:
-    name: str = field()
+    name: Optional[str] = field()
+    title: Optional[str] = field(default=None)
     steps: int = field(default=1)
     step: int = field(default=0, init=False)
     auto: bool = field(default=True)
@@ -48,7 +49,10 @@ class LogProgress:
         k = self.step
         n = self.steps
         r = 1 if n == 0 else k / n
-        return f'Progress {dash} {self.name}: {k}/{n} ({r:.2%})'
+        if self.depth == 0:
+            return f"Progress {dash} {self.title or self.name}: {k}/{n} ({r:.2%})"
+        else:
+            return f"{self.name or 'Progress'} {dash} {self.title}: {k}/{n} ({r:.2%})"
 
     @property
     def done(self) -> bool:
@@ -64,11 +68,12 @@ class LogProgress:
             self.report()
         return
 
-    def subtask(self, name: str, steps: int = 1, step: int = 0, auto: Optional[bool] = None):
+    def subtask(self, title: str, steps: int = 1, step: int = 0, auto: Optional[bool] = None):
         self.tasks += 1
         auto = self.auto if auto is None else auto
         child = LogProgress(
-            name=name,
+            name=self.name,
+            title=title,
             steps=steps,
             auto=auto,
             depth=self.depth + 1,

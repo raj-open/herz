@@ -68,11 +68,11 @@ def recognise_special_points(
     times = {}
     n_der = max([point.spec.derivative for _, point in search if point.spec is not None])
 
-    # clone the polynomial and define an accuracy level for computing roots
-    q0 = Poly(coeff=poly.coefficients, accuracy=POLY_RESOLUTION)
+    # create a non-cyclic copy of the polynomial (preserve all else)
+    q = Poly[float](coeff=poly.coefficients, accuracy=poly.accuracy)
+
     # Get n-th derivatives of polynomial.
-    q = q0
-    polys = [q0]
+    polys = [q]
     for _ in range(n_der + 1):
         q = q.derivative()
         polys.append(q)
@@ -81,12 +81,12 @@ def recognise_special_points(
     crits = [get_critical_points_bounded(p=q, dp=dq, t_min=0.0, t_max=1.0) for q, dq in zip(polys, polys[1:])]
 
     # clean up critical points
-    crits = clean_up_critical_points(crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR, real_valued=True)  # fmt: skip
+    crits = clean_up_critical_points(crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR)  # fmt: skip
 
     # determine peak
     crit = filter_kinds(crits[0], kinds={EnumCriticalPoints.MAXIMUM})
     crit = filter_times(crit, t_before=1.0)
-    assert len(crit) >= 1, 'The cycle should have exactly one peak!'
+    assert len(crit) >= 1, f'The cycle has {len(crit)} peaks but should have exactly one!'
     t_max = crit[0].x
 
     # shift cycle to format peak-to-peak (NOTE: period scaled to 1)
@@ -97,7 +97,7 @@ def recognise_special_points(
 
     # messages
     log_debug('Critical points of polynomial computed:')
-    log_debug_wrapped(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0, polys=polys, real_valued=True))
+    log_debug_wrapped(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0, polys=polys))
     log_debug(f'Searching for {" -> ".join([ key for key, _ in search ])}.')
 
     # iteratively identify points:
@@ -130,18 +130,26 @@ def recognise_special_points(
             log_debug(f'({key}) found t={t0:.4f}·T.')
             # unshift time-values to original format of cycle and store
             t = (t0 + t_max) % 1
-            x = q0(t)
+            x = poly(t)
             results[key].time = t
             results[key].value = x
             results[key].found = True
 
         except Exception as err:
             results[key].found = False
+            crit = filter_times(crits[n], t_after=t_after, t_before=t_before)
+            print(crit)
+            crit = filter_kinds(crits[n], kinds={spec.kind})
+            print(crit)
+            crit = filter_times(crit, t_after=t_after, t_before=t_before)
+            print(crit)
+            print(t_after, t_before)
+            input('warte')
             if skip_errors:
                 log_warn(f'Could not find special point "{key}"! (non critical)')
             else:
                 log_error(f'Could not find special point "{key}"!')
-                raise err
+                # raise err
 
     return results
 
