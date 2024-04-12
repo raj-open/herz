@@ -6,18 +6,19 @@
 # ----------------------------------------------------------------
 
 from collections import Counter
-import lmfit
-import math
+from findpeaks import findpeaks
 from math import pi
-import numpy as np
 from numpy.typing import NDArray
-import networkx as nx
-import random
-import scipy as sp
 from scipy import linalg as spla
 from scipy import optimize as spo
 from scipy import signal as sps
-from findpeaks import findpeaks
+import lmfit
+import math
+import networkx as nx
+import numpy as np
+import random
+import scipy as sp
+import sympy
 
 # for modifications only
 from numpy.random import MT19937
@@ -141,4 +142,5 @@ __all__ = [
     'spla',
     'spo',
     'sps',
+    'sympy',
 ]

@@ -71,13 +71,15 @@ pydantic-extra-types = {version='~2.5'}
 # --------------------------------
 # maths + data
 # --------------------------------
-numpy = {version='~1,^1.24.0'} # ensures major version = 1, and version >= 1.24.0
+numpy = {version='~1.26'}
 pandas = {version='~2.2'}
 scipy = {version='~1.11'} # findpeaks imports fft from scipy in the wrong way under latest version
 pint = {version='^0.23'}
 findpeaks = {version='^2.6.1'}
 lmfit = {version='^1.2.2'}
 networkx = {version='~3,^3.2.1'}
+# mpmath = {version='^1.3'}
+sympy = {version='~1.12'}
 # --------------------------------
 # rendering
 # --------------------------------
@@ -131,7 +133,7 @@ openapi-generator = {version='^1.0.6'}
 # hooks and linting
 # --------------------------------
 pre_commit = {version='^3.6.1'}
-black = {extras=['d', 'jupyter'], version='^24.2.0'}
+black = {extras=['d', 'jupyter'], version='^24.3.0'}
 
 [tool.setuptools]
 include-package-data = true
