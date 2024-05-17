@@ -215,6 +215,10 @@ build-requirements-basics:
     @{{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade certifi wheel toml poetry
 
 build-requirements-dependencies:
+    @echo "... install packages with PEP issues"
+    @{{PYVENV_ON}} && {{PYVENV}} -m pip wheel --no-cache-dir --use-pep517 \
+        "wget (==3.2)"
+    @echo "... install ordinary packages via poetry"
     @{{PYVENV_ON}} && {{PYVENV}} -m poetry lock --no-update
     @{{PYVENV_ON}} && {{PYVENV}} -m poetry install --no-interaction --no-root
 
