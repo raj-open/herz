@@ -67,7 +67,8 @@ def subfeature_pv_fitting_steps(
 
 def subfeature_pv_recognition_steps(
     prog: LogProgress,
-    fitinfos_trig: dict[str, tuple[FittedInfoTrig, list[tuple[float, float], list[tuple[float, float]]]]],
+    # interpols_poly: dict[str, tuple[Poly[float] | None, list[tuple[float, float], list[tuple[float, float]]]]],
+    # interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float], list[tuple[float, float]]]]],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     polys: dict[str, Poly[float]],
     specials: dict[str, dict[str, SpecialPointsConfig]],
@@ -76,10 +77,10 @@ def subfeature_pv_recognition_steps(
     specials['pv'] = step_compute_pv(
         poly_p=polys['pressure'],
         poly_v=polys['volume'],
-        # fit_trig_p=fitinfos_trig['pressure'][0],
-        # fit_trig_v=fitinfos_trig['volume'][0],
-        fit_trig_p=None,
-        fit_trig_v=None,
+        # fit_poly_p=interpols_poly['pressure'][0],
+        # fit_poly_v=interpols_poly['volume'][0],
+        # fit_trig_p=interpols_trig['pressure'][0],
+        # fit_trig_v=interpols_trig['volume'][0],
         fitinfo_exp=fitinfo_exp,
         special_p=specials['pressure'],
         special_v=specials['volume'],

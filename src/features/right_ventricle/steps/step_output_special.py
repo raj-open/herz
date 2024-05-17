@@ -40,12 +40,12 @@ def step_output_special_points(
     special_pv: dict[str, SpecialPointsConfigPV],
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    # poly_p: Poly[float],
-    # poly_v: Poly[float],
-    fitinfos_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    fitinfos_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    cfg_trig_p: FitTrigConfig,
-    cfg_trig_v: FitTrigConfig,
+    interpols_poly_p: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpols_poly_v: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpols_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpols_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    cfg_trig_p: InterpConfigTrig | None,
+    cfg_trig_v: InterpConfigTrig | None,
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
 ):
     path = case.output.table.path.root
@@ -84,11 +84,11 @@ def step_output_special_points(
             {'name': 'Period', 'time': cv['time'] * T, 'unit-t': units['time']},
         )
 
-    for quantity, symb, T, fitinfos_trig, cfg_trig, special in [
-        ('pressure', 'P', T_p, fitinfos_trig_p, cfg_trig_p, special_p),
-        ('volume', 'V', T_v, fitinfos_trig_v, cfg_trig_v, special_v),
+    for quantity, symb, T, interpols_trig, cfg_trig, special in [
+        ('pressure', 'P', T_p, interpols_trig_p, cfg_trig_p, special_p),
+        ('volume', 'V', T_v, interpols_trig_v, cfg_trig_v, special_v),
     ]:
-        fit, hull, intervals = fitinfos_trig
+        fit, hull, intervals = interpols_trig
         if fit is None:
             continue
 

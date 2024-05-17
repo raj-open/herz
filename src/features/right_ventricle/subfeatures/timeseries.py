@@ -35,17 +35,17 @@ def subfeature_time_series_steps(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    fitinfos_trig: dict[
+    interpols_poly: dict[
         str,
-        tuple[
-            Poly[float] | None,
-            list[tuple[float, float]],
-            list[tuple[float, float]],
-        ],
+        tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    ],
+    interpols_trig: dict[
+        str,
+        tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     ],
     specials: dict[str, dict[str, SpecialPointsConfig]],
 ):
-    for quantity, symb, shift, cfg_data, conds, cfg_points, cfg_trig, key_align in [
+    for quantity, symb, shift, cfg_data, conds, cfg_points, cfg_poly, cfg_trig, key_align in [
         (
             'pressure',
             'P',
@@ -53,7 +53,8 @@ def subfeature_time_series_steps(
             case.data.pressure,
             config.POLY.pressure,
             specials['pressure'],
-            config.TRIG.pressure,
+            None if config.iPOLY is None else config.iPOLY.pressure,
+            None if config.iTRIG is None else config.iTRIG.pressure,
             config.MATCHING.pressure,
         ),
         (
@@ -63,7 +64,8 @@ def subfeature_time_series_steps(
             case.data.volume,
             config.POLY.volume,
             specials['volume'],
-            config.TRIG.volume,
+            None if config.iPOLY is None else config.iPOLY.volume,
+            None if config.iTRIG is None else config.iTRIG.volume,
             config.MATCHING.volume,
         ),
     ]:
@@ -74,7 +76,8 @@ def subfeature_time_series_steps(
             dataparts=dataparts,
             infos=infos,
             polys=polys,
-            fitinfos_trig=fitinfos_trig,
+            interpols_poly=interpols_poly,
+            interpols_trig=interpols_trig,
             specials=specials,
             quantity=quantity,
             symb=symb,
@@ -82,6 +85,7 @@ def subfeature_time_series_steps(
             cfg_data=cfg_data,
             conds=conds,
             cfg_points=cfg_points,
+            cfg_poly=cfg_poly,
             cfg_trig=cfg_trig,
             key_align=key_align,
         )
@@ -95,13 +99,13 @@ def subfeature_time_series_steps_single(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    fitinfos_trig: dict[
+    interpols_poly: dict[
         str,
-        tuple[
-            Poly[float] | None,
-            list[tuple[float, float]],
-            list[tuple[float, float]],
-        ],
+        tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    ],
+    interpols_trig: dict[
+        str,
+        tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     ],
     specials: dict[str, dict[str, SpecialPointsConfig]],
     quantity: str,
@@ -110,7 +114,8 @@ def subfeature_time_series_steps_single(
     cfg_data: DataTimeSeries,
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     cfg_points: dict[str, SpecialPointsConfig],
-    cfg_trig: FitTrigConfig,
+    cfg_poly: InterpConfigPoly | None,
+    cfg_trig: InterpConfigTrig | None,
     key_align: str,
 ):
     subprog = prog.subtask(f'''READ DATA {quantity}''', steps=2)
@@ -142,17 +147,28 @@ def subfeature_time_series_steps_single(
     special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align)
     subprog.next()
 
+    interp_poly = None
+    hull_poly = []
+    intervals_poly = []
+    # TODO
+    # if cfg_poly is not None:
+    #     subprog = prog.subtask(f'''INTERPOLATE POLY-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
+    #     data_anon = data.rename(columns={quantity: 'value'})
+    #     interp_poly, hull_poly, intervals_poly = step_interp_poly(data_anon, special=special, cfg_poly=cfg_poly, symb=symb)  # fmt: skip
+    #     subprog.next()
+    #     special = step_recognise_iso(interp_poly, special=special)
+    #     subprog.next()
+
+    interp_trig = None
+    hull_trig = []
+    intervals_trig = []
     if cfg_trig is not None:
-        subprog = prog.subtask(f'''FIT TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
+        subprog = prog.subtask(f'''INTERPOLATE TRIG-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
         data_anon = data.rename(columns={quantity: 'value'})
-        fit_trig, hull_trig, intervals_trig = step_fit_trig(data_anon, poly=poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
+        interp_trig, hull_trig, intervals_trig = step_interp_trig(data_anon, poly=poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
         subprog.next()
-        special = step_recognise_iso(fit_trig, special=special)
+        special = step_recognise_iso(interp_trig, special=special)
         subprog.next()
-    else:
-        fit_trig = None
-        hull_trig = []
-        intervals_trig = []
 
     subprog = prog.subtask(f'''RENORMALISE DATA + FITTINGS FOR {quantity}''', steps=4)
     data = get_unnormalised_data(data, infos=infos_, quantity=quantity, renormalise=True)
@@ -162,9 +178,9 @@ def subfeature_time_series_steps_single(
     subprog.next()
     poly = get_unnormalised_polynomial(poly, info=info)
     subprog.next()
-    if fit_trig is not None:
+    if interp_trig is not None:
         T = info.period
-        fit_trig = get_unnormalised_trig(fit_trig, info=info)
+        interp_trig = get_unnormalised_trig(interp_trig, info=info)
         hull_trig = [(T * a, T * b) for a, b in hull_trig]
         intervals_trig = [(T * a, T * b) for a, b in intervals_trig]
     subprog.next()
@@ -176,8 +192,8 @@ def subfeature_time_series_steps_single(
     subprog.next()
     poly = get_realignment_polynomial(poly, special=special)
     subprog.next()
-    if fit_trig is not None:
-        fit_trig = get_realignment_trig(fit_trig, special=special)
+    if interp_trig is not None:
+        interp_trig = get_realignment_trig(interp_trig, special=special)
         hull_trig = get_realignment_intervals(hull_trig, info=info, special=special, collapse=False)
         intervals_trig = get_realignment_intervals(intervals_trig, info=info, special=special, collapse=False)
     subprog.next()
@@ -186,7 +202,8 @@ def subfeature_time_series_steps_single(
     dataparts[quantity] = points_data
     infos[quantity] = info
     polys[quantity] = poly
-    fitinfos_trig[quantity] = (fit_trig, hull_trig, intervals_trig)
+    interpols_poly[quantity] = (interp_poly, hull_poly, intervals_poly)
+    interpols_trig[quantity] = (interp_trig, hull_trig, intervals_trig)
     specials[quantity] = special
     prog.next()
     return

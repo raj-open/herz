@@ -36,7 +36,8 @@ def step_output_time_plot(
     data: pd.DataFrame,
     info: FittedInfoNormalisation,
     poly: Poly[float],
-    fitinfo_trig: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_poly: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
@@ -72,8 +73,12 @@ def step_output_time_plot(
     for subplot in plot_data_vs_time(data, info=info, quantity=quantity, collapse=collapse, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
-    # plot trig fit
-    for subplot in plot_trig_fit(fitinfo_trig, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
+    # plot interpolated poly fit
+    for subplot in plot_interpolated_poly_fit(interpol_poly, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
+        fig.append_trace(subplot, row=1, col=1)
+
+    # plot interpolated trig fit
+    for subplot in plot_interpolated_trig_fit(interpol_trig, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
@@ -286,7 +291,48 @@ def plot_poly_fit(
         )
 
 
-def plot_trig_fit(
+def plot_interpolated_poly_fit(
+    fitinfo: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    info: FittedInfoNormalisation,
+    quantity: str,
+    cycles: list[int],
+    N: int,
+    cv: dict[str, float],
+    units: dict[str, str],
+) -> Generator[pgo.Scatter, None, None]:
+    '''
+    Creates subplot for the interpolated poly-fitting (if given).
+
+    TODO: define this.
+    '''
+    fit, _, _ = fitinfo
+    if fit is None:
+        return
+
+    # time, values, _ = compute_fitted_curves_poly(
+    #     info,
+    #     poly,
+    #     usehull=True,
+    #     cycles=cycles,
+    #     N=N,
+    #     cv_time=cv['time'],
+    #     cv_value=cv[quantity],
+    # )
+
+    # yield from add_plot_time_series(
+    #     name=f'{quantity.title()} [int. poly]',
+    #     time=time,
+    #     values=values,
+    #     mode='lines',
+    #     line=dict(
+    #         width=3,
+    #         color='hsla(100, 100%, 25%, 0.5)',
+    #     ),
+    #     showlegend=True,
+    # )
+
+
+def plot_interpolated_trig_fit(
     fitinfo: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     info: FittedInfoNormalisation,
     quantity: str,
@@ -296,7 +342,7 @@ def plot_trig_fit(
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
     '''
-    Creates subplot for the trig-fitting (if given).
+    Creates subplot for the interpolated trig-fitting (if given).
     '''
     fit, _, _ = fitinfo
     if fit is None:

@@ -8,7 +8,8 @@
 from .step_combine_data import *
 from .step_fit_exp import *
 from .step_fit_poly import *
-from .step_fit_trig import *
+from .step_interp_poly import *
+from .step_interp_trig import *
 from .step_interpolate_data import *
 from .step_normalise import *
 from .step_output_plots import *
@@ -33,7 +34,8 @@ __all__ = [
     'step_compute_pv',
     'step_fit_exp',
     'step_fit_poly',
-    'step_fit_trig',
+    'step_interp_poly',
+    'step_interp_trig',
     'step_interpolate_pv',
     'step_normalise',
     'step_output_combined_table',

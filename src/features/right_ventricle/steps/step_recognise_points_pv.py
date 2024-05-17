@@ -36,8 +36,10 @@ __all__ = [
 def step_compute_pv(
     poly_p: Poly[float],
     poly_v: Poly[float],
-    fit_trig_p: FittedInfoTrig | None,
-    fit_trig_v: FittedInfoTrig | None,
+    # fit_poly_p: Poly[float] | None,
+    # fit_poly_v: Poly[float] | None,
+    # fit_trig_p: FittedInfoTrig | None,
+    # fit_trig_v: FittedInfoTrig | None,
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
@@ -56,25 +58,25 @@ def step_compute_pv(
     dP_osc = None
     dV_osc = None
 
-    if isinstance(fit_trig_p, FittedInfoTrig):
-        hshift = fit_trig_p.hshift
-        hscale = fit_trig_p.hscale
-        # vshift = fit_trig_p.vshift
-        vscale = fit_trig_p.vscale
-        drift = fit_trig_p.drift
-        omega = 2 * pi / hscale
-        # osc_p = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
-        dP_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
+    # if isinstance(fit_trig_p, FittedInfoTrig):
+    #     hshift = fit_trig_p.hshift
+    #     hscale = fit_trig_p.hscale
+    #     # vshift = fit_trig_p.vshift
+    #     vscale = fit_trig_p.vscale
+    #     drift = fit_trig_p.drift
+    #     omega = 2 * pi / hscale
+    #     # osc_p = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
+    #     dP_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
 
-    if isinstance(fit_trig_v, FittedInfoTrig):
-        hshift = fit_trig_v.hshift
-        hscale = fit_trig_v.hscale
-        # vshift = fit_trig_v.vshift
-        vscale = fit_trig_v.vscale
-        drift = fit_trig_v.drift
-        omega = 2 * pi / hscale
-        # osc_v = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
-        dV_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
+    # if isinstance(fit_trig_v, FittedInfoTrig):
+    #     hshift = fit_trig_v.hshift
+    #     hscale = fit_trig_v.hscale
+    #     # vshift = fit_trig_v.vshift
+    #     vscale = fit_trig_v.vscale
+    #     drift = fit_trig_v.drift
+    #     omega = 2 * pi / hscale
+    #     # osc_v = lambda t: vshift + drift * t + vscale * math.cos(omega * (t - hshift))
+    #     dV_osc = lambda t: drift - omega * vscale * math.sin(omega * (t - hshift))
 
     t_edp = special_p['ed'].time
     t_esp = special_p['es'].time

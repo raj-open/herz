@@ -27,7 +27,7 @@ from ....algorithms.fitting.trigonometric import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_fit_trig',
+    'step_interp_trig',
 ]
 
 # ----------------------------------------------------------------
@@ -35,20 +35,20 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP fit trigonometric-model to data/poly-model', level=LOG_LEVELS.INFO)
-def step_fit_trig(
+@echo_function(message='STEP fit interpolated trig-model to data/poly-model', level=LOG_LEVELS.INFO)
+def step_interp_trig(
     data: pd.DataFrame,
     poly: Poly[float],
     special: dict[str, SpecialPointsConfig],
     symb: str,
-    cfg_fit: FitTrigConfig,
+    cfg_fit: InterpConfigTrig,
 ) -> tuple[
     FittedInfoTrig,
     list[tuple[float, float]],
     list[tuple[float, float]],
 ]:
     '''
-    Fits trig curve to normalised model.
+    Fits an interpolated trig curve to normalised model.
     '''
     # NOTE: polynomial must be rendered cyclic
     # to allow for consistent values upon shifting
@@ -141,18 +141,6 @@ def message_result(
         Final movement of parameters during computation: {dx:.4e}
         '''
     )
-
-
-def convert_dom_to_interval(
-    I: RootModel[list[str]],
-    env: dict[str, float],
-) -> tuple[float, float]:
-    '''
-    Determines the value of the interval corresponding
-    to a spatial configuration of an interval.
-    '''
-    key1, key2 = I.root
-    return (env[key1], env[key2])
 
 
 def resolve_to_piecewise_functions(

@@ -131,15 +131,3 @@ def line_model(
     m = (y2 - y1) / (x2 - x1)
     C = y1 - m * x1
     return C, m
-
-
-def convert_dom_to_interval(
-    I: RootModel[list[str]],
-    env: dict[str, float],
-) -> tuple[float, float]:
-    '''
-    Determines the value of the interval corresponding
-    to a spatial configuration of an interval.
-    '''
-    key1, key2 = I.root
-    return (env[key1], env[key2])

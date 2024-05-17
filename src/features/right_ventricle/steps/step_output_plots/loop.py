@@ -40,8 +40,10 @@ def step_output_loop_plot(
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
     poly_v: Poly[float],
-    fitinfo_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    fitinfo_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_poly_p: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_poly_v: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
@@ -79,10 +81,10 @@ def step_output_loop_plot(
     for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=poly_p, poly_v=poly_v, T_pv=T_pv, N=N, visible=True, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
-    # plot trig-curve
-    for subplot in plot_trig_curve(
-        fitinfo_trig_p,
-        fitinfo_trig_v,
+    # plot interpolated poly-curve
+    for subplot in plot_interpolated_poly_curve(
+        interpol_poly_p,
+        interpol_poly_v,
         info_p=info_p,
         info_v=info_v,
         poly_p=poly_p,
@@ -92,7 +94,23 @@ def step_output_loop_plot(
         N=N,
         cv=cv,
         units=units,
-    ):
+    ) :
+        fig.append_trace(subplot, row=1, col=1)
+
+    # plot interpolated trig-curve
+    for subplot in plot_interpolated_trig_curve(
+        interpol_trig_p,
+        interpol_trig_v,
+        info_p=info_p,
+        info_v=info_v,
+        poly_p=poly_p,
+        poly_v=poly_v,
+        usehull=False,
+        visible=False,
+        N=N,
+        cv=cv,
+        units=units,
+    ) :
         fig.append_trace(subplot, row=1, col=1)
 
     # plot exp-curve
@@ -309,9 +327,83 @@ def plot_poly_fit(
     )
 
 
-def plot_trig_curve(
-    fitinfo_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    fitinfo_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+def plot_interpolated_poly_curve(
+    interpol_poly_p: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_poly_v: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    info_p: FittedInfoNormalisation,
+    info_v: FittedInfoNormalisation,
+    poly_p: Poly[float],
+    poly_v: Poly[float],
+    usehull: bool,
+    visible: bool,
+    N: int,
+    cv: dict[str, float],
+    units: dict[str, str],
+) -> Generator[pgo.Scatter, None, None]:
+    '''
+    Plots fitted trig curves against data.
+
+    TODO: define this.
+    '''
+    T_p = info_p.period
+    T_v = info_v.period
+    fit_p, _, _ = interpol_poly_p
+    fit_v, _, _ = interpol_poly_v
+
+    # if fit_p is not None:
+    #     _, paxis, vaxis = compute_fitted_curves_poly(
+    #         interpol_poly_p,
+    #         info_p,
+    #         usehull=usehull,
+    #         N=N,
+    #         cv_time=cv['time'],
+    #         cv_value=cv['pressure'],
+    #         cv_aux=cv['volume'],
+    #         auxiliary=lambda t: poly_v.values((T_v / T_p) * t),
+    #     )
+    #     yield pgo.Scatter(
+    #         name='P(t) ~ cos(ωt)',
+    #         x=vaxis,
+    #         y=paxis,
+    #         mode='lines',
+    #         line=dict(
+    #             width=5,
+    #             color='hsla(100, 100%, 25%, 0.75)',
+    #         ),
+    #         visible=True if visible else 'legendonly',
+    #         showlegend=True,
+    #     )
+
+    # if fit_v is not None:
+    #     _, vaxis, paxis = compute_fitted_curves_poly(
+    #         interpol_poly_v,
+    #         info_v,
+    #         usehull=usehull,
+    #         N=N,
+    #         cv_time=cv['time'],
+    #         cv_value=cv['volume'],
+    #         cv_aux=cv['pressure'],
+    #         auxiliary=lambda t: poly_p.values((T_p / T_v) * t),
+    #     )
+    #     yield pgo.Scatter(
+    #         name='V(t) ~ cos(ωt)',
+    #         x=vaxis,
+    #         y=paxis,
+    #         mode='lines',
+    #         line=dict(
+    #             width=5,
+    #             color='hsla(100, 100%, 25%, 0.75)',
+    #         ),
+    #         visible=True if visible else 'legendonly',
+    #         showlegend=True,
+    #     )
+
+    return
+
+
+def plot_interpolated_trig_curve(
+    interpol_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
@@ -327,12 +419,12 @@ def plot_trig_curve(
     '''
     T_p = info_p.period
     T_v = info_v.period
-    fit_p, _, _ = fitinfo_trig_p
-    fit_v, _, _ = fitinfo_trig_v
+    fit_p, _, _ = interpol_trig_p
+    fit_v, _, _ = interpol_trig_v
 
     if fit_p is not None:
         _, paxis, vaxis = compute_fitted_curves_trig(
-            fitinfo_trig_p,
+            interpol_trig_p,
             info_p,
             usehull=usehull,
             N=N,
@@ -356,8 +448,8 @@ def plot_trig_curve(
 
     if fit_v is not None:
         _, vaxis, paxis = compute_fitted_curves_trig(
-            fitinfo_trig_p,
-            info_p,
+            interpol_trig_v,
+            info_v,
             usehull=usehull,
             N=N,
             cv_time=cv['time'],

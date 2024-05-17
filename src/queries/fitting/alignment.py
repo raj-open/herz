@@ -80,7 +80,7 @@ def get_realignment_polynomial(
 def get_realignment_trig(
     fit: FittedInfoTrig,
     special: dict[str, SpecialPointsConfig],
-) -> Poly[float]:
+) -> FittedInfoTrig:
     '''
     Realigns trigonometric model to start at a particular timepoint.
     '''
