@@ -14,6 +14,7 @@ components:
     # --------------------------------
     # Internal Repo Info
     # --------------------------------
+
     RepoInfo:
       description: |-
         Basic infos about repo
@@ -39,6 +40,7 @@ components:
     # --------------------------------
     # AppConfig
     # --------------------------------
+
     AppConfig:
       description: |-
         Data model for all parts of the app configuration.
@@ -58,7 +60,7 @@ components:
             - units
             - matching
             - polynomial
-            - trigonometric
+            - interpolation
             - exponential
             - points
           properties:
@@ -77,19 +79,8 @@ components:
               description: |-
                 Conditions for initial fitting (polynomial) curves to raw data.
               $ref: "#/components/schemas/PolynomialConfig"
-            trigonometric:
-              description: |-
-                Settings to fit trigonometric model.
-              type: object
-              required:
-                - pressure
-                # - volume
-              properties:
-                pressure:
-                  $ref: "#/components/schemas/FitTrigConfig"
-                volume:
-                  $ref: "#/components/schemas/FitTrigConfig"
-              additionalProperties: false
+            interpolation:
+              $ref: "#/components/schemas/InterpConfig"
             exponential:
               description: |-
                 Settings to fit exponential model.
@@ -103,6 +94,7 @@ components:
     # --------------------------------
     # DATA TYPE - matching settings
     # --------------------------------
+
     MatchingConfig:
       description: |-
         Designates to each data series the name of a special point
@@ -122,6 +114,7 @@ components:
     # --------------------------------
     # DATA TYPE - polynomial setting
     # --------------------------------
+
     PolynomialConfig:
       description: |-
         Setting on for polynomial fitting for cycles within a time-series.
@@ -149,6 +142,7 @@ components:
     # --------------------------------
     # DATA TYPE - polynomial critical conditions
     # --------------------------------
+
     PolyCritCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -169,6 +163,7 @@ components:
     # --------------------------------
     # DATA TYPE - polynomial derivative condition
     # --------------------------------
+
     PolyDerCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -191,6 +186,7 @@ components:
     # --------------------------------
     # DATA TYPE - polynomial integral condition
     # --------------------------------
+
     PolyIntCondition:
       description: |-
         A condition to force on fitted polynomial of the form:
@@ -210,6 +206,7 @@ components:
     # --------------------------------
     # DATA TYPE - Time interval
     # --------------------------------
+
     TimeInterval:
       description: |-
         Defines end points of a time-interval (`a` to `b`).
@@ -493,12 +490,54 @@ components:
       additionalProperties: false
 
     # --------------------------------
-    # DATA TYPE - Trig Fitting
+    # DATA TYPE - Interpolation Configs
     # --------------------------------
 
-    FitTrigConfig:
+    InterpConfig:
       description: |-
-        Settings used to fit trigonometric curve to parts of model.
+        Configuration options for interpolation.
+      type: object
+      required: []
+      properties:
+        polynomial:
+          description: |-
+            Settings to fit polynomial interpolation.
+          type: object
+          required:
+            - pressure
+            # - volume
+          properties:
+            pressure:
+              $ref: "#/components/schemas/InterpConfigPoly"
+            volume:
+              $ref: "#/components/schemas/InterpConfigPoly"
+          additionalProperties: false
+        trigonometric:
+          description: |-
+            Settings to fit trigonometric interpolation.
+          type: object
+          required:
+            - pressure
+            # - volume
+          properties:
+            pressure:
+              $ref: "#/components/schemas/InterpConfigTrig"
+            volume:
+              $ref: "#/components/schemas/InterpConfigTrig"
+          additionalProperties: false
+      additionalProperties: false
+
+    InterpConfigPoly:
+      description: |-
+        Settings use to fit polynomial interpolations.
+      type: object
+      required: []
+      properties: {}
+      additionalProperties: false
+
+    InterpConfigTrig:
+      description: |-
+        Settings used to fit trigonometric interpolations.
       type: object
       required:
         - solver

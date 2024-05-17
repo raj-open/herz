@@ -125,6 +125,17 @@ class PointFormat(BaseModel):
     text_position: str = Field('top center', alias='text-position')
 
 
+class InterpConfigPoly(BaseModel):
+    """
+    Settings use to fit polynomial interpolations.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+
+
 class FitTrigIntialisation(BaseModel):
     """
     Provides initial estimates for model parameters
@@ -291,6 +302,19 @@ class SpecialPointsSpec(BaseModel):
     )
 
 
+class Polynomial(BaseModel):
+    """
+    Settings to fit polynomial interpolation.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    pressure: InterpConfigPoly
+    volume: Optional[InterpConfigPoly] = None
+
+
 class Solver(BaseModel):
     """
     Settings for the solver.
@@ -391,9 +415,9 @@ class SpecialPointsConfig(BaseModel):
     format: Optional[PointFormat] = Field(None, description='Settings for plot marker.')
 
 
-class FitTrigConfig(BaseModel):
+class InterpConfigTrig(BaseModel):
     """
-    Settings used to fit trigonometric curve to parts of model.
+    Settings used to fit trigonometric interpolations.
     """
 
     model_config = ConfigDict(
@@ -427,19 +451,6 @@ class FitExpConfig(BaseModel):
     initial: FitExpIntialisation
 
 
-class Trigonometric(BaseModel):
-    """
-    Settings to fit trigonometric model.
-    """
-
-    model_config = ConfigDict(
-        extra='forbid',
-        populate_by_name=True,
-    )
-    pressure: FitTrigConfig
-    volume: Optional[FitTrigConfig] = None
-
-
 class SpecialPointsConfigs(BaseModel):
     """
     Configuration of special points.
@@ -452,6 +463,32 @@ class SpecialPointsConfigs(BaseModel):
     pressure: Dict[str, SpecialPointsConfig]
     volume: Dict[str, SpecialPointsConfig]
     pv: Dict[str, SpecialPointsConfigPV]
+
+
+class Trigonometric(BaseModel):
+    """
+    Settings to fit trigonometric interpolation.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    pressure: InterpConfigTrig
+    volume: Optional[InterpConfigTrig] = None
+
+
+class InterpConfig(BaseModel):
+    """
+    Configuration options for interpolation.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    polynomial: Optional[Polynomial] = Field(None, description='Settings to fit polynomial interpolation.')
+    trigonometric: Optional[Trigonometric] = Field(None, description='Settings to fit trigonometric interpolation.')
 
 
 class Settings(BaseModel):
@@ -468,7 +505,7 @@ class Settings(BaseModel):
     polynomial: PolynomialConfig = Field(
         ..., description='Conditions for initial fitting (polynomial) curves to raw data.'
     )
-    trigonometric: Trigonometric = Field(..., description='Settings to fit trigonometric model.')
+    interpolation: InterpConfig
     exponential: FitExpConfig = Field(..., description='Settings to fit exponential model.')
     points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
 

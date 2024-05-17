@@ -22,7 +22,9 @@ from ..generated.app import TimeInterval
 from ..generated.app import FitExpConfig
 from ..generated.app import FitExpCondition
 from ..generated.app import FitExpIntialisation
-from ..generated.app import FitTrigConfig
+from ..generated.app import InterpConfig
+from ..generated.app import InterpConfigPoly
+from ..generated.app import InterpConfigTrig
 from ..generated.app import FitTrigCondition
 from ..generated.app import FitTrigIntialisation
 from ..generated.app import EnumBoundKind
@@ -47,7 +49,9 @@ __all__ = [
     'FittedInfoNormalisation',
     'FittedInfoTrig',
     'FitTrigCondition',
-    'FitTrigConfig',
+    'InterpConfig',
+    'InterpConfigPoly',
+    'InterpConfigTrig',
     'FitTrigIntialisation',
     'PointPV',
     'PolyCritCondition',

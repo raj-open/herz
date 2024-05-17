@@ -85,78 +85,105 @@ settings:
         time: 1.
 
   # --------------------------------
-  # SETTINGS FOR FITTING TRIG-MODEL
+  # SETTINGS FOR INTERPOLATION MODEL
   # --------------------------------
 
-  trigonometric:
-    pressure:
-      solver: &ref_solver
-        n-max: 1000
-        # mode: BRUTE-FORCE
-        mode: HYBRID-GRADIENT
-        # mode: GRADIENT
-        model: DATA
-        # model: POLY-MODEL
-        drift: false
+  interpolation:
+    # --------------------------------
+    # POLYNOMIAL OPTION
+    # --------------------------------
 
-      points:
-        a1: "P['ed'].time - T_p"
-        y11: "P['ed'].value"
-        b1: "P['epad'].time - T_p"
-        y12: "P['epad'].value"
-        a2: "P['anti-epad'].time"
-        y21: "P['anti-epad'].value"
-        b2: "P['bd'].time"
-        y22: "P['bd'].value"
+    polynomial:
+      pressure:
+        points:
+          a1: "P['ed'].time - T_p"
+          y11: "P['ed'].value"
+          b1: "P['epad'].time - T_p"
+          y12: "P['epad'].value"
+          a2: "P['anti-epad'].time"
+          y21: "P['anti-epad'].value"
+          b2: "P['bd'].time"
+          y22: "P['bd'].value"
 
-      intervals:
-        - [ a1, b1 ]
-        - [ a2, b2 ]
+        intervals:
+          - [ a1, b1 ]
+          - [ a2, b2 ]
 
-      initial:
-        omega: '(omega_min + omega_max)/2'
-        hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
-        # since data is normalised with amplitude = 1, peak = 0
-        vscale: 1
-        vshift: -2
-        drift: 0
+      # volume:
 
-      conditions:
-        - kind: HSCALE-LOWER-BOUND
-          value: '1*(b2 - a1)'
-        - kind: HSCALE-UPPER-BOUND
-          value: '2*(a2 - b1)'
+    # --------------------------------
+    # TRIG OPTION
+    # --------------------------------
 
-    # volume:
-    #   solver: *ref_solver
-    #
-    #   points:
-    #     a1: "V['anti-es'].time - T_v"
-    #     y11: "V['anti-es'].value"
-    #     b1: "V['bd'].time - T_v"
-    #     y12: "V['bd'].value"
-    #     a2: "V['sys'].time"
-    #     y21: "V['sys'].value"
-    #     b2: "V['es'].time"
-    #     y22: "V['es'].value"
-    #
-    #   intervals:
-    #     - [ a1, b1 ]
-    #     - [ a2, b2 ]
-    #
-    #   initial:
-    #     omega: '(omega_min + omega_max)/2'
-    #     hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
-    #     # since data is normalised with amplitude = 1, peak = 0
-    #     vscale: '1'
-    #     vshift: '-2'
-    #     drift: 0
-    #
-    #   conditions:
-    #     - kind: HSCALE-LOWER-BOUND
-    #       value: '1*(b2 - a1)'
-    #     - kind: HSCALE-UPPER-BOUND
-    #       value: '2*(a2 - b1)'
+    # trigonometric:
+    #   pressure:
+    #     solver: &ref_solver
+    #       n-max: 1000
+    #       # mode: BRUTE-FORCE
+    #       mode: HYBRID-GRADIENT
+    #       # mode: GRADIENT
+    #       model: DATA
+    #       # model: POLY-MODEL
+    #       drift: false
+
+    #     points:
+    #       a1: "P['ed'].time - T_p"
+    #       y11: "P['ed'].value"
+    #       b1: "P['epad'].time - T_p"
+    #       y12: "P['epad'].value"
+    #       a2: "P['anti-epad'].time"
+    #       y21: "P['anti-epad'].value"
+    #       b2: "P['bd'].time"
+    #       y22: "P['bd'].value"
+
+    #     intervals:
+    #       - [ a1, b1 ]
+    #       - [ a2, b2 ]
+
+    #     initial:
+    #       omega: '(omega_min + omega_max)/2'
+    #       hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
+    #       # since data is normalised with amplitude = 1, peak = 0
+    #       vscale: 1
+    #       vshift: -2
+    #       drift: 0
+
+    #     conditions:
+    #       - kind: HSCALE-LOWER-BOUND
+    #         value: '1*(b2 - a1)'
+    #       - kind: HSCALE-UPPER-BOUND
+    #         value: '2*(a2 - b1)'
+
+    #   # volume:
+    #   #   solver: *ref_solver
+    #   #
+    #   #   points:
+    #   #     a1: "V['anti-es'].time - T_v"
+    #   #     y11: "V['anti-es'].value"
+    #   #     b1: "V['bd'].time - T_v"
+    #   #     y12: "V['bd'].value"
+    #   #     a2: "V['sys'].time"
+    #   #     y21: "V['sys'].value"
+    #   #     b2: "V['es'].time"
+    #   #     y22: "V['es'].value"
+    #   #
+    #   #   intervals:
+    #   #     - [ a1, b1 ]
+    #   #     - [ a2, b2 ]
+    #   #
+    #   #   initial:
+    #   #     omega: '(omega_min + omega_max)/2'
+    #   #     hshift: 'xintercept(((a1, y11), (b1, y12)), ((a2, y21), (b2, y22)))'
+    #   #     # since data is normalised with amplitude = 1, peak = 0
+    #   #     vscale: '1'
+    #   #     vshift: '-2'
+    #   #     drift: 0
+    #   #
+    #   #   conditions:
+    #   #     - kind: HSCALE-LOWER-BOUND
+    #   #       value: '1*(b2 - a1)'
+    #   #     - kind: HSCALE-UPPER-BOUND
+    #   #       value: '2*(a2 - b1)'
 
   # --------------------------------
   # SETTINGS FOR FITTING EXP-MODEL
