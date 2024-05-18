@@ -10,6 +10,7 @@ from ....thirdparty.types import *
 
 from ....models.polynomials import *
 from ....models.fitting import *
+from ...interpolations import *
 
 # ----------------------------------------------------------------
 # EXPORTS
@@ -28,73 +29,81 @@ __all__ = [
 def onb_conditions(
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-    t1: float = 0.0,
-    t2: float = 1.0,
+    intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> NDArray[np.float64]:
     '''
-    Let A be the condition-matrix.
-    We first compute an ONB, B, in ℝ^{d+1} of the nullspace of A.
-    The goal is to transform this to an ONB in C[0, T].
+    Let `Ω` denote the union of the intervals.
+    Let `A` be the condition-matrix.
+    We first compute an ONB, `B`, in `ℝᵈ⁺¹` of the nullspace of `A`.
+    The goal is to transform this to an ONB in `(C(Ω), ‖·‖₂)`.
 
-    Let p_j be the polynomial corresponding to coeffs in B[:, j]
+    Let `p_j` be the polynomial corresponding to coeffs in `B[:, j]`.
     Set
 
-       S[i, j] = ⟨p_i, p_j⟩ = ∫ p_i p_j^* dt / T
+    ```
+    S[i, j] = ⟨p_i, p_j⟩
+        = ∫_{t ∈ Ω} p_i p_j^* dt
+    ```
 
-    for each i, j.
+    for each `i, j`.
 
-    **CLAIM:** S is a positive definite matrix on ℝ^{d+1}.
-    _Proof:_
-        For v ∈ ℝ^{d+1}, setting ξ := ∑_j v[j]p_j ∈ C[0, T], one has
+    **CLAIM:** `S` is a positive definite matrix on `ℝᵈ⁺¹`.
 
-            ⟨Sv, v⟩_{ℝ^{d+1}} = ∑_ij  ⟨p_i, p_j⟩ v[i]v[j]^* = ⟨ξ, ξ⟩ ≥ 0,
-
-        with ⟨Sv, v⟩_{ℝ^{d+1}} = 0
+    *Proof:*
+        For `v ∈ ℝᵈ⁺¹`, setting `ξ := ∑_j v[j]p_j ∈ C(Ω)`, one has
+        ```
+        ⟨Sv, v⟩_{ℝᵈ⁺¹} = ∑_ij  ⟨p_i, p_j⟩ v[i]v[j]^* = ⟨ξ, ξ⟩ ≥ 0,
+        ```
+        with
+        ```
+        ⟨Sv, v⟩_{ℝᵈ⁺¹} = 0
         ⟺ ⟨ξ, ξ⟩ = 0
         ⟺ ξ = 0
         ⟺ coeffs in ξ = 0
         ⟺ coeffs in ∑_j v[j] p_j = 0
         ⟺ ∑_j v[j]B[:, j] = 0
         ⟺ Bv = 0
-        ⟺ v = 0, since B is a matrix consisting of linear indep vectors.
-    QED.
+        ⟺ v = 0,
+        ```
+        since `B` is a matrix consisting of linear indep vectors.
+    QED
 
-    It follows that S = UDU^*,
-    where U is unitary, D is diagonal and D > 0 (strictly).
-    Set Q = B conj(U).
-    Let q_j be the polynomial corresponding to coeffs in Q[:, j].
+    It follows that `S = UDU^*`,
+    where `U` is unitary, `D` is diagonal and `D > 0` (strictly).
+
+    Set `Q = B conj(U)`.
+    Let `q_j` be the polynomial corresponding to coeffs in `Q[:, j]`.
     So
+    ```
+    q_j[i] = Q[i, j]
+        = B[i, :] conj(U)[:, j]
+        = ∑ₖ U^*[j, k] · p_k[i]
 
-        q_j[i] = Q[i, j]
-          = B[i, :] conj(U)[:, j]
-          = ∑ₖ U^*[j, k] · p_k[i]
-
-        ==> q_j = ∑ₖ U[j, k]^* · p_k
-
+    ⟹ q_j = ∑ₖ U[j, k]^* · p_k
+    ```
     and
-
-        ⟨q_i, q_j⟩
-        = ∑ₖ₁, ₖ₂ U^*[i, k1] · ⟨p_k1, p_k2⟩ · (U^*[j, k2])^*
-        = ∑ₖ₁, ₖ₂ U^*[i, k1] · S[k1, k2] · U[k2, j]
-        = (U^* S U)[i, j]
-        = D[i, j]
-
-    In particular, the vectors {q_i} are orthogonal (in C[0, T]).
-    Hence, { 1/√D[i,i] * q_i } is an ONB in C[0, T].
+    ```
+    ⟨q_i, q_j⟩
+    = ∑ₖ₁, ₖ₂ U^*[i, k1] · ⟨p_k1, p_k2⟩ · (U^*[j, k2])^*
+    = ∑ₖ₁, ₖ₂ U^*[i, k1] · S[k1, k2] · U[k2, j]
+    = (U^* S U)[i, j]
+    = D[i, j]
+    ```
+    In particular, the vectors `{q_i}` are orthogonal in `C(Ω)`.
+    Hence, `{ 1/√D[i,i] * q_i }` is an ONB in `C(Ω)`.
     '''
     # compute ONB for null-space of condition-matrix:
     A = force_poly_conditions(deg=deg, conds=conds)
     B = spla.null_space(A)
 
-    # compute inner-products within C[0, T]:
-    S = inner_product_polybasis(B, t1=t1, t2=t2)
+    # compute inner-products within C(Ω):
+    S = inner_product_polybasis(B, intervals)
 
-    # transform B into an ONB in C[0, T]:
+    # transform B into an ONB in C(Ω):
     # U, D, V = np.linalg.svd(S)
     D, U = np.linalg.eigh(S)
     Q = B @ U.conj()  # orthogonal family
     Q = Q * 1 / np.sqrt(D)  # normalise each columns
-    S = inner_product_polybasis(Q, t1=t1, t2=t2)
 
     return Q
 
@@ -106,11 +115,10 @@ def onb_conditions(
 
 def onb_spectrum(
     Q: NDArray[np.float64],
+    t: list[float],
     x: list[float],
-    t: Optional[list[float]] = None,
+    intervals: Iterable[tuple[float, float]],
     cyclic: bool = False,
-    T: float = 1.0,
-    offset: float = 0.0,
     in_standard_basis: bool = True,
 ) -> Poly[float]:
     '''
@@ -118,7 +126,8 @@ def onb_spectrum(
     - `Q` - a `d x m` array, where `Q[:,j]` denote the coefficients of a polynomial qⱼ
       and {qⱼ}ⱼ is an ONB
     - (`t`, `x`) - a discrete time-series
-    - `T` - the total time-duration
+    - `intervals` - list of disjoint sub intervals of some interval
+       on which the polynomial lives.
     - `cyclic` - whether the series is periodic
     - `in_standard_basis` - whether to convert the computed innerproducts
        to coefficients wrt the standard basis {tʲ}ⱼ.
@@ -139,6 +148,9 @@ def onb_spectrum(
     are the best fit polynomial wrt. the standard basis {tʲ}ⱼ or the ONB {qⱼ}ⱼ
 
     ## Computation ##
+
+    Let `Ω` denote the union of the disjoint invervals.
+
     Determines
     ```
     cⱼ := ⟨x, qⱼ⟩
@@ -155,16 +167,10 @@ def onb_spectrum(
     ```
     amongst all possibly polynomials in the subspace `V ⊆ C[0, T]`
     spanned by {qⱼ}ⱼ.
-    '''
-    deg = Q.shape[0] - 1  # degree of polynomials in ONB
-    m = Q.shape[1]  # size of ONB
 
-    if t is None:
-        t = np.linspace(start=0, stop=T, endpoint=False)
+    ### Step 1 ###
 
-    '''
-    NOTE:
-    The interval [0, T] is subdivided into
+    The intervals in Ω are subdivided into
     intervals [t1ᵢ, t2ᵢ] with endpoints
     from the discrete time-series.
     The monom
@@ -173,37 +179,17 @@ def onb_spectrum(
     ```
     is a piecewise-linear interpolation
     for x(t) on [t1ᵢ, t2ᵢ].
-    '''
-    t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
-    if cyclic:
-        x = np.concatenate([x, x[:1]])
-    else:
-        x1 = np.asarray(x[1:])
-        x2 = np.asarray(x[:-1])
-        x = np.concatenate([[x[0]], (x1 + x2) / 2, [x[-1]]]).tolist()
 
-    dt = np.diff(t)
-    dx = np.diff(x)
-    dt[dt == 0.0] = 1.0
-    C1 = dx / dt
-    C0 = np.asarray(x[:-1]) - C1 * np.asarray(t[:-1])
+    ### Step 2 ###
 
-    '''
     Determine coefficients of integrals of polynomials:
-    NOTE:
     - Q[:, j] = coeff of polynomial qⱼ
     - Q1[:, j] = coeff of polynomial q1ⱼ, a stemfunction of qⱼ
     - Q2[:, j] = coeff of polynomial q2ⱼ, a stemfunction of q1ⱼ
     - R[:, j] = coeff of polynomial rⱼ = t·q1ⱼ - q2ⱼ
-    '''
-    Q1 = np.column_stack([Poly(coeff=Q[:, j].tolist()).integral().coefficients for j in range(m)])
-    Q2 = np.column_stack([Poly(coeff=Q1[:, j].tolist()).integral().coefficients for j in range(m)])
-    zeros = np.zeros((1, m))
-    R = np.concatenate([zeros, Q1]) - Q2
-    Q1 = np.concatenate([Q1, zeros])  # pad
 
-    '''
-    NOTE:
+    ### Step 3 ###
+
     Set
     ```
     dmonomes[i, k] = t2ᵢᵏ - t2ᵢᵏ
@@ -221,14 +207,9 @@ def onb_spectrum(
         = ∑ₖ P[k, j]·t2ᵢᵏ - P[k, j]·t2ᵢᵏ
         = pⱼ(t2ᵢ) - pⱼ(t1ᵢ)
     ```
-    '''
-    monomes = np.asarray([np.concatenate([[1], np.cumprod([tt] * (deg + 2))]) for tt in t])
-    dmonomes = monomes[1:, :] - monomes[:-1, :]
-    I0 = dmonomes @ Q1
-    I1 = dmonomes @ R
 
-    '''
-    NOTE:
+    ### Step 4 ###
+
     Part of innerproduct ⟨x, qⱼ⟩ restricted to [t1ᵢ, t2ᵢ],
     assuming interpolation
     ```
@@ -254,6 +235,39 @@ def onb_spectrum(
         = (I0^* · C0 + I1^* · C1)[j]
     ```
     '''
+
+    deg = Q.shape[0] - 1  # degree of polynomials in ONB
+    m = Q.shape[1]  # size of ONB
+    _, T, dt_ = get_time_aspects(t)
+    offset = t[0]
+
+    # TODO compute integrals for all time differences.
+
+    t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
+    if cyclic:
+        x = np.concatenate([x, x[:1]])
+    else:
+        x1 = np.asarray(x[1:])
+        x2 = np.asarray(x[:-1])
+        x = np.concatenate([[x[0]], (x1 + x2) / 2, [x[-1]]]).tolist()
+
+    dt = np.diff(t)
+    dx = np.diff(x)
+    dt[dt == 0.0] = 1.0
+    C1 = dx / dt
+    C0 = np.asarray(x[:-1]) - C1 * np.asarray(t[:-1])
+
+    Q1 = np.column_stack([Poly(coeff=Q[:, j].tolist()).integral().coefficients for j in range(m)])
+    Q2 = np.column_stack([Poly(coeff=Q1[:, j].tolist()).integral().coefficients for j in range(m)])
+    zeros = np.zeros((1, m))
+    R = np.concatenate([zeros, Q1]) - Q2
+    Q1 = np.concatenate([Q1, zeros])  # pad
+
+    monomes = np.asarray([np.concatenate([[1], np.cumprod([tt] * (deg + 2))]) for tt in t])
+    dmonomes = monomes[1:, :] - monomes[:-1, :]
+    I0 = dmonomes @ Q1
+    I1 = dmonomes @ R
+
     coeff = I0.conj().T @ C0 + I1.conj().T @ C1
 
     if in_standard_basis:

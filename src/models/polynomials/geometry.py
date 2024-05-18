@@ -66,25 +66,32 @@ def norm_poly_exp(
 
 def inner_product_polybasis(
     B: NDArray[np.float64],
-    t1: float = 0.0,
-    t2: float = 1.0,
-) -> float:
+    intervals: Iterable[tuple[float, float]],
+) -> NDArray[np.float64]:
+    '''
+    Computes interproducts of polynomials.
+    @returns
+    matrix `S` with
+
+    ```
+    S[i, j] = ∫_[t1, t2] p_i · p_j^* dt
+    ```
+
+    for each `i, j ∈ {0, 1, 2, …, m}`
+    '''
     d = B.shape[0] - 1
     m = B.shape[1]
-    ip = get_inner_products_standard_basis(d, d, t1, t2)
+    ip = get_inner_products_standard_basis(d, d, intervals)
     S = np.zeros((m, m))
 
     for j1 in range(m):
-        for j2 in range(j1 + 1):
+        for j2 in range(m):
             # NOTE: coeffs[i, k] = B[i, j1]·B*[j2, k]*
             # sum(coeffs) = ∑_{i,k} B[i, j1]·B*[j2, k]*
             # = ∑_{i,k} 1^T·B[i, j1]·B*[j2, k]*·1
             coeffs = B[:, j1][:, np.newaxis] * B[:, j2][np.newaxis, :].conj()
             S[j1, j2] = np.sum(ip * coeffs)
 
-    for j2 in range(m):
-        for j1 in range(j2):
-            S[j1, j2] = S[j2, j1]
     return S
 
 
@@ -96,8 +103,7 @@ def inner_product_polybasis(
 def get_inner_products_standard_basis(
     d1: int,
     d2: int,
-    t2: float = 1.0,
-    t1: float = 0.0,
+    intervals: Iterable[tuple[float, float]],
 ):
     '''
     Computes the inner products between the elements of the standard basis.
@@ -106,22 +112,9 @@ def get_inner_products_standard_basis(
     powers2 = np.asarray(range(d2 + 1))
     sumpowers = powers1[:, np.newaxis] + powers2[np.newaxis, :] + 1
 
-    match t1:
-        case 0.0:
-            tt1 = np.zeros((d1 + 1, d2 + 1))
-        case 1.0:
-            tt1 = np.ones((d1 + 1, d2 + 1))
-        case _:
-            tt1 = t1**sumpowers
+    ip = np.zeros((d1 + 1, d2 + 1))
+    for t1, t2 in intervals:
+        ip += t2**sumpowers - t1**sumpowers
+    ip /= sumpowers
 
-    match t2:
-        case 0.0:
-            tt2 = np.zeros((d1 + 1, d2 + 1))
-        case 1.0:
-            tt2 = np.ones((d1 + 1, d2 + 1))
-        case _:
-            tt2 = t2**sumpowers
-
-    T = t2 - t1 or 1.0
-    ip = (tt2 - tt1) / (T * sumpowers)
     return ip

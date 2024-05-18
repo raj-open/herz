@@ -50,7 +50,7 @@ def fit_poly_cycles(
     # fit each cycle
     fits = []
     for i1, i2 in windows:
-        tt, _ = normalise_to_unit_interval(t[i1:i2])
+        tt, _, _, _ = normalise_to_unit_interval(t[i1:i2])
         xx = x[i1:i2]
         p = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds, period=1, offset=0)
         fits.append((p, (i1, i2)))
@@ -61,13 +61,17 @@ def fit_poly_cycles(
     return fits
 
 
+# ----------------------------------------------------------------
+# SECIONDARY METHODS
+# ----------------------------------------------------------------
+
+
 def fit_poly_cycle(
     t: NDArray[np.float64],
     x: NDArray[np.float64],
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
-    period: float,
-    offset: float,
+    intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> Poly[float]:
     '''
     Fits 'certain' polynomials to a cycle in such a way,
@@ -77,6 +81,7 @@ def fit_poly_cycle(
     - `t` - a `1`-dimensional array of time-values normalised to [0, 1].
     - `x` - a `1`-dimensional array of values in a cycle.
     - `dt` - the time increment.
+    - `intervals` - list of subintervals `[a, b] ⊆ [0, 1]` for which the data is to be considered.
 
     @returns
     - `[ (k, c_k) … ]` whereby `c_k` is the coefficient of the monom `t^k`,
@@ -84,14 +89,9 @@ def fit_poly_cycle(
       over time uniformly on `[0, T]`.
     - the fit polynomial
     '''
-    Q = onb_conditions(deg=deg, conds=conds)
-    p = onb_spectrum(t=t, x=x, Q=Q, cyclic=True, T=period, offset=offset, in_standard_basis=True)
+    Q = onb_conditions(deg=deg, conds=conds, intervals=intervals)
+    p = onb_spectrum(t=t, x=x, Q=Q, intervals=intervals, cyclic=True, in_standard_basis=True)
     return p
-
-
-# ----------------------------------------------------------------
-# SECIONDARY METHODS
-# ----------------------------------------------------------------
 
 
 def compute_simultaneous_fit(
