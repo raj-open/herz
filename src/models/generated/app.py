@@ -125,17 +125,6 @@ class PointFormat(BaseModel):
     text_position: str = Field('top center', alias='text-position')
 
 
-class InterpConfigPoly(BaseModel):
-    """
-    Settings use to fit polynomial interpolations.
-    """
-
-    model_config = ConfigDict(
-        extra='forbid',
-        populate_by_name=True,
-    )
-
-
 class FitTrigIntialisation(BaseModel):
     """
     Provides initial estimates for model parameters
@@ -302,17 +291,16 @@ class SpecialPointsSpec(BaseModel):
     )
 
 
-class Polynomial(BaseModel):
+class InterpConfigPoly(BaseModel):
     """
-    Settings to fit polynomial interpolation.
+    Settings use to fit polynomial interpolations.
     """
 
     model_config = ConfigDict(
         extra='forbid',
         populate_by_name=True,
     )
-    pressure: InterpConfigPoly
-    volume: Optional[InterpConfigPoly] = None
+    interval: PairString
 
 
 class Solver(BaseModel):
@@ -413,6 +401,19 @@ class SpecialPointsConfig(BaseModel):
         None, description='Optional specifications for computation of special point.'
     )
     format: Optional[PointFormat] = Field(None, description='Settings for plot marker.')
+
+
+class Polynomial(BaseModel):
+    """
+    Settings to fit polynomial interpolation.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    pressure: InterpConfigPoly
+    volume: Optional[InterpConfigPoly] = None
 
 
 class InterpConfigTrig(BaseModel):

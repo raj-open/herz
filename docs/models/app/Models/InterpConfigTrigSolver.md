@@ -1,4 +1,4 @@
-# FitTrigConfigSolver
+# InterpConfigTrigSolver
 ## Properties
 
 Name | Type | Description | Notes

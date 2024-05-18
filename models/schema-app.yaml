@@ -531,8 +531,11 @@ components:
       description: |-
         Settings use to fit polynomial interpolations.
       type: object
-      required: []
-      properties: {}
+      required:
+        - interval
+      properties:
+        interval:
+          $ref: "#/components/schemas/PairString"
       additionalProperties: false
 
     InterpConfigTrig:

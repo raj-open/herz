@@ -95,19 +95,17 @@ settings:
 
     polynomial:
       pressure:
-        points:
-          a1: "P['ed'].time - T_p"
-          y11: "P['ed'].value"
-          b1: "P['epad'].time - T_p"
-          y12: "P['epad'].value"
-          a2: "P['anti-epad'].time"
-          y21: "P['anti-epad'].value"
-          b2: "P['bd'].time"
-          y22: "P['bd'].value"
-
-        intervals:
-          - [ a1, b1 ]
-          - [ a2, b2 ]
+        # points:
+        #   - sys
+        #   - es
+        #   - anti-epad
+        #   - bd
+        #   - dia
+        #   - anti-bd
+        #   - ed
+        #   - epad
+        #   - bs
+        interval: [ anti-epad, epad ]
 
       # volume:
 

@@ -1,9 +1,9 @@
-# FitTrigConfig
+# InterpConfigTrig
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**solver** | [**FitTrigConfig_solver**](FitTrigConfig_solver.md) |  | [default to null]
+**solver** | [**InterpConfigTrig_solver**](InterpConfigTrig_solver.md) |  | [default to null]
 **points** | [**Map**](string.md) | Schema for values to be used in intervals and conditions | [default to null]
 **intervals** | [**List**](array.md) | Defines the spatial domain over which the model is to be defined. | [default to null]
 **conditions** | [**List**](FitTrigCondition.md) | Provides restrictions on the frequency. | [optional] [default to []]
