@@ -13,6 +13,7 @@ from ....setup import config
 from ....core.log import *
 from ....models.app import *
 from ....models.user import *
+from ....algorithms.interpolations import *
 from .methods import *
 
 # ----------------------------------------------------------------

@@ -36,7 +36,7 @@ def step_output_time_plot(
     data: pd.DataFrame,
     info: FittedInfoNormalisation,
     poly: Poly[float],
-    interpol_poly: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_poly: Poly[float] | None,
     interpol_trig: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
@@ -74,11 +74,11 @@ def step_output_time_plot(
         fig.append_trace(subplot, row=1, col=1)
 
     # plot interpolated poly fit
-    for subplot in plot_interpolated_poly_fit(interpol_poly, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
+    for subplot in plot_interpolated_poly_fit(interpol_poly, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
     # plot interpolated trig fit
-    for subplot in plot_interpolated_trig_fit(interpol_trig, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):
+    for subplot in plot_interpolated_trig_fit(interpol_trig, info=info, quantity=quantity, cycles=cycles, N=N, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
@@ -292,7 +292,7 @@ def plot_poly_fit(
 
 
 def plot_interpolated_poly_fit(
-    fitinfo: tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
+    poly: Poly[float] | None,
     info: FittedInfoNormalisation,
     quantity: str,
     cycles: list[int],
@@ -305,14 +305,13 @@ def plot_interpolated_poly_fit(
 
     TODO: define this.
     '''
-    fit, _, _ = fitinfo
-    if fit is None:
+    if poly is None:
         return
 
     # time, values, _ = compute_fitted_curves_poly(
     #     info,
     #     poly,
-    #     usehull=True,
+    #     quantity=quantity,
     #     cycles=cycles,
     #     N=N,
     #     cv_time=cv['time'],

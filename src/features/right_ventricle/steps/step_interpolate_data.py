@@ -46,12 +46,12 @@ def step_interpolate_pv(
 
     for i_v, j_v in windows_v:
         t_v = data_v[i_v:j_v]['time'].to_numpy(copy=True)
-        t_v, _ = normalise_to_unit_interval(t_v)
+        t_v, _, _, _ = normalise_to_unit_interval(t_v)
         V = data_v[i_v:j_v]['volume'].to_numpy(copy=True)
 
         for i_p, j_p in windows_p:
             t_p = data_p[i_p:j_p]['time'].to_numpy(copy=True)
-            t_p, _ = normalise_to_unit_interval(t_p)
+            t_p, _, _, _ = normalise_to_unit_interval(t_p)
             P = data_p[i_p:j_p]['pressure'].to_numpy(copy=True)
             t_, dt_, V_, P_ = interpolate_two_series(t1=t_v, x1=V, t2=t_p, x2=P)
             PV_ = np.asarray([t_, dt_, V_, P_]).T

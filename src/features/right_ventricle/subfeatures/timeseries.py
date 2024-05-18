@@ -35,14 +35,8 @@ def subfeature_time_series_steps(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    interpols_poly: dict[
-        str,
-        tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
-    ],
-    interpols_trig: dict[
-        str,
-        tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    ],
+    interpols_poly: dict[str, Poly[float] | None],
+    interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]]],
     specials: dict[str, dict[str, SpecialPointsConfig]],
 ):
     for quantity, symb, shift, cfg_data, conds, cfg_points, cfg_poly, cfg_trig, key_align in [
@@ -99,14 +93,8 @@ def subfeature_time_series_steps_single(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    interpols_poly: dict[
-        str,
-        tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]],
-    ],
-    interpols_trig: dict[
-        str,
-        tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    ],
+    interpols_poly: dict[str, Poly[float] | None],
+    interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]]],
     specials: dict[str, dict[str, SpecialPointsConfig]],
     quantity: str,
     symb: str,
@@ -148,16 +136,20 @@ def subfeature_time_series_steps_single(
     subprog.next()
 
     interp_poly = None
-    hull_poly = []
-    intervals_poly = []
-    # TODO
     # if cfg_poly is not None:
+    #     # TODO
+    #     cfg_poly.interval
     #     subprog = prog.subtask(f'''INTERPOLATE POLY-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
     #     data_anon = data.rename(columns={quantity: 'value'})
-    #     interp_poly, hull_poly, intervals_poly = step_interp_poly(data_anon, special=special, cfg_poly=cfg_poly, symb=symb)  # fmt: skip
+    #     interp_poly = step_interp_poly(data_anon, special=special, cfg_poly=cfg_poly, symb=symb)  # fmt: skip
+
+    #     conf_ = case.process.fit
+    #     data, fitsinfos_poly = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=conf_.mode)
+    #     poly, _ = fitsinfos_poly[-1]
+    #     # special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align)
     #     subprog.next()
-    #     special = step_recognise_iso(interp_poly, special=special)
-    #     subprog.next()
+    #     # special = step_recognise_iso(interp_poly, special=special)
+    #     # subprog.next()
 
     interp_trig = None
     hull_trig = []
@@ -202,7 +194,7 @@ def subfeature_time_series_steps_single(
     dataparts[quantity] = points_data
     infos[quantity] = info
     polys[quantity] = poly
-    interpols_poly[quantity] = (interp_poly, hull_poly, intervals_poly)
+    interpols_poly[quantity] = interp_poly
     interpols_trig[quantity] = (interp_trig, hull_trig, intervals_trig)
     specials[quantity] = special
     prog.next()

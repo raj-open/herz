@@ -34,6 +34,7 @@ __all__ = [
     'step_compute_pv',
     'step_fit_exp',
     'step_fit_poly',
+    'step_refit_poly',
     'step_interp_poly',
     'step_interp_trig',
     'step_interpolate_pv',

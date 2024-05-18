@@ -7,6 +7,7 @@
 
 from ...thirdparty.code import *
 from ...thirdparty.maths import *
+from ...thirdparty.types import *
 
 from .statistics import *
 
@@ -15,6 +16,7 @@ from .statistics import *
 # ----------------------------------------------------------------
 
 __all__ = [
+    'get_time_aspects',
     'normalise_to_unit_interval',
     'normalise_interpolated_cycle',
 ]
@@ -24,18 +26,34 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
+def get_time_aspects(t: Iterable[float]) -> tuple[int, float, float]:
+    '''
+    Computes aspects
+
+    - `N` - number of points
+    - `T` - total duration
+    - `dt` - time increment (assuming homogeneity)
+
+    of an ordered series of time points
+    '''
+    match len(t):
+        case 0 | 1 as N:
+            return N, 1.0, 1.0
+        case _ as N:
+            # initial guess of dt
+            dt = np.median(np.diff(t))
+            # correct T_max
+            T = (t[-1] + dt) - t[0]
+            # (re)compute dt
+            dt = T / (N or 1.0)
+            return N, T, dt
+
+
 def normalise_to_unit_interval(
     t: NDArray[np.float64],
-) -> tuple[NDArray[np.float64], float]:
-    if len(t) == 0:
-        return t
-    if len(t) == 1:
-        return np.asarray([0.0])
-    t = t - t[0]
-    dt = np.mean(np.diff(t))
-    T = t[-1] + dt
-    t = t / (T or 1.0)
-    return t, T
+) -> tuple[NDArray[np.float64], int, float, float]:
+    N, T, dt = get_time_aspects(t)
+    return (t - t[0]) / T, N, T, dt / T
 
 
 def normalise_interpolated_cycle(

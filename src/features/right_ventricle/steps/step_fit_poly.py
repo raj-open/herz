@@ -25,6 +25,7 @@ from ....algorithms.fitting.polynomials import *
 
 __all__ = [
     'step_fit_poly',
+    'step_refit_poly',
 ]
 
 # ----------------------------------------------------------------
@@ -46,6 +47,34 @@ def step_fit_poly(
     and minimising wrt. the L²-norm.
 
     NOTE: Initial fitting runs from peak to peak.
+    '''
+    # fit polynomial
+    t = data['time'].to_numpy(copy=True)
+    x = data[quantity].to_numpy(copy=True)
+    cycles = data['cycle'].tolist()
+    windows = cycles_to_windows(cycles)
+    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds)
+
+    # compute n'th derivatives
+    data = compute_nth_derivatives_for_cycles(data, fits, quantity=quantity, n_der=n_der, mode=mode)
+
+    return data, fits
+
+
+@echo_function(message='STEP re-fit polynomial-model to data via interpolation', level=LOG_LEVELS.INFO)
+def step_refit_poly(
+    data: pd.DataFrame,
+    quantity: str,
+    conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+    mode: EnumFittingMode,
+    n_der: int,
+    cfg: InterpConfigPoly,
+) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
+    '''
+    Re-fits polynomial to data series
+    interpolating between spec
+
+    TODO
     '''
     # fit polynomial
     t = data['time'].to_numpy(copy=True)

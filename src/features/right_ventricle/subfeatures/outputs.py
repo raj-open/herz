@@ -34,7 +34,7 @@ def subfeature_output_steps(
     data_pv: pd.DataFrame,
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    interpols_poly: dict[str, tuple[Poly[float] | None, list[tuple[float, float]], list[tuple[float, float]]]],
+    interpols_poly: dict[str, Poly[float] | None],
     interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]]],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     specials: dict[str, dict[str, SpecialPointsConfig]],

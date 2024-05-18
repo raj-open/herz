@@ -45,7 +45,7 @@ def fit_normalisation(
     dt = np.zeros(t.shape)
     for i1, i2 in windows:
         # scale time
-        tt, T = normalise_to_unit_interval(t[i1:i2])
+        tt, _, T, _ = normalise_to_unit_interval(t[i1:i2])
 
         # scale values
         c, m, s, xx = normalise_interpolated_cycle(tt, x[i1:i2], T=1, periodic=True)

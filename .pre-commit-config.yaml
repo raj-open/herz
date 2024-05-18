@@ -37,9 +37,10 @@ repos:
       args: []
       entry: |-
         bash -c '
+          echo "Not implemented! Run manually."
           # just lint-check "$0" # perform linting without changes
-          just lint "$0" # perform linting with changes
-          git add "$0" # add to commit
+          # just lint "$0" # perform linting with changes
+          # git add "$0" # add to commit
         '
       verbose: true
       stages: [ pre-commit ]
@@ -54,7 +55,8 @@ repos:
       args: []
       entry: |-
         bash -c '
-          just test-unit "$0"
+          echo "Not implemented! Run manually."
+          # just test-unit "$0"
         '
       verbose: true
       stages: [ pre-commit ]

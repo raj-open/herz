@@ -13,6 +13,7 @@ from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
 from ....algorithms.anomalies import *
+from ....algorithms.interpolations import *
 from .methods import *
 
 # ----------------------------------------------------------------

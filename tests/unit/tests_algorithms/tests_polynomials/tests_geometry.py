@@ -111,7 +111,7 @@ def test_force_poly_conditions(
     # check onb
     t1 = 0
     t2 = 1
-    Q = onb_conditions(deg=deg, conds=conds, t1=t1, t2=t2)
+    Q = onb_conditions(deg=deg, conds=conds, intervals=[(t1, t2)])
     m = Q.shape[1]
     polys = [Poly(coeff=Q[:, j]) for j in range(m)]
     for i, f in enumerate(polys):
