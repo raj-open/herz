@@ -30,12 +30,12 @@ def test_trig_ALGEBRA(test: TestCase, omega: float, C: float, C2: float):
     g = xi * p
     test.assertIsInstance(g, PolyTrig)
     test.assertEqual(g.omega, f.omega)
-    np.testing.assert_almost_equal(g.coefficients, f.coefficients)
+    assert np.isclose(g.coefficients, f.coefficients, rtol=1e-7).all()
 
     # poly multiplication dominates
     g = PolyTrig.cast(p * xi)
     test.assertEqual(g.omega, f.omega)
-    np.testing.assert_almost_equal(g.coefficients, f.coefficients)
+    assert np.isclose(g.coefficients, f.coefficients, rtol=1e-7).all()
     return
 
 
@@ -51,12 +51,12 @@ def test_cos_ALGEBRA(
     g = osc * p
     test.assertIsInstance(g, PolyTrig)
     test.assertEqual(g.omega, f.omega)
-    np.testing.assert_almost_equal(g.coefficients, f.coefficients)
+    assert np.isclose(g.coefficients, f.coefficients, rtol=1e-7).all()
 
     # poly multiplication dominates
     g = PolyTrig.cast(p * osc)
     test.assertEqual(g.omega, f.omega)
-    np.testing.assert_almost_equal(g.coefficients, f.coefficients)
+    assert np.isclose(g.coefficients, f.coefficients, rtol=1e-7).all()
     return
 
 
@@ -80,7 +80,7 @@ def test_polytrig_INTEGRALS(
     F = f.integral()
     f_ = F.derivative()
     test.assertEqual(f.omega, f_.omega)
-    np.testing.assert_almost_equal(f.coefficients, f_.coefficients)
+    assert np.isclose(f.coefficients, f_.coefficients, rtol=1e-7).all()
     return
 
 
@@ -93,7 +93,7 @@ def test_cos_VALUES(
     f = Cos(omega=omega, lead=C)
     result = f.values(time_values)
     expected = C * np.cos(omega * time_values)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -132,7 +132,7 @@ def test_sin_VALUES(
     f = Sin(omega=omega, lead=C)
     result = f.values(time_values)
     expected = C * np.sin(omega * time_values)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 

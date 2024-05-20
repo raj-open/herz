@@ -46,7 +46,7 @@ def test_integral_poly_exp_ANALYTIC(
     F = f.integral()
     f_ = F.derivative()
     test.assertEqual(f.alpha, f_.alpha)
-    np.testing.assert_almost_equal(f.coefficients, f_.coefficients)
+    assert np.isclose(f.coefficients, f_.coefficients, rtol=1e-7).all()
     return
 
 

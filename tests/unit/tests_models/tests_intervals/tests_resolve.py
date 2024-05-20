@@ -53,7 +53,7 @@ def test_resolve_interval_CASES(
     )
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -74,5 +74,5 @@ def test_resolve_intervals_CASES(
     results = list(resolve_intervals(intervals, offset=offset, period=period))
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return

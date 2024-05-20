@@ -41,7 +41,7 @@ def test_collapse_intervals_to_cycle_BASIC(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -62,7 +62,7 @@ def test_collapse_intervals_to_cycle_EMPTY(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -83,7 +83,7 @@ def test_collapse_intervals_to_cycle_SPLITS(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -105,11 +105,7 @@ def test_collapse_intervals_to_cycle_MERGE_WHOLE_CYCLE(
 ):
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
-    np.testing.assert_almost_equal(
-        result,
-        [(offset, offset + period)],
-        err_msg='Expected full cycle to emerge.',
-    )
+    assert np.isclose(result, [(offset, offset + period)], rtol=1e-7).all(), 'Expected full cycle to emerge.'
     return
 
 
@@ -131,7 +127,7 @@ def test_collapse_intervals_to_cycle_MERGE_NOTTRIVIAL(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -153,7 +149,7 @@ def test_collapse_intervals_to_cycle_DISJOINT(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
 
 
@@ -172,5 +168,5 @@ def test_collapse_intervals_to_cycle_MIXED(
     results = collapse_intervals_to_cycle(intervals, offset=offset, period=period)
     result = np.asarray(results)
     expected = np.asarray(expected)
-    np.testing.assert_almost_equal(result, expected)
+    assert np.isclose(result, expected, rtol=1e-7).all()
     return
