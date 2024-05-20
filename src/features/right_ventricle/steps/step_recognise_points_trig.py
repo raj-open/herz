@@ -21,7 +21,7 @@ from ....algorithms.critical import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_recognise_iso',
+    'step_recognise_iso_from_trig',
 ]
 
 # ----------------------------------------------------------------
@@ -29,8 +29,8 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP recognise iso', level=LOG_LEVELS.INFO)
-def step_recognise_iso(
+@echo_function(message='STEP recognise iso from trig', level=LOG_LEVELS.INFO)
+def step_recognise_iso_from_trig(
     fit: FittedInfoTrig,
     special: dict[str, SpecialPointsConfig],
 ) -> dict[str, SpecialPointsConfig]:

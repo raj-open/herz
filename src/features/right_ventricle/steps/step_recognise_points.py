@@ -22,11 +22,24 @@ from ....algorithms.critical import *
 
 __all__ = [
     'step_recognise_points',
+    'step_recognise_iso_from_poly',
 ]
 
 # ----------------------------------------------------------------
 # METHODS
 # ----------------------------------------------------------------
+
+
+@echo_function(message='STEP recognise iso from poly', level=LOG_LEVELS.INFO)
+def step_recognise_iso_from_poly(
+    special: dict[str, SpecialPointsConfig],
+) -> dict[str, SpecialPointsConfig]:
+    point = special['iso']
+    point_max = special['max']
+    point.time = point_max.time
+    point.value = point_max.value
+    point.found = True
+    return special
 
 
 @echo_function(message='STEP recognise special points', level=LOG_LEVELS.INFO)

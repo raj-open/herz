@@ -35,7 +35,6 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
     datas = dict()
     infos = dict()
     polys = dict()
-    interpols_poly = dict()
     interpols_trig = dict()
     cfg_points = config.POINTS.model_copy(deep=True)
     specials = {
@@ -53,7 +52,6 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
         dataparts=dataparts,
         infos=infos,
         polys=polys,
-        interpols_poly=interpols_poly,
         interpols_trig=interpols_trig,
         specials=specials,
     )
@@ -69,7 +67,6 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
     )
     subfeature_pv_recognition_steps(
         prog=prog,
-        # interpols_poly=interpols_poly,
         # interpols_trig=interpols_trig,
         fitinfo_exp=fitinfo_exp,
         polys=polys,
@@ -84,7 +81,6 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
         data_pv=data_pv,
         infos=infos,
         polys=polys,
-        interpols_poly=interpols_poly,
         interpols_trig=interpols_trig,
         fitinfo_exp=fitinfo_exp,
         specials=specials,

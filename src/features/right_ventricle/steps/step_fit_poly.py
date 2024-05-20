@@ -69,23 +69,25 @@ def step_refit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
-    period: float,
     cfg: InterpConfigPoly,
     special: dict[str, SpecialPointsConfig],
 ) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
     '''
     Re-fits polynomial to data series interpolating between certain special points.
+
+    NOTE: assumes special points are normalised!
     '''
     # determine the intervals (normalised)
     key1, key2 = cfg.interval.root
     pt1, pt2 = special[key1], special[key2]
-    intervals = [(pt1.time / period, pt2.time / period)]
+    intervals = [(pt1.time, pt2.time)]
 
-    # force conditions (use normalised time values)
-    conds_ = []
-    for pt in [pt1, pt2]:
-        conds_.append(PolyDerCondition(derivative=pt.spec.derivative, time=pt.time / period))
-    conds = conds + conds_
+    # NOTE: this results in an overfitted polynomial!
+    # # force conditions (use normalised time values)
+    # conds_ = []
+    # for pt in [pt1, pt2]:
+    #     conds_.append(PolyDerCondition(derivative=pt.spec.derivative, time=pt.time))
+    # conds = conds + conds_
 
     # run the fit method
     return step_fit_poly(data=data, quantity=quantity, conds=conds, mode=mode, n_der=n_der, intervals=intervals)  # fmt: skip

@@ -40,8 +40,6 @@ def step_output_special_points(
     special_pv: dict[str, SpecialPointsConfigPV],
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
-    interpols_poly_p: Poly[float] | None,
-    interpols_poly_v: Poly[float] | None,
     interpols_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     interpols_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     cfg_trig_p: InterpConfigTrig | None,

@@ -40,8 +40,6 @@ def step_output_loop_plot(
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
     poly_v: Poly[float],
-    interpol_poly_p: Poly[float] | None,
-    interpol_poly_v: Poly[float] | None,
     interpol_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     interpol_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
@@ -78,11 +76,7 @@ def step_output_loop_plot(
     for subplot in plot_data_vs_fits(data_p=data_p, data_v=data_v, poly_p=poly_p, poly_v=poly_v, T_p=T_p, T_v=T_v, visible=False, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
-    for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=poly_p, poly_v=poly_v, T_p=T_p, T_v=T_v, T_pv=T_pv, N=N, visible=True, cv=cv, units=units):  # fmt: skip
-        fig.append_trace(subplot, row=1, col=1)
-
-    # plot interpolated poly-curve
-    for subplot in plot_poly_fit(info_p=info_p, info_v=info_v, poly_p=interpol_poly_p, poly_v=interpol_poly_v, T_p=T_p, T_v=T_v, T_pv=T_pv, N=N, visible=True, cv=cv, units=units):  # fmt: skip
+    for subplot in plot_poly_fit(poly_p=poly_p, poly_v=poly_v, T_p=T_p, T_v=T_v, T_pv=T_pv, N=N, visible=True, cv=cv, units=units):  # fmt: skip
         fig.append_trace(subplot, row=1, col=1)
 
     # plot interpolated trig-curve

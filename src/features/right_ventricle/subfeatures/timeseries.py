@@ -35,7 +35,6 @@ def subfeature_time_series_steps(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    interpols_poly: dict[str, Poly[float] | None],
     interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]]],
     specials: dict[str, dict[str, SpecialPointsConfig]],
 ):
@@ -70,7 +69,6 @@ def subfeature_time_series_steps(
             dataparts=dataparts,
             infos=infos,
             polys=polys,
-            interpols_poly=interpols_poly,
             interpols_trig=interpols_trig,
             specials=specials,
             quantity=quantity,
@@ -93,7 +91,6 @@ def subfeature_time_series_steps_single(
     dataparts: dict[str, list[tuple[tuple[int, int], dict[str, int]]]],
     infos: dict[str, FittedInfoNormalisation],
     polys: dict[str, Poly[float]],
-    interpols_poly: dict[str, Poly[float] | None],
     interpols_trig: dict[str, tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]]],
     specials: dict[str, dict[str, SpecialPointsConfig]],
     quantity: str,
@@ -132,20 +129,21 @@ def subfeature_time_series_steps_single(
     subprog.next()
 
     subprog = prog.subtask(f'''RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=1)
-    special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align)
+    special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align) # fmt: skip
     subprog.next()
 
-    interp_poly = None
-    special_post = None
+    # NOTE: if this is performed, then previous polynomial is overwritten too
     if cfg_poly is not None:
-        subprog = prog.subtask(f'''RE-FIT (INTERPOLATION) POLY-CURVE FOR {quantity}''', steps=2)
+        subprog = prog.subtask(f'''RE-FIT (INTERPOLATION) POLY-CURVE FOR {quantity}''', steps=1)
         mode = case.process.fit.mode
-        data_, fitsinfos_poly_ = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode, period=info.period, cfg=cfg_poly, special=special)  # fmt: skip
-        interp_poly, _ = fitsinfos_poly[-1]
+        data, fitsinfos_poly = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode, cfg=cfg_poly, special=special)  # fmt: skip
+        poly, _ = fitsinfos_poly[-1]
         subprog.next()
 
-        subprog = prog.subtask(f'''RE-RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=1)
-        special_post, points_data_ = step_recognise_points(data_, fitinfos=fitsinfos_poly_, cfg=cfg_points, key_align=key_align)
+        subprog = prog.subtask(f'''RE-RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=2)
+        special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align) # fmt: skip
+        subprog.next()
+        special = step_recognise_iso_from_poly(special=special)
         subprog.next()
 
     interp_trig = None
@@ -156,19 +154,15 @@ def subfeature_time_series_steps_single(
         data_anon = data.rename(columns={quantity: 'value'})
         interp_trig, hull_trig, intervals_trig = step_interp_trig(data_anon, poly=poly, special=special, cfg_fit=cfg_trig, symb=symb)  # fmt: skip
         subprog.next()
-        special = step_recognise_iso(interp_trig, special=special)
+        special = step_recognise_iso_from_trig(interp_trig, special=special)
         subprog.next()
 
-    subprog = prog.subtask(f'''RENORMALISE DATA + FITTINGS FOR {quantity}''', steps=4)
+    subprog = prog.subtask(f'''RENORMALISE DATA + FITTINGS FOR {quantity}''', steps=3)
     data = get_unnormalised_data(data, infos=infos_, quantity=quantity, renormalise=True)
     subprog.next()
     # NOTE: just renormalises, but does not realign.
     special = get_unnormalised_special(special, info=info)
     poly = get_unnormalised_polynomial(poly, info=info)
-    subprog.next()
-    if interp_poly is not None and special_post is not None:
-        special_post = get_unnormalised_special(special_post, info=info)
-        interp_poly = get_unnormalised_polynomial(interp_poly, info=info)
     subprog.next()
     if interp_trig is not None:
         T = info.period
@@ -177,15 +171,11 @@ def subfeature_time_series_steps_single(
         intervals_trig = [(T * a, T * b) for a, b in intervals_trig]
     subprog.next()
 
-    subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=4)
+    subprog = prog.subtask(f'''RE-ALIGN {quantity} FOR MATCHING''', steps=3)
     data = step_shift_data_custom(data, points_data)
     subprog.next()
     special = get_realignment_special(special, info=info)
     poly = get_realignment_polynomial(poly, special=special)
-    subprog.next()
-    if interp_poly is not None and special_post is not None:
-        special_post = get_realignment_special(special_post, info=info)
-        interp_poly = get_realignment_polynomial(interp_poly, special=special)
     subprog.next()
     if interp_trig is not None:
         interp_trig = get_realignment_trig(interp_trig, special=special)
@@ -197,7 +187,6 @@ def subfeature_time_series_steps_single(
     dataparts[quantity] = points_data
     infos[quantity] = info
     polys[quantity] = poly
-    interpols_poly[quantity] = interp_poly
     interpols_trig[quantity] = (interp_trig, hull_trig, intervals_trig)
     specials[quantity] = special
     prog.next()
