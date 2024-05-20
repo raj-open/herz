@@ -32,6 +32,7 @@ def fit_poly_cycles(
     x: NDArray[np.float64],
     windows: list[tuple[int, int]],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+    deg: int | None = None,
     intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> list[tuple[Poly[float], tuple[int, int]]]:
     '''
@@ -46,7 +47,9 @@ def fit_poly_cycles(
     # conds.append(PolyIntCondition(times=[TimeInterval(a=0., b=1.)]))
 
     # refine conditions + determine degree of polynomial needed
-    conds, deg = refine_conditions_determine_degree(conds)
+    conds, deg_ = refine_conditions_determine_degree(conds)
+    if deg is None:
+        deg = deg_
 
     # fit each cycle
     fits = []

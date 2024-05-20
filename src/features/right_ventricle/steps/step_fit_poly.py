@@ -13,6 +13,7 @@ from ....core.log import *
 from ....models.app import *
 from ....models.enums import *
 from ....models.fitting import *
+from ....models.intervals import *
 from ....models.polynomials import *
 from ....models.user import *
 from ....queries.fitting import *
@@ -40,6 +41,7 @@ def step_fit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
+    deg: int | None,
     intervals: Iterable[tuple[float, float]] = [(0, 1)],
 ) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
     '''
@@ -54,7 +56,7 @@ def step_fit_poly(
     x = data[quantity].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
     windows = cycles_to_windows(cycles)
-    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds, intervals=intervals)
+    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds, deg=deg, intervals=intervals)
 
     # compute n'th derivatives
     data = compute_nth_derivatives_for_cycles(data, fits, quantity=quantity, n_der=n_der, mode=mode)
@@ -69,6 +71,8 @@ def step_refit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
+    period: float,
+    deg: int | None,
     cfg: InterpConfigPoly,
     special: dict[str, SpecialPointsConfig],
 ) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
@@ -77,20 +81,36 @@ def step_refit_poly(
 
     NOTE: assumes special points are normalised!
     '''
-    # determine the intervals (normalised)
-    key1, key2 = cfg.interval.root
-    pt1, pt2 = special[key1], special[key2]
-    intervals = [(pt1.time, pt2.time)]
+    # compute environment
+    t = { key: pt.time for key, pt in special.items() }
+    x = { key: pt.value for key, pt in special.items() }
+    env = {'T': period, 't': t, 'x': x}
+    for key, expr in cfg.points.items():
+        env[key] = eval(expr, env)
 
-    # NOTE: this results in an overfitted polynomial!
-    # # force conditions (use normalised time values)
-    # conds_ = []
-    # for pt in [pt1, pt2]:
-    #     conds_.append(PolyDerCondition(derivative=pt.spec.derivative, time=pt.time))
-    # conds = conds + conds_
+    # determine the intervals (normalised)
+    intervals = [ (env[I.root[0]], env[I.root[1]]) for I in cfg.intervals ]
+    intervals = collapse_intervals_to_cycle(intervals, period=period, offset=0, disjoint=True)
+    # normalise
+    intervals = [ (t1/period, t2/period) for t1, t2 in intervals ]
+
+    # force conditions (use normalised time values)
+    conds_ = []
+    for key in cfg.special:
+        # condition is n'th derivative is critical (=> n+1'th derivative = 0)
+        pt = special[key]
+        n = pt.spec.derivative
+        cond = PolyDerCondition(derivative=n + 1, time=pt.time/period)
+        conds_.append(cond)
+
+    # NOTE: this results in an overfitted polynomial:
+    # conds = conds + conds_ # include previous conditions
+
+    # NOTE: this seems to be the correct way (and justifiably so):
+    conds = conds_ # override previous conditions
 
     # run the fit method
-    return step_fit_poly(data=data, quantity=quantity, conds=conds, mode=mode, n_der=n_der, intervals=intervals)  # fmt: skip
+    return step_fit_poly(data=data, quantity=quantity, conds=conds, mode=mode, n_der=n_der, deg=deg, intervals=intervals)  # fmt: skip
 
 
 # ----------------------------------------------------------------
