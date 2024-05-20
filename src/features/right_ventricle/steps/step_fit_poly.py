@@ -40,6 +40,7 @@ def step_fit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
+    intervals: Iterable[tuple[float, float]] = [(0, 1)],
 ) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
     '''
     Fits polynomial to cycles in time-series, forcing certain conditions
@@ -53,7 +54,7 @@ def step_fit_poly(
     x = data[quantity].to_numpy(copy=True)
     cycles = data['cycle'].tolist()
     windows = cycles_to_windows(cycles)
-    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds)
+    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds, intervals=intervals)
 
     # compute n'th derivatives
     data = compute_nth_derivatives_for_cycles(data, fits, quantity=quantity, n_der=n_der, mode=mode)
@@ -68,25 +69,26 @@ def step_refit_poly(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
     mode: EnumFittingMode,
     n_der: int,
+    period: float,
     cfg: InterpConfigPoly,
+    special: dict[str, SpecialPointsConfig],
 ) -> tuple[pd.DataFrame, list[tuple[Poly[float], tuple[int, int]]]]:
     '''
-    Re-fits polynomial to data series
-    interpolating between spec
-
-    TODO
+    Re-fits polynomial to data series interpolating between certain special points.
     '''
-    # fit polynomial
-    t = data['time'].to_numpy(copy=True)
-    x = data[quantity].to_numpy(copy=True)
-    cycles = data['cycle'].tolist()
-    windows = cycles_to_windows(cycles)
-    fits = fit_poly_cycles(t=t, x=x, windows=windows, conds=conds)
+    # determine the intervals (normalised)
+    key1, key2 = cfg.interval.root
+    pt1, pt2 = special[key1], special[key2]
+    intervals = [(pt1.time / period, pt2.time / period)]
 
-    # compute n'th derivatives
-    data = compute_nth_derivatives_for_cycles(data, fits, quantity=quantity, n_der=n_der, mode=mode)
+    # force conditions (use normalised time values)
+    conds_ = []
+    for pt in [pt1, pt2]:
+        conds_.append(PolyDerCondition(derivative=pt.spec.derivative, time=pt.time / period))
+    conds = conds + conds_
 
-    return data, fits
+    # run the fit method
+    return step_fit_poly(data=data, quantity=quantity, conds=conds, mode=mode, n_der=n_der, intervals=intervals)  # fmt: skip
 
 
 # ----------------------------------------------------------------

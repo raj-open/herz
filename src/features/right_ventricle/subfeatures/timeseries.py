@@ -120,14 +120,14 @@ def subfeature_time_series_steps_single(
     data = step_recognise_cycles(data, quantity=quantity, shift=shift)
     subprog.next()
 
-    subprog = prog.subtask(f'''NORMALISE DATA {quantity}''', steps=2)
+    subprog = prog.subtask(f'''NORMALISE DATA {quantity}''', steps=1)
     data, infos_ = step_normalise(data=data, quantity=quantity)
     info, _ = infos_[-1]
     subprog.next()
 
     subprog = prog.subtask(f'''FIT POLY-CURVE FOR {quantity}''', steps=1)
-    conf_ = case.process.fit
-    data, fitsinfos_poly = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=conf_.mode)
+    mode = case.process.fit.mode
+    data, fitsinfos_poly = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode)
     poly, _ = fitsinfos_poly[-1]
     subprog.next()
 
@@ -136,20 +136,17 @@ def subfeature_time_series_steps_single(
     subprog.next()
 
     interp_poly = None
-    # if cfg_poly is not None:
-    #     # TODO
-    #     cfg_poly.interval
-    #     subprog = prog.subtask(f'''INTERPOLATE POLY-CURVE + COMPUTE ISO-MAX FOR {quantity}''', steps=2)
-    #     data_anon = data.rename(columns={quantity: 'value'})
-    #     interp_poly = step_interp_poly(data_anon, special=special, cfg_poly=cfg_poly, symb=symb)  # fmt: skip
+    special_post = None
+    if cfg_poly is not None:
+        subprog = prog.subtask(f'''RE-FIT (INTERPOLATION) POLY-CURVE FOR {quantity}''', steps=2)
+        mode = case.process.fit.mode
+        data_, fitsinfos_poly_ = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode, period=info.period, cfg=cfg_poly, special=special)  # fmt: skip
+        interp_poly, _ = fitsinfos_poly[-1]
+        subprog.next()
 
-    #     conf_ = case.process.fit
-    #     data, fitsinfos_poly = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=conf_.mode)
-    #     poly, _ = fitsinfos_poly[-1]
-    #     # special, points_data = step_recognise_points(data, fitinfos=fitsinfos_poly, cfg=cfg_points, key_align=key_align)
-    #     subprog.next()
-    #     # special = step_recognise_iso(interp_poly, special=special)
-    #     # subprog.next()
+        subprog = prog.subtask(f'''RE-RECOGNISE CRITICAL POINTS OF {quantity} VIA POLY-FITTING''', steps=1)
+        special_post, points_data_ = step_recognise_points(data_, fitinfos=fitsinfos_poly_, cfg=cfg_points, key_align=key_align)
+        subprog.next()
 
     interp_trig = None
     hull_trig = []
@@ -167,8 +164,11 @@ def subfeature_time_series_steps_single(
     subprog.next()
     # NOTE: just renormalises, but does not realign.
     special = get_unnormalised_special(special, info=info)
-    subprog.next()
     poly = get_unnormalised_polynomial(poly, info=info)
+    subprog.next()
+    if interp_poly is not None and special_post is not None:
+        special_post = get_unnormalised_special(special_post, info=info)
+        interp_poly = get_unnormalised_polynomial(interp_poly, info=info)
     subprog.next()
     if interp_trig is not None:
         T = info.period
@@ -181,8 +181,11 @@ def subfeature_time_series_steps_single(
     data = step_shift_data_custom(data, points_data)
     subprog.next()
     special = get_realignment_special(special, info=info)
-    subprog.next()
     poly = get_realignment_polynomial(poly, special=special)
+    subprog.next()
+    if interp_poly is not None and special_post is not None:
+        special_post = get_realignment_special(special_post, info=info)
+        interp_poly = get_realignment_polynomial(interp_poly, special=special)
     subprog.next()
     if interp_trig is not None:
         interp_trig = get_realignment_trig(interp_trig, special=special)
