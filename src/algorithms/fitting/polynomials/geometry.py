@@ -118,8 +118,8 @@ def onb_spectrum(
     t: list[float],
     x: list[float],
     intervals: Iterable[tuple[float, float]],
+    T: float | None = None,
     cyclic: bool = False,
-    in_standard_basis: bool = True,
 ) -> Poly[float]:
     '''
     @inputs
@@ -129,23 +129,13 @@ def onb_spectrum(
     - `intervals` - list of disjoint sub intervals of some interval
        on which the polynomial lives.
     - `cyclic` - whether the series is periodic
-    - `in_standard_basis` - whether to convert the computed innerproducts
-       to coefficients wrt the standard basis {tʲ}ⱼ.
 
     @returns
-    the polynomial
+    the unique polynomial, a linear combination of polynomials in `Q`
     ```
     p(t) = ∑ⱼ cⱼ·tⱼ
     ```
-    such that either
-    ```
-    ∑ⱼ cⱼtʲ
-    ```
-    or
-    ```
-    ∑ⱼ cⱼqⱼ
-    ```
-    are the best fit polynomial wrt. the standard basis {tʲ}ⱼ or the ONB {qⱼ}ⱼ
+    which is the best fit polynomial wrt. the standard basis {tʲ}ⱼ.
 
     ## Computation ##
 
@@ -154,7 +144,7 @@ def onb_spectrum(
     Determines
     ```
     cⱼ := ⟨x, qⱼ⟩
-       := 1/T · ∫_[0, T] x(t)·qⱼ(t)^* dt
+       := ∫_Ω x(t)·qⱼ(t)^* dt
     ```
     where `x(t)` is a piecewise linear interpolation of a discrete time-series `x`.
     This yields a polynomial:
@@ -165,10 +155,18 @@ def onb_spectrum(
     ```
     L²-norm ‖x – p‖ minimal
     ```
-    amongst all possibly polynomials in the subspace `V ⊆ C[0, T]`
+    amongst all possibly polynomials in the subspace `V ⊆ C(Ω)`
     spanned by {qⱼ}ⱼ.
 
     ### Step 1 ###
+
+    Determine coefficients of integrals of polynomials:
+    - Q[:, j] = coeff of polynomial qⱼ
+    - Q1[:, j] = coeff of polynomial q1ⱼ, a stemfunction of qⱼ
+    - Q2[:, j] = coeff of polynomial q2ⱼ, a stemfunction of q1ⱼ
+    - R[:, j] = coeff of polynomial rⱼ = t·q1ⱼ - q2ⱼ
+
+    ### Step 2 - piecewise linear interpolations ###
 
     The intervals in Ω are subdivided into
     intervals [t1ᵢ, t2ᵢ] with endpoints
@@ -180,19 +178,11 @@ def onb_spectrum(
     is a piecewise-linear interpolation
     for x(t) on [t1ᵢ, t2ᵢ].
 
-    ### Step 2 ###
-
-    Determine coefficients of integrals of polynomials:
-    - Q[:, j] = coeff of polynomial qⱼ
-    - Q1[:, j] = coeff of polynomial q1ⱼ, a stemfunction of qⱼ
-    - Q2[:, j] = coeff of polynomial q2ⱼ, a stemfunction of q1ⱼ
-    - R[:, j] = coeff of polynomial rⱼ = t·q1ⱼ - q2ⱼ
-
     ### Step 3 ###
 
     Set
     ```
-    dmonomes[i, k] = t2ᵢᵏ - t2ᵢᵏ
+    dmonomes[i, k] = t2ᵢᵏ - t1ᵢᵏ
     ```
     for each i and for k ∈ {0, 1, ..., deg + 2}
     The polynomial evaluations of an array of `deg+2`-degree
@@ -208,7 +198,7 @@ def onb_spectrum(
         = pⱼ(t2ᵢ) - pⱼ(t1ᵢ)
     ```
 
-    ### Step 4 ###
+    NOTE:
 
     Part of innerproduct ⟨x, qⱼ⟩ restricted to [t1ᵢ, t2ᵢ],
     assuming interpolation
@@ -235,43 +225,45 @@ def onb_spectrum(
         = (I0^* · C0 + I1^* · C1)[j]
     ```
     '''
-
+    # Step 1 - auxiliary computeations for polynomials in basis
     deg = Q.shape[0] - 1  # degree of polynomials in ONB
-    m = Q.shape[1]  # size of ONB
-    _, T, dt_ = get_time_aspects(t)
-    offset = t[0]
-
-    # TODO compute integrals for all time differences.
-
-    t = (np.asarray(t) - t[0]).tolist() + [T]  # normalise to [0, T]
-    if cyclic:
-        x = np.concatenate([x, x[:1]])
-    else:
-        x1 = np.asarray(x[1:])
-        x2 = np.asarray(x[:-1])
-        x = np.concatenate([[x[0]], (x1 + x2) / 2, [x[-1]]]).tolist()
-
-    dt = np.diff(t)
-    dx = np.diff(x)
-    dt[dt == 0.0] = 1.0
-    C1 = dx / dt
-    C0 = np.asarray(x[:-1]) - C1 * np.asarray(t[:-1])
-
+    m = Q.shape[1]  # number of elements in the ONB
+    # stem functions (for 1st and 2nd order derivatives) for the q_i
     Q1 = np.column_stack([Poly(coeff=Q[:, j].tolist()).integral().coefficients for j in range(m)])
     Q2 = np.column_stack([Poly(coeff=Q1[:, j].tolist()).integral().coefficients for j in range(m)])
+    # coefficients of t·q1ⱼ - q2ⱼ for each qⱼ:
     zeros = np.zeros((1, m))
     R = np.concatenate([zeros, Q1]) - Q2
-    Q1 = np.concatenate([Q1, zeros])  # pad
+    # pad coefficients of Q1 to match Q2
+    Q1 = np.concatenate([Q1, zeros])
 
-    monomes = np.asarray([np.concatenate([[1], np.cumprod([tt] * (deg + 2))]) for tt in t])
-    dmonomes = monomes[1:, :] - monomes[:-1, :]
-    I0 = dmonomes @ Q1
-    I1 = dmonomes @ R
+    # Loop over all intervals
+    t, x = complete_time_series(t=t, x=x, T=T, cyclic=cyclic)
+    alpha = np.zeros((m,))
+    for t1, t2 in intervals:
+        filt = (t1 <= t) & (t <= t2)
+        t_ = t[filt]
+        x_ = x[filt]
+        # Step 2 - compute linear interpolations
+        dt = np.diff(t_)
+        dx = np.diff(x_)
+        dt[dt == 0.0] = 1.0
+        C1 = dx / dt
+        C0 = np.asarray(x_[:-1]) - C1 * np.asarray(t_[:-1])
 
-    coeff = I0.conj().T @ C0 + I1.conj().T @ C1
+        # Step 3 - compute (contribution to) inner products
+        monomes = np.asarray([np.concatenate([[1], np.cumprod([tt] * (deg + 2))]) for tt in t_])
+        dmonomes = monomes[1:, :] - monomes[:-1, :]
+        I0 = dmonomes @ Q1
+        I1 = dmonomes @ R
+        alpha += I0.conj().T @ C0 + I1.conj().T @ C1
 
-    if in_standard_basis:
-        coeff = Q @ coeff
+    # convert to standard basis
+    coeff = Q @ alpha
+
+    offset = t[0]
+    if T is None:
+        _, T, _ = get_time_aspects(t)
 
     return Poly[float](
         coeff=coeff.tolist(),

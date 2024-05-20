@@ -17,6 +17,7 @@ from .statistics import *
 
 __all__ = [
     'get_time_aspects',
+    'complete_time_series',
     'normalise_to_unit_interval',
     'normalise_interpolated_cycle',
 ]
@@ -47,6 +48,29 @@ def get_time_aspects(t: Iterable[float]) -> tuple[int, float, float]:
             # (re)compute dt
             dt = T / (N or 1.0)
             return N, T, dt
+
+
+def complete_time_series(
+    t: Iterable[float],
+    x: Iterable[float],
+    cyclic: bool,
+    T: float | None = None,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    '''
+    Completes a time series (t,x) to include an endpoint.
+    If `cyclic == true`, the endpoint repeats the start point.
+    Otherwise the data in `x` are simply "blurred" and stretched.
+    '''
+    if T is None:
+        _, T, _ = get_time_aspects(t)
+    t = np.append(t, t[0] + T)
+    if cyclic:
+        x = np.concatenate([x, x[:1]])
+    else:
+        x1 = np.asarray(x[1:])
+        x2 = np.asarray(x[:-1])
+        x = np.concatenate([[x[0]], (x1 + x2) / 2, [x[-1]]])
+    return t, x
 
 
 def normalise_to_unit_interval(

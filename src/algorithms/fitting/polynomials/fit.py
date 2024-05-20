@@ -32,6 +32,7 @@ def fit_poly_cycles(
     x: NDArray[np.float64],
     windows: list[tuple[int, int]],
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
+    intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> list[tuple[Poly[float], tuple[int, int]]]:
     '''
     Fits polynomial to cycles of a time-series:
@@ -52,10 +53,10 @@ def fit_poly_cycles(
     for i1, i2 in windows:
         tt, _, _, _ = normalise_to_unit_interval(t[i1:i2])
         xx = x[i1:i2]
-        p = fit_poly_cycle(t=tt, x=xx, deg=deg, conds=conds, period=1, offset=0)
+        p = fit_poly_cycle(t=tt, x=xx, period=1, deg=deg, conds=conds, intervals=intervals)
         fits.append((p, (i1, i2)))
 
-    p_sim = compute_simultaneous_fit([p for p, _ in fits], period=1, offset=0)
+    p_sim = compute_simultaneous_fit([p for p, _ in fits], offset=0, period=1)
     fits.append((p_sim, (-1, -1)))
 
     return fits
@@ -69,6 +70,7 @@ def fit_poly_cycles(
 def fit_poly_cycle(
     t: NDArray[np.float64],
     x: NDArray[np.float64],
+    period: float,
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
     intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
@@ -90,7 +92,7 @@ def fit_poly_cycle(
     - the fit polynomial
     '''
     Q = onb_conditions(deg=deg, conds=conds, intervals=intervals)
-    p = onb_spectrum(t=t, x=x, Q=Q, intervals=intervals, cyclic=True, in_standard_basis=True)
+    p = onb_spectrum(t=t, x=x, T=period, Q=Q, intervals=intervals, cyclic=True)
     return p
 
 

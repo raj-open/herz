@@ -15,6 +15,7 @@ from .statistics import *
 # ----------------------------------------------------------------
 
 __all__ = [
+    'complete_time_series',
     'get_time_aspects',
     'innerproduct_interpolated',
     'integral_interpolated',

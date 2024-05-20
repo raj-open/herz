@@ -22,15 +22,21 @@ __all__ = [
 ]
 
 # ----------------------------------------------------------------
+# LOCAL CONSTANTS, VARIABLES
+# ----------------------------------------------------------------
+
+T = TypeVar('T')
+
+# ----------------------------------------------------------------
 # METHODS
 # ----------------------------------------------------------------
 
 
 def inner_product_poly_exp(
-    f: PolyExp,
-    g: PolyExp,
+    f: PolyExp[T],
+    g: PolyExp[T],
     *intervals: tuple[float, float],
-):
+) -> T:
     '''
     Computes the inner product ⟨f, g⟩
     over a space determined by a series of (assumed) disjoint intervals.
