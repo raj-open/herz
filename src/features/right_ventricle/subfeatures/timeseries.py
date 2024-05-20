@@ -103,6 +103,8 @@ def subfeature_time_series_steps_single(
     cfg_trig: InterpConfigTrig | None,
     key_align: str,
 ):
+    mode = case.process.fit.mode
+
     subprog = prog.subtask(f'''READ DATA {quantity}''', steps=2)
     data = step_read_data(case, cfg=cfg_data, quantity=quantity)
     subprog.next()
@@ -123,8 +125,7 @@ def subfeature_time_series_steps_single(
     subprog.next()
 
     subprog = prog.subtask(f'''FIT POLY-CURVE FOR {quantity}''', steps=1)
-    mode = case.process.fit.mode
-    data, fitsinfos_poly = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode)
+    data, fitsinfos_poly = step_fit_poly(data, quantity=quantity, conds=conds, n_der=2, deg=None, mode=mode)
     poly, _ = fitsinfos_poly[-1]
     subprog.next()
 
@@ -135,8 +136,7 @@ def subfeature_time_series_steps_single(
     # NOTE: if this is performed, then previous polynomial is overwritten too
     if cfg_poly is not None:
         subprog = prog.subtask(f'''RE-FIT (INTERPOLATION) POLY-CURVE FOR {quantity}''', steps=1)
-        mode = case.process.fit.mode
-        data, fitsinfos_poly = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, mode=mode, cfg=cfg_poly, special=special)  # fmt: skip
+        data, fitsinfos_poly = step_refit_poly(data, quantity=quantity, conds=conds, n_der=2, deg=poly.degree, period=1.0, mode=mode, cfg=cfg_poly, special=special)  # fmt: skip
         poly, _ = fitsinfos_poly[-1]
         subprog.next()
 
