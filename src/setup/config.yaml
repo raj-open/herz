@@ -252,7 +252,7 @@ settings:
           size: 9
           colour: green
           symbol: "x"
-      sys:
+      max:
         name: 'sys = P<sub>max</sub>'
         name-simple: "sys"
         spec:
