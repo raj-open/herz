@@ -138,13 +138,8 @@ def recognise_special_points(
         except Exception as err:
             results[key].found = False
             crit = filter_times(crits[n], t_after=t_after, t_before=t_before)
-            print(crit)
             crit = filter_kinds(crits[n], kinds={spec.kind})
-            print(crit)
             crit = filter_times(crit, t_after=t_after, t_before=t_before)
-            print(crit)
-            print(t_after, t_before)
-            input('warte')
             if skip_errors:
                 log_warn(f'Could not find special point "{key}"! (non critical)')
             else:
