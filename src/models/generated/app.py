@@ -300,7 +300,18 @@ class InterpConfigPoly(BaseModel):
         extra='forbid',
         populate_by_name=True,
     )
-    interval: PairString
+    special: List[str] = Field(
+        [], description='List of keys of special points\nwhose conditions we will continue to force.'
+    )
+    points: Dict[str, Any] = Field(
+        {},
+        description='A local environment of definitions in terms of period and special points.\nThe expressions like "T" and "t[\'key\']" and "x[\'key\']"\nevaluate to period, time-coordiate and value of `\'key\'` respectively.',
+    )
+    intervals: List[PairString] = Field(
+        ...,
+        description='Defines the spatial domain over which the model is to be defined.\nThe remainder is an interpolation.',
+        min_length=1,
+    )
 
 
 class Solver(BaseModel):

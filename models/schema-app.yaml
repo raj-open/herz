@@ -532,10 +532,32 @@ components:
         Settings use to fit polynomial interpolations.
       type: object
       required:
-        - interval
+        - intervals
       properties:
-        interval:
-          $ref: "#/components/schemas/PairString"
+        special:
+          description: |-
+            List of keys of special points
+            whose conditions we will continue to force.
+          type: array
+          items:
+            type: string
+          default: []
+        points:
+          description: |-
+            A local environment of definitions in terms of period and special points.
+            The expressions like "T" and "t['key']" and "x['key']"
+            evaluate to period, time-coordiate and value of `'key'` respectively.
+          type: object
+          additionalProperties: true
+          default: {}
+        intervals:
+          description: |-
+            Defines the spatial domain over which the model is to be defined.
+            The remainder is an interpolation.
+          type: array
+          items:
+            $ref: "#/components/schemas/PairString"
+          minItems: 1
       additionalProperties: false
 
     InterpConfigTrig:

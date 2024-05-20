@@ -95,17 +95,15 @@ settings:
 
     polynomial:
       pressure:
-        # points:
-        #   - sys
-        #   - es
-        #   - anti-epad
-        #   - bd
-        #   - dia
-        #   - anti-bd
-        #   - ed
-        #   - epad
-        #   - bs
-        interval: [ anti-epad, epad ]
+        special:
+          # - anti-bd
+          - epad
+          - anti-epad
+        points:
+          a1: "t['anti-epad']"
+          b1: "t['epad']"
+        intervals:
+          - [ a1, b1 ]
 
       # volume:
 
