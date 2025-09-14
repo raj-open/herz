@@ -4,72 +4,34 @@ _default:
 menu:
     @- just --unsorted --choose
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # Justfile
 # Recipes for various workflows.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
 set dotenv-load := true
+# set dotenv-path := [".env", ".env.docker-vars"]
+set positional-arguments := true
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # VARIABLES
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-REPO_NAME := "herz"
-PROJECT_NAME := "herz"
+# --------------------------------
 
 PATH_ROOT := justfile_directory()
 CURRENT_DIR := invocation_directory()
 OS := if os_family() == "windows" { "windows" } else { "linux" }
 PYVENV_ON := if os_family() == "windows" { ". .venv/Scripts/activate" } else { ". .venv/bin/activate" }
 PYVENV := if os_family() == "windows" { "python" } else { "python3" }
-LINTING := "black"
+LINTING := "ruff"
 GITHOOK_PRECOMMIT := "pre_commit"
 GEN_MODELS := "datamodel_code_generator"
-GEN_APIS := "openapi-generator"
+GEN_MODELS_DOCUMENTATION := "openapi-generator-cli"
+RUST_TO_PY_BINDINGS := "maturin"
 TOOL_TEST_BDD := "behave"
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # Macros
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-_create-file-if-not-exists fname:
-    #!/usr/bin/env bash
-    touch "{{fname}}";
-    exit 0;
-
-_create-folder-if-not-exists path:
-    #!/usr/bin/env bash
-    if ! [[ -d "{{path}}" ]]; then
-        mkdir -p "{{path}}";
-    fi
-    exit 0;
-
-_create-temp-folder path="." name="tmp":
-    #!/usr/bin/env bash
-    k=-1;
-    tmp_folder="{{path}}/{{name}}";
-    while [[ -d "${tmp_folder}" ]] || [[ -f "${tmp_folder}" ]]; do
-        k=$(( $k + 1 ));
-        tmp_folder="{{path}}/{{name}}_${k}";
-    done
-    mkdir "${tmp_folder}";
-    echo "${tmp_folder}";
-    exit 0;
-
-_delete-if-file-exists fname:
-    #!/usr/bin/env bash
-    if [[ -f "{{fname}}" ]]; then
-        rm "{{fname}}";
-    fi
-    exit 0;
-
-_delete-if-folder-exists path:
-    #!/usr/bin/env bash
-    if [[ -d "{{path}}" ]]; then
-        rm -rf "{{path}}";
-    fi
-    exit 0;
+# --------------------------------
 
 _clean-all-files path pattern:
     #!/usr/bin/env bash
@@ -101,23 +63,20 @@ _check-tool tool name:
         echo -e "Tool \x1b[2;3m{{name}}\x1b[0m installed correctly.";
         exit 0;
     else
-        echo -e "Tool \x1b[2;3m{{name}}\x1b[0m did not work." >> /dev/stderr;
+        echo -e "Tool \x1b[2;3m{{tool}}\x1b[0m did not work." >> /dev/stderr;
         echo -e "Ensure that \x1b[2;3m{{name}}\x1b[0m (-> \x1b[1mjust build\x1b[0m) installed correctly and system paths are set." >> /dev/stderr;
         exit 1;
     fi
 
 _generate-documentation path_schema target_path name:
-    @{{PYVENV_ON}} && {{GEN_APIS}} generate \
+    @{{PYVENV_ON}} && {{GEN_MODELS_DOCUMENTATION}} generate \
         --skip-validate-spec \
         --input-spec {{path_schema}}/schema-{{name}}.yaml \
         --generator-name markdown \
         --output "{{target_path}}/{{name}}"
 
-_generate-documentation-recursively path_schema target_path:
+_build-documentation-recursively path_schema target_path:
     #!/usr/bin/env bash
-    # skip if no files exist
-    ls -f {{path_schema}}/schema-*.yaml >> /dev/null 2> /dev/null || exit 0;
-    # otherwise proceed
     while read path; do
         if [[ "${path}" == "" ]]; then continue; fi
         path="${path##*/}";
@@ -128,29 +87,31 @@ _generate-documentation-recursively path_schema target_path:
     exit 0;
 
 _generate-models path_schema target_path name:
+    @ # cf. https://github.com/koxudaxi/datamodel-code-generator?tab=readme-ov-file#all-command-options
     @{{PYVENV_ON}} && {{PYVENV}} -m {{GEN_MODELS}} \
         --input-file-type openapi \
         --output-model-type pydantic_v2.BaseModel \
         --encoding "UTF-8" \
         --disable-timestamp \
         --use-schema-description \
+        --use-standard-collections \
+        --use-union-operator \
+        --use-default-kwarg \
         --field-constraints \
+        --output-datetime-class AwareDatetime \
         --capitalise-enum-members \
         --enum-field-as-literal one \
         --set-default-enum-member \
         --use-subclass-enum \
         --allow-population-by-field-name \
-        --snake-case-field \
         --strict-nullable \
+        --use-double-quotes \
         --target-python-version 3.11 \
-        --input {{path_schema}}/schema-{{name}}.yaml \
-        --output {{target_path}}/{{name}}.py
+        --input "{{path_schema}}/schema-{{name}}.yaml" \
+        --output "{{target_path}}/{{name}}.py"
 
 _generate-models-recursively path_schema target_path:
     #!/usr/bin/env bash
-    # skip if no files exist
-    ls -f {{path_schema}}/schema-*.yaml >> /dev/null 2> /dev/null || exit 0;
-    # otherwise proceed
     while read path; do
         if [[ "${path}" == "" ]]; then continue; fi
         path="${path##*/}";
@@ -160,14 +121,13 @@ _generate-models-recursively path_schema target_path:
     done <<< "$( ls -f {{path_schema}}/schema-*.yaml )";
     exit 0;
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 # TARGETS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ----------------------------------------------------------------
 
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: build
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 setup:
     @echo "TASK: SETUP"
@@ -177,23 +137,15 @@ setup:
 
 build:
     @echo "TASK: BUILD"
-    @just build-venv
+    @- just build-venv
     @just build-requirements
     @just check-system-requirements
     @just build-models
     @just build-githook-pc
 
-build-skip-requirements:
-    @echo "TASK: BUILD (skip installing requirements)"
-    @just build-venv
-    @just check-system-requirements
-    @just build-models
-    @just build-githook-pc
-
 build-venv:
-    @just check-system
-    @echo "SUBTASK: build venv"
-    @- ${PYTHON_PATH} -m venv .venv
+    @echo "SUBTASK: create venv if not exists"
+    @${PYTHON_PATH} -m venv .venv
 
 # cf. https://pre-commit.com
 build-githook-pc:
@@ -207,54 +159,56 @@ build-githook-pc:
 
 build-requirements:
     @echo "SUBTASK: build requirements"
-    @just build-requirements-basics
+    @just build-requirements-basic
     @just build-requirements-dependencies
 
-build-requirements-basics:
-    @{{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade pip
-    @{{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade certifi wheel toml poetry
+build-requirements-basic:
+    @- {{PYVENV_ON}} && {{PYVENV}} -m pip install --upgrade pip 2> /dev/null
+    @{{PYVENV_ON}} && pip install ruff uv
 
 build-requirements-dependencies:
-    @echo "... install packages with PEP issues"
-    @{{PYVENV_ON}} && {{PYVENV}} -m pip wheel --no-cache-dir --use-pep517 \
-        "wget (==3.2)"
-    @echo "... install ordinary packages via poetry"
-    @{{PYVENV_ON}} && {{PYVENV}} -m poetry lock --no-update
-    @{{PYVENV_ON}} && {{PYVENV}} -m poetry install --no-interaction --no-root
+    @{{PYVENV_ON}} && uv pip install \
+        --exact \
+        --strict \
+        --compile-bytecode \
+        --no-python-downloads \
+        --requirements pyproject.toml
+    @{{PYVENV_ON}} && uv sync
 
 build-models:
     @echo "SUBTASK: build data models from schemata."
-    @just _delete-if-folder-exists "src/models/generated"
-    @just _create-folder-if-not-exists "src/models/generated"
-    @just _create-file-if-not-exists "src/models/generated/__init__.py"
+    @rm -rf "src/models/generated" 2> /dev/null
+    @mkdir -p "src/models/generated"
+    @touch "src/models/generated/__init__.py"
     @just _generate-models-recursively "models" "src/models/generated"
+
+build-bindings:
+    @echo "SUBTASK: build compiled bindings."
+    @{{PYVENV_ON}} && cd bindings/rust && {{PYVENV}} -m {{RUST_TO_PY_BINDINGS}} develop \
+        --bindings pyo3 \
+        --ignore-rust-version \
+        --release
 
 build-docs:
     @echo "SUBTASK: build documentation for data models from schemata."
-    @just _delete-if-folder-exists "docs/models"
-    @just _create-folder-if-not-exists "docs/models"
-    @- just _generate-documentation-recursively "models" "docs/models"
+    @rm -rf "docs/models" 2> /dev/null
+    @mkdir -p "docs/models"
+    @- just _build-documentation-recursively "models" "docs/models"
     @- just _clean-all-files "." ".openapi-generator*"
     @- just _clean-all-folders "." ".openapi-generator*"
 
-build-archive branch="main":
-    @echo "SUBTASK: build artefact"
-    @echo "Create zip archive of project"
-    @mkdir -p dist
-    @git archive -o dist/{{PROJECT_NAME}}-$(cat dist/VERSION).zip "{{branch}}"
+build-archive:
+    @echo "TASK: create .zip archive of project"
+    @# store current state
+    @git add . && git commit --no-verify --allow-empty -m "temp"
+    @# create archive
+    @git archive -o dist/${PROJECT_NAME}-$(cat dist/VERSION).zip "HEAD"
+    @# undo above commit
+    @git reset --soft HEAD~1 && git reset .
 
-# process for release
-dist branch="main":
-    @echo "TASK: create release"
-    @just clean
-    @just setup
-    @just build
-    @just build-docs
-    @just build-archive "{{branch}}"
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: execution
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 run *args:
     @{{PYVENV_ON}} && {{PYVENV}} -m src.cli {{args}}
@@ -299,18 +253,18 @@ run-api-debug env_path=".env" log_path="logs" session_path=".session" IP="${HTTP
         --log "{{log_path}}" \
         --session "{{session_path}}"
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: development
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 # Recipe only works if local file test.py exists
 dev *args:
     @just _reset-logs
-    @{{PYVENV_ON}} && {{PYVENV}} test.py {{args}}
+    @{{PYVENV_ON}} && {{PYVENV}} -m dev {{args}}
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: terminate execution
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 # finds pid based on port
 get-pid PORT:
@@ -332,9 +286,9 @@ kill-port PORT="${HTTP_PORT:-8000}":
     fi
     exit 0;
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: tests
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 tests:
     @just tests-unit
@@ -380,10 +334,10 @@ tests-integration:
 test-integration path:
     @echo "Integration tests not yet implemented"
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: qa
 # NOTE: use for development only.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 qa:
     @{{PYVENV_ON}} && {{PYVENV}} -m coverage report -m
@@ -398,24 +352,51 @@ coverage source_path tests_path log_path="logs":
         2> /dev/null
     @just _display-logs
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: prettify
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 lint path:
-    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} check \
+        --respect-gitignore \
+        --show-fixes \
+        --no-unsafe-fixes \
+        --exit-zero \
+        --fix \
+        "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} format \
+        --respect-gitignore \
+        "{{path}}"
+
+lint-dry path:
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} check \
+        --respect-gitignore \
+        --no-unsafe-fixes \
+        --exit-zero \
+        --diff \
+        "{{path}}"
 
 lint-check path:
-    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --check --verbose "{{path}}"
+    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} check \
+        --respect-gitignore \
+        --no-unsafe-fixes \
+        --exit-zero \
+        --verbose \
+        "{{path}}"
 
 prettify:
-    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose src/*
-    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose tests/*
-    @{{PYVENV_ON}} && {{PYVENV}} -m {{LINTING}} --verbose notebooks/*
+    @just lint "src"
+    @just lint "tests"
+    @just lint "notebooks"
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+prettify-dry:
+    @just lint-dry "src"
+    @just lint-dry "tests"
+    @just lint-dry "notebooks"
+
+# --------------------------------
 # TARGES: utilities
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 create-badge-pyversion:
     @{{PYVENV_ON}} && {{PYVENV}} -m pybadges \
@@ -426,34 +407,33 @@ create-badge-pyversion:
         --logo='https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/python.svg' \
         >> docs/badges/pyversion.svg
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: clean
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
-
-
-clean log_path="logs" session_path=".session":
-    @- just clean-basic "{{log_path}}" "{{session_path}}"
+clean session_path=".session":
+    @- just clean-basic "{{session_path}}"
     @- just clean-notebooks
     @- just clean-venv
 
-clean-basic log_path="logs" session_path=".session":
+clean-basic session_path=".session":
     @echo "All system artefacts will be force removed."
     @- just _clean-all-files "." ".DS_Store" 2> /dev/null
     @echo "All test artefacts will be force removed."
-    @- just _delete-if-folder-exists ".pytest_cache" 2> /dev/null
-    @- just _delete-if-file-exists ".coverage" 2> /dev/null
-    @- just _delete-if-folder-exists "tests/behave/.session" 2> /dev/null
-    @- just _delete-if-folder-exists "tests/behave/logs" 2> /dev/null
-    @echo "All execution artefacts will be force removed."
-    @- just _delete-if-folder-exists "{{log_path}}" 2> /dev/null
-    @- just _delete-if-folder-exists "{{session_path}}" 2> /dev/null
+    @- rm -rf ".pytest_cache" 2> /dev/null
+    @- rm -f ".coverage" 2> /dev/null
+    @- rm -f "tests/behave/.session" 2> /dev/null
+    @- rm -f "tests/behave/logs" 2> /dev/null
     @echo "All build artefacts will be force removed."
+    @- rm -rf ".venv" 2> /dev/null
+    @- rm -rf "build" 2> /dev/null
+    @- rm -rf "bindings/rust/target" 2> /dev/null
     @- just _clean-all-folders "." ".idea" 2> /dev/null
     @- just _clean-all-folders "." "__pycache__" 2> /dev/null
 
 clean-venv:
-    @- just _delete-if-folder-exists ".venv" 2> /dev/null
+    @echo "VENV will be removed."
+    @- rm -rf ".venv" 2> /dev/null
 
 clean-notebooks:
     @echo "Clean outputs and metadata from python notebooks."
@@ -472,56 +452,80 @@ clean-notebook-meta path:
     @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":""}' "{{path}}" 2> /dev/null
     @{{PYVENV_ON}} && {{PYVENV}} -m jupytext --update-metadata '{"vscode":null}' "{{path}}" 2> /dev/null
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 # TARGETS: logging, session
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
-_clear-logs log_path="logs":
-    @just _delete-if-folder-exists "{{log_path}}"
+_clear-logs log_path="${PATH_LOGS}":
+    @rm -rf "{{log_path}}" 2> /dev/null
 
-_create-logs log_path="logs":
+_create-logs-part part log_path="${PATH_LOGS}":
+    @mkdir -p "{{log_path}}"
+    @touch "{{log_path}}/{{part}}.log"
+
+_create-logs log_path="${PATH_LOGS}":
     @just _create-logs-part "debug" "{{log_path}}"
-    @just _create-logs-part "out" "{{log_path}}"
-    @just _create-logs-part "err" "{{log_path}}"
+    @just _create-logs-part "out"   "{{log_path}}"
+    @just _create-logs-part "err"   "{{log_path}}"
 
-_create-logs-part part log_path="logs":
-    @just _create-folder-if-not-exists "{{log_path}}"
-    @just _create-file-if-not-exists "{{log_path}}/{{part}}.log"
-
-_reset-logs log_path="logs":
-    @just _delete-if-folder-exists "{{log_path}}"
+_reset-logs log_path="${PATH_LOGS}":
+    @- just _clear-logs "{{log_path}}" 2> /dev/null
     @just _create-logs "{{log_path}}"
 
-_reset-test-logs kind:
-    @just _delete-if-folder-exists "tests/{{kind}}/logs"
-    @just _create-logs-part "debug" "tests/{{kind}}/logs"
-
-_display-logs log_path="logs":
+_display-logs:
     @echo ""
-    @echo "Content of logs/debug.log:"
+    @echo "Content of ${PATH_LOGS}/debug.log:"
     @echo "----------------"
     @echo ""
-    @- cat "{{log_path}}/debug.log"
+    @- cat ${PATH_LOGS}/debug.log
     @echo ""
     @echo "----------------"
 
-watch-logs n="10" log_path="logs":
-    @tail -f -n {{n}} "{{log_path}}/out.log"
+watch-logs n="10":
+    @tail -f -n {{n}} ${PATH_LOGS}/out.log
 
-watch-logs-err n="10" log_path="logs":
-    @tail -f -n {{n}} "{{log_path}}/err.log"
+watch-logs-err n="10":
+    @tail -f -n {{n}} ${PATH_LOGS}/err.log
 
-watch-logs-debug n="10" log_path="logs":
-    @tail -f -n {{n}} "{{log_path}}/debug.log"
+watch-logs-debug n="10":
+    @tail -f -n {{n}} ${PATH_LOGS}/debug.log
 
-watch-logs-all n="10" log_path="logs":
-    @just watch-logs {{n}} "{{log_path}}" &
-    @just watch-logs-err {{n}} "{{log_path}}" &
-    @just watch-logs-debug {{n}} "{{log_path}}" &
+watch-logs-all n="10":
+    @just watch-logs {{n}} &
+    @just watch-logs-err {{n}} &
+    @just watch-logs-debug {{n}} &
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# appends log contents to a file with date stamp
+archive-log part log_path="${PATH_LOGS}" archive_path="${PATH_LOGS}/archive":
+    #!/usr/bin/env bash
+    # create stamps
+    DATE_NOW="$(date '+%Y-%m-%d')"
+    TEMP_STAMP="${DATE_NOW}_${RANDOM}"
+
+    echo "ARCHIVE {{log_path}}/{{part}}.log ---> {{archive_path}}/${DATE_NOW}_{{part}}.log"
+
+    # shift entire contents to temp file and recreate an empty file
+    mv "{{log_path}}/{{part}}.log" "{{log_path}}/{{part}}_${TEMP_STAMP}.log"
+    touch "{{log_path}}/{{part}}.log"
+
+    # append contents of temp file to possibly pre-existing archive and remove temp
+    cat "{{log_path}}/{{part}}_${TEMP_STAMP}.log" >> "{{archive_path}}/${DATE_NOW}_{{part}}.log"
+    rm "{{log_path}}/{{part}}_${TEMP_STAMP}.log"
+
+archive-logs log_path="${PATH_LOGS}" archive_path="${PATH_LOGS}/archive":
+    @# ensure logs exist
+    @mkdir -p "{{archive_path}}"
+    @just _create-logs "{{log_path}}"
+    @# store each log
+    @just archive-log "out" "{{log_path}}" "{{archive_path}}"
+    @just archive-log "err" "{{log_path}}" "{{archive_path}}"
+    @# NOTE: do not archive debug logs!
+    @# just archive-log "debug" "{{log_path}}" "{{archive_path}}"
+    @just _create-logs-part "debug" "{{log_path}}"
+
+# --------------------------------
 # TARGETS: requirements
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# --------------------------------
 
 check-system:
     @echo "Operating System detected:  {{os_family()}}"
@@ -531,6 +535,5 @@ check-system:
 
 check-system-requirements:
     @just _check-python-tool "{{GEN_MODELS}}" "datamodel-code-generator"
-    @just _check-tool "{{GEN_APIS}}" "openapi-code-generator"
+    @just _check-python-tool "{{TOOL_TEST_BDD}}" "behave"
     @just _check-python-tool "{{LINTING}}" "{{LINTING}}"
-    @just _check-python-tool "{{GITHOOK_PRECOMMIT}}" "pre-commit"

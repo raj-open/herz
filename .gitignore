@@ -1,4 +1,4 @@
-*
+/**
 !/.gitignore
 !/.gitattributes
 
@@ -9,8 +9,10 @@
 !/README.md
 !/LICENCE
 !/justfile
+!/Cargo.toml
+!/rustfmt.toml
 !/pyproject.toml
-!/poetry.lock
+!/*.lock
 !/.coveragerc
 !/.behaverc
 # for githook
@@ -68,14 +70,17 @@
 !/dist/VERSION
 
 # ----------------------------------------------------------------
-# FORCE EXCLUDE
+# FORCE REMOVE
 # ----------------------------------------------------------------
 
-**/.DS_Store
-**/__pycache__*
-**/__archive__*
-**/sandbox*
+**/.session
+**/logs
+**/.vscode
 **/*.tmp
+**/.DS_Store
+**/__archive__*
+**/__pycache__*
+/build
 
 # ----------------------------------------------------------------
 # FORCE RETAIN
