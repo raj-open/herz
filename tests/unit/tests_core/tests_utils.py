@@ -5,11 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import numpy as np
+
 from tests.unit.thirdparty.unit import *
 
 from src.core.utils import *
 from src.thirdparty.maths import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS

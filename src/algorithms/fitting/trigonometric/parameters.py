@@ -5,9 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import math
+from math import pi
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....models.fitting import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

@@ -5,6 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import csv
+import math
+from math import pi
+
+import pandas as pd
+from tabulate import tabulate
+
 from ....core.log import *
 from ....models.fitting import *
 from ....models.intervals import *
@@ -13,10 +20,8 @@ from ....models.user import *
 from ....queries.fitting import *
 from ....queries.scientific import *
 from ....setup import config
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.misc import *
-from ....thirdparty.render import *
 
 # ----------------------------------------------------------------
 # EXPORTS

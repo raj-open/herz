@@ -5,12 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+from collections.abc import Iterable
+
 from ...models.fitting import *
 from ...models.intervals import *
 from ...models.polynomials import *
-from ...thirdparty.data import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

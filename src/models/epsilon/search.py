@@ -5,8 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
+from typing import TypeVar
+
+import numpy as np
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

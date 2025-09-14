@@ -5,6 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+
 from ...core.constants import *
 from ...core.utils import *
 from ...models.critical import *
@@ -12,7 +15,6 @@ from ...models.enums import *
 from ...models.epsilon import *
 from ...models.polynomials import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

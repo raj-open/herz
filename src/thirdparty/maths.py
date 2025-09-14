@@ -7,26 +7,26 @@
 
 import math
 import random
-from collections import Counter
-from math import pi
 
-import lmfit
-
-# import mpmath
-import networkx as nx
 import numpy as np
-import scipy as sp
-import sympy
-from findpeaks import findpeaks
-
-# for modifications only
 from numpy.random import MT19937
 from numpy.random import RandomState
 from numpy.random import SeedSequence
 from numpy.typing import NDArray
-from scipy import linalg as spla
-from scipy import optimize as spo
-from scipy import signal as sps
+
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    "NDArray",
+    "indices_non_outliers",
+    "nCr",
+    "nPr",
+    "normalised_order_statistics",
+    "remove_outliers",
+    "reseed",
+]
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -122,32 +122,3 @@ def remove_outliers(X: NDArray[np.float64], sig: float = 2.0) -> NDArray[np.floa
     indices = indices_non_outliers(X, sig=sig)
     X = X[indices]
     return X
-
-
-# ----------------------------------------------------------------
-# EXPORTS
-# ----------------------------------------------------------------
-
-__all__ = [
-    "Counter",
-    "NDArray",
-    "findpeaks",
-    "indices_non_outliers",
-    "lmfit",
-    "math",
-    # 'mpmath',
-    "nCr",
-    "nPr",
-    "normalised_order_statistics",
-    "np",
-    "nx",
-    "pi",
-    "random",
-    "remove_outliers",
-    "reseed",
-    "sp",
-    "spla",
-    "spo",
-    "sps",
-    "sympy",
-]

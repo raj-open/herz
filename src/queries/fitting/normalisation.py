@@ -5,11 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import pandas as pd
+
 from ...models.fitting import *
 from ...models.polynomials import *
-from ...thirdparty.data import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

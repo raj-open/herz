@@ -7,7 +7,8 @@
 
 from __future__ import annotations
 
-from ...thirdparty.types import *
+from typing import Generator
+
 from .models_polytrig import *
 
 # ----------------------------------------------------------------

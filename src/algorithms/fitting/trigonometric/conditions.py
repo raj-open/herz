@@ -5,11 +5,18 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import math
+from functools import partial
+from math import pi
+
+import numpy as np
+from numpy.typing import NDArray
+from pydantic import RootModel
+
 from ....models.fitting import *
 from ....models.polynomials import *
-from ....thirdparty.code import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from .parameters import *
 
 # ----------------------------------------------------------------

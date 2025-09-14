@@ -5,8 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import Any
+
 from ...models.apis import *
-from ...thirdparty.types import *
 from .basic import *
 
 # ----------------------------------------------------------------

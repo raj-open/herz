@@ -5,9 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+from collections.abc import Iterable
+from typing import TypeVar
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...core.constants import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .models_polyexp import *
 
 # ----------------------------------------------------------------

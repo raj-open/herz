@@ -47,8 +47,8 @@ dependencies = [
     # --------------------------------
     # code - async, distr. system
     # --------------------------------
-    "asyncio>=4.0.0",
-    "anyio>=4.10.0",
+    # "asyncio>=4.0.0",
+    # "anyio>=4.10.0",
     "lazy-load>=0.8.3",
     # --------------------------------
     # web
@@ -84,7 +84,7 @@ dependencies = [
     "scipy>=1.16.2", # findpeaks imports fft from scipy in the wrong way under latest version
     "findpeaks>=2.7.5",
     "lmfit>=1.3.4",
-    # "networkx>=3.5", # for graphs
+    "networkx>=3.5", # for graphs
     # "mpmath>=1.3.0",
     "sympy>=1.14.0",
     # --------------------------------

@@ -7,16 +7,13 @@
 
 from enum import Enum
 
-# NOTE: reference https://plotly.com/python/reference
-import plotly
-import plotly.express as pex
-import plotly.graph_objects as pgo
-from matplotlib import colors as mcolours
-from matplotlib import pyplot as mplot
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
-from matplotlib.patches import FancyArrowPatch
-from plotly.subplots import make_subplots
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    "PLOTLY_COLOUR_SCHEME",
+]
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -122,21 +119,3 @@ class PLOTLY_COLOUR_SCHEME(Enum):
     YLGNBU = "ylgnbu"
     YLORBR = "ylorbr"
     YLORRD = "ylorrd"
-
-
-# ----------------------------------------------------------------
-# EXPORTS
-# ----------------------------------------------------------------
-
-__all__ = [
-    "PLOTLY_COLOUR_SCHEME",
-    "Axes",
-    "FancyArrowPatch",
-    "Figure",
-    "make_subplots",
-    "mcolours",
-    "mplot",
-    "pex",
-    "pgo",
-    "plotly",
-]

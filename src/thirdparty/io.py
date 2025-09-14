@@ -5,14 +5,18 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from argparse import ArgumentError
-from argparse import ArgumentParser
-from argparse import Namespace
-from argparse import RawTextHelpFormatter
-
-# for modifications, not export
 from enum import Enum
 from io import BytesIO
+
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    "ENCODING",
+    "BytesIO",
+    "BytesIOStream",
+]
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -45,18 +49,3 @@ class BytesIOStream:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         return
-
-
-# ----------------------------------------------------------------
-# EXPORTS
-# ----------------------------------------------------------------
-
-__all__ = [
-    "ENCODING",
-    "ArgumentError",
-    "ArgumentParser",
-    "BytesIO",
-    "BytesIOStream",
-    "Namespace",
-    "RawTextHelpFormatter",
-]

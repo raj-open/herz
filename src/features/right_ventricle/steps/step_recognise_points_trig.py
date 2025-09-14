@@ -5,6 +5,7 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
 from ....algorithms.critical import *
 from ....core.log import *
 from ....models.app import *
@@ -13,7 +14,6 @@ from ....models.fitting import *
 from ....models.polynomials import *
 from ....models.user import *
 from ....queries.fitting import *
-from ....thirdparty.data import *
 
 # ----------------------------------------------------------------
 # EXPORTS

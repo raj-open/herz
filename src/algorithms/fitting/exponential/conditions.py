@@ -5,12 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import math
+
+import numpy as np
+
 from ....core.log import *
 from ....models.fitting import *
 from ....models.polynomials import *
-from ....thirdparty.code import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from .parameters import *
 
 # ----------------------------------------------------------------

@@ -5,6 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+
+import numpy as np
+
 from ...core.utils import *
 from ...thirdparty.maths import *
 from .cycles import *

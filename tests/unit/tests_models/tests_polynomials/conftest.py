@@ -5,6 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from math import pi
+
+import numpy as np
+
 from tests.unit.thirdparty.unit import *
 
 from src.thirdparty.maths import *

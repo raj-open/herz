@@ -5,6 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+from collections.abc import Iterable
+
+import numpy as np
+import pandas as pd
+
 from ....algorithms.anomalies import *
 from ....algorithms.fitting.polynomials import *
 from ....core.log import *
@@ -15,9 +21,7 @@ from ....models.intervals import *
 from ....models.polynomials import *
 from ....models.user import *
 from ....queries.fitting import *
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

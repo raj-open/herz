@@ -5,13 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import pandas as pd
+
 from ....algorithms.anomalies import *
 from ....algorithms.interpolations import *
 from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from .methods import *
 

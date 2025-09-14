@@ -5,10 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import random
+from functools import partial
+from typing import Callable
+from typing import Generator
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....models.fitting import *
-from ....thirdparty.code import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from ..leastsq import *
 from .geometry import *
 from .gradients import *

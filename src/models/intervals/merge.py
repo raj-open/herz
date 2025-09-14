@@ -5,8 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
+from typing import Generator
+
+import networkx as nx
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

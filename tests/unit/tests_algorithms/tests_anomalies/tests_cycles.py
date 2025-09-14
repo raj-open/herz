@@ -8,8 +8,6 @@
 from tests.unit.thirdparty.unit import *
 
 from src.algorithms.anomalies.cycles import *
-from src.thirdparty.log import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS

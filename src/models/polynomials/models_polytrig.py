@@ -7,7 +7,10 @@
 
 from __future__ import annotations
 
-from ...thirdparty.types import *
+from collections.abc import Iterable
+from typing import Any
+from typing import Generator
+
 from .models_polyexp import *
 
 # ----------------------------------------------------------------

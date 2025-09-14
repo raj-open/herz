@@ -5,6 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+from typing import Iterable
+
+import numpy as np
+
 from tests.unit.thirdparty.unit import *
 
 from src.algorithms.fitting.polynomials import *
@@ -15,7 +20,6 @@ from src.algorithms.fitting.polynomials.geometry import force_poly_conditions
 from src.models.fitting import *
 from src.models.polynomials import *
 from src.thirdparty.maths import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES

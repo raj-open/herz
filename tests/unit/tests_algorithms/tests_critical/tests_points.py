@@ -12,7 +12,6 @@ from src.core.constants import *
 from src.models.critical import *
 from src.models.polynomials import *
 from src.thirdparty.maths import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS

@@ -5,8 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import TypeVar
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .models_poly import *
 from .models_polyexp import *
 

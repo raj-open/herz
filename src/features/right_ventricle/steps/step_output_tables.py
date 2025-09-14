@@ -5,14 +5,19 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import os
+from pathlib import Path
+from typing import Optional
+
+import pandas as pd
+
 from ....core.log import *
 from ....models.user import *
 from ....queries.scientific import *
 from ....setup import config
-from ....thirdparty.data import *
 from ....thirdparty.physics import *
 from ....thirdparty.system import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

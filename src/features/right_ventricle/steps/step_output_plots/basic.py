@@ -5,6 +5,19 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import os
+from math import pi
+from pathlib import Path
+from typing import Callable
+from typing import Generator
+from typing import Optional
+
+import numpy as np
+
+# NOTE: reference https://plotly.com/python/reference
+import plotly.graph_objects as pgo
+from numpy.typing import NDArray
+
 from .....algorithms.fitting.trigonometric import *
 from .....models.fitting import *
 from .....models.intervals import *
@@ -12,7 +25,6 @@ from .....models.polynomials import *
 from .....thirdparty.maths import *
 from .....thirdparty.plots import *
 from .....thirdparty.system import *
-from .....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

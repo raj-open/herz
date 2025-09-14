@@ -7,8 +7,6 @@
 
 from tests.unit.thirdparty.unit import *
 
-from src.thirdparty.types import *
-
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------

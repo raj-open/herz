@@ -9,7 +9,6 @@ from tests.unit.thirdparty.unit import *
 
 from src.algorithms.graph.ranks import *
 from src.thirdparty.maths import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS

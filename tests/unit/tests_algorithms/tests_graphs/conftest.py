@@ -5,6 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import networkx as nx
+
 from tests.unit.thirdparty.unit import *
 
 from src.thirdparty.maths import *

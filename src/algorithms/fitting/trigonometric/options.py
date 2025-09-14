@@ -5,9 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+from typing import Callable
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....models.polynomials import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from .geometry import *
 from .gradients import *
 

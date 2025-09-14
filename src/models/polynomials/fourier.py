@@ -5,6 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from math import pi
+
+import numpy as np
+
 from ...thirdparty.maths import *
 from .models_poly import *
 

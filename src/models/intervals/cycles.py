@@ -5,8 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .merge import *
 from .resolve import *
 

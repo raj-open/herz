@@ -5,11 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
 from itertools import pairwise
+
+import numpy as np
 
 from ...core.utils import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .peaks import *
 
 # ----------------------------------------------------------------

@@ -6,14 +6,20 @@
 # ----------------------------------------------------------------
 
 import os
-import signal
-import socket
-import sys
-import traceback
-import warnings
 from pathlib import Path
 
-import pathspec
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    "clear_dir_if_exists",
+    "create_dir_if_not_exists",
+    "create_file_if_not_exists",
+    "remove_dir_if_exists",
+    "remove_file_if_exists",
+    "temporary_folder_name",
+]
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -93,25 +99,3 @@ def temporary_folder_name(
     if create and not os.path.exists(path):
         create_dir_if_not_exists(path)
     return path
-
-
-# ----------------------------------------------------------------
-# EXPORTS
-# ----------------------------------------------------------------
-
-__all__ = [
-    "Path",
-    "clear_dir_if_exists",
-    "create_dir_if_not_exists",
-    "create_file_if_not_exists",
-    "os",
-    "pathspec",
-    "remove_dir_if_exists",
-    "remove_file_if_exists",
-    "signal",
-    "socket",
-    "sys",
-    "temporary_folder_name",
-    "traceback",
-    "warnings",
-]

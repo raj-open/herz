@@ -5,14 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+from tabulate import tabulate
+
 from ...core.constants import *
 from ...core.utils import *
 from ...models.critical import *
 from ...models.epsilon import *
 from ...models.polynomials import *
 from ...thirdparty.maths import *
-from ...thirdparty.render import *
-from ...thirdparty.types import *
 from .clean import *
 
 # ----------------------------------------------------------------

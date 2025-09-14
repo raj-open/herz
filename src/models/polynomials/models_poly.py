@@ -7,8 +7,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+from typing import Any
+from typing import Generator
+from typing import TypeVar
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .models_polyexp import *
 
 # ----------------------------------------------------------------

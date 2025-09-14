@@ -5,9 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.code import *
+import math
+from collections.abc import Iterable
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .statistics import *
 
 # ----------------------------------------------------------------

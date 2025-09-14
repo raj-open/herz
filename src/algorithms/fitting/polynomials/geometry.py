@@ -5,10 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+from collections.abc import Iterable
+
+import numpy as np
+from numpy.typing import NDArray
+from scipy import linalg as spla
+
 from ....models.fitting import *
 from ....models.polynomials import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from ...interpolations import *
 
 # ----------------------------------------------------------------

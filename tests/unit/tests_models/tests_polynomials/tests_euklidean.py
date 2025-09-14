@@ -5,6 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import numpy as np
+
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *

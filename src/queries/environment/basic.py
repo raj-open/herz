@@ -5,10 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.code import *
-from ...thirdparty.config import *
+from functools import wraps
+from typing import Any
+from typing import Callable
+from typing import Concatenate
+from typing import ParamSpec
+from typing import TypeVar
+
 from ...thirdparty.system import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

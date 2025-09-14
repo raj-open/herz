@@ -5,9 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
 from ....core.utils import *
 from ....models.fitting import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

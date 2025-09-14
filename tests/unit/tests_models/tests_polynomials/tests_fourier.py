@@ -5,12 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from math import pi
+
+import numpy as np
+
 from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *
 from src.thirdparty.maths import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES

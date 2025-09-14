@@ -5,12 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+import pandas as pd
+
 from ....algorithms.anomalies import *
 from ....algorithms.interpolations import *
 from ....core.log import *
 from ....models.app import *
 from ....models.fitting import *
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
 
 # ----------------------------------------------------------------

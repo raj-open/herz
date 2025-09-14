@@ -15,9 +15,10 @@ import sys
 os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.getcwd())
 
+import uvicorn
+
 from .queries.console.api import *
 from .setup import config
-from .thirdparty.fastapi import *
 from .ui import *
 
 # ----------------------------------------------------------------

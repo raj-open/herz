@@ -9,8 +9,9 @@ This submodule contains the Euklidean algorithm.
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import TypeVar
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .models_poly import *
 
 # ----------------------------------------------------------------

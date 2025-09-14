@@ -5,6 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+from collections.abc import Iterable
+
+import numpy as np
+import pandas as pd
+from numpy.typing import NDArray
+
 from ....algorithms.anomalies import *
 from ....algorithms.fitting.trigonometric import *
 from ....core.constants import *
@@ -15,11 +22,8 @@ from ....models.fitting import *
 from ....models.polynomials import *
 from ....models.user import *
 from ....queries.fitting import *
-from ....thirdparty.code import *
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.misc import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

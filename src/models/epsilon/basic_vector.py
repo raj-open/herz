@@ -9,8 +9,13 @@ Methods for eps-differences for aligned arrays.
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
+from typing import TypeVar
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from ..enums import *
 
 # ----------------------------------------------------------------

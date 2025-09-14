@@ -5,10 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import Callable
+from typing import Generator
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....core.log import *
 from ....models.fitting import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

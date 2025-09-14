@@ -5,13 +5,20 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+from typing import Generator
+
+import numpy as np
+import pandas as pd
+
+# NOTE: reference https://plotly.com/python/reference
+import plotly.graph_objects as pgo
+
 from .....models.fitting import *
 from .....models.polynomials import *
 from .....queries.fitting import *
-from .....thirdparty.data import *
 from .....thirdparty.maths import *
 from .....thirdparty.plots import *
-from .....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

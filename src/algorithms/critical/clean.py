@@ -5,6 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+
 from ...models.critical import *
 from ...models.epsilon import *
 from ...models.polynomials import *

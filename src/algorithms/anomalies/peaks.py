@@ -5,8 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import math
+from collections.abc import Iterable
+
+import numpy as np
+from numpy.typing import NDArray
+from scipy import signal as sps
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

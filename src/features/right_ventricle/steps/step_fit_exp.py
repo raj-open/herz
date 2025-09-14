@@ -5,6 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import math
+
+import numpy as np
+import pandas as pd
+from numpy.typing import NDArray
+
 from ....algorithms.fitting.exponential import *
 from ....core.constants import *
 from ....core.log import *
@@ -13,10 +20,8 @@ from ....models.enums import *
 from ....models.fitting import *
 from ....models.polynomials import *
 from ....queries.fitting import *
-from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.misc import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

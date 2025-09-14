@@ -7,8 +7,11 @@
 
 from __future__ import annotations
 
-from ...thirdparty.code import *
-from ...thirdparty.types import *
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Callable
+from typing import Optional
+
 from .basic import *
 
 # ----------------------------------------------------------------

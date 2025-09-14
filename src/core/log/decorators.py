@@ -5,8 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.code import *
-from ...thirdparty.types import *
+from functools import wraps
+from typing import Callable
+from typing import ParamSpec
+from typing import TypeVar
+
 from .basic import *
 
 # ----------------------------------------------------------------

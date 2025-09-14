@@ -7,9 +7,16 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+from typing import Any
+from typing import Generator
+from typing import TypeVar
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...core.utils import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from ..intervals import *
 from .models_base import *
 
@@ -184,8 +191,9 @@ class PolyExp(PolyExpBase[T]):
             case _ as s:
                 deg = self.degree
                 Zero = np.zeros((deg + 1, 1))
-                E = np.row_stack(
-                    [np.column_stack([Zero[:-1], np.diag(range(1, deg + 1))]), O.T]
+                E = np.concat(
+                    [np.column_stack([Zero[:-1], np.diag(range(1, deg + 1))]), Zero.T],
+                    axis=0,
                 )
                 # DEV-NOTE: canot use += due to possible dtype-clash (float + complex)
                 E = E + s * np.eye(deg + 1)

@@ -5,11 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import pandas as pd
+
 from ....core.log import *
 from ....models.fitting import *
 from ....models.polynomials import *
 from ....setup import config
-from ....thirdparty.data import *
 from ..steps import *
 
 # ----------------------------------------------------------------

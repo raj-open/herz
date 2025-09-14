@@ -5,8 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import TypeVar
+
+import numpy as np
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from ..enums import *
 
 # ----------------------------------------------------------------

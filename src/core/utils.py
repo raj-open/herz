@@ -5,9 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.code import *
+from collections.abc import Iterable
+from itertools import chain as itertools_chain
+from typing import TypeVar
+
+import numpy as np
+
 from ..thirdparty.maths import *
-from ..thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS

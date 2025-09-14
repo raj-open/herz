@@ -5,21 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from copy import copy
-from copy import deepcopy
-from dataclasses import MISSING
-from dataclasses import Field
-from dataclasses import asdict
-from dataclasses import dataclass
-from dataclasses import field
 from functools import partial
-from functools import reduce
 from functools import wraps
-from itertools import chain as itertools_chain
-from itertools import product as itertools_product
-from operator import itemgetter
-
-# cf. https://github.com/mplanchard/safetywrap
 from typing import Callable
 from typing import Optional
 from typing import ParamSpec
@@ -27,6 +14,17 @@ from typing import TypeVar
 
 from lazy_load import lazy
 from pydantic import BaseModel
+
+# ----------------------------------------------------------------
+# EXPORTS
+# ----------------------------------------------------------------
+
+__all__ = [
+    "compute_once",
+    "echo_function",
+    "make_lazy",
+    "value_of_model",
+]
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -94,29 +92,3 @@ def compute_once(method: Callable[PARAMS, RETURN]) -> Callable[PARAMS, RETURN]:
         return _value
 
     return wrapped_method
-
-
-# ----------------------------------------------------------------
-# EXPORTS
-# ----------------------------------------------------------------
-
-__all__ = [
-    "MISSING",
-    "Field",
-    "asdict",
-    "compute_once",
-    "copy",
-    "dataclass",
-    "deepcopy",
-    "echo_function",
-    "field",
-    "itemgetter",
-    "itertools_chain",
-    "itertools_product",
-    "lazy",
-    "make_lazy",
-    "partial",
-    "reduce",
-    "value_of_model",
-    "wraps",
-]

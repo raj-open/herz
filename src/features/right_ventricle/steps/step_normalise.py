@@ -5,11 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import pandas as pd
+
 from ....algorithms.anomalies import *
 from ....algorithms.fitting.normalisation import *
 from ....core.log import *
 from ....models.fitting import *
-from ....thirdparty.data import *
 
 # ----------------------------------------------------------------
 # EXPORTS

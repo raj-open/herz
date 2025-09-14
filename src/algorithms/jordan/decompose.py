@@ -5,9 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections import Counter
+from typing import TypeVar
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ...models.polynomials import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from .polynomials import *
 
 # ----------------------------------------------------------------

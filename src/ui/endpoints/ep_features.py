@@ -9,11 +9,16 @@ API endpoints for main features.
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import Annotated
+
+from fastapi import Body as FastAPIBody
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPBasic
+
 from ...features import *
 from ...models.user import *
 from ...setup import *
-from ...thirdparty.fastapi import *
-from ...thirdparty.types import *
 from ...thirdparty.web import *
 from .decorators import *
 

@@ -5,10 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....models.fitting import *
 from ....models.polynomials import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 from ...interpolations import *
 
 # ----------------------------------------------------------------

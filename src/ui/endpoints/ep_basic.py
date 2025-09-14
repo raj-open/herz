@@ -9,9 +9,16 @@ API endpoints basic.
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import Annotated
+
+from fastapi import Depends as FastAPIDepends
+from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
+from fastapi.responses import RedirectResponse
+from fastapi.security import HTTPBasic
+from fastapi.security import HTTPBasicCredentials
+
 from ...setup import *
-from ...thirdparty.fastapi import *
-from ...thirdparty.types import *
 from .decorators import *
 
 # ----------------------------------------------------------------

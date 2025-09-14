@@ -5,11 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from typing import Any
+
 from tests.unit.thirdparty.unit import *
 
 from src.core.log import *
-from src.thirdparty.log import *
-from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS

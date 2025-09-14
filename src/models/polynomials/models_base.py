@@ -7,9 +7,16 @@
 
 from __future__ import annotations
 
-from ...thirdparty.code import *
+from collections.abc import Iterable
+from dataclasses import asdict
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Generic
+from typing import TypeVar
+
+import numpy as np
+
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from ..epsilon import *
 
 # ----------------------------------------------------------------

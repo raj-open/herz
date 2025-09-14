@@ -5,9 +5,13 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from collections.abc import Iterable
+from typing import TypeVar
+
+import numpy as np
+
 from ...core.utils import *
 from ...thirdparty.maths import *
-from ...thirdparty.types import *
 from ..enums import *
 from .basic_matrix import *
 

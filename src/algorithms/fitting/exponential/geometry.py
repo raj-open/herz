@@ -5,9 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+
+import numpy as np
+from numpy.typing import NDArray
+
 from ....models.polynomials import *
 from ....thirdparty.maths import *
-from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
