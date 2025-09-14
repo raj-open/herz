@@ -225,6 +225,7 @@ ignore = [
     # "E703",
     "E712", # turn off, as sometimes variables have mixed boolean + string/null types
     "E731", # allow lambda expressions
+    "E741", # allow short single letter variable names for mathematical purposes
     "F403", # disable as conflicts with *-imports
     "F405", # disable as conflicts with *-imports
     # "F541", # allow f-string without placeholders
@@ -232,6 +233,9 @@ ignore = [
     "F811", # allow redefinition of methods
     # "I100", # disable imports from same library being forced into a single ,-separated statement
     # "I102", # disable multiple import formatting
+    "RUF001", # allow arbitrary accents in strings
+    "RUF002", # allow unicode in docstrings
+    "RUF003", # allow greek
     "RUF018", # allow assignment expressions in asserts
     "RUF028", # allow suppression comments within parts
     "S110", # allow try-except-pass
