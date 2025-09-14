@@ -1,4 +1,4 @@
-[![Python version: 3.10, 3.11](https://img.shields.io/badge/python%20version-3.10,%203.11-1464b4.svg)](https://www.python.org)
+[![Python version: 3.11--3.13](https://img.shields.io/badge/python%20version-3.11,%203.13-1464b4.svg)](https://www.python.org)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # Pressure-Volume analysis (RV) for cardiology #
@@ -21,7 +21,8 @@ See [examples](examples) and [notes](docs/README.md).
 
 ## System requirements ##
 
-- [Python 3.11](https://www.python.org/downloads)[^pythonversion]
+- [Python ^3.11](https://www.python.org/downloads) (currently developed under 3.13)
+
 - [Justfile tool](https://github.com/casey/just#installation)
 
 ### Windows users ###
@@ -30,6 +31,7 @@ Windows users are encouraged to install **bash**.
 There are a few ways to do this:
 
 1. Install [git for windows](https://gitforwindows.org) (which includes bash).
+
 2. [Activate ubuntu](https://devblogs.microsoft.com/commandline/bash-on-ubuntu-on-windows-download-now-3).
    This is perhaps more standard, but more complicated.
 
@@ -104,10 +106,5 @@ are in part inspired by literature, e.g. [^Heerdt2019].
 The remaining methods (esp. polynomial fitting methods)
 and corresponding code in this repository
 was developed independently by the repository owner.
-
-[^pythonversion]: one can use `python 3.10`.
-To do so, add a file called **.env** to the root of the project
-(use [templates/template.env](templates/template.env) as a template)
-define the value `PYTHON_VERSION:="3.10"`.
 
 [^Heerdt2019]: Heerdt, Paul M et al. "A pressure-based single beat method for estimation of right ventricular ejection fraction: proof of concept." _The European respiratory journal_ vol. 55,3 1901635. 12 Mar. 2020, doi:10.1183/13993003.01635-2019
