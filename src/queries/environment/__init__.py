@@ -13,9 +13,9 @@ from .http import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'add_environment',
-    'get_email_settings',
-    'get_environment',
-    'get_http_ip',
-    'get_http_port',
+    "add_environment",
+    "get_email_settings",
+    "get_environment",
+    "get_http_ip",
+    "get_http_port",
 ]

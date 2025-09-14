@@ -6,15 +6,15 @@
 # ----------------------------------------------------------------
 
 from .extra import *
-from .single import *
 from .loop import *
+from .single import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'quick_plot',
-    'step_output_loop_plot',
-    'step_output_time_plot',
+    "quick_plot",
+    "step_output_loop_plot",
+    "step_output_time_plot",
 ]

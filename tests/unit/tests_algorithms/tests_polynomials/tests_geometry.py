@@ -5,25 +5,24 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
-from src.models.polynomials import *
 from src.algorithms.fitting.polynomials import *
-
-from src.models.fitting import *
 from src.algorithms.fitting.polynomials.geometry import *
 
 # private method
 from src.algorithms.fitting.polynomials.geometry import force_poly_conditions
+from src.models.fitting import *
+from src.models.polynomials import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
 # ----------------------------------------------------------------
 
 
-@fixture(scope='function')
+@fixture(scope="function")
 def poly() -> Poly[float]:
     return Poly[float](coeff=[100, 3, 0, -0.7])
 
@@ -34,7 +33,7 @@ def poly() -> Poly[float]:
 
 
 @mark.parametrize(
-    ('n', 'deg', 't', 'expected'),
+    ("n", "deg", "t", "expected"),
     [
         (0, 5, 0.0, [[1, 0, 0, 0, 0, 0]]),
         (0, 5, 0.1, [[1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5]]),
@@ -64,7 +63,7 @@ def test_force_poly_conditions(
 
 
 @mark.parametrize(
-    ('deg', 'conds', 'coeff', 'T', 'intervals'),
+    ("deg", "conds", "coeff", "T", "intervals"),
     [
         (
             3,
@@ -133,7 +132,7 @@ def test_force_poly_conditions(
 
 
 @mark.parametrize(
-    ('deg', 'conds', 'T', 'intervals'),
+    ("deg", "conds", "T", "intervals"),
     [
         (
             4,

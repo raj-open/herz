@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
-from src.models.polynomials import *
 from src.algorithms.jordan import *
+from src.models.polynomials import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS
@@ -30,7 +30,7 @@ def test_characteristic_polynomial(
         if k > 0:
             Apow = Apow @ A
         pA += a * Apow
-    test.assertAlmostEqual(np.linalg.norm(pA), 0, msg='char(A) should be the 0-matrix')
+    test.assertAlmostEqual(np.linalg.norm(pA), 0, msg="char(A) should be the 0-matrix")
     return
 
 
@@ -45,5 +45,5 @@ def test_chinese_polynomial(
     for t, q in data:
         rest = ch % q
         test.assertEqual(rest.degree, 0)
-        test.assertAlmostEqual(rest.coefficients[0], t, msg='expected ch % q to be a scalar')
+        test.assertAlmostEqual(rest.coefficients[0], t, msg="expected ch % q to be a scalar")
     return

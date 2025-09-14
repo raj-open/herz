@@ -5,20 +5,19 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....algorithms.anomalies import *
+from ....core.utils import *
+from ....models.user import *
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....core.utils import *
-from ....models.user import *
-from ....algorithms.anomalies import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'recocompute_time_axis',
+    "recocompute_time_axis",
 ]
 
 # ----------------------------------------------------------------
@@ -32,6 +31,6 @@ def recocompute_time_axis(
 ) -> pd.DataFrame:
     N = len(data)
     T_max = N * dt
-    data['time[orig]'] = data['time']
-    data['time'] = np.linspace(start=0.0, stop=T_max, num=N, endpoint=False)
+    data["time[orig]"] = data["time"]
+    data["time"] = np.linspace(start=0.0, stop=T_max, num=N, endpoint=False)
     return data

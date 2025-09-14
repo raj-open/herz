@@ -13,6 +13,6 @@ from .ep_features import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'add_endpoints_basic',
-    'add_endpoints_features',
+    "add_endpoints_basic",
+    "add_endpoints_features",
 ]

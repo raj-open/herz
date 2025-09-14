@@ -5,19 +5,18 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ..__paths__ import *
+from ..core.log import *
+from ..models.apis import *
+from ..models.app import *
+from ..models.internal import *
+from ..models.user import *
+from ..queries import environment
 from ..thirdparty.code import *
 from ..thirdparty.config import *
 from ..thirdparty.io import *
 from ..thirdparty.misc import *
 from ..thirdparty.system import *
-
-from ..__paths__ import *
-from ..core.log import *
-from ..queries import environment
-from ..models.app import *
-from ..models.apis import *
-from ..models.internal import *
-from ..models.user import *
 from .register import *
 
 # ----------------------------------------------------------------
@@ -25,8 +24,8 @@ from .register import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'INFO',
-    'VERSION',
+    "INFO",
+    "VERSION",
 ]
 
 # ----------------------------------------------------------------
@@ -41,7 +40,7 @@ path_app_config = Property[str]()
 http_ip = Property[str](lambda: environment.get_http_ip(path_env()))
 http_port = Property[int](lambda: environment.get_http_port(path_env()))
 http_creds = Property[Credentials](lambda: environment.get_http_credentials(path_env()))
-path_app_config.set(os.path.join(get_source_path(), 'setup', 'config.yaml'))
+path_app_config.set(os.path.join(get_source_path(), "setup", "config.yaml"))
 
 
 # ----------------------------------------------------------------
@@ -53,9 +52,9 @@ def initialise_logging(
     name: str,
     debug: bool = False,
 ):
-    '''
+    """
     Initialise logging.
-    '''
+    """
     level = LOG_LEVELS.DEBUG if debug else LOG_LEVELS.INFO
     path = path_logging()
     configure_logging(name=name, level=level.name, path=path)
@@ -67,20 +66,20 @@ def initialise_application(
     log_pid: str | None = None,
     debug: bool = False,
 ):
-    '''
+    """
     Initialises cli execution of application
-    '''
+    """
     # initialise logging
     initialise_logging(name=name, debug=debug)
     # store pid as single value
-    path = log_pid or ''
-    if path != '':
+    path = log_pid or ""
+    if path != "":
         path = get_path_in_session(path)
         create_file_if_not_exists(path)
-        with open(path, 'w') as fp:
-            fp.write(f'{pid()}\n')
+        with open(path, "w") as fp:
+            fp.write(f"{pid()}\n")
     # log infos about application and execution mode
-    log_info(f'running {INFO.name} v{INFO.version} on PID {pid()}')
+    log_info(f"running {INFO.name} v{INFO.version} on PID {pid()}")
     return
 
 
@@ -95,9 +94,9 @@ def get_path_in_session(path: str) -> str:
 
 def get_temp_path(filename: str | None = None) -> str:
     if filename is None:
-        path = os.path.join('tmp', str(pid()))
+        path = os.path.join("tmp", str(pid()))
     else:
-        path = os.path.join('tmp', str(pid()), filename)
+        path = os.path.join("tmp", str(pid()), filename)
     return get_path_in_session(path)
 
 
@@ -108,10 +107,10 @@ def remove_temp_path() -> bool:
 
 
 def load_repo_info() -> RepoInfo:
-    path = os.path.join(get_root_path(), 'pyproject.toml')
-    with open(path, 'r', encoding=ENCODING.UTF8.value) as fp:
+    path = os.path.join(get_root_path(), "pyproject.toml")
+    with open(path, "r", encoding=ENCODING.UTF8.value) as fp:
         config_repo = toml.load(fp)
-        assets = config_repo.get('tool', {}).get('poetry', {})
+        assets = config_repo.get("tool", {}).get("poetry", {})
         info = RepoInfo.model_validate(assets)
         return info
 

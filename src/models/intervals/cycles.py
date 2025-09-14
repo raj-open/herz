@@ -7,7 +7,6 @@
 
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from .merge import *
 from .resolve import *
 
@@ -16,7 +15,7 @@ from .resolve import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'collapse_intervals_to_cycle',
+    "collapse_intervals_to_cycle",
 ]
 
 # ----------------------------------------------------------------
@@ -30,9 +29,9 @@ def collapse_intervals_to_cycle(
     period: float,
     disjoint: bool = True,
 ) -> list[tuple[float, float]]:
-    '''
+    """
     Moves all intervals to the main cycle and resolves these to disjoint intervals.
-    '''
+    """
     if not disjoint:
         intervals = list(merge_intervals(intervals))
     # make intervals "safely" fit into cycles

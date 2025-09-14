@@ -13,17 +13,17 @@ from ...thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'closest_index',
-    'closest_indices',
-    'closest_value',
-    'closest_values',
+    "closest_index",
+    "closest_indices",
+    "closest_value",
+    "closest_values",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-NUMBER = TypeVar('NUMBER', float, complex)
+NUMBER = TypeVar("NUMBER", float, complex)
 
 # ----------------------------------------------------------------
 # METHODS
@@ -34,8 +34,10 @@ def closest_index(x: NUMBER, points: Iterable[NUMBER], init: int = 0) -> int:
     try:
         dist = abs(np.asarray(points) - x)
         index = init + dist.argmin()
-    except:
-        raise ValueError('List of points must be non-empty!')
+
+    except Exception as _:
+        raise ValueError("List of points must be non-empty!")
+
     return index
 
 

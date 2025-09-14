@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Contains steps for hello-world behavioural tests.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
-from thirdparty.behave import *
-from thirdparty.types import *
-
 from core.decorators import *
+from thirdparty.behave import *
+
+from thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'given_browser_open',
-    'then_browser_at_url',
-    'then_see_title',
-    'then_see_heading',
+    "given_browser_open",
+    "then_browser_at_url",
+    "then_see_heading",
+    "then_see_title",
 ]
 
 # ----------------------------------------------------------------
@@ -55,7 +55,7 @@ def then_browser_at_url(
     url: str,
 ):
     url_ = www.current_url
-    assert url_.rstrip('/') == url.rstrip('/')
+    assert url_.rstrip("/") == url.rstrip("/")
     return
 
 

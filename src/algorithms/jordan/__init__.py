@@ -13,9 +13,9 @@ from .polynomials import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'algebraic_dimensions',
-    'characteristic_polynomial',
-    'chevalley_polynomial',
-    'chinese_polynomial',
-    'decompose_jordan_chevalley',
+    "algebraic_dimensions",
+    "characteristic_polynomial",
+    "chevalley_polynomial",
+    "chinese_polynomial",
+    "decompose_jordan_chevalley",
 ]

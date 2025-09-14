@@ -5,14 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from fastapi import HTTPException
-from fastapi.security import HTTPBasicCredentials
 from functools import wraps
 from typing import Awaitable
 from typing import Callable
 from typing import Concatenate
 from typing import ParamSpec
 from typing import TypeVar
+
+from fastapi import HTTPException
+from fastapi.security import HTTPBasicCredentials
 
 from ...core.log import *
 from ...guards.http import *
@@ -22,18 +23,18 @@ from ...guards.http import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'catch_internal_server_error',
-    'add_http_auth',
+    "add_http_auth",
+    "catch_internal_server_error",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS/VARIABLES
 # ----------------------------------------------------------------
 
-PARAMS = ParamSpec('PARAMS')
-T1 = TypeVar('T1')
-T2 = TypeVar('T2')
-RETURN = TypeVar('RETURN')
+PARAMS = ParamSpec("PARAMS")
+T1 = TypeVar("T1")
+T2 = TypeVar("T2")
+RETURN = TypeVar("RETURN")
 
 # ----------------------------------------------------------------
 # DECORATORS
@@ -46,9 +47,9 @@ def catch_internal_server_error(
         Awaitable[RETURN],
     ],
 ):
-    '''
+    """
     Decorates and endpoint by returning internal server error if error occurs.
-    '''
+    """
 
     # modify function
     @wraps(action)
@@ -73,7 +74,7 @@ def add_http_auth(
         Awaitable[RETURN],
     ],
 ):
-    '''
+    """
     Decorates and endpoint by adding basic http-authorisation to it.
 
     **DEV-NOTE:**
@@ -81,7 +82,7 @@ def add_http_auth(
     `@app.get`, `@app.post`, etc. decorators.
     Thus need to include all arguments needed by our decorators,
     even if superfluous inside undecorated part.
-    '''
+    """
 
     # modify function - but with different signature!
     @wraps(action)

@@ -5,18 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
-
 from ...models.critical import *
 from ...models.epsilon import *
 from ...models.polynomials import *
+from ...thirdparty.maths import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'clean_up_critical_points',
+    "clean_up_critical_points",
 ]
 
 # ----------------------------------------------------------------
@@ -30,10 +29,9 @@ def clean_up_critical_points(
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[list[CriticalPoint]]:
-    '''
+    """
     Cleans up critical points
-    '''
-
+    """
     times_all = [[pt.x for pt in crit] for crit in crits]
 
     _, assignments = duplicates_get_assignment_dictionaries(
@@ -45,9 +43,8 @@ def clean_up_critical_points(
     crits = [
         [
             CriticalPoint(
-                x=t0,
-                y=crit[indices[0]].y,
-                kinds=set().union(*[crit[i].kinds for i in indices ]))
+                x=t0, y=crit[indices[0]].y, kinds=set().union(*[crit[i].kinds for i in indices])
+            )
             for t0, indices in assignment.items()
         ]
         for assignment, crit in zip(assignments, crits)  # fmt: skip

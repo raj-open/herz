@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This submodule contains the Euklidean algorithm.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -11,7 +11,6 @@ This submodule contains the Euklidean algorithm.
 
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from .models_poly import *
 
 # ----------------------------------------------------------------
@@ -19,14 +18,14 @@ from .models_poly import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'euklidean_algorithm',
+    "euklidean_algorithm",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T', float, complex)
+T = TypeVar("T", float, complex)
 
 # ----------------------------------------------------------------
 # METHODS
@@ -38,7 +37,7 @@ def euklidean_algorithm(
     q: Poly[T],
     normalised: bool = True,
 ) -> tuple[Poly[T], Poly[T], Poly[T]]:
-    '''
+    """
     Returns polynomials `d`, `m`, `n` such that
     ```
     d = gcd(p, q)
@@ -47,7 +46,7 @@ def euklidean_algorithm(
 
     - If `p`, `q` are 0, then returns `0`, `0`, `0`.
     - Otherwise returns `d` with leading coefficient `1`.
-    '''
+    """
     if p == 0 and q == 0:
         d = Poly[T](coeff=[1], lead=0)
         factor_p = Poly[T](coeff=[1], lead=0)

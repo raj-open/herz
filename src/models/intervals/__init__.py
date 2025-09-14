@@ -6,17 +6,17 @@
 # ----------------------------------------------------------------
 
 from .cycles import *
-from .resolve import *
 from .merge import *
+from .resolve import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'compute_overlaps',
-    'merge_intervals',
-    'resolve_interval',
-    'resolve_intervals',
-    'collapse_intervals_to_cycle',
+    "collapse_intervals_to_cycle",
+    "compute_overlaps",
+    "merge_intervals",
+    "resolve_interval",
+    "resolve_intervals",
 ]

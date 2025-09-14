@@ -5,11 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.code import *
-from ....thirdparty.types import *
-from ....thirdparty.maths import *
-
 from ....models.fitting import *
+from ....thirdparty.code import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 from ..leastsq import *
 from .geometry import *
 from .gradients import *
@@ -20,7 +19,7 @@ from .parameters import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_trigonometric_curve',
+    "fit_trigonometric_curve",
 ]
 
 # ----------------------------------------------------------------
@@ -44,12 +43,14 @@ def fit_trigonometric_curve(
     num_epochs: int = 10,
     eps: float = 0.5e-6,
 ) -> tuple[FittedInfoTrig, float, float]:
-    '''
+    """
     Runs a least-sq fitting algorithm to fit a trigonometric curve.
-    '''
+    """
     x_init = fit_trig_parameters_from_info(fit_init)
 
-    gen_space = partial(generate_space, omega_min=omega_min, omega_max=omega_max, N_max=N_max, x_init=x_init)
+    gen_space = partial(
+        generate_space, omega_min=omega_min, omega_max=omega_max, N_max=N_max, x_init=x_init
+    )
     gen_init = partial(generate_random_init, omega_min=omega_min, omega_max=omega_max)
     restrict_eta = partial(restrict_learning, omega_min=omega_min, omega_max=omega_max)
 

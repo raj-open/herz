@@ -13,8 +13,8 @@ from ...thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'resolve_interval',
-    'resolve_intervals',
+    "resolve_interval",
+    "resolve_intervals",
 ]
 
 # ----------------------------------------------------------------
@@ -27,8 +27,8 @@ def resolve_intervals(
     period: float,
     offset: float = 0.0,
 ) -> Generator[tuple[int, float, float], None, None]:
-    for I in intervals:
-        yield from resolve_interval(I, offset=offset, period=period)
+    for interval in intervals:
+        yield from resolve_interval(interval, offset=offset, period=period)
 
 
 def resolve_interval(

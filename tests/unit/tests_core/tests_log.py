@@ -5,11 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.log import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.core.log import *
+from src.thirdparty.log import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
@@ -29,11 +29,11 @@ from src.core.log import *
 
 
 @mark.parametrize(
-    ('level',),
+    ("level",),
     [
-        ('INFO',),
+        ("INFO",),
         (LOG_LEVELS.INFO,),
-        ('DEBUG',),
+        ("DEBUG",),
         (LOG_LEVELS.DEBUG,),
     ],
 )
@@ -43,5 +43,5 @@ def test_log_configure(
     level: Any,
 ):
     with does_not_raise():
-        configure_logging(name='unit', level=LOG_LEVELS.DEBUG, path=None)
+        configure_logging(name="unit", level=LOG_LEVELS.DEBUG, path=None)
     return

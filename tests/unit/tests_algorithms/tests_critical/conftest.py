@@ -5,14 +5,15 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.core.constants import *
 from tests.unit.thirdparty.unit import *
+
+from src.core.constants import *
 
 # ----------------------------------------------------------------
 # FIXTURES
 # ----------------------------------------------------------------
 
 
-@fixture(scope='module', autouse=True)
+@fixture(scope="module", autouse=True)
 def eps() -> float:
     return POLY_RESOLUTION

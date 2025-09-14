@@ -5,23 +5,22 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
-from ...thirdparty.types import *
-
 from ...core.constants import *
 from ...core.utils import *
 from ...models.critical import *
 from ...models.enums import *
 from ...models.epsilon import *
 from ...models.polynomials import *
+from ...thirdparty.maths import *
+from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_critical_points',
-    'get_critical_points_bounded',
+    "get_critical_points",
+    "get_critical_points_bounded",
 ]
 
 # ----------------------------------------------------------------
@@ -203,8 +202,8 @@ def get_time_grid(
     # add extra supports and compute differences between successive points:
     dt = 0.1 * max([abs(t0) + 1 for t0 in t])
     delta = np.minimum(
-        np.diff([t_min - dt] + t),
-        np.diff(t + [t_max + dt]),
+        np.diff([t_min - dt, *t]),
+        np.diff([*t, t_max + dt]),
     )
     # only use balls that occur in window:
     balls = list(zip(t, delta))

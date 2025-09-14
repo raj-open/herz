@@ -13,15 +13,15 @@ from ...thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'DiGraphExtra',
-    'sort_nodes_by_rank',
+    "DiGraphExtra",
+    "sort_nodes_by_rank",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 # ----------------------------------------------------------------
 # CLASSES
@@ -45,7 +45,7 @@ class DiGraphExtra(Generic[T], nx.DiGraph):
             upstream = [u]
         r = 0
         for uu in self.predecessors(u):
-            r_ = self.rank(uu, upstream=upstream + [u])
+            r_ = self.rank(uu, upstream=[*upstream, u])
             if r_ == -1:
                 r = -1
                 break

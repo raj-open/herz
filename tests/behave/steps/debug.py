@@ -1,33 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Just contains steps for debugging purposes only.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
+from core.decorators import *
 from thirdparty.behave import *
-from thirdparty.system import *
 
 from core.log import *
-from core.decorators import *
+from thirdparty.system import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'given_time_passed',
-    'given_comment',
-    'when_comment',
-    'then_comment',
-    'given_nothing',
-    'given_read',
-    'then_nothing',
-    'then_echo',
+    "given_comment",
+    "given_nothing",
+    "given_read",
+    "given_time_passed",
+    "then_comment",
+    "then_echo",
+    "then_nothing",
+    "when_comment",
 ]
 
 # ----------------------------------------------------------------
@@ -35,55 +35,55 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@behave.given('% {comment}')
+@behave.given("% {comment}")
 def given_comment(ctx: Context, comment: str):
-    '''
+    """
     Does nothing - treated as comment
-    '''
+    """
     return
 
 
-@behave.when('% {comment}')
+@behave.when("% {comment}")
 def when_comment(ctx: Context, comment: str):
-    '''
+    """
     Does nothing - treated as comment
-    '''
+    """
     return
 
 
-@behave.then('% {comment}')
+@behave.then("% {comment}")
 def then_comment(ctx: Context, comment: str):
-    '''
+    """
     Does nothing - treated as comment
-    '''
+    """
     return
 
 
-@behave.given('nothing happened')
+@behave.given("nothing happened")
 def given_nothing(
     ctx: Context,
 ):
-    '''
+    """
     **NOTE:** For debugging purposes only.
 
     A behavioural step, in which nothing happens.
-    '''
+    """
     return
 
 
-@behave.then('nothing should happen')
+@behave.then("nothing should happen")
 def then_nothing(
     ctx: Context,
 ):
-    '''
+    """
     **NOTE:** For debugging purposes only.
 
     A behavioural step, in which nothing happens.
-    '''
+    """
     return
 
 
-@behave.given('{n:d} seconds have passed')
+@behave.given("{n:d} seconds have passed")
 def given_time_passed(
     ctx: Context,
     n: int,
@@ -101,12 +101,12 @@ def given_read(
     # end decorator args
     value: str,
 ):
-    '''
+    """
     **NOTE:** For debugging purposes only.
 
     A behavioural step, in which value stored.
-    '''
-    userdata['value'] = value
+    """
+    userdata["value"] = value
     return
 
 
@@ -119,14 +119,14 @@ def then_echo(
     # end decorator args
     value: str,
 ):
-    '''
+    """
     **NOTE:** For debugging purposes only.
 
     A behavioural step, in which a value is just echoed.
 
     See `tests/behave/logs/debug.log`.
-    '''
-    value_previous = userdata.get('value', None)
-    expr = f'{value_previous} -> {value}'
+    """
+    value_previous = userdata.get("value", None)
+    expr = f"{value_previous} -> {value}"
     log_dev(expr)
     return

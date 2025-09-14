@@ -5,12 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
+from ....models.polynomials import *
 from ....thirdparty.code import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.fitting import *
-from ....models.polynomials import *
 from .parameters import *
 
 # ----------------------------------------------------------------
@@ -18,10 +17,10 @@ from .parameters import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_schema_from_settings',
-    'get_spatial_domain_from_settings',
-    'get_bounds_from_settings',
-    'get_initialisation_from_settings',
+    "get_bounds_from_settings",
+    "get_initialisation_from_settings",
+    "get_schema_from_settings",
+    "get_spatial_domain_from_settings",
 ]
 
 # ----------------------------------------------------------------
@@ -33,16 +32,16 @@ def get_schema_from_settings(
     schema: dict[str, str],
     env: dict[str, float],
 ) -> dict[str, float]:
-    '''
+    """
     Determines schema for time-values
-    '''
-    env = env | {'math': math, 'np': np}
+    """
+    env = env | {"math": math, "np": np}
     env_ = {}
     for key, expr in schema.items():
         try:
             env_[key] = eval(expr, env | env_)
         except Exception as err:
-            raise ValueError(f'Could not evaluate environment value {key}: {expr}. {err}')
+            raise ValueError(f"Could not evaluate environment value {key}: {expr}. {err}")
     return env_
 
 
@@ -50,14 +49,14 @@ def get_spatial_domain_from_settings(
     intervals_schema: list[list[str]],
     env: dict[str, float],
 ) -> list[tuple[float, float]]:
-    '''
+    """
     Determines spatial domain from settings
-    '''
+    """
     try:
         conv = partial(convert_dom_to_interval, env=env)
         return list(map(conv, intervals_schema))
     except Exception as err:
-        raise ValueError(f'Could not interpret intervals! {err}')
+        raise ValueError(f"Could not interpret intervals! {err}")
 
 
 def get_bounds_from_settings(
@@ -68,7 +67,7 @@ def get_bounds_from_settings(
     invscale_max = 4
 
     try:
-        env = env | {'math': math, 'np': np}
+        env = env | {"math": math, "np": np}
         for cond in conditions:
             value: float = eval(cond.value, env)
             match cond.kind:
@@ -82,7 +81,7 @@ def get_bounds_from_settings(
                     invscale_min = max(invscale_min, value)
 
     except Exception as err:
-        raise ValueError(f'Could not interpret conditions! {err}')
+        raise ValueError(f"Could not interpret conditions! {err}")
 
     return 2 * pi * invscale_min, 2 * pi * invscale_max
 
@@ -92,15 +91,15 @@ def get_initialisation_from_settings(
     env: dict[str, float],
 ) -> NDArray[np.float64]:
     try:
-        env = env | {'math': math, 'np': np}
-        env = env | {'xintercept': xintercept, 'yintercept': yintercept}
+        env = env | {"math": math, "np": np}
+        env = env | {"xintercept": xintercept, "yintercept": yintercept}
         omega: float = eval(str(conds.omega), env)
         hshift: float = eval(str(conds.hshift), env)
         vscale: float = eval(str(conds.vscale), env)
         vshift: float = eval(str(conds.vshift), env)
         drift: float = eval(str(conds.drift), env)
     except Exception as err:
-        raise ValueError(f'Could not interpret conditions! {err}')
+        raise ValueError(f"Could not interpret conditions! {err}")
 
     return FittedInfoTrig(
         hshift=hshift,
@@ -156,9 +155,9 @@ def convert_dom_to_interval(
     I: RootModel[list[str]],
     env: dict[str, float],
 ) -> tuple[float, float]:
-    '''
+    """
     Determines the value of the interval corresponding
     to a spatial configuration of an interval.
-    '''
+    """
     key1, key2 = I.root
     return (env[key1], env[key2])

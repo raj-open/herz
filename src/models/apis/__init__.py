@@ -12,6 +12,6 @@ from ..generated.apis import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Credentials',
-    'MetaData',
+    "Credentials",
+    "MetaData",
 ]

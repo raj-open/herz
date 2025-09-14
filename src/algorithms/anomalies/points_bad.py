@@ -5,9 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
-
 from ...core.utils import *
+from ...thirdparty.maths import *
 from .cycles import *
 from .peaks import *
 
@@ -16,8 +15,8 @@ from .peaks import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'mark_pinched_points_on_cycle',
-    'mark_pinched_points_on_cycles',
+    "mark_pinched_points_on_cycle",
+    "mark_pinched_points_on_cycles",
 ]
 
 # ----------------------------------------------------------------
@@ -30,13 +29,15 @@ def mark_pinched_points_on_cycles(
     cycles: list[int],
     sig_t: float = 0.05,
 ) -> list[bool]:
-    '''
+    """
     Cleans 'bad' parts of each cycle.
-    '''
+    """
     # determine start and end of each cycle
     windows = cycles_to_windows(cycles)
     # mark 'bad' parts of each cycle
-    marked = np.concatenate([mark_pinched_points_on_cycle(x=x[i1:i2, :], sig_t=sig_t) for i1, i2 in windows]).tolist()
+    marked = np.concatenate(
+        [mark_pinched_points_on_cycle(x=x[i1:i2, :], sig_t=sig_t) for i1, i2 in windows]
+    ).tolist()
     return marked
 
 
@@ -44,7 +45,7 @@ def mark_pinched_points_on_cycle(
     x: NDArray[np.float64],
     sig_t: float = 0.05,
 ) -> list[bool]:
-    '''
+    r"""
     Removes spatial 'pinches' at start/end of parameterised curves.
 
     The curves are spatial cycles uniformly parameterised by a variable (`t ∈ [0, 1]`).
@@ -67,8 +68,7 @@ def mark_pinched_points_on_cycle(
        the point `x[i]` is not sufficiently close to a non-adjacent point.
 
     NOTE: Pinches that occur mid-cycle are *not* marked!
-    '''
-
+    """
     N = x.shape[0]
     m = x.shape[1]
     marked = [False] * N

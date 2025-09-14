@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Loss functions and their gradients
 for models with non-linear parts governed by a single-parameter.
 Assumes that in the vector of parameters to be fitted,
 the parameter for the non-linearity occurs last.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -20,9 +20,9 @@ from ....thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'loss_function',
-    'loss_function_gradient',
-    'solve_linear_part',
+    "loss_function",
+    "loss_function_gradient",
+    "solve_linear_part",
 ]
 
 # ----------------------------------------------------------------
@@ -34,7 +34,7 @@ def loss_function(
     G: NDArray[np.float64],
     x: NDArray[np.float64],
 ) -> float:
-    '''
+    """
     We have
     ```
     loss := ½‖f - p‖²
@@ -46,7 +46,7 @@ def loss_function(
     y[:-1] = x[:-1]
     y[-1] = -1
     ```
-    '''
+    """
     y = x.copy()
     y[-1] = -1
     loss = np.inner(G @ y, y) / 2

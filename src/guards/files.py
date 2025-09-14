@@ -12,8 +12,8 @@ from ..thirdparty.system import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'guard_directory_exists',
-    'guard_file_exists',
+    "guard_directory_exists",
+    "guard_file_exists",
 ]
 
 # ----------------------------------------------------------------
@@ -24,9 +24,9 @@ __all__ = [
 def guard_directory_exists(
     path: str,
 ):
-    '''
+    """
     A guard which checks if file exists.
-    '''
+    """
     if not os.path.exists(path):
         raise FileNotFoundError(f"path '{path}' does not exist!")
     if not os.path.isdir(path):
@@ -37,9 +37,9 @@ def guard_directory_exists(
 def guard_file_exists(
     path: str,
 ):
-    '''
+    """
     A guard which checks if file exists.
-    '''
+    """
     if not os.path.exists(path):
         raise FileNotFoundError(f"path '{path}' does not exist!")
     if not os.path.isfile(path):

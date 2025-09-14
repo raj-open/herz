@@ -5,11 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
+from ....models.polynomials import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.polynomials import *
-from ....models.fitting import *
 from ...interpolations import *
 
 # ----------------------------------------------------------------
@@ -17,8 +16,8 @@ from ...interpolations import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'onb_conditions',
-    'onb_spectrum',
+    "onb_conditions",
+    "onb_spectrum",
 ]
 
 # ----------------------------------------------------------------
@@ -31,7 +30,7 @@ def onb_conditions(
     conds: list[PolyDerCondition | PolyIntCondition],
     intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> NDArray[np.float64]:
-    '''
+    """
     Let `Ω` denote the union of the intervals.
     Let `A` be the condition-matrix.
     We first compute an ONB, `B`, in `ℝᵈ⁺¹` of the nullspace of `A`.
@@ -91,7 +90,7 @@ def onb_conditions(
     ```
     In particular, the vectors `{q_i}` are orthogonal in `C(Ω)`.
     Hence, `{ 1/√D[i,i] * q_i }` is an ONB in `C(Ω)`.
-    '''
+    """
     # compute ONB for null-space of condition-matrix:
     A = force_poly_conditions(deg=deg, conds=conds)
     B = spla.null_space(A)
@@ -121,7 +120,7 @@ def onb_spectrum(
     T: float | None = None,
     cyclic: bool = False,
 ) -> Poly[float]:
-    '''
+    """
     @inputs
     - `Q` - a `d x m` array, where `Q[:,j]` denote the coefficients of a polynomial qⱼ
       and {qⱼ}ⱼ is an ONB
@@ -198,8 +197,7 @@ def onb_spectrum(
         = pⱼ(t2ᵢ) - pⱼ(t1ᵢ)
     ```
 
-    NOTE:
-
+    Note:
     Part of innerproduct ⟨x, qⱼ⟩ restricted to [t1ᵢ, t2ᵢ],
     assuming interpolation
     ```
@@ -224,13 +222,18 @@ def onb_spectrum(
 
         = (I0^* · C0 + I1^* · C1)[j]
     ```
-    '''
+
+    """
     # Step 1 - auxiliary computeations for polynomials in basis
     deg = Q.shape[0] - 1  # degree of polynomials in ONB
     m = Q.shape[1]  # number of elements in the ONB
     # stem functions (for 1st and 2nd order derivatives) for the q_i
-    Q1 = np.column_stack([Poly(coeff=Q[:, j].tolist()).integral().coefficients for j in range(m)])
-    Q2 = np.column_stack([Poly(coeff=Q1[:, j].tolist()).integral().coefficients for j in range(m)])
+    Q1 = np.column_stack(
+        [Poly(coeff=Q[:, j].tolist()).integral().coefficients for j in range(m)]
+    )
+    Q2 = np.column_stack(
+        [Poly(coeff=Q1[:, j].tolist()).integral().coefficients for j in range(m)]
+    )
     # coefficients of t·q1ⱼ - q2ⱼ for each qⱼ:
     zeros = np.zeros((1, m))
     R = np.concatenate([zeros, Q1]) - Q2
@@ -282,11 +285,11 @@ def force_poly_conditions(
     deg: int,
     conds: list[PolyDerCondition | PolyIntCondition],
 ) -> NDArray[np.float64]:
-    '''
+    """
     Linear condition on coefficients to determine if
     the `n`th derivate of a polynomial `p` of degree `deg` at point `t`
     satisfies `p⁽ⁿ⁾(t) = 0`.
-    '''
+    """
     rows = []
     for cond in conds:
         match cond:

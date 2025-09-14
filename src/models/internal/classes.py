@@ -14,14 +14,14 @@ from typing import TypeVar
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Property',
+    "Property",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 # ----------------------------------------------------------------
 # CLASSES
@@ -29,7 +29,7 @@ T = TypeVar('T')
 
 
 class Property(Generic[T]):
-    '''
+    """
     A class allowing delayed setting of properties.
 
     Properties are type-annotated
@@ -86,7 +86,7 @@ class Property(Generic[T]):
     print(name()) # 'Max Mustermann'
     name.set('Julia Musterfrau') # raises error
     ```
-    '''
+    """
 
     _final: bool
 
@@ -95,13 +95,13 @@ class Property(Generic[T]):
         self._factory = factory
 
     def __call__(self) -> T:
-        if not hasattr(self, '_value') and callable(self._factory):
+        if not hasattr(self, "_value") and callable(self._factory):
             self._value = self._factory()
-        if not hasattr(self, '_value'):
-            raise AssertionError('Call ... .value = ... first!')
+        if not hasattr(self, "_value"):
+            raise AssertionError("Call ... .value = ... first!")
         return self._value
 
     def set(self, x: T):
-        if self._final and hasattr(self, '_value'):
-            raise AssertionError('Can only set value once!')
+        if self._final and hasattr(self, "_value"):
+            raise AssertionError("Can only set value once!")
         self._value = x

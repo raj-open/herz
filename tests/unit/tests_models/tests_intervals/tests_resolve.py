@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.intervals import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
@@ -24,7 +24,7 @@ _module = get_module(__file__)
 
 
 @mark.parametrize(
-    ('offset', 'period', 'interval', 'expected'),
+    ("offset", "period", "interval", "expected"),
     [
         (0, 1, (0, 1), [(0, 0, 1)]),
         (0, 1, (-0.3, 0.5), [(-1, -0.3, 0), (0, 0, 0.5)]),
@@ -58,7 +58,7 @@ def test_resolve_interval_CASES(
 
 
 @mark.parametrize(
-    ('offset', 'period', 'intervals', 'expected'),
+    ("offset", "period", "intervals", "expected"),
     [
         (0, 1, [(0, 0.3), (0.8, 1.1)], [(0, 0, 0.3), (0, 0.8, 1), (1, 1, 1.1)]),
     ],

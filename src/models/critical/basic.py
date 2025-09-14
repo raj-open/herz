@@ -16,7 +16,7 @@ from ..enums import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'CriticalPoint',
+    "CriticalPoint",
 ]
 
 # ----------------------------------------------------------------
@@ -25,12 +25,12 @@ __all__ = [
 
 
 class CriticalPoint(BaseModel):
-    '''
+    """
     Critical points
-    '''
+    """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
     x: float

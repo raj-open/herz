@@ -15,14 +15,14 @@ from .statistics import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'complete_time_series',
-    'get_time_aspects',
-    'innerproduct_interpolated',
-    'integral_interpolated',
-    'interpolate_two_series',
-    'mean_interpolated',
-    'norm_interpolated',
-    'normalise_interpolated_cycle',
-    'normalise_to_unit_interval',
-    'sd_interpolated',
+    "complete_time_series",
+    "get_time_aspects",
+    "innerproduct_interpolated",
+    "integral_interpolated",
+    "interpolate_two_series",
+    "mean_interpolated",
+    "norm_interpolated",
+    "normalise_interpolated_cycle",
+    "normalise_to_unit_interval",
+    "sd_interpolated",
 ]

@@ -5,11 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.core.utils import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
@@ -29,7 +29,7 @@ from src.core.utils import *
 
 
 @mark.parametrize(
-    ('N', 'indices', 'ch'),
+    ("N", "indices", "ch"),
     [
         (8, [3, 4, 7], [False, False, False, True, True, False, False, True]),
         (0, [], []),

@@ -13,14 +13,14 @@ from thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'log_dev',
+    "log_dev",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-_LOGGING_DEBUG_FILE = 'tests/behave/logs/debug.log'
+_LOGGING_DEBUG_FILE = "tests/behave/logs/debug.log"
 
 # ----------------------------------------------------------------
 # DEBUG LOGGING FOR DEVELOPMENT
@@ -30,5 +30,5 @@ _LOGGING_DEBUG_FILE = 'tests/behave/logs/debug.log'
 def log_dev(*messages: Any):
     path = _LOGGING_DEBUG_FILE
     create_file_if_not_exists(path)
-    with open(path, 'a') as fp:
+    with open(path, "a") as fp:
         print(*messages, file=fp)

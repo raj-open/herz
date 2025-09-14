@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Starting point for programme executed in CLI mode.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -12,14 +12,14 @@ Starting point for programme executed in CLI mode.
 import os
 import sys
 
-os.chdir(os.path.join(os.path.dirname(__file__), '..'))
+os.chdir(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.getcwd())
 
-from .setup import config
+from .features import *
 from .models.app import *
 from .models.user import *
 from .queries.console.cli import *
-from .features import *
+from .setup import config
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS, SETTINGS
@@ -31,7 +31,7 @@ PID = os.getpid()
 # EXECUTION
 # ----------------------------------------------------------------
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     info = config.INFO
     args = CliArguments(info=info).parse(*sys.argv[1:])
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     config.path_env.set(args.env)
     config.path_logging.set(args.log)
     config.path_session.set(args.session)
-    config.initialise_application(name='app', log_pid='PIDs', debug=args.debug)
+    config.initialise_application(name="app", log_pid="PIDs", debug=args.debug)
 
     # get configurations once
     cfg = config.load_internal_config()

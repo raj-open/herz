@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 API endpoints for main features.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...features import *
+from ...models.user import *
+from ...setup import *
 from ...thirdparty.fastapi import *
 from ...thirdparty.types import *
 from ...thirdparty.web import *
-
-from ...setup import *
-from ...models.user import *
-from ...features import *
 from .decorators import *
 
 # ----------------------------------------------------------------
@@ -23,7 +22,7 @@ from .decorators import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'add_endpoints_features',
+    "add_endpoints_features",
 ]
 
 # ----------------------------------------------------------------
@@ -36,18 +35,17 @@ def add_endpoints_features(
     tag: str,
     sec: HTTPBasic,
 ):
-    '''
+    """
     Adds endpoints pertaining to the features of the repo.
-    '''
-
+    """
     # manager_os = user.get_files_manager(
     #     location=EnumFilesManagementSystem.OS,
     #     tz=config.TIMEZONE,
     # )
 
     @app.post(
-        f'/feature/{EnumFeature.RIGHT_VENTRICLE.value}',
-        summary=f'Runs the {EnumFeature.RIGHT_VENTRICLE.value} feature',
+        f"/feature/{EnumFeature.RIGHT_VENTRICLE.value}",
+        summary=f"Runs the {EnumFeature.RIGHT_VENTRICLE.value} feature",
         tags=[tag],
         include_in_schema=True,
     )
@@ -59,7 +57,7 @@ def add_endpoints_features(
         # run.process(cfg=cfg, request=request)
         return HTMLResponse(
             status_code=200,
-            content='''
+            content="""
             <html>
                 <head>
                 <title>Result</title>
@@ -68,5 +66,5 @@ def add_endpoints_features(
                     <h1>Under construction</h1>
                 </body>
             </html>
-            ''',
+            """,
         )

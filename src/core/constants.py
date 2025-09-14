@@ -12,10 +12,10 @@
 # ----------------------------------------------------------------
 
 __all__ = [
-    'FLOAT_ERR',
-    'MACHINE_EPS',
-    'POLY_RESOLUTION',
-    'SOLVE_TOLERANCE',
+    "FLOAT_ERR",
+    "MACHINE_EPS",
+    "POLY_RESOLUTION",
+    "SOLVE_TOLERANCE",
 ]
 
 # ----------------------------------------------------------------

@@ -7,7 +7,6 @@
 
 from ...thirdparty.code import *
 from ...thirdparty.types import *
-
 from .basic import *
 
 # ----------------------------------------------------------------
@@ -15,15 +14,15 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'echo_function',
+    "echo_function",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS/VARIABLES
 # ----------------------------------------------------------------
 
-PARAMS = ParamSpec('PARAMS')
-RETURN = TypeVar('RETURN')
+PARAMS = ParamSpec("PARAMS")
+RETURN = TypeVar("RETURN")
 _depth = 0
 
 # ----------------------------------------------------------------
@@ -37,13 +36,13 @@ def echo_function(
     level: LOG_LEVELS | None = None,
     close: bool = True,
 ):
-    '''
+    """
     Decorates method with an echo method.
-    '''
+    """
 
     def dec(action: Callable[PARAMS, RETURN]) -> Callable[PARAMS, RETURN]:
         # prepare the message
-        tag_ = tag or f'fct:{action.__name__}'
+        tag_ = tag or f"fct:{action.__name__}"
         message_ = message or tag_
 
         # modify function
@@ -54,9 +53,9 @@ def echo_function(
 
             message__ = message_.format(*_, **__)
 
-            message__ = '-' * (_depth + 1) + '> ' + message__
+            message__ = "-" * (_depth + 1) + "> " + message__
             if close:
-                log(message__ + '...', level=level)
+                log(message__ + "...", level=level)
             else:
                 log(message__, level=level)
 
@@ -66,7 +65,7 @@ def echo_function(
             _depth = max(_depth - 1, 0)
 
             if close:
-                log(message__ + ' completed.', level=level)
+                log(message__ + " completed.", level=level)
 
             return output
 

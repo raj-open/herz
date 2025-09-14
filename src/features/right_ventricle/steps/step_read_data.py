@@ -5,24 +5,23 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....core.log import *
+from ....core.utils import *
+from ....models.app import *
+from ....models.user import *
+from ....setup import config
 from ....thirdparty.code import *
 from ....thirdparty.data import *
 from ....thirdparty.maths import *
 from ....thirdparty.physics import *
 from ....thirdparty.types import *
 
-from ....setup import config
-from ....core.log import *
-from ....core.utils import *
-from ....models.app import *
-from ....models.user import *
-
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_read_data',
+    "step_read_data",
 ]
 
 # ----------------------------------------------------------------
@@ -30,13 +29,13 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP read data from csv', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP read data from csv", level=LOG_LEVELS.INFO)
 def step_read_data(
     case: RequestConfig,
     cfg: DataTimeSeries,
     quantity: str,
 ) -> pd.DataFrame:
-    unit_time: str = config.UNITS.get('time', 's')
+    unit_time: str = config.UNITS.get("time", "s")
     unit_quantity: str = config.UNITS[quantity]
 
     path = cfg.path.root
@@ -51,16 +50,16 @@ def step_read_data(
 
     data = pd.DataFrame(
         {
-            'time': t,
+            "time": t,
             quantity: x,
         }
     ).astype(
         {
-            'time': float,
+            "time": float,
             quantity: float,
         }
     )
-    data.sort_values(inplace=True, by=['time'])
+    data.sort_values(inplace=True, by=["time"])
     data.reset_index(inplace=True, drop=True)
 
     return data
@@ -81,7 +80,7 @@ def get_column(
         col = data[key][:]
     except KeyError as e:
         columns = list(data.columns)
-        raise KeyError(f'{key} not found in data set with columns {", ".join(columns)}')
+        raise KeyError(f"{key} not found in data set with columns {', '.join(columns)}")
 
     X = np.asarray(col, dtype=cfg.type.value)
     if cfg.unit is not None and unit is not None:
@@ -97,8 +96,9 @@ def get_bool_function(text: str) -> Callable[[int], bool]:
         def fct(i: int) -> bool:
             try:
                 return fct_(i)
-            except:
+
+            except Exception as _:
                 return False
 
-    except:
+    except Exception as _:
         return lambda i: False

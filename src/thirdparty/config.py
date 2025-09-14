@@ -6,15 +6,16 @@
 # ----------------------------------------------------------------
 
 import json
-import yaml
-from pydantic_yaml import to_yaml_str
-from pydantic_yaml import to_yaml_file
-from dotenv import dotenv_values
-from dotenv import load_dotenv
-import toml
 
 # for modification, not exported
 from enum import Enum
+
+import toml
+import yaml
+from dotenv import dotenv_values
+from dotenv import load_dotenv
+from pydantic_yaml import to_yaml_file
+from pydantic_yaml import to_yaml_str
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -28,12 +29,12 @@ def get_environment(path: str) -> dict:
 
 
 class EnumConfigType(Enum):
-    YAML = '.yaml'
-    JSON = '.json'
+    YAML = ".yaml"
+    JSON = ".json"
 
 
 class YamlIndentDumper(yaml.Dumper):
-    '''
+    """
     PyYaml's `yaml.dump` for lists yields
     ```yaml
     key:
@@ -54,7 +55,7 @@ class YamlIndentDumper(yaml.Dumper):
     ```py
     yaml.dump(..., Dumper=YamlIndentDumper)
     ```
-    '''
+    """
 
     def increase_indent(
         self,
@@ -69,14 +70,14 @@ class YamlIndentDumper(yaml.Dumper):
 # ----------------------------------------------------------------
 
 __all__ = [
-    'EnumConfigType',
-    'YamlIndentDumper',
-    'dotenv_values',
-    'get_environment',
-    'load_dotenv',
-    'json',
-    'yaml',
-    'toml',
-    'to_yaml_str',
-    'to_yaml_file',
+    "EnumConfigType",
+    "YamlIndentDumper",
+    "dotenv_values",
+    "get_environment",
+    "json",
+    "load_dotenv",
+    "to_yaml_file",
+    "to_yaml_str",
+    "toml",
+    "yaml",
 ]

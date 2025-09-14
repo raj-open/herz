@@ -5,18 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.polynomials import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.polynomials import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'compute_inner_products_from_model',
-    'compute_inner_products_from_data',
+    "compute_inner_products_from_data",
+    "compute_inner_products_from_model",
 ]
 
 # ----------------------------------------------------------------
@@ -47,17 +46,17 @@ def compute_inner_products_from_model(
     I_sin = S1.integral().evaluate(*intervals)
     I_cos2 = C2.integral().evaluate(*intervals)
     I_sin2 = S2.integral().evaluate(*intervals)
-    I_p = sum([q.integral().evaluate(I) for q, I in zip(models, intervals)])
-    I_p2 = sum([(q * q).integral().evaluate(I) for q, I in zip(models, intervals)])
-    I_tp = sum([tq.integral().evaluate(I) for tq, I in zip(tp, intervals)])
+    I_p = sum([q.integral().evaluate(I) for q, I in zip(models, intervals)])  # fmt: skip
+    I_p2 = sum([(q * q).integral().evaluate(I) for q, I in zip(models, intervals)])  # fmt: skip
+    I_tp = sum([tq.integral().evaluate(I) for tq, I in zip(tp, intervals)])  # fmt: skip
     I_t_cos = (C1 * t).integral().evaluate(*intervals)
     I_t_sin = (S1 * t).integral().evaluate(*intervals)
     I_t2_cos = (C1 * t2).integral().evaluate(*intervals)
     I_t2_sin = (S1 * t2).integral().evaluate(*intervals)
-    I_p_cos = sum([(C1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])
-    I_p_sin = sum([(S1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])
-    I_tp_cos = sum([(C1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])
-    I_tp_sin = sum([(S1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])
+    I_p_cos = sum([(C1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])  # fmt: skip
+    I_p_sin = sum([(S1 * q).integral().evaluate(I) for q, I in zip(models, intervals)])  # fmt: skip
+    I_tp_cos = sum([(C1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])  # fmt: skip
+    I_tp_sin = sum([(S1 * tq).integral().evaluate(I) for tq, I in zip(tp, intervals)])  # fmt: skip
     I_t_cos2 = (C2 * t).integral().evaluate(*intervals)
     I_t_sin2 = (S2 * t).integral().evaluate(*intervals)
 
@@ -77,28 +76,28 @@ def compute_inner_products_from_model(
 
     # place innerproducts in dict
     return {
-        '1': I_one,
-        't': I_t,
-        'cos': I_cos,
-        'sin': I_sin,
-        'f': I_p,
-        't^2': I_t2,
-        'cos^2': I_cos_cos,
-        'sin^2': I_sin_sin,
-        'f^2': I_p2,
-        'cos*sin': I_cos_sin,
-        't*cos': I_t_cos,
-        't*sin': I_t_sin,
-        't*f': I_tp,
-        'f*cos': I_p_cos,
-        'f*sin': I_p_sin,
-        't*f*cos': I_tp_cos,
-        't*f*sin': I_tp_sin,
-        't*cos^2': I_t_cos_cos,
-        't*sin^2': I_t_sin_sin,
-        't*cos*sin': I_t_cos_sin,
-        't^2*cos': I_t2_cos,
-        't^2*sin': I_t2_sin,
+        "1": I_one,
+        "t": I_t,
+        "cos": I_cos,
+        "sin": I_sin,
+        "f": I_p,
+        "t^2": I_t2,
+        "cos^2": I_cos_cos,
+        "sin^2": I_sin_sin,
+        "f^2": I_p2,
+        "cos*sin": I_cos_sin,
+        "t*cos": I_t_cos,
+        "t*sin": I_t_sin,
+        "t*f": I_tp,
+        "f*cos": I_p_cos,
+        "f*sin": I_p_sin,
+        "t*f*cos": I_tp_cos,
+        "t*f*sin": I_tp_sin,
+        "t*cos^2": I_t_cos_cos,
+        "t*sin^2": I_t_sin_sin,
+        "t*cos*sin": I_t_cos_sin,
+        "t^2*cos": I_t2_cos,
+        "t^2*sin": I_t2_sin,
     }
 
 
@@ -152,26 +151,26 @@ def compute_inner_products_from_data(
 
     # place innerproducts in dict
     return {
-        '1': I_one,
-        't': I_t,
-        'cos': I_cos,
-        'sin': I_sin,
-        'f': I_x,
-        't^2': I_t2,
-        'cos^2': I_cos_cos,
-        'sin^2': I_sin_sin,
-        'f^2': I_x2,
-        'cos*sin': I_cos_sin,
-        't*cos': I_t_cos,
-        't*sin': I_t_sin,
-        't*f': I_tx,
-        'f*cos': I_x_cos,
-        'f*sin': I_x_sin,
-        't*f*cos': I_tx_cos,
-        't*f*sin': I_tx_sin,
-        't*cos^2': I_t_cos_cos,
-        't*sin^2': I_t_sin_sin,
-        't*cos*sin': I_t_cos_sin,
-        't^2*cos': I_t2_cos,
-        't^2*sin': I_t2_sin,
+        "1": I_one,
+        "t": I_t,
+        "cos": I_cos,
+        "sin": I_sin,
+        "f": I_x,
+        "t^2": I_t2,
+        "cos^2": I_cos_cos,
+        "sin^2": I_sin_sin,
+        "f^2": I_x2,
+        "cos*sin": I_cos_sin,
+        "t*cos": I_t_cos,
+        "t*sin": I_t_sin,
+        "t*f": I_tx,
+        "f*cos": I_x_cos,
+        "f*sin": I_x_sin,
+        "t*f*cos": I_tx_cos,
+        "t*f*sin": I_tx_sin,
+        "t*cos^2": I_t_cos_cos,
+        "t*sin^2": I_t_sin_sin,
+        "t*cos*sin": I_t_cos_sin,
+        "t^2*cos": I_t2_cos,
+        "t^2*sin": I_t2_sin,
     }

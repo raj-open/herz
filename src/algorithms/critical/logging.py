@@ -5,15 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
-from ...thirdparty.types import *
-from ...thirdparty.render import *
-
-from ...core.utils import *
 from ...core.constants import *
+from ...core.utils import *
 from ...models.critical import *
 from ...models.epsilon import *
 from ...models.polynomials import *
+from ...thirdparty.maths import *
+from ...thirdparty.render import *
+from ...thirdparty.types import *
 from .clean import *
 
 # ----------------------------------------------------------------
@@ -21,7 +20,7 @@ from .clean import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'log_critical_points',
+    "log_critical_points",
 ]
 
 # ----------------------------------------------------------------
@@ -43,31 +42,35 @@ def log_critical_points(
         t_max=t_max,
     )
 
-    headers = {'time': 't/T'}
+    headers = {"time": "t/T"}
     for k in range(n_der + 1):
-        p_dash = f'p{"´" * k}'
-        headers = headers | {f'kind_{k}': f'crit {p_dash}', f'value_{k}': f'{p_dash}(t)'}
+        p_dash = f"p{'´' * k}"
+        headers = headers | {f"kind_{k}": f"crit {p_dash}", f"value_{k}": f"{p_dash}(t)"}
 
     data = []
     for t0, classif in classifications:
-        row = {'time': f'{t0:.6f}'}
+        row = {"time": f"{t0:.6f}"}
         for k, (q, kinds) in enumerate(zip(polys, classif)):
             row = row | {
-                f'kind_{k}': ', '.join([kind.value for kind in kinds]) if len(kinds) > 0 else None,
-                f'value_{k}': f'{q(t0):.4f}',
+                f"kind_{k}": ", ".join([kind.value for kind in kinds])
+                if len(kinds) > 0
+                else None,
+                f"value_{k}": f"{q(t0):.4f}",
             }
         data.append(row)
 
+    colalign = flatten(*[["center", "right"]] * (n_der + 1))
+    colalign = ["right", *colalign]
     table = tabulate(
         data,
         headers=headers,
-        tablefmt='pretty',
-        floatfmt='.6f',
-        stralign='left',
-        missingval='—',
+        tablefmt="pretty",
+        floatfmt=".6f",
+        stralign="left",
+        missingval="—",
         showindex=False,
-        colalign=['right'] + flatten(*[['center', 'right']] * (n_der + 1)),
-        rowalign='top',
+        colalign=colalign,
+        rowalign="top",
     )
     return table
 
@@ -83,9 +86,9 @@ def gather_multi_level_critical_points_classifications(
     t_min: float = -np.inf,
     t_max: float = np.inf,
 ) -> list[tuple[float, list[set[EnumCriticalPoints]]]]:
-    '''
+    """
     Consolidates and gathers information about
-    '''
+    """
     crits = clean_up_critical_points(crits, t_min=t_min, t_max=t_max, eps=eps)  # fmt: skip
 
     times, _ = duplicates_get_assignment_maps(

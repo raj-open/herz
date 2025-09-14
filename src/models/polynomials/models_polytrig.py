@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------
 
 from __future__ import annotations
-from ...thirdparty.types import *
 
+from ...thirdparty.types import *
 from .models_polyexp import *
 
 # ----------------------------------------------------------------
@@ -15,7 +15,7 @@ from .models_polyexp import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'PolyTrig',
+    "PolyTrig",
 ]
 
 # ----------------------------------------------------------------
@@ -24,7 +24,7 @@ __all__ = [
 
 
 class PolyTrig(PolyExp[complex]):
-    '''
+    """
     A class to model functions of the form
     ```
     t ⟼ Re[C·p(t)exp(iωt)]
@@ -32,7 +32,7 @@ class PolyTrig(PolyExp[complex]):
     where `ω` = some constant,
     `p` a real-valued polynomial,
     `C` a (possibly complex) leading coefficient.
-    '''
+    """
 
     def __init__(self, omega: float, coeff: list[float] = [1], lead: complex = 1, **__):
         self.omega = omega
@@ -56,7 +56,7 @@ class PolyTrig(PolyExp[complex]):
             assert f.alpha.real == 0
             assert f.lead.imag == 0
         else:
-            raise Exception('No multiplication method developed!')
+            raise Exception("No multiplication method developed!")
         model = super().__mul__(f)
         return PolyTrig.cast(model)
 

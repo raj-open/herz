@@ -5,11 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.code import *
-from ....thirdparty.types import *
-from ....thirdparty.maths import *
-
 from ....models.fitting import *
+from ....thirdparty.code import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 from ..leastsq import *
 from .geometry import *
 from .gradients import *
@@ -20,7 +19,7 @@ from .parameters import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_exponential_curve',
+    "fit_exponential_curve",
 ]
 
 # ----------------------------------------------------------------
@@ -44,12 +43,14 @@ def fit_exponential_curve(
     num_epochs: int = 10,
     eps: float = 0.5e-6,
 ) -> tuple[FittedInfoExp, float, float]:
-    '''
+    """
     Runs a least-sq fitting algorithm to fit an exponential curve.
-    '''
+    """
     x_init = fit_exp_parameters_from_info(fit_init)
 
-    gen_space = partial(generate_space, beta_min=beta_min, beta_max=beta_max, N_max=N_max, x_init=x_init)
+    gen_space = partial(
+        generate_space, beta_min=beta_min, beta_max=beta_max, N_max=N_max, x_init=x_init
+    )
     gen_init = partial(generate_random_init, beta_min=beta_min, beta_max=beta_max)
     restrict_eta = partial(restrict_learning, beta_min=beta_min, beta_max=beta_max)
 

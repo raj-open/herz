@@ -5,14 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
+from src.algorithms.critical import *
 from src.core.constants import *
 from src.models.critical import *
 from src.models.polynomials import *
-from src.algorithms.critical import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS

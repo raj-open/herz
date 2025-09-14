@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Methods for eps-differences for aligned arrays.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -11,7 +11,6 @@ Methods for eps-differences for aligned arrays.
 
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from ..enums import *
 
 # ----------------------------------------------------------------
@@ -19,15 +18,15 @@ from ..enums import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'normalised_diffs',
-    'sign_normalised_diffs',
+    "normalised_diffs",
+    "sign_normalised_diffs",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-NUMBER = TypeVar('NUMBER', float, complex)
+NUMBER = TypeVar("NUMBER", float, complex)
 
 # ----------------------------------------------------------------
 # METHODS - aligned arrays
@@ -35,13 +34,14 @@ NUMBER = TypeVar('NUMBER', float, complex)
 
 
 def normalised_diffs(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> NDArray[np.float64]:
-    '''
+    """
     Computes difference `x_to - x_from` relativised.
 
-    NOTE:
+    Note:
     - For large numbers it is the same as a relative difference.
     - For small numbers this is the same as an ordinary difference.
-    '''
+
+    """
     x_from = np.asarray(x_from)
     x_to = np.asarray(x_to)
     dx = x_to - x_from
@@ -49,7 +49,9 @@ def normalised_diffs(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER]) -> NDArra
     return dx / C
 
 
-def sign_normalised_diffs(x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float) -> NDArray[np.float64]:
+def sign_normalised_diffs(
+    x_from: Iterable[NUMBER], x_to: Iterable[NUMBER], eps: float
+) -> NDArray[np.float64]:
     r = normalised_diffs(x_from=x_from, x_to=x_to)
     check = np.full(r.shape, fill_value=EnumSign.NON_ZERO, dtype=EnumSign)
 

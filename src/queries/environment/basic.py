@@ -7,23 +7,23 @@
 
 from ...thirdparty.code import *
 from ...thirdparty.config import *
-from ...thirdparty.types import *
 from ...thirdparty.system import *
+from ...thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'add_environment',
+    "add_environment",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS/VARIABLES
 # ----------------------------------------------------------------
 
-PARAMS = ParamSpec('PARAMS')
-RETURN = TypeVar('RETURN')
+PARAMS = ParamSpec("PARAMS")
+RETURN = TypeVar("RETURN")
 
 # ----------------------------------------------------------------
 # METHODS
@@ -33,11 +33,11 @@ RETURN = TypeVar('RETURN')
 def add_environment(
     action: Callable[Concatenate[str, dict[str, Any], PARAMS], RETURN],
 ) -> Callable[Concatenate[str, PARAMS], RETURN]:
-    '''
+    """
     Decorates method to make it get environment first.
     Runs method with error wrapping,
     catching errors with a ValueError
-    '''
+    """
 
     # modify function
     @wraps(action)
@@ -46,7 +46,8 @@ def add_environment(
             env = get_environment(path=path)
             result = action(path, env, *_, **__)
             return result
-        except:
-            raise ValueError('Create a .env file in the project root with appropriate values!')
+
+        except Exception as _:
+            raise ValueError("Create a .env file in the project root with appropriate values!")
 
     return wrapped_action

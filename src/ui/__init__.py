@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This submodule provides methods for the fastapi ui.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -16,5 +16,5 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'create_ui',
+    "create_ui",
 ]

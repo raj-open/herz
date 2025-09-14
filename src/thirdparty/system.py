@@ -6,13 +6,14 @@
 # ----------------------------------------------------------------
 
 import os
-from pathlib import Path
-import pathspec
 import signal
 import socket
 import sys
 import traceback
 import warnings
+from pathlib import Path
+
+import pathspec
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -73,13 +74,13 @@ def remove_file_if_exists(path: str) -> bool:
 
 def temporary_folder_name(
     path: str,
-    template: str = '{path}_{index}',
+    template: str = "{path}_{index}",
     create: bool = False,
 ):
-    '''
+    """
     Ensure that a temporary folder name does not exist,
     modifying it if necessary.
-    '''
+    """
     if os.path.exists(path):
         index = 1
         path_ = template.format(path=path, index=index)
@@ -87,7 +88,7 @@ def temporary_folder_name(
             index += 1
             path__ = path_
             path_ = template.format(path=path, index=index)
-            assert path_ != path__, 'Template must generate unique names for each index!'
+            assert path_ != path__, "Template must generate unique names for each index!"
         path = path_
     if create and not os.path.exists(path):
         create_dir_if_not_exists(path)
@@ -99,18 +100,18 @@ def temporary_folder_name(
 # ----------------------------------------------------------------
 
 __all__ = [
-    'clear_dir_if_exists',
-    'create_dir_if_not_exists',
-    'create_file_if_not_exists',
-    'os',
-    'Path',
-    'pathspec',
-    'remove_dir_if_exists',
-    'remove_file_if_exists',
-    'signal',
-    'socket',
-    'sys',
-    'temporary_folder_name',
-    'traceback',
-    'warnings',
+    "Path",
+    "clear_dir_if_exists",
+    "create_dir_if_not_exists",
+    "create_file_if_not_exists",
+    "os",
+    "pathspec",
+    "remove_dir_if_exists",
+    "remove_file_if_exists",
+    "signal",
+    "socket",
+    "sys",
+    "temporary_folder_name",
+    "traceback",
+    "warnings",
 ]

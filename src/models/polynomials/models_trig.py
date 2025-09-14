@@ -7,10 +7,7 @@
 
 from __future__ import annotations
 
-from src.models.polynomials.models_polyexp import PolyExp
-from src.thirdparty.types import Any
 from ...thirdparty.types import *
-
 from .models_polytrig import *
 
 # ----------------------------------------------------------------
@@ -18,8 +15,8 @@ from .models_polytrig import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Cos',
-    'Sin',
+    "Cos",
+    "Sin",
 ]
 
 # ----------------------------------------------------------------
@@ -28,13 +25,13 @@ __all__ = [
 
 
 class Cos(PolyTrig):
-    '''
+    """
     A class to model functions of the form
     ```
     t ⟼ cos(ωt)
     ```
     where `ω` some constant.
-    '''
+    """
 
     def __init__(self, omega: float, lead: float = 1, **__):
         assert omega != 0
@@ -77,13 +74,13 @@ class Cos(PolyTrig):
 
 
 class Sin(PolyTrig):
-    '''
+    """
     A class to model functions of the form
     ```
     t ⟼ sin(ωt)
     ```
     where `ω` some constant.
-    '''
+    """
 
     def __init__(self, omega: float, lead: complex = 1, **__):
         assert omega != 0

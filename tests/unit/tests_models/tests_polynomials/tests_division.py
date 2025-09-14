@@ -15,7 +15,7 @@ from src.models.polynomials import *
 
 
 @mark.parametrize(
-    ('coeff_p', 'coeff_q', 'coeff_result'),
+    ("coeff_p", "coeff_q", "coeff_result"),
     [
         ([1, 1], [1], [1, 1]),
         ([0, 6, 0, 16], [0, 2], [3, 0, 8]),
@@ -37,7 +37,7 @@ def test_get_long_division_CASES(
 
 
 @mark.parametrize(
-    ('coeff_p', 'coeff_q'),
+    ("coeff_p", "coeff_q"),
     [
         ([1], [1, 1]),
         ([0, 2], [100, 6, 0, 16]),
@@ -56,7 +56,7 @@ def test_get_long_division_ZERO_DIVISION(
 
 
 @mark.parametrize(
-    ('coeff_p', 'coeff_q', 'coeff_result'),
+    ("coeff_p", "coeff_q", "coeff_result"),
     [
         ([100, 6, 0, 16], [0, 2], [100]),
         ([100, 6, 0, 16], [1, 2], [95]),
@@ -77,7 +77,7 @@ def test_get_modulo_CASES(
 
 
 @mark.parametrize(
-    ('coeff_p', 'coeff_q'),
+    ("coeff_p", "coeff_q"),
     [
         ([0, 2], [100, 6, 0, 16]),
         ([1, 2, -3], [100, 6, 0, 16]),
@@ -96,7 +96,7 @@ def test_get_modulo_TRIVIAL(
 
 
 @mark.parametrize(
-    ('coeff_p', 'coeff_q'),
+    ("coeff_p", "coeff_q"),
     [
         ([0, 0, 100], [100]),
         ([0, 0, 1, 2, -0.3], [1, 2, -0.3]),

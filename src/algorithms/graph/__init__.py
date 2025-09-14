@@ -12,5 +12,5 @@ from .ranks import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'sort_nodes_by_rank',
+    "sort_nodes_by_rank",
 ]

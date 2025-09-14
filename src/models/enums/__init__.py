@@ -22,14 +22,14 @@ from ..generated.user import EnumType
 # ----------------------------------------------------------------
 
 __all__ = [
-    'EnumCriticalPoints',
-    'EnumExtremePoints',
-    'EnumFeature',
-    'EnumFittingMode',
-    'EnumModelKind',
-    'EnumProgrammeMode',
-    'EnumSign',
-    'EnumSolver',
-    'EnumSpecialPointPVKind',
-    'EnumType',
+    "EnumCriticalPoints",
+    "EnumExtremePoints",
+    "EnumFeature",
+    "EnumFittingMode",
+    "EnumModelKind",
+    "EnumProgrammeMode",
+    "EnumSign",
+    "EnumSolver",
+    "EnumSpecialPointPVKind",
+    "EnumType",
 ]

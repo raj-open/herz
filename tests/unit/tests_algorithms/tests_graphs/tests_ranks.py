@@ -5,11 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.algorithms.graph.ranks import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS
@@ -26,15 +26,15 @@ def test_compute_ranks(
     G = graph_non_cyclical_1
     G = DiGraphExtra(G.nodes, G.edges)
     r = G.ranks
-    test.assertDictEqual(r, {'d': 0, 'a': 1, 'e': 1, 'b': 2, 'c': 3})
+    test.assertDictEqual(r, {"d": 0, "a": 1, "e": 1, "b": 2, "c": 3})
     G = graph_non_cyclical_2
     G = DiGraphExtra(G.nodes, G.edges)
     r = G.ranks
-    test.assertDictEqual(r, {'d': 0, 'a': 1, 'b': 2, 'c': 3})
+    test.assertDictEqual(r, {"d": 0, "a": 1, "b": 2, "c": 3})
     G = graph_cyclical_1
     G = DiGraphExtra(G.nodes, G.edges)
     r = G.ranks
-    test.assertTrue(-1 in r.values(), 'Should detect circularity.')
+    test.assertTrue(-1 in r.values(), "Should detect circularity.")
     return
 
 
@@ -47,21 +47,21 @@ def test_sort_nodes_by_rank(
 ):
     G = graph_non_cyclical_1
     nodes, err = sort_nodes_by_rank(nodes=G.nodes, edges=G.edges)
-    test.assertFalse(err, 'Should note non-circularity.')
-    test.assertListEqual(nodes[0:][:1], ['d'])
-    test.assertListEqual(sorted(nodes[1:3]), ['a', 'e'])
-    test.assertListEqual(nodes[3:][:1], ['b'])
-    test.assertListEqual(nodes[4:][:1], ['c'])
+    test.assertFalse(err, "Should note non-circularity.")
+    test.assertListEqual(nodes[0:][:1], ["d"])
+    test.assertListEqual(sorted(nodes[1:3]), ["a", "e"])
+    test.assertListEqual(nodes[3:][:1], ["b"])
+    test.assertListEqual(nodes[4:][:1], ["c"])
 
     G = graph_non_cyclical_2
     nodes, err = sort_nodes_by_rank(nodes=G.nodes, edges=G.edges)
-    test.assertFalse(err, 'Should note non-circularity.')
-    test.assertListEqual(nodes[0:][:1], ['d'])
-    test.assertListEqual(nodes[1:][:1], ['a'])
-    test.assertListEqual(nodes[2:][:1], ['b'])
-    test.assertListEqual(nodes[3:][:1], ['c'])
+    test.assertFalse(err, "Should note non-circularity.")
+    test.assertListEqual(nodes[0:][:1], ["d"])
+    test.assertListEqual(nodes[1:][:1], ["a"])
+    test.assertListEqual(nodes[2:][:1], ["b"])
+    test.assertListEqual(nodes[3:][:1], ["c"])
 
     G = graph_cyclical_1
     nodes, err = sort_nodes_by_rank(nodes=G.nodes, edges=G.edges)
-    test.assertTrue(err, 'Should note circularity.')
+    test.assertTrue(err, "Should note circularity.")
     return

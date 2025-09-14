@@ -5,18 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.fitting import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_trig_parameters_from_info',
-    'fit_trig_parameters_to_info',
+    "fit_trig_parameters_from_info",
+    "fit_trig_parameters_to_info",
 ]
 
 # ----------------------------------------------------------------
@@ -27,7 +26,7 @@ __all__ = [
 def fit_trig_parameters_from_info(
     info: FittedInfoTrig,
 ) -> NDArray[np.float64]:
-    '''
+    """
     Given is the model
     ```
     f(t) = C + b·t + r·cos(ω·(t - t₀))
@@ -40,7 +39,7 @@ def fit_trig_parameters_from_info(
             c = r·cos(φ)
             d = r·sin(φ)
     ```
-    '''
+    """
     a = info.vshift
     b = info.drift
     t0 = info.hshift
@@ -53,7 +52,7 @@ def fit_trig_parameters_from_info(
 
 
 def fit_trig_parameters_to_info(x: NDArray[np.float64]) -> FittedInfoTrig:
-    '''
+    """
     Given is the model
     ```
     f(t) = a + b·t + c·cos(ω·t) + d·sin(ω·t)
@@ -65,7 +64,7 @@ def fit_trig_parameters_to_info(x: NDArray[np.float64]) -> FittedInfoTrig:
          = a + b·t + r·cos(ω·(t - t₀))
             where t₀ = φ / ω
     ```
-    '''
+    """
     a, b, c, d, omega = x
     r = math.sqrt(c**2 + d**2)
     phase = math.atan2(d, c)

@@ -13,8 +13,8 @@ from ...thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_extremes',
-    'get_peaks_simple',
+    "get_extremes",
+    "get_peaks_simple",
 ]
 
 # ----------------------------------------------------------------

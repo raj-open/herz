@@ -6,20 +6,20 @@
 # ----------------------------------------------------------------
 
 from src.thirdparty.config import *
-from src.thirdparty.types import *
 from src.thirdparty.misc import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'YamlImports',
-    'YamlLongString',
-    'read_yaml',
-    'write_yaml',
-    'get_dumper',
-    'register_enum_for_yaml_dumping',
+    "YamlImports",
+    "YamlLongString",
+    "get_dumper",
+    "read_yaml",
+    "register_enum_for_yaml_dumping",
+    "write_yaml",
 ]
 
 # ----------------------------------------------------------------
@@ -64,7 +64,7 @@ class YamlImports(str):
 
 def read_yaml(path: str):
     register_yaml_constructors()
-    with open(path, 'rb') as fp:
+    with open(path, "rb") as fp:
         return yaml.load(fp, yaml.FullLoader)
 
 
@@ -75,13 +75,13 @@ def write_yaml(
     n: int = 0,
 ):
     register_yaml_dumpers()
-    with open(path, 'w') as fp:
+    with open(path, "w") as fp:
         yaml.dump(
             obj,
             stream=fp,
             sort_keys=sort_keys,
             indent=2,
-            encoding='utf-8',
+            encoding="utf-8",
             allow_unicode=True,
             Dumper=get_dumper(n),
         )
@@ -103,24 +103,26 @@ def register_yaml_constructors():
         try:
             value = loader.construct_yaml_str(node)
             assert isinstance(value, str)
-            m = re.match(pattern=r'^(.*)\/#\/?(.*)$', string=value)
+            m = re.match(pattern=r"^(.*)\/#\/?(.*)$", string=value)
             path = m.group(1) if m else value
-            keys_as_str = m.group(2) if m else ''
+            keys_as_str = m.group(2) if m else ""
             obj = read_yaml(path)
-            keys = keys_as_str.split('/')
+            keys = keys_as_str.split("/")
             for key in keys:
-                if key == '':
+                if key == "":
                     continue
                 obj = obj.get(key, dict())
             return obj
-        except:
+
+        except Exception as _:
             return None
 
     def not_constructor(loader: yaml.Loader, node: yaml.Node) -> bool:
         try:
             value = loader.construct_yaml_bool(node)
             return not value
-        except:
+
+        except Exception as _:
             return None
 
     def join_constructor(loader: yaml.Loader, node: yaml.Node):
@@ -128,20 +130,22 @@ def register_yaml_constructors():
             values = loader.construct_sequence(node, deep=True)
             sep, parts = str(values[0]), [str(_) for _ in values[1]]
             return sep.join(parts)
-        except:
-            return ''
+
+        except Exception as _:
+            return ""
 
     def tuple_constructor(loader: yaml.Loader, node: yaml.Node):
         try:
             value = loader.construct_sequence(node, deep=True)
             return tuple(value)
-        except:
+
+        except Exception as _:
             return None
 
-    yaml.add_constructor(tag=u'!include', constructor=include_constructor)
-    yaml.add_constructor(tag=u'!not', constructor=not_constructor)
-    yaml.add_constructor(tag=u'!join', constructor=join_constructor)
-    yaml.add_constructor(tag=u'!tuple', constructor=tuple_constructor)
+    yaml.add_constructor(tag="!include", constructor=include_constructor)
+    yaml.add_constructor(tag="!not", constructor=not_constructor)
+    yaml.add_constructor(tag="!join", constructor=join_constructor)
+    yaml.add_constructor(tag="!tuple", constructor=tuple_constructor)
 
     _yaml_constructors_registered = True
     return
@@ -160,7 +164,7 @@ def register_enum_for_yaml_dumping(tt: type):
     _yaml_registered_types.append(tt.__name__)
 
     def _register(dumper: yaml.Dumper, data: tt):
-        return dumper.represent_scalar(u'tag:yaml.org,2002:str', data)
+        return dumper.represent_scalar("tag:yaml.org,2002:str", data)
 
     yaml.add_representer(tt, _register)
     yaml.representer.SafeRepresenter.add_representer(tt, _register)
@@ -186,9 +190,9 @@ def _repr_long_strings(
     data: YamlLongString,
 ):
     return dumper.represent_scalar(
-        u'tag:yaml.org,2002:str',
+        "tag:yaml.org,2002:str",
         data,
-        style='|',
+        style="|",
     )
 
 
@@ -196,7 +200,7 @@ def _repr_imports(
     dumper: yaml.Dumper,
     data: YamlImports,
 ):
-    return dumper.represent_scalar(u'!include', data, style='"')
+    return dumper.represent_scalar("!include", data, style='"')
 
 
 # ----------------------------------------------------------------

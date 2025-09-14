@@ -5,11 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
+from ....models.polynomials import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.polynomials import *
-from ....models.fitting import *
 from ...interpolations import *
 
 # ----------------------------------------------------------------
@@ -17,7 +16,7 @@ from ...interpolations import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_normalisation',
+    "fit_normalisation",
 ]
 
 # ----------------------------------------------------------------
@@ -35,11 +34,11 @@ def fit_normalisation(
     NDArray[np.float64],
     list[tuple[FittedInfoNormalisation, tuple[int, int]]],
 ]:
-    '''
+    """
     Fits polynomial to cycles of a time-series:
     - minimises wrt. the L²-norm
     - forces certain conditions on n'th-derivatives at certain time points
-    '''
+    """
     # fit each cycle
     fitinfos = []
     dt = np.zeros(t.shape)
@@ -75,9 +74,9 @@ def fit_normalisation(
 
 
 def combine_fit(infos: list[FittedInfoNormalisation]) -> FittedInfoNormalisation:
-    '''
+    """
     Fits a single polynomial to all (normalised) cycles simultaenously.
-    '''
+    """
     T = np.median(np.asarray([info.period for info in infos]), axis=0).tolist()  # fmt: skip
     c = np.median(np.asarray([info.intercept for info in infos]), axis=0).tolist()  # fmt: skip
     m = np.median(np.asarray([info.gradient for info in infos]), axis=0).tolist()  # fmt: skip

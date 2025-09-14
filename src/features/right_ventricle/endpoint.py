@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------
 
 from ...core.log import *
-from ...setup import config
 from ...models.user import *
+from ...setup import config
 from .steps import *
 from .subfeatures import *
 
@@ -16,7 +16,7 @@ from .subfeatures import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'endpoint',
+    "endpoint",
 ]
 
 # ----------------------------------------------------------------
@@ -24,12 +24,12 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(tag='FEATURE {feature.value}', level=LOG_LEVELS.INFO)
+@echo_function(tag="FEATURE {feature.value}", level=LOG_LEVELS.INFO)
 def endpoint(feature: EnumFeature, case: RequestConfig):
-    '''
+    """
     Processes right ventricular data
-    '''
-    prog = LogProgress(name=f'CASE {case.label}', steps=8, logger=log_info)
+    """
+    prog = LogProgress(name=f"CASE {case.label}", steps=8, logger=log_info)
 
     # set configs / settings
     datas = dict()
@@ -38,9 +38,9 @@ def endpoint(feature: EnumFeature, case: RequestConfig):
     interpols_trig = dict()
     cfg_points = config.POINTS.model_copy(deep=True)
     specials = {
-        'pressure': cfg_points.pressure,
-        'volume': cfg_points.volume,
-        'pv': cfg_points.pv,
+        "pressure": cfg_points.pressure,
+        "volume": cfg_points.volume,
+        "pv": cfg_points.pv,
     }
     dataparts = dict()
 

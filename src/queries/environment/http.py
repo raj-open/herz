@@ -5,19 +5,18 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.types import *
-
-from .basic import *
 from ...models.apis import *
+from ...thirdparty.types import *
+from .basic import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_http_ip',
-    'get_http_port',
-    'get_http_credentials',
+    "get_http_credentials",
+    "get_http_ip",
+    "get_http_port",
 ]
 
 # ----------------------------------------------------------------
@@ -31,9 +30,9 @@ def get_http_ip(
     path: str,
     env: dict[str, Any],
     # end decorator args
-    default: str = '0.0.0.0',
+    default: str = "0.0.0.0",
 ) -> str:
-    return env.get('HTTP_IP', default)
+    return env.get("HTTP_IP", default)
 
 
 @add_environment
@@ -44,7 +43,7 @@ def get_http_port(
     # end decorator args
     default: int = 80,
 ) -> int:
-    value = env.get('HTTP_PORT', default)
+    value = env.get("HTTP_PORT", default)
     return int(value)
 
 
@@ -55,8 +54,8 @@ def get_http_credentials(
     env: dict[str, Any],
     # end decorator args
 ) -> Credentials:
-    '''
+    """
     Gets http user + token.
     If value not set in .env, will raise a (Key)Exception.
-    '''
-    return Credentials(username=env['HTTP_USER'], token=env['HTTP_PASSWORD'])
+    """
+    return Credentials(username=env["HTTP_USER"], token=env["HTTP_PASSWORD"])

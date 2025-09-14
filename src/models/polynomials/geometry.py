@@ -5,10 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...core.constants import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
-from ...core.constants import *
 from .models_polyexp import *
 
 # ----------------------------------------------------------------
@@ -16,16 +15,16 @@ from .models_polyexp import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'inner_product_poly_exp',
-    'norm_poly_exp',
-    'inner_product_polybasis',
+    "inner_product_poly_exp",
+    "inner_product_polybasis",
+    "norm_poly_exp",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS, VARIABLES
 # ----------------------------------------------------------------
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 # ----------------------------------------------------------------
 # METHODS
@@ -37,10 +36,10 @@ def inner_product_poly_exp(
     g: PolyExp[T],
     *intervals: tuple[float, float],
 ) -> T:
-    '''
+    """
     Computes the inner product ⟨f, g⟩
     over a space determined by a series of (assumed) disjoint intervals.
-    '''
+    """
     # determine integrand
     h = f * g.conjugate()
     # determine a stem-function
@@ -50,18 +49,18 @@ def inner_product_poly_exp(
     H_values = H.values(times)
     # add up the differences (= integrals over all each interval)
     N = len(intervals)
-    I = sum(H_values[N:] - H_values[:N])
-    return I
+    Integ = sum(H_values[N:] - H_values[:N])
+    return Integ
 
 
 def norm_poly_exp(
     f: PolyExp,
     *intervals: tuple[float, float],
 ):
-    '''
+    """
     Computes the L²-norm ‖f‖
     over a space determined by a series of (assumed) disjoint intervals.
-    '''
+    """
     return math.sqrt(inner_product_poly_exp(f, f, *intervals))
 
 
@@ -74,7 +73,7 @@ def inner_product_polybasis(
     B: NDArray[np.float64],
     intervals: Iterable[tuple[float, float]],
 ) -> NDArray[np.float64]:
-    '''
+    """
     Computes interproducts of polynomials.
     @returns
     matrix `S` with
@@ -84,7 +83,7 @@ def inner_product_polybasis(
     ```
 
     for each `i, j ∈ {0, 1, 2, …, m}`
-    '''
+    """
     d = B.shape[0] - 1
     m = B.shape[1]
     ip = get_inner_products_standard_basis(d, d, intervals)
@@ -111,9 +110,9 @@ def get_inner_products_standard_basis(
     d2: int,
     intervals: Iterable[tuple[float, float]],
 ):
-    '''
+    """
     Computes the inner products between the elements of the standard basis.
-    '''
+    """
     powers1 = np.asarray(range(d1 + 1))
     powers2 = np.asarray(range(d2 + 1))
     sumpowers = powers1[:, np.newaxis] + powers2[np.newaxis, :] + 1

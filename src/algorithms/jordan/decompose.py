@@ -5,10 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...models.polynomials import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
-from ...models.polynomials import *
 from .polynomials import *
 
 # ----------------------------------------------------------------
@@ -16,30 +15,32 @@ from .polynomials import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'algebraic_dimensions',
-    'chevalley_polynomial',
-    'decompose_jordan_chevalley',
+    "algebraic_dimensions",
+    "chevalley_polynomial",
+    "decompose_jordan_chevalley",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T', np.float64, np.complex128)
+T = TypeVar("T", np.float64, np.complex128)
 
 # ----------------------------------------------------------------
 # METHODS
 # ----------------------------------------------------------------
 
 
-def decompose_jordan_chevalley(A: NDArray[T]) -> tuple[
+def decompose_jordan_chevalley(
+    A: NDArray[T],
+) -> tuple[
     tuple[NDArray[T], NDArray[T]],
     tuple[NDArray[np.complex128], NDArray[np.complex128]],
 ]:
-    '''
+    """
     Computes the Jordan–Chevalley (a.k.a. Dunford) decomposition
     of a matrix into diagonalisable and nilpotent parts.
-    '''
+    """
     ch = chevalley_polynomial(A)
     Apow = np.eye(*A.shape)
     D = np.zeros(A.shape)
@@ -57,10 +58,10 @@ def decompose_jordan_chevalley(A: NDArray[T]) -> tuple[
 
 
 def chevalley_polynomial(A: NDArray[T]) -> Poly[np.complex128]:
-    '''
+    """
     Computes the Jordan–Chevalley (a.k.a. Dunford) decomposition
     of a matrix into diagonalisable and nilpotent parts.
-    '''
+    """
     stats = algebraic_dimensions(A)
     data = [(t, Poly(coeff=[-t, 1]) ** n) for t, n in stats.items()]
     return chinese_polynomial(data)

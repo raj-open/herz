@@ -6,10 +6,10 @@
 # ----------------------------------------------------------------
 
 from __future__ import annotations
-from ...thirdparty.maths import *
-from ...thirdparty.types import *
 
 from ...core.utils import *
+from ...thirdparty.maths import *
+from ...thirdparty.types import *
 from ..intervals import *
 from .models_base import *
 
@@ -18,15 +18,15 @@ from .models_base import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'PolyExp',
-    'pre_compare',
+    "PolyExp",
+    "pre_compare",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T', float, complex)
+T = TypeVar("T", float, complex)
 
 # ----------------------------------------------------------------
 # CLASS
@@ -34,7 +34,7 @@ T = TypeVar('T', float, complex)
 
 
 class PolyExp(PolyExpBase[T]):
-    '''
+    """
     A class to model functions of the form
     ```
     t ⟼ p(t)·exp(αt)
@@ -43,7 +43,7 @@ class PolyExp(PolyExpBase[T]):
     and `α` some growth constant.
 
     NOTE: Only the polynomial part may be periodic.
-    '''
+    """
 
     @staticmethod
     def load_from_zeroes(
@@ -91,8 +91,8 @@ class PolyExp(PolyExpBase[T]):
             params = self.params
             match self.cyclic, q.cyclic:
                 case True, True:
-                    assert self.offset == q.offset, 'Models must have compatible offset-value!'
-                    assert self.period == q.period, 'Models must have compatible period-value!'
+                    assert self.offset == q.offset, "Models must have compatible offset-value!"
+                    assert self.period == q.period, "Models must have compatible period-value!"
                 case False, True:
                     params = q.params
 
@@ -102,10 +102,13 @@ class PolyExp(PolyExpBase[T]):
             coeff_p = np.asarray(self.coeff)
             coeff_q = np.asarray(q.coeff)
             coeff = np.sum(
-                [[0] * k + (c * coeff_p).tolist() + [0] * (q.degree - k) for k, c in enumerate(coeff_q)],
+                [
+                    [0] * k + (c * coeff_p).tolist() + [0] * (q.degree - k)
+                    for k, c in enumerate(coeff_q)
+                ],
                 axis=0,
             ).tolist()
-            params = params | {'accuracy': max(self.accuracy, q.accuracy)}
+            params = params | {"accuracy": max(self.accuracy, q.accuracy)}
             result = PolyExp(
                 alpha=self.alpha + q.alpha,
                 lead=self.lead * q.lead,
@@ -115,16 +118,16 @@ class PolyExp(PolyExpBase[T]):
             result.roots = self.roots[:] + q.roots[:]
             return result
 
-        raise TypeError(f'No multiplication method for Poly x {type(q)}!')
+        raise TypeError(f"No multiplication method for Poly x {type(q)}!")
 
     def __rmul__(self, q: Any) -> PolyExp:
         return self * q
 
     def __pow__(self, n: Any) -> PolyExp[T]:
         if not isinstance(n, int):
-            raise ValueError(f'cannot compute PolyExp ** {type(n)}')
+            raise ValueError(f"cannot compute PolyExp ** {type(n)}")
         if n < 0:
-            raise ValueError(f'cannot compute negative powers of PolyExp')
+            raise ValueError("cannot compute negative powers of PolyExp")
         result = PolyExp[T](coeff=[1], lead=1, alpha=self.alpha, **self.params)
         base = self.__copy__()
         for _ in range(n):
@@ -180,8 +183,10 @@ class PolyExp(PolyExpBase[T]):
 
             case _ as s:
                 deg = self.degree
-                O = np.zeros((deg + 1, 1))
-                E = np.row_stack([np.column_stack([O[:-1], np.diag(range(1, deg + 1))]), O.T])
+                Zero = np.zeros((deg + 1, 1))
+                E = np.row_stack(
+                    [np.column_stack([Zero[:-1], np.diag(range(1, deg + 1))]), O.T]
+                )
                 # DEV-NOTE: canot use += due to possible dtype-clash (float + complex)
                 E = E + s * np.eye(deg + 1)
                 u = np.asarray(self.coeff)
@@ -189,7 +194,7 @@ class PolyExp(PolyExpBase[T]):
                 return PolyExp(coeff=coeff, lead=self.lead, alpha=s, **self.params)
 
     def integral(self, n: int = 1) -> PolyExp:
-        '''
+        r"""
         Computes a stem function for the model
         ```
         f(t) = p(t)e^{st}
@@ -247,7 +252,7 @@ class PolyExp(PolyExpBase[T]):
             ```
 
             for all `n ∈ ℕ₀`, `s ∈ ℂ \\ {0}`.
-        '''
+        """
         if n == 0:
             return self.__copy__()
 
@@ -280,7 +285,7 @@ class PolyExp(PolyExpBase[T]):
                 return PolyExp(coeff=coeff, lead=self.lead, alpha=s, **self.params)
 
     def evaluate(self, *intervals: tuple[float, float]) -> complex:
-        '''
+        r"""
         For a model `f(t)` computes `∑ₖ f(bₖ) - f(aₖ)`.
 
         ## Application ##
@@ -303,7 +308,7 @@ class PolyExp(PolyExpBase[T]):
         ```
         assuming `(a, b) ∪ (c, d)` are disjoint,
         etc.
-        '''
+        """
         N = len(intervals)
         if N == 0:
             return 0
@@ -312,7 +317,7 @@ class PolyExp(PolyExpBase[T]):
         return sum(values[N:] - values[:N])
 
     def rescale(self, a: float = 1.0, t0: float = 0.0) -> PolyExp[T]:
-        '''
+        """
         Let `p` be a `d`-degree polynomial of the form
         ```
         p(t) = exp(bt) ∑ₖ cₖ·tᵏ
@@ -387,15 +392,20 @@ class PolyExp(PolyExpBase[T]):
         <==> offset + T + a·T' == offset
         <==> T' = -T / a
         ```
-        '''
-        assert a != 0, 'Cannot rescale using 0-values!'
+        """
+        assert a != 0, "Cannot rescale using 0-values!"
 
         deg = self.degree
 
         # compute polynomial part
         a_pow = np.cumprod([1] + [a] * deg)
         coeff = a_pow * self.coeff
-        A = np.asarray([[nCr(k + j, k) * x for j, x in enumerate(coeff[k:])] + [0] * k for k in range(deg + 1)])
+        A = np.asarray(
+            [
+                [nCr(k + j, k) * x for j, x in enumerate(coeff[k:])] + [0] * k
+                for k in range(deg + 1)
+            ]
+        )
 
         t_pow = np.cumprod([1] + [t0] * deg)
         coeff = (A @ t_pow).tolist()
@@ -407,13 +417,13 @@ class PolyExp(PolyExpBase[T]):
         match self.cyclic, a < 0:
             case True, True:
                 params = params | {
-                    'offset': (self.offset + self.period) / a - t0,
-                    'period': self.period / -a,
+                    "offset": (self.offset + self.period) / a - t0,
+                    "period": self.period / -a,
                 }
             case True, _:
                 params = params | {
-                    'offset': self.offset / a - t0,
-                    'period': self.period / a,
+                    "offset": self.offset / a - t0,
+                    "period": self.period / a,
                 }
             case _:
                 pass
@@ -424,13 +434,13 @@ class PolyExp(PolyExpBase[T]):
         self,
         *intervals: tuple[float, float],
     ) -> Generator[tuple[PolyExp[T], float, float]]:
-        '''
+        """
         Resolves cyclic models into pieceweise non-cyclic parts.
         This is necessary e.g. as a precursor
 
         - before algebraically combining current model with non-cyclic models
         - before computing integral / stem functions
-        '''
+        """
         intervals = merge_intervals(intervals)
         if not self.cyclic:
             for a, b in intervals:
@@ -439,19 +449,21 @@ class PolyExp(PolyExpBase[T]):
 
         offset = self.offset
         period = self.period
-        safeintervals = list(resolve_intervals(offset=offset, period=period, intervals=intervals))
+        safeintervals = list(
+            resolve_intervals(offset=offset, period=period, intervals=intervals)
+        )
         for k, a, b in safeintervals:
-            '''
+            r"""
             NOTE: We are given a "safe" interval,
             i.e. I = [a, b], where
             t0 + k·T ≤ a < b < t0 + (k+1)·T.
             Given the cyclic nature of the (polynomial part of the) model,
             it holds that
 
-            f(t) = exp(a·t) · ∑ⱼ cⱼ (t – k·T)ʲ
+            f(t) = exp(a·t) · ∑ⱼ cⱼ (t - k·T)ʲ
 
             for t ∈ I.
-            '''
+            """
             # create a copy of the model, as it will be modified
             f = self.__copy__()
             # remove cyclic aspects

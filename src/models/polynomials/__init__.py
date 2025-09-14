@@ -20,16 +20,16 @@ from .models_trig import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Cos',
-    'Exp',
-    'Poly',
-    'PolyExp',
-    'PolyTrig',
-    'Sin',
-    'euklidean_algorithm',
-    'fourier_of_polynomial',
-    'inner_product_poly_exp',
-    'inner_product_polybasis',
-    'integral_poly_trig',
-    'norm_poly_exp',
+    "Cos",
+    "Exp",
+    "Poly",
+    "PolyExp",
+    "PolyTrig",
+    "Sin",
+    "euklidean_algorithm",
+    "fourier_of_polynomial",
+    "inner_product_poly_exp",
+    "inner_product_polybasis",
+    "integral_poly_trig",
+    "norm_poly_exp",
 ]

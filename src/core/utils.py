@@ -14,19 +14,19 @@ from ..thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'where_to_characteristic',
-    'characteristic_to_where',
-    'unique',
-    'flatten',
-    'gather_by_key',
-    'flatten_by_key',
+    "characteristic_to_where",
+    "flatten",
+    "flatten_by_key",
+    "gather_by_key",
+    "unique",
+    "where_to_characteristic",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 # ----------------------------------------------------------------
 # METHODS - INDICES

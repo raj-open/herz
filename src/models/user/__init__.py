@@ -22,15 +22,15 @@ from .files import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'DataTimeSeries',
-    'DataTypeColumn',
-    'DataTypeQuantity',
-    'EnumFeature',
-    'EnumProgrammeMode',
-    'RequestConfig',
-    'RequestsConfig',
-    'UserData',
-    'UserOutput',
-    'UserProcess',
-    'get_files_manager',
+    "DataTimeSeries",
+    "DataTypeColumn",
+    "DataTypeQuantity",
+    "EnumFeature",
+    "EnumProgrammeMode",
+    "RequestConfig",
+    "RequestsConfig",
+    "UserData",
+    "UserOutput",
+    "UserProcess",
+    "get_files_manager",
 ]

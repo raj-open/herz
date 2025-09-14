@@ -5,17 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from .....thirdparty.data import *
-from .....thirdparty.maths import *
-from .....thirdparty.plots import *
-from .....thirdparty.types import *
-
-from .....setup import config
 from .....core.log import *
 from .....models.fitting import *
 from .....models.polynomials import *
 from .....models.user import *
 from .....queries.scientific import *
+from .....setup import config
+from .....thirdparty.data import *
+from .....thirdparty.maths import *
+from .....thirdparty.plots import *
+from .....thirdparty.types import *
 from .basic import *
 
 # ----------------------------------------------------------------
@@ -23,7 +22,7 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_output_time_plot',
+    "step_output_time_plot",
 ]
 
 # ----------------------------------------------------------------
@@ -31,12 +30,14 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP output time-plot', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP output time-plot", level=LOG_LEVELS.INFO)
 def step_output_time_plot(
     data: pd.DataFrame,
     info: FittedInfoNormalisation,
     poly: Poly[float],
-    interpol_trig: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig: tuple[
+        FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]
+    ],
     special: dict[str, SpecialPointsConfig],
     quantity: str,
     symb: str,
@@ -45,7 +46,7 @@ def step_output_time_plot(
     cfg_output: UserOutput,
     N: int = 1000,
 ) -> pgo.Figure:
-    '''
+    """
     Creates Time-Series plot for a quantity including:
 
     - subplots for 0th, 1st, 2nd derivatives;
@@ -53,14 +54,14 @@ def step_output_time_plot(
     - trig-fitted series (0th derivative only);
     - poly-fitted series (all derivatives);
     - special points (all derivatives).
-    '''
+    """
     cv = output_conversions(cfg_output.quantities, units=config.UNITS)
     units = output_units(cfg_output.quantities)
     T = info.period
     cycles = [0]
     collapse = cfg_output.plot.collapse_cycles
     if not collapse:
-        cycles = sorted(np.unique(data['cycle'].to_numpy()))
+        cycles = sorted(np.unique(data["cycle"].to_numpy()))
 
     # compute series for fitted curves
     time, data_poly, specials = compute_fitted_curves_poly(info=info, poly=poly, quantity=quantity, special=special, n_der=2, N=N, cycles=cycles, cv=cv, units=units)  # fmt: skip
@@ -69,7 +70,9 @@ def step_output_time_plot(
     fig = setup_plot(title=plot_title, quantity=quantity, symb=symb, T=T, cycles=cycles, specials=specials, cfg=cfg_output, cv=cv, units=units)  # fmt: skip
 
     # plot data points
-    for subplot in plot_data_vs_time(data, info=info, quantity=quantity, collapse=collapse, cv=cv, units=units):
+    for subplot in plot_data_vs_time(
+        data, info=info, quantity=quantity, collapse=collapse, cv=cv, units=units
+    ):
         fig.append_trace(subplot, row=1, col=1)
 
     # plot interpolated trig fit
@@ -77,9 +80,11 @@ def step_output_time_plot(
         fig.append_trace(subplot, row=1, col=1)
 
     # plot poly fit
-    names = [f'{quantity.title()} [fit]', f'(d/dt){symb} [fit]', f'(d/dt)²{symb} [fit]']
-    quantities = [quantity, f'd[1,t]{quantity}[fit]', f'd[2,t]{quantity}[fit]']
-    for k, (name, quantity_, values, special_) in enumerate(zip(names, quantities, data_poly, specials)):
+    names = [f"{quantity.title()} [fit]", f"(d/dt){symb} [fit]", f"(d/dt)²{symb} [fit]"]
+    quantities = [quantity, f"d[1,t]{quantity}[fit]", f"d[2,t]{quantity}[fit]"]
+    for k, (name, quantity_, values, special_) in enumerate(
+        zip(names, quantities, data_poly, specials)
+    ):
         for subplot in plot_poly_fit(fig, info=info, name=name, quantity=quantity_, time=time, values=values, special=special_, cycles=cycles, showlegend=k == 0, cv=cv, units=units):  # fmt: skip
             fig.append_trace(subplot, row=k + 1, col=1)
 
@@ -89,7 +94,7 @@ def step_output_time_plot(
     # save plot
     path = cfg_output.plot.path.root
     if path is not None:
-        path = path.format(label=plot_label, kind=f'{quantity}-time')
+        path = path.format(label=plot_label, kind=f"{quantity}-time")
         save_image(fig=fig, path=path)
 
     return fig
@@ -111,9 +116,9 @@ def setup_plot(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> pgo.Figure:
-    '''
+    """
     Initialises plot.
-    '''
+    """
     cfg_font = cfg.plot.font
 
     cycle_min = min(cycles)
@@ -125,8 +130,8 @@ def setup_plot(
         rows=3,
         cols=1,
         subplot_titles=[
-            f'Time series for {name} (fitted, single cycle)'
-            for name in [f'{quantity.title()}', f'(d/dt){symb}', f'(d/dt)²{symb}']
+            f"Time series for {name} (fitted, single cycle)"
+            for name in [f"{quantity.title()}", f"(d/dt){symb}", f"(d/dt)²{symb}"]
         ],
         shared_xaxes=True,
     )
@@ -145,12 +150,12 @@ def setup_plot(
         font=dict(
             family=cfg_font.family,
             size=cfg_font.size,
-            color='hsla(0, 100%, 0%, 1)',
+            color="hsla(0, 100%, 0%, 1)",
         ),
-        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        plot_bgcolor="hsla(0, 100%, 0%, 0.1)",
         showlegend=cfg.plot.legend,
         legend=dict(
-            title='Series/Points',
+            title="Series/Points",
             font=dict(
                 family=cfg_font.family,
                 size=cfg_font.size_legend,
@@ -159,38 +164,40 @@ def setup_plot(
     )
 
     opt = dict(
-        linecolor='black',
+        linecolor="black",
         mirror=True,  # adds border on right/top too
-        ticks='outside',
+        ticks="outside",
         showgrid=True,
         visible=True,
         # range=[0, None], # FIXME: does not work!
     )
 
-    t_sp = np.asarray([0] + [point.time for _, point in specials[0].items() if not point.ignore] + [T])
+    t_sp = np.asarray(
+        [0] + [point.time for _, point in specials[0].items() if not point.ignore] + [T]
+    )
     t_sp = np.unique(np.concatenate([k * T + t_sp for k in cycles]))
-    t_sp = cv['time'] * t_sp  # convert units
+    t_sp = cv["time"] * t_sp  # convert units
 
     for row in range(1, 3 + 1):
         fig.update_xaxes(
-            title=f'Time    ({units["time"]})',
-            rangemode='tozero',
+            title=f"Time    ({units['time']})",
+            rangemode="tozero",
             **opt,
             row=row,
             col=1,
-            range=[cv['time'] * (cycle_min - 0.1) * T, cv['time'] * (cycle_min + 1 + 0.1) * T],
+            range=[cv["time"] * (cycle_min - 0.1) * T, cv["time"] * (cycle_min + 1 + 0.1) * T],
             tickvals=t_sp,
-            ticktext=[f'{t:.3g}' for t in t_sp],
+            ticktext=[f"{t:.3g}" for t in t_sp],
             tickangle=90,
         )
 
     for row, key, name in [
         (1, quantity, quantity.title()),
-        (2, f'd[1,t]{quantity}[fit]', f'{symb}´(t)'),
-        (3, f'd[2,t]{quantity}[fit]', f'{symb}´´(t)'),
+        (2, f"d[1,t]{quantity}[fit]", f"{symb}´(t)"),
+        (3, f"d[2,t]{quantity}[fit]", f"{symb}´´(t)"),
     ]:
         unit = units[key]
-        fig.update_yaxes(title=f'{name}    ({unit})', rangemode='normal', **opt, row=row, col=1)
+        fig.update_yaxes(title=f"{name}    ({unit})", rangemode="normal", **opt, row=row, col=1)
 
     fig.update_layout(
         xaxis_showticklabels=True,
@@ -224,26 +231,26 @@ def plot_data_vs_time(
     cv: dict[str, float],
     units: dict[str, str],
 ):
-    '''
+    """
     Plots raw time series (collapsed onto one period).
-    '''
+    """
     T = info.period
-    time = data['time'] % T
+    time = data["time"] % T
     if not collapse:
-        cycles = data['cycle']
+        cycles = data["cycle"]
         cycles = cycles - min(cycles)
         time = cycles * T + time
 
     yield from add_plot_time_series(
-        name=f'{quantity.title()} [data]',
-        text=f'{quantity}',
-        time=cv['time'] * time,
+        name=f"{quantity.title()} [data]",
+        text=f"{quantity}",
+        time=cv["time"] * time,
         values=cv[quantity] * data[quantity],
-        mode='markers',
+        mode="markers",
         marker=dict(
             size=2,
-            color='hsla(0, 100%, 0%, 0.5)',
-            symbol='cross',
+            color="hsla(0, 100%, 0%, 0.5)",
+            symbol="cross",
         ),
         showlegend=True,
     )
@@ -262,9 +269,9 @@ def plot_poly_fit(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Plots poly-fitted curve + special points.
-    '''
+    """
     T = info.period
     yield from add_plot_time_series(
         name=name,
@@ -280,7 +287,7 @@ def plot_poly_fit(
             point=point,
             cycles=cycles,
             T=T,
-            cv_time=cv['time'],
+            cv_time=cv["time"],
             cv_value=cv[quantity],
             showlegend=showlegend,
         )
@@ -295,9 +302,9 @@ def plot_interpolated_trig_fit(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Creates subplot for the interpolated trig-fitting (if given).
-    '''
+    """
     fit, _, _ = fitinfo
     if fit is None:
         return
@@ -308,18 +315,18 @@ def plot_interpolated_trig_fit(
         usehull=True,
         cycles=cycles,
         N=N,
-        cv_time=cv['time'],
+        cv_time=cv["time"],
         cv_value=cv[quantity],
     )
 
     yield from add_plot_time_series(
-        name=f'{quantity.title()} [trig]',
+        name=f"{quantity.title()} [trig]",
         time=time,
         values=values,
-        mode='lines',
+        mode="lines",
         line=dict(
             width=3,
-            color='hsla(100, 100%, 25%, 0.5)',
+            color="hsla(100, 100%, 25%, 0.5)",
         ),
         showlegend=True,
     )

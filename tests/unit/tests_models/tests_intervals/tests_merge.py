@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.intervals import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
@@ -24,7 +24,7 @@ _module = get_module(__file__)
 
 
 @mark.parametrize(
-    ('intervals', 'expected'),
+    ("intervals", "expected"),
     [
         (
             [
@@ -126,7 +126,7 @@ def test_compute_overlaps_BASIC(
 
 
 @mark.parametrize(
-    ('intervals', 'expected'),
+    ("intervals", "expected"),
     [
         (
             [
@@ -164,7 +164,7 @@ def test_resolve_interval_TRANSITIVITY(
 
 
 @mark.parametrize(
-    ('intervals', 'expected'),
+    ("intervals", "expected"),
     [
         (
             [

@@ -6,9 +6,9 @@
 # ----------------------------------------------------------------
 
 from __future__ import annotations
+
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from .models_polyexp import *
 
 # ----------------------------------------------------------------
@@ -16,14 +16,14 @@ from .models_polyexp import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Poly',
+    "Poly",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T', float, complex)
+T = TypeVar("T", float, complex)
 
 # ----------------------------------------------------------------
 # CLASS
@@ -31,9 +31,9 @@ T = TypeVar('T', float, complex)
 
 
 class Poly(PolyExp[T]):
-    '''
+    """
     A class to model (possibly periodic) polynomials.
-    '''
+    """
 
     @staticmethod
     def load_from_zeroes(
@@ -92,13 +92,13 @@ class Poly(PolyExp[T]):
             params = self.params
             match self.cyclic, q.cyclic:
                 case True, True:
-                    assert self.offset == q.offset, 'Models must have compatible offset-value!'
-                    assert self.period == q.period, 'Models must have compatible period-value!'
+                    assert self.offset == q.offset, "Models must have compatible offset-value!"
+                    assert self.period == q.period, "Models must have compatible period-value!"
                 case False, True:
                     params = q.params
 
             coeff, coeff_q = pre_compare(self, q)
-            params = params | {'accuracy': max(self.accuracy, q.accuracy)}
+            params = params | {"accuracy": max(self.accuracy, q.accuracy)}
             result = Poly(coeff=[c + cc for c, cc in zip(coeff, coeff_q)], **params)
             match self.lead == 0, q.lead == 0:
                 case True, True:
@@ -110,7 +110,7 @@ class Poly(PolyExp[T]):
 
             return result
 
-        raise TypeError(f'No addition method for Poly + {type(q)}!')
+        raise TypeError(f"No addition method for Poly + {type(q)}!")
 
     def __radd__(self, q: Any) -> Poly:
         return self + q
@@ -118,7 +118,7 @@ class Poly(PolyExp[T]):
     def __sub__(self, q: Any) -> Poly:
         if isinstance(q, Poly):
             return self.__add__(-q)
-        raise TypeError(f'No addition method for Poly - {type(q)}!')
+        raise TypeError(f"No addition method for Poly - {type(q)}!")
 
     def __divmod__(self, q: Poly[T]) -> tuple[Poly[T], Poly[T]]:
         coef_p = np.asarray(self.coefficients)

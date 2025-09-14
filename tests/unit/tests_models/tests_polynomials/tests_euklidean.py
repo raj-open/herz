@@ -5,10 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *
+from src.thirdparty.maths import *
 
 # ----------------------------------------------------------------
 # TESTS

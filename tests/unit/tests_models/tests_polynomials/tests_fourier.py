@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
@@ -24,7 +24,7 @@ _module = get_module(__file__)
 
 
 @mark.parametrize(
-    ('coeff',),
+    ("coeff",),
     [
         ([3, 0.5, -0.8, 1.7],),
         ([1],),
@@ -54,7 +54,7 @@ def test_fourier_of_polynomial_CASES(
 
     # compute using method:
     F0, F = fourier_of_polynomial(p)
-    F_method = [F0] + F.values(1 / n_values[1:]).tolist()
+    F_method = [F0, *F.values(1 / n_values[1:]).tolist()]
 
     # verify correctness of method:
     np.testing.assert_array_almost_equal(F_method, F_manual, decimal=4)

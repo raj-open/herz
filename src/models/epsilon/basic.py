@@ -7,7 +7,6 @@
 
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from ..enums import *
 
 # ----------------------------------------------------------------
@@ -15,16 +14,16 @@ from ..enums import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'is_epsilon_eq',
-    'normalised_difference',
-    'sign_normalised_difference',
+    "is_epsilon_eq",
+    "normalised_difference",
+    "sign_normalised_difference",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-NUMBER = TypeVar('NUMBER', float, complex)
+NUMBER = TypeVar("NUMBER", float, complex)
 
 # ----------------------------------------------------------------
 # METHODS - single values
@@ -36,13 +35,14 @@ def is_epsilon_eq(arg1: NUMBER, arg2: NUMBER, eps: float) -> bool:
 
 
 def normalised_difference(x_from: NUMBER, x_to: NUMBER) -> NUMBER:
-    '''
+    """
     Computes difference `x_to - x_from` relativised.
 
-    NOTE:
+    Note:
     - For large numbers it is the same as a relative difference.
     - For small numbers this is the same as an ordinary difference.
-    '''
+
+    """
     dx = x_to - x_from
     C = max(1.0, (abs(x_from) + abs(x_to)) / 2)
     return dx / C

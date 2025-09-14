@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from ...thirdparty.code import *
 from ...thirdparty.types import *
-
 from .basic import *
 
 # ----------------------------------------------------------------
@@ -17,7 +16,7 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'LogProgress',
+    "LogProgress",
 ]
 
 # ----------------------------------------------------------------
@@ -45,7 +44,7 @@ class LogProgress:
 
     @property
     def state(self) -> str:
-        dash = '-' * (3 + 2 * self.depth)
+        dash = "-" * (3 + 2 * self.depth)
         k = self.step
         n = self.steps
         r = 1 if n == 0 else k / n

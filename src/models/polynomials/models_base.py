@@ -6,10 +6,10 @@
 # ----------------------------------------------------------------
 
 from __future__ import annotations
+
 from ...thirdparty.code import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from ..epsilon import *
 
 # ----------------------------------------------------------------
@@ -17,14 +17,14 @@ from ..epsilon import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'PolyExpBase',
+    "PolyExpBase",
 ]
 
 # ----------------------------------------------------------------
 # LOCAL VARIABLES / CONSTANTS
 # ----------------------------------------------------------------
 
-T = TypeVar('T', float, complex)
+T = TypeVar("T", float, complex)
 
 # ----------------------------------------------------------------
 # CLASS
@@ -33,9 +33,9 @@ T = TypeVar('T', float, complex)
 
 @dataclass
 class PolyExpBase(Generic[T]):
-    '''
+    """
     The base class for poly x exp models.
-    '''
+    """
 
     alpha: complex = field(default=0)
     lead: T = field(default=1)
@@ -50,7 +50,7 @@ class PolyExpBase(Generic[T]):
     accuracy: float = field(default=1e-7)
 
     def __post_init__(self):
-        assert self.period > 0, 'Cannot use a non-positive value for the period!'
+        assert self.period > 0, "Cannot use a non-positive value for the period!"
 
         # to prevent explosion (e.g. upon rescaling), clean up coefficients that are near 0
         self.coeff = remove_small_polynomial_coefficients(self.coeff, eps=self.accuracy)
@@ -77,10 +77,10 @@ class PolyExpBase(Generic[T]):
     @property
     def params(self) -> dict:
         keys = [
-            'cyclic',
-            'period',
-            'offset',
-            'accuracy',
+            "cyclic",
+            "period",
+            "offset",
+            "accuracy",
         ]
         return {key: getattr(self, key) for key in keys if hasattr(self, key)}
 
@@ -94,7 +94,7 @@ class PolyExpBase(Generic[T]):
 
     @property
     def roots(self) -> list[complex]:
-        if not hasattr(self, '_roots'):
+        if not hasattr(self, "_roots"):
             if self.degree == 0:
                 values = []
             else:
@@ -105,7 +105,7 @@ class PolyExpBase(Generic[T]):
 
     @property
     def real_roots(self) -> list[float]:
-        if not hasattr(self, '_roots_reals'):
+        if not hasattr(self, "_roots_reals"):
             # not necessary, as cleaning already performed!
             eps = self.accuracy
             roots = [z.real for z in self.roots if abs(z.imag) < eps]
@@ -142,7 +142,7 @@ def remove_small_polynomial_coefficients(
     coefficients: Iterable[T],
     eps: float,
 ) -> list[T]:
-    '''
+    """
     Renormalises coefficients `c[k]` to the form
     ```
     c[k] = α[k]·t^(n-k)
@@ -150,7 +150,7 @@ def remove_small_polynomial_coefficients(
     before filtering out "small" values of `α[k]`.
     This is more stable than directly filtering based on `c[k]`,
     as polynomials upon shifting take on the above form.
-    '''
+    """
     # first remove too small values
     coefficients = np.asarray(coefficients)
     alpha = abs(coefficients)
@@ -163,7 +163,7 @@ def remove_small_polynomial_coefficients(
     if len(coefficients) == 0:
         coefficients = [0]
 
-    # compute least-sq fit c[k] ~ α[k]·exp(m·(deg-k))
+    # compute least-sq fit c[k] ~ alpha[k]·exp(m·(deg-k))
     deg = len(coefficients) - 1
     coefficients = np.asarray(coefficients)
     indices = np.asarray(range(deg + 1))
@@ -173,7 +173,7 @@ def remove_small_polynomial_coefficients(
     m = np.sum((deg - indices[filt]) * np.log(alpha[filt])) / (C or 1)
     alpha = alpha * np.exp(-m * (deg - indices))
 
-    # remove too small values of α[k]
+    # remove too small values of alpha[k]
     filt = alpha < eps
     alpha[filt] = 0
     # # remove too small _relative_ values of alpha

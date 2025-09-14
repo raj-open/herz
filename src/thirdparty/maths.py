@@ -5,27 +5,28 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from collections import Counter
-from findpeaks import findpeaks
-from math import pi
-from numpy.typing import NDArray
-from scipy import linalg as spla
-from scipy import optimize as spo
-from scipy import signal as sps
-import lmfit
 import math
+import random
+from collections import Counter
+from math import pi
+
+import lmfit
 
 # import mpmath
 import networkx as nx
 import numpy as np
-import random
 import scipy as sp
 import sympy
+from findpeaks import findpeaks
 
 # for modifications only
 from numpy.random import MT19937
 from numpy.random import RandomState
 from numpy.random import SeedSequence
+from numpy.typing import NDArray
+from scipy import linalg as spla
+from scipy import optimize as spo
+from scipy import signal as sps
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -39,16 +40,16 @@ def reseed(seed: int) -> RandomState:
 
 
 def nCr(n: int, r: int) -> int:
-    '''
+    """
     Computes `n!/(r!(n-r)!)`
-    '''
+    """
     return math.comb(n, r)
 
 
 def nPr(n: int, r: int) -> int:
-    '''
+    """
     Computes `n!/(n-r)!`
-    '''
+    """
     if r == 0:
         return 1
     if r == 1:
@@ -57,7 +58,7 @@ def nPr(n: int, r: int) -> int:
 
 
 def normalised_order_statistics(X: NDArray[np.float64]) -> NDArray[np.float64]:
-    '''
+    """
     Computes
 
     ```
@@ -72,12 +73,13 @@ def normalised_order_statistics(X: NDArray[np.float64]) -> NDArray[np.float64]:
     This measures how close (relatively) a random variable is to its median.
     Working with medians for the scale prevent warping effects from outliers.
 
-    NOTE:
+    Note:
     - If `X` contains `1` element, then `s = [0]`.
     - If `X` contains `2` elements,
       then `s = [1, 1]` if the values are different
       or else `s = [0, 0]`.
-    '''
+
+    """
     med = np.median(X)
     delta = X - med
     scale = np.median(abs(delta)) or 1.0
@@ -86,35 +88,37 @@ def normalised_order_statistics(X: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def indices_non_outliers(X: NDArray[np.float64], sig: float = 2.0) -> list[int]:
-    '''
+    """
     Computes indices of all elements in an array,
     bar those which are significantly far away from the median.
 
     NOTE: Choose `sig > 1`.
 
-    NOTE:
+    Note:
     - If `X` contains `<= 2` elements, then nothing is removed.
     - If `X` is non-empty,
       then the result contains at least the elements
       closest to the median.
-    '''
+
+    """
     s = abs(normalised_order_statistics(X))
     obj = np.where(s < sig)
     return obj[0].tolist()
 
 
 def remove_outliers(X: NDArray[np.float64], sig: float = 2.0) -> NDArray[np.float64]:
-    '''
+    """
     Removes elements from an array which are significantly far away from the median.
 
     NOTE: Choose `sig > 1`.
 
-    NOTE:
+    Note:
     - If `X` contains `<= 2` elements, then nothing is removed.
     - If `X` is non-empty,
       then the result contains at least the elements
       closest to the median.
-    '''
+
+    """
     indices = indices_non_outliers(X, sig=sig)
     X = X[indices]
     return X
@@ -125,25 +129,25 @@ def remove_outliers(X: NDArray[np.float64], sig: float = 2.0) -> NDArray[np.floa
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Counter',
-    'NDArray',
-    'findpeaks',
-    'indices_non_outliers',
-    'lmfit',
-    'math',
+    "Counter",
+    "NDArray",
+    "findpeaks",
+    "indices_non_outliers",
+    "lmfit",
+    "math",
     # 'mpmath',
-    'nCr',
-    'nPr',
-    'normalised_order_statistics',
-    'np',
-    'nx',
-    'pi',
-    'random',
-    'remove_outliers',
-    'reseed',
-    'sp',
-    'spla',
-    'spo',
-    'sps',
-    'sympy',
+    "nCr",
+    "nPr",
+    "normalised_order_statistics",
+    "np",
+    "nx",
+    "pi",
+    "random",
+    "remove_outliers",
+    "reseed",
+    "sp",
+    "spla",
+    "spo",
+    "sps",
+    "sympy",
 ]

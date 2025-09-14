@@ -5,25 +5,27 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+import json
+from typing import Generator
+
+import behave_webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+
 import behave
+import behave.model
+from behave.model import Feature
+from behave.model import Row
+from behave.model import Scenario
+
+# for modifications, not import
+from behave.model import Table
+from behave.runner import Context
 
 # from behave import fixture
 # from behave import use_fixture
 from behave.tag_matcher import ActiveTagMatcher
 from behave.tag_matcher import setup_active_tag_values
-import behave.model
-from behave.model import Feature
-from behave.model import Scenario
-from behave.runner import Context
 from behave.userdata import UserData
-import behave_webdriver
-from selenium.webdriver.chrome.options import Options as ChromeOptions
-
-# for modifications, not import
-from behave.model import Table
-from behave.model import Row
-import json
-from typing import Generator
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -64,19 +66,19 @@ def get_context_table_rows_unjson(ctx: Context) -> Generator[dict, None, None]:
 # ----------------------------------------------------------------
 
 __all__ = [
-    'ActiveTagMatcher',
-    'ChromeOptions',
-    'Context',
-    'Feature',
-    'Scenario',
-    'Table',
-    'UserData',
-    'behave',
-    'behave_webdriver',
-    'get_context_table',
-    'get_context_table_rows',
-    'get_context_table_rows_unjson',
-    'get_feature_tags',
-    'get_scenario_tags',
-    'setup_active_tag_values',
+    "ActiveTagMatcher",
+    "ChromeOptions",
+    "Context",
+    "Feature",
+    "Scenario",
+    "Table",
+    "UserData",
+    "behave",
+    "behave_webdriver",
+    "get_context_table",
+    "get_context_table_rows",
+    "get_context_table_rows_unjson",
+    "get_feature_tags",
+    "get_scenario_tags",
+    "setup_active_tag_values",
 ]

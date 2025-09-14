@@ -12,7 +12,7 @@ from ...thirdparty.maths import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'interpolate_two_series',
+    "interpolate_two_series",
 ]
 
 # ----------------------------------------------------------------
@@ -31,10 +31,10 @@ def interpolate_two_series(
     NDArray[np.float64],
     NDArray[np.float64],
 ]:
-    '''
+    """
     Takes two time-series defined on `[0, 1)`
     and linearly interpolates them to a common time axis.
-    '''
+    """
     t = sorted(set(t1.tolist() + t2.tolist()))
     t = np.asarray(t)
     dt = np.diff(t)

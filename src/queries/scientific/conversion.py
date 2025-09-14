@@ -5,17 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.physics import *
-
 from ...models.scientific import *
+from ...thirdparty.physics import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'output_conversions',
-    'output_units',
+    "output_conversions",
+    "output_units",
 ]
 
 # ----------------------------------------------------------------
@@ -33,7 +32,7 @@ def output_conversions(
     columns: list[DataTypeColumn],
     units: dict[str, str],
 ) -> dict[str, float]:
-    '''
+    """
     Returns conversion factors
     **from** interal calculations
     **to** desired output units.
@@ -45,7 +44,7 @@ def output_conversions(
     p = cv.pressure * p
     # p now in units for outputs
     ```
-    '''
+    """
     # throws an error if a unit is missing (we want this behaviour!!)
     units = {col.key: units[col.quantity] for col in columns}
     # compute conversions

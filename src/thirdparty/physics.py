@@ -5,9 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-import pint
-
 from typing import Optional
+
+import pint
 
 # ----------------------------------------------------------------
 # MODIFICATIONS
@@ -30,8 +30,8 @@ def print_unit(text: str, ascii: bool = True) -> Optional[str]:
     _ureg = _ureg or pint.UnitRegistry()
     try:
         u = _ureg.Unit(text)
-        return f'{u:~C}' if ascii else f'{u:~P}'
-    except:
+        return f"{u:~C}" if ascii else f"{u:~P}"
+    except Exception as _:
         return None
 
 
@@ -40,7 +40,7 @@ def print_unit(text: str, ascii: bool = True) -> Optional[str]:
 # ----------------------------------------------------------------
 
 __all__ = [
-    'convert_units',
-    'print_unit',
-    'pint',
+    "convert_units",
+    "pint",
+    "print_unit",
 ]

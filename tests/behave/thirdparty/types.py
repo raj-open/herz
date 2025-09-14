@@ -5,8 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from enum import Enum
 from collections.abc import Iterable
+from enum import Enum
 from typing import Annotated
 from typing import Any
 from typing import Callable
@@ -25,6 +25,7 @@ from typing import Text
 from typing import Type
 from typing import TypeAlias
 from typing import TypeVar
+
 from pydantic import SecretStr
 
 # ----------------------------------------------------------------
@@ -32,25 +33,25 @@ from pydantic import SecretStr
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Annotated',
-    'Any',
-    'Callable',
-    'ClassVar',
-    'Concatenate',
-    'Coroutine',
-    'Enum',
-    'Generator',
-    'Generic',
-    'Iterable',
-    'Literal',
-    'Optional',
-    'ParamSpec',
-    'ParamSpecArgs',
-    'ParamSpecKwargs',
-    'Protocol',
-    'SecretStr',
-    'Text',
-    'Type',
-    'TypeAlias',
-    'TypeVar',
+    "Annotated",
+    "Any",
+    "Callable",
+    "ClassVar",
+    "Concatenate",
+    "Coroutine",
+    "Enum",
+    "Generator",
+    "Generic",
+    "Iterable",
+    "Literal",
+    "Optional",
+    "ParamSpec",
+    "ParamSpecArgs",
+    "ParamSpecKwargs",
+    "Protocol",
+    "SecretStr",
+    "Text",
+    "Type",
+    "TypeAlias",
+    "TypeVar",
 ]

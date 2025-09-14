@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 API endpoints basic.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...setup import *
 from ...thirdparty.fastapi import *
 from ...thirdparty.types import *
-
-from ...setup import *
 from .decorators import *
 
 # ----------------------------------------------------------------
@@ -20,7 +19,7 @@ from .decorators import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'add_endpoints_basic',
+    "add_endpoints_basic",
 ]
 
 # ----------------------------------------------------------------
@@ -33,22 +32,22 @@ def add_endpoints_basic(
     tag: str,
     sec: HTTPBasic,
 ):
-    '''
+    """
     Adds basic endpoints.
-    '''
+    """
 
     @app.get(
-        '/',
-        summary='',
+        "/",
+        summary="",
         tags=[tag],
         include_in_schema=False,
     )
     async def method():
-        return RedirectResponse('/docs')
+        return RedirectResponse("/docs")
 
     @app.get(
-        '/version',
-        summary='Display the VERSION of the programme',
+        "/version",
+        summary="Display the VERSION of the programme",
         tags=[tag],
         include_in_schema=True,
     )
@@ -57,8 +56,8 @@ def add_endpoints_basic(
         return PlainTextResponse(status_code=200, content=config.VERSION)
 
     @app.get(
-        '/ping',
-        summary='Ping api',
+        "/ping",
+        summary="Ping api",
         tags=[tag],
         include_in_schema=True,
     )
@@ -68,7 +67,7 @@ def add_endpoints_basic(
         http_cred: Annotated[HTTPBasicCredentials, FastAPIDepends(sec)],
         # end of decorator arguments
     ):
-        '''
+        """
         An endpoint for debugging.
-        '''
-        return PlainTextResponse(status_code=200, content=f'Server running!')
+        """
+        return PlainTextResponse(status_code=200, content="Server running!")

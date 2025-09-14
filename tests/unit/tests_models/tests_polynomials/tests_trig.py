@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
@@ -67,7 +67,9 @@ def test_polytrig_DERIVATIVES(
     f = PolyTrig(omega=omega, coeff=[-1, 3, 0.8])
     f = f.derivative()
     test.assertEqual(f.omega, omega)
-    test.assertEqual(f.coefficients, [1j * omega * -1 + 3, 1j * omega * 3 + 2 * 0.8, 1j * omega * 0.8])
+    test.assertEqual(
+        f.coefficients, [1j * omega * -1 + 3, 1j * omega * 3 + 2 * 0.8, 1j * omega * 0.8]
+    )
     return
 
 

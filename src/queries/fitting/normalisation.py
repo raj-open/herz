@@ -5,24 +5,23 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...models.fitting import *
+from ...models.polynomials import *
 from ...thirdparty.data import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
-from ...models.fitting import *
-from ...models.polynomials import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_unnormalised_data',
-    'get_unnormalised_trig',
-    'get_unnormalised_point',
-    'get_unnormalised_polynomial',
-    'get_unnormalised_special',
-    'get_unnormalised_time',
+    "get_unnormalised_data",
+    "get_unnormalised_point",
+    "get_unnormalised_polynomial",
+    "get_unnormalised_special",
+    "get_unnormalised_time",
+    "get_unnormalised_trig",
 ]
 
 # ----------------------------------------------------------------
@@ -54,7 +53,7 @@ def get_unnormalised_polynomial(
     p: Poly[float],
     info: FittedInfoNormalisation,
 ) -> Poly[float]:
-    '''
+    """
     Normalisation:
     ```
     z(t) = (x(t₀ + T·t) - (c + m·t))/s
@@ -63,7 +62,7 @@ def get_unnormalised_polynomial(
     ```
     x(t) = c + m · t + s · z((t-t₀)/T)
     ```
-    '''
+    """
     T, c, m, s = get_normalisation_params(info)
     return Poly[float](coeff=[c, m]) + s * p.rescale(a=1 / T)
 
@@ -72,7 +71,7 @@ def get_unnormalised_trig(
     fit: FittedInfoTrig,
     info: FittedInfoNormalisation,
 ) -> FittedInfoTrig:
-    '''
+    """
     The model
     ```
     f(t) = a + b·t + r·cos(ω·(t - t₀))
@@ -82,7 +81,7 @@ def get_unnormalised_trig(
     g(t) = C + m·t + s·f(t/T)
          = (C + s·a) + (m + s·b/T)·t + s·r·cos(ω/T·(t - t₀·T))
     ```
-    '''
+    """
     T, c, m, s = get_normalisation_params(info)
     return FittedInfoTrig(
         hshift=T * fit.hshift,
@@ -101,12 +100,12 @@ def get_unnormalised_data(
     n_der: int = 0,
     renormalise: bool = True,
 ) -> pd.DataFrame:
-    '''
+    """
     Undoes normalisation of the data series.
     If `renormalise=True` is set,
     then renormalises using commmon parameters.
-    '''
-    data['dt'] = 0
+    """
+    data["dt"] = 0
 
     # get common parameters
     info0, _ = infos[-1]
@@ -115,27 +114,27 @@ def get_unnormalised_data(
     for info, (i1, i2) in infos[:-1]:
         info = info0 if renormalise else info
         T, c, m, s = get_normalisation_params(info)
-        tt = data['time'][i1:i2]
+        tt = data["time"][i1:i2]
         xx = data[quantity][i1:i2]
 
         tt = T * tt
         xx = c + m * tt + s * xx
 
-        data['time'][i1:i2] = tt
+        data["time"][i1:i2] = tt
         data[quantity][i1:i2] = xx
 
         for n in range(n_der + 1):
             match n:
                 case 0:
-                    col = f'{quantity}[fit]'
+                    col = f"{quantity}[fit]"
                     xx = data[col][i1:i2]
                     xx = c + m * tt + s * xx
                 case 1:
-                    col = f'd[{n},t]{quantity}[fit]'
+                    col = f"d[{n},t]{quantity}[fit]"
                     xx = data[col][i1:i2]
                     xx = m + s * xx
                 case _:
-                    col = f'd[{n},t]{quantity}[fit]'
+                    col = f"d[{n},t]{quantity}[fit]"
                     xx = data[col][i1:i2]
                     xx = s * xx
             data[col][i1:i2] = xx
@@ -147,9 +146,9 @@ def get_unnormalised_special(
     special: dict[str, SpecialPointsConfig],
     info: FittedInfoNormalisation,
 ):
-    '''
+    """
     Renormalises (without realignment).
-    '''
+    """
     for _, point in special.items():
         t, x = point.time, point.value
         t, x = get_unnormalised_point(t, x, info=info)

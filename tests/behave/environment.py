@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This file provides tearup / teardown for all features.
 Cf. <https://behave.readthedocs.io/en/stable/api.html>.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
-from thirdparty.behave import *
-
 from core.decorators import *
+from thirdparty.behave import *
 
 # ----------------------------------------------------------------
 # HOOKS

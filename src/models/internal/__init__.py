@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This submodule provides the methods to be used e.g. in setup.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
@@ -16,5 +16,5 @@ from .classes import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'Property',
+    "Property",
 ]

@@ -5,29 +5,28 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.code import *
-from ....thirdparty.data import *
-from ....thirdparty.maths import *
-from ....thirdparty.misc import *
-from ....thirdparty.types import *
-
-from ....core.log import *
+from ....algorithms.anomalies import *
+from ....algorithms.fitting.trigonometric import *
 from ....core.constants import *
+from ....core.log import *
 from ....models.app import *
 from ....models.enums import *
 from ....models.fitting import *
 from ....models.polynomials import *
 from ....models.user import *
 from ....queries.fitting import *
-from ....algorithms.anomalies import *
-from ....algorithms.fitting.trigonometric import *
+from ....thirdparty.code import *
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.misc import *
+from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_interp_trig',
+    "step_interp_trig",
 ]
 
 # ----------------------------------------------------------------
@@ -35,7 +34,9 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP fit interpolated trig-model to data/poly-model', level=LOG_LEVELS.INFO)
+@echo_function(
+    message="STEP fit interpolated trig-model to data/poly-model", level=LOG_LEVELS.INFO
+)
 def step_interp_trig(
     data: pd.DataFrame,
     poly: Poly[float],
@@ -47,9 +48,9 @@ def step_interp_trig(
     list[tuple[float, float]],
     list[tuple[float, float]],
 ]:
-    '''
+    """
     Fits an interpolated trig curve to normalised model.
-    '''
+    """
     # NOTE: polynomial must be rendered cyclic
     # to allow for consistent values upon shifting
     offset = 0
@@ -58,15 +59,15 @@ def step_interp_trig(
     # get environment variables for settings
     conf_ = cfg_fit.points
     env = {
-        f'{symb.upper()}': special,
-        f'T_{symb.lower()}': period,
+        f"{symb.upper()}": special,
+        f"T_{symb.lower()}": period,
     }
     env = get_schema_from_settings(conf_, env=env)
 
     # add bounds for non-linear part
     conf_ = cfg_fit.conditions
     omega_min, omega_max = get_bounds_from_settings(conf_, env=env)
-    env = env | {'omega_min': omega_min, 'omega_max': omega_max}
+    env = env | {"omega_min": omega_min, "omega_max": omega_max}
 
     # determine initial guess
     conf_ = cfg_fit.initial
@@ -100,7 +101,9 @@ def step_interp_trig(
             gen_grad = fit_options_gradients_poly_model(models, intervals, drift=conf_.drift)
 
         case _ as m:
-            raise ValueError(f'No method available for running trig-fit algorithm for {m.value}.')
+            raise ValueError(
+                f"No method available for running trig-fit algorithm for {m.value}."
+            )
 
     # perform fitting
     fit, loss, dx = fit_trigonometric_curve(
@@ -129,7 +132,7 @@ def message_result(
     dx: float,
 ):
     return dedent(
-        f'''
+        f"""
         Parameters of trigonometric model:
         (  Shift/Linear + Oscillation  )
         ----
@@ -139,7 +142,7 @@ def message_result(
         ----
         Relativised loss of the approximation: {loss:.4g}
         Final movement of parameters during computation: {dx:.4e}
-        '''
+        """
     )
 
 
@@ -150,10 +153,10 @@ def resolve_to_piecewise_functions(
     list[Poly[float]],
     list[tuple[float, float]],
 ]:
-    '''
+    """
     Resolve cyclic polynomial to non-cyclic parts
     on disjoint (sub)intervals each contained within a full cycle.
-    '''
+    """
     parts = list(poly.resolve_piecewise(*intervals))
     models = [q for q, a, b in parts]
     intervals = [(a, b) for q, a, b in parts]
@@ -166,21 +169,25 @@ def restrict_data_to_intervals(
     offset: float,
     period: float,
 ) -> NDArray[np.float64]:
-    '''
+    """
     Restricts time and values of data to intervals.
-    '''
+    """
     # filter data
-    intervals_ = [(offset + (a - offset) % period, offset + (b - offset) % period) for a, b in intervals]
+    intervals_ = [
+        (offset + (a - offset) % period, offset + (b - offset) % period) for a, b in intervals
+    ]
     data = np.asarray(
         [
-            data['time'],
-            data['dt'],
-            data['value'],
+            data["time"],
+            data["dt"],
+            data["value"],
         ]
     ).T
     datas = [data[(a_ <= data[:, 0]) & (data[:, 0] < b_), :] for a_, b_ in intervals_]
     # rewrite time-values
-    times = [data[:, 0] + (a - a_) for (a, b), (a_, b_), data in zip(intervals, intervals_, datas)]
+    times = [
+        data[:, 0] + (a - a_) for (a, b), (a_, b_), data in zip(intervals, intervals_, datas)
+    ]
     delta = [data[:, 1] for data in datas]
     values = [data[:, 2] for data in datas]
     # store in data structure

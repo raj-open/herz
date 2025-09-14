@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.polynomials import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # FIXTURES
@@ -24,7 +24,7 @@ _module = get_module(__file__)
 
 
 @mark.parametrize(
-    ('s', 'coeff'),
+    ("s", "coeff"),
     itertools_product(
         [0, 1j, 2 * pi * 1j, -3],
         [
@@ -51,7 +51,7 @@ def test_integral_poly_exp_ANALYTIC(
 
 
 @mark.parametrize(
-    ('tt', 's', 'coeff'),
+    ("tt", "s", "coeff"),
     itertools_product(
         [
             (0, 1),

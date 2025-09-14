@@ -5,11 +5,10 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
+from ....models.polynomials import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.polynomials import *
-from ....models.fitting import *
 from ...interpolations import *
 from .geometry import *
 
@@ -18,8 +17,8 @@ from .geometry import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_poly_cycle',
-    'fit_poly_cycles',
+    "fit_poly_cycle",
+    "fit_poly_cycles",
 ]
 
 # ----------------------------------------------------------------
@@ -35,11 +34,11 @@ def fit_poly_cycles(
     deg: int | None = None,
     intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> list[tuple[Poly[float], tuple[int, int]]]:
-    '''
+    """
     Fits polynomial to cycles of a time-series:
     - minimises wrt. the L²-norm
     - forces certain conditions on n'th-derivatives at certain time points
-    '''
+    """
     # due to normalisation (drift-removal), force extra boundary conditions
     conds = conds[:]
     conds.append(PolyDerCondition(derivative=0, time=0.0))
@@ -78,7 +77,7 @@ def fit_poly_cycle(
     conds: list[PolyDerCondition | PolyIntCondition],
     intervals: Iterable[tuple[float, float]] = [(0.0, 1.0)],
 ) -> Poly[float]:
-    '''
+    """
     Fits 'certain' polynomials to a cycle in such a way,
     that special attributes can be extracted.
 
@@ -93,7 +92,7 @@ def fit_poly_cycle(
       Here the polynomial is to be understood as being paramterised
       over time uniformly on `[0, T]`.
     - the fit polynomial
-    '''
+    """
     Q = onb_conditions(deg=deg, conds=conds, intervals=intervals)
     p = onb_spectrum(t=t, x=x, T=period, Q=Q, intervals=intervals, cyclic=True)
     return p
@@ -104,10 +103,10 @@ def compute_simultaneous_fit(
     offset: float,
     period: float,
 ) -> Poly[float]:
-    '''
+    """
     Fits a single polynomial to all cycles simultaenously.
 
-    NOTE:
+    Note:
     Since a method via ONB is used, the optimal solution
     (least L²-distance) is the average.
     Proof.
@@ -137,7 +136,8 @@ def compute_simultaneous_fit(
         Hence the coefficients for p are just the average
         of the coefficients of the p⁽ᵏ⁾.
     QED
-    '''
+
+    """
     coeff = np.mean(np.asarray([p.coefficients for p in polys]), axis=0).tolist()
     return Poly[float](
         coeff=coeff,
@@ -155,16 +155,23 @@ def compute_simultaneous_fit(
 def refine_conditions_determine_degree(
     conds: list[PolyCritCondition | PolyDerCondition | PolyIntCondition],
 ) -> tuple[list[PolyDerCondition | PolyIntCondition], int]:
-    '''
+    """
     Extracts the minimum model size needed to satisfy all criteria.
-    '''
+    """
     conds_crit = [cond for cond in conds if isinstance(cond, PolyCritCondition)]
     conds_der = [cond for cond in conds if isinstance(cond, PolyDerCondition)]
     conds_int = [cond for cond in conds if isinstance(cond, PolyIntCondition)]
 
     # determine the number of unique ZEROES being forced by derivative conditions:
-    n_max = max([0] + [cond.derivative for cond in conds_der] + [cond.derivative + 1 for cond in conds_crit])
-    num_zeroes = [len(np.unique([cond.time for cond in conds_der if cond.derivative == n])) for n in range(n_max + 1)]
+    n_max = max(
+        [0]
+        + [cond.derivative for cond in conds_der]
+        + [cond.derivative + 1 for cond in conds_crit]
+    )
+    num_zeroes = [
+        len(np.unique([cond.time for cond in conds_der if cond.derivative == n]))
+        for n in range(n_max + 1)
+    ]
 
     # ensure the number of forced CRITICAL POINTS on n'th derivatives:
     deg = 0

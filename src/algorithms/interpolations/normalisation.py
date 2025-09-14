@@ -8,7 +8,6 @@
 from ...thirdparty.code import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
 from .statistics import *
 
 # ----------------------------------------------------------------
@@ -16,10 +15,10 @@ from .statistics import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_time_aspects',
-    'complete_time_series',
-    'normalise_to_unit_interval',
-    'normalise_interpolated_cycle',
+    "complete_time_series",
+    "get_time_aspects",
+    "normalise_interpolated_cycle",
+    "normalise_to_unit_interval",
 ]
 
 # ----------------------------------------------------------------
@@ -28,7 +27,7 @@ __all__ = [
 
 
 def get_time_aspects(t: Iterable[float]) -> tuple[int, float, float]:
-    '''
+    """
     Computes aspects
 
     - `N` - number of points
@@ -36,7 +35,7 @@ def get_time_aspects(t: Iterable[float]) -> tuple[int, float, float]:
     - `dt` - time increment (assuming homogeneity)
 
     of an ordered series of time points
-    '''
+    """
     match len(t):
         case 0 | 1 as N:
             return N, 1.0, 1.0
@@ -56,11 +55,11 @@ def complete_time_series(
     cyclic: bool,
     T: float | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    '''
+    """
     Completes a time series (t,x) to include an endpoint.
     If `cyclic == true`, the endpoint repeats the start point.
     Otherwise the data in `x` are simply "blurred" and stretched.
-    '''
+    """
     if T is None:
         _, T, _ = get_time_aspects(t)
     t = np.append(t, t[0] + T)

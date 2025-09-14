@@ -6,10 +6,12 @@
 # ----------------------------------------------------------------
 
 from __future__ import annotations
+
 import os
 from datetime import datetime
 from datetime import timezone
 from pathlib import Path
+
 from pydantic import AwareDatetime
 
 from ...models.apis import *
@@ -20,9 +22,9 @@ from .traits import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'OSFilesManager',
-    'OSFilesManagerFile',
-    'OSFilesManagerFolder',
+    "OSFilesManager",
+    "OSFilesManagerFile",
+    "OSFilesManagerFolder",
 ]
 
 # ----------------------------------------------------------------
@@ -31,9 +33,9 @@ __all__ = [
 
 
 class OSFilesManager:
-    '''
+    """
     File system for a local operating system
-    '''
+    """
 
     _timezone: timezone
 
@@ -43,47 +45,47 @@ class OSFilesManager:
 
     @staticmethod
     def path_split(path: str) -> tuple[str, str, str]:
-        path = path.strip().rstrip(r'\/')
+        path = path.strip().rstrip(r"\/")
         filename = os.path.basename(path)
-        path = os.path.dirname(path) or '.'
+        path = os.path.dirname(path) or "."
         basename, ext = os.path.splitext(filename)
         return path, basename, ext
 
     @staticmethod
     def path_join(*path: str) -> str:
-        '''
+        """
         Static method to combine parts of path
-        '''
-        return os.path.join(*path) or '.'
+        """
+        return os.path.join(*path) or "."
 
     def get_file(self, *path: str) -> OSFilesManagerFile:
         tz = self._timezone
-        path_full = os.path.join(*path) or '.'
-        path_full = path_full.strip().rstrip(r'\/')
+        path_full = os.path.join(*path) or "."
+        path_full = path_full.strip().rstrip(r"\/")
         return OSFilesManagerFile(path=path_full, tz=tz)
 
     def get_folder(self, *path: str) -> OSFilesManagerFolder:
         tz = self._timezone
-        path_full = os.path.join(*path) or '.'
-        path_full = path_full.strip().rstrip(r'\/')
+        path_full = os.path.join(*path) or "."
+        path_full = path_full.strip().rstrip(r"\/")
         return OSFilesManagerFolder(manager=self, path=path_full, tz=tz)
 
     def create_folder(self, path: str) -> OSFilesManagerFolder:
-        '''
+        """
         Use files manager to create folder by full path.
         First checks if folder already exists.
-        '''
-        path = path.strip().rstrip(r'\/')
+        """
+        path = path.strip().rstrip(r"\/")
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
         return self.get_folder(path)
 
     def create_file(self, path: str, contents: bytes) -> OSFilesManagerFile:
-        '''
+        """
         Use files manager to create file by full path
-        '''
+        """
         path, basename, ext = OSFilesManager.path_split(path)
-        filename = f'{basename}{ext}'
+        filename = f"{basename}{ext}"
         # first ensure folder exists
         folder = self.create_folder(path)
         # next create file within folder
@@ -92,16 +94,16 @@ class OSFilesManager:
 
 
 class OSFilesManagerFile:
-    '''
+    """
     File manager for a local operating system
-    '''
+    """
 
     _path: str
     _timezone: timezone
     _object: Path
 
     def __init__(self, path: str, tz: timezone):
-        assert path != '', 'Path cannot be empty!'
+        assert path != "", "Path cannot be empty!"
         self._path = path
         self._timezone = tz
         return
@@ -112,9 +114,9 @@ class OSFilesManagerFile:
 
     @property
     def exists(self) -> bool | None:
-        '''
+        """
         Whether or not the file exists (unknown -> `None`)
-        '''
+        """
         try:
             return os.path.exists(self.path)
         except Exception:
@@ -126,31 +128,31 @@ class OSFilesManagerFile:
 
     @property
     def directory(self) -> str:
-        '''
+        """
         Gets basepath of file
-        '''
+        """
         return os.path.dirname(self._path)
 
     @property
     def filename(self) -> str:
-        '''
+        """
         Gets basename of file (including extension)
-        '''
+        """
         return os.path.basename(self._path)
 
     @property
     def basename(self) -> str:
-        '''
+        """
         Gets basename of file (including extension)
-        '''
+        """
         basename, _ = os.path.splitext(self.filename)
         return basename
 
     @property
     def ext(self) -> str:
-        '''
+        """
         Gets file extension
-        '''
+        """
         _, ext = os.path.splitext(self._path)
         return ext
 
@@ -170,9 +172,9 @@ class OSFilesManagerFile:
         return datetime.fromtimestamp(meta.st_mtime, tz=self._timezone)
 
     def get_meta_data(self) -> MetaData:
-        '''
+        """
         Gets bundled meta data associated to file.
-        '''
+        """
         return MetaData(
             path=self.path,
             filename=self.filename,
@@ -184,17 +186,17 @@ class OSFilesManagerFile:
         )
 
     def read_as_bytes(self) -> bytes:
-        '''
+        """
         Downloads file contents as bytes
-        '''
-        with open(self._path, 'rb') as fp:
+        """
+        with open(self._path, "rb") as fp:
             contents = fp.read()
             return contents
 
     def delete_self(self) -> bool:
-        '''
+        """
         Deletes current file
-        '''
+        """
         if not self.exists:
             return True
         try:
@@ -207,9 +209,9 @@ class OSFilesManagerFile:
 
 
 class OSFilesManagerFolder:
-    '''
+    """
     Folder manager for a local operating system
-    '''
+    """
 
     _manager: OSFilesManager
     _path: str
@@ -217,7 +219,7 @@ class OSFilesManagerFolder:
     _filenames: list[str] | None
 
     def __init__(self, manager: OSFilesManager, path: str, tz: timezone):
-        assert path != '', 'Path cannot be empty!'
+        assert path != "", "Path cannot be empty!"
         self._manager = manager
         self._path = path
         self._timezone = tz
@@ -226,9 +228,9 @@ class OSFilesManagerFolder:
 
     @property
     def exists(self) -> bool | None:
-        '''
+        """
         Whether or not the folder exists (unknown -> `None`)
-        '''
+        """
         try:
             return os.path.exists(self.path)
         except Exception:
@@ -275,11 +277,11 @@ class OSFilesManagerFolder:
         return self._manager.get_file(os.path.join(self._path, name))
 
     def get_files_meta_data(self, as_basename: bool) -> dict[str, MetaData]:
-        '''
+        """
         Gets a dictionary of metadata associated to files
         with keys = basename or filenames,
         values = metadata
-        '''
+        """
         if as_basename:
             return {file.basename: file.get_meta_data() for file in self.files}
         else:
@@ -287,7 +289,7 @@ class OSFilesManagerFolder:
 
     def write_bytes(self, name: str, contents: bytes) -> OSFilesManagerFile:
         path = os.path.join(self._path, name)
-        with open(path, 'wb') as fp:
+        with open(path, "wb") as fp:
             fp.write(contents)
 
         return OSFilesManagerFile(
@@ -296,10 +298,10 @@ class OSFilesManagerFolder:
         )
 
     def add_subfolder(self, name: str) -> OSFilesManagerFolder:
-        '''
+        """
         Adds subfolder and returns a manager for it.
         If subfolder already exists, it will not be created.
-        '''
+        """
         path = os.path.join(self._path, name)
         p = Path(path)
         p.mkdir(parents=True, exist_ok=True)
@@ -310,9 +312,9 @@ class OSFilesManagerFolder:
         )
 
     def clear_folder(self) -> bool:
-        '''
+        """
         Removes all contents of current folder
-        '''
+        """
         success = True
         for file in self.files:
             success = success and file.delete_self()
@@ -321,9 +323,9 @@ class OSFilesManagerFolder:
         return success
 
     def delete_self(self) -> bool:
-        '''
+        """
         Deletes current folder
-        '''
+        """
         if not self.exists:
             return True
         success = self.clear_folder()

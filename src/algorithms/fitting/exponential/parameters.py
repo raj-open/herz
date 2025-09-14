@@ -5,18 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ....models.fitting import *
 from ....thirdparty.maths import *
 from ....thirdparty.types import *
-
-from ....models.fitting import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_exp_parameters_from_info',
-    'fit_exp_parameters_to_info',
+    "fit_exp_parameters_from_info",
+    "fit_exp_parameters_to_info",
 ]
 
 # ----------------------------------------------------------------
@@ -27,14 +26,14 @@ __all__ = [
 def fit_exp_parameters_from_info(
     info: FittedInfoExp,
 ) -> NDArray[np.float64]:
-    '''
+    """
     Given is the model
     ```
     f(t) = a + b·exp(t/c)
          = a + b·exp(β·t)
             where β = 1/c
     ```
-    '''
+    """
     a = info.vshift
     b = info.vscale
     c = info.hscale
@@ -48,14 +47,14 @@ def fit_exp_parameters_from_info(
 def fit_exp_parameters_to_info(
     x: NDArray[np.float64],
 ) -> FittedInfoExp:
-    '''
+    """
     Given is the model
     ```
     f(t) = a + b·exp(β·t)
          = a + b·exp(t/c)
             where c = 1/β
     ```
-    '''
+    """
     a, b, beta = x
     if beta == 0:
         b, c = 0, 1

@@ -5,10 +5,9 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from ...core.utils import *
 from ...thirdparty.maths import *
 from ...thirdparty.types import *
-
-from ...core.utils import *
 from ..enums import *
 from .basic_matrix import *
 
@@ -17,17 +16,17 @@ from .basic_matrix import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'eps_clean_duplicates',
-    'eps_clean_zeroes',
-    'eps_clean_pure_real_imaginary',
-    'eps_clean_boundaries',
+    "eps_clean_boundaries",
+    "eps_clean_duplicates",
+    "eps_clean_pure_real_imaginary",
+    "eps_clean_zeroes",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-NUMBER = TypeVar('NUMBER', float, complex)
+NUMBER = TypeVar("NUMBER", float, complex)
 
 # ----------------------------------------------------------------
 # METHODS
@@ -64,9 +63,9 @@ def eps_clean_zeroes(
     values: Iterable[float],
     eps: float,
 ) -> list[float]:
-    '''
+    """
     Cleans up values that are ε-close to being zero.
-    '''
+    """
     return eps_clean_value(values, x=0, eps=eps)
 
 
@@ -74,9 +73,9 @@ def eps_clean_pure_real_imaginary(
     values: Iterable[complex],
     eps: float,
 ) -> list[complex]:
-    '''
+    """
     Cleans up values that are ε-close to being zero.
-    '''
+    """
     if not isinstance(values, np.ndarray):
         values = np.asarray(values)
     values = np.asarray(eps_clean_zeroes(values.real, eps=eps)) + 1j * np.asarray(
@@ -90,9 +89,9 @@ def eps_clean_boundaries(
     eps: float,
     bounds: tuple[float, float] = (-np.inf, np.inf),
 ) -> list[float]:
-    '''
+    """
     Clean up values that are ε-close to boundaries (treated box-like)
-    '''
+    """
     for u in bounds:
         if abs(u) < np.inf:
             values = eps_clean_value(values, x=u, eps=eps)
@@ -109,9 +108,9 @@ def eps_clean_value(
     x: float,
     eps: float,
 ) -> list[float]:
-    '''
+    """
     Forces the real-part of values that are ε-close to a certain value, `x`, to be `x`.
-    '''
+    """
     values = np.asarray(values)
     values.flags.writeable = True  # DEV-NOTE: this is sometimes necessary
     d = sign_normalised_diff_matrix(x_from=[x], x_to=values, eps=eps)

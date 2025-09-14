@@ -5,17 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
+from itertools import pairwise
 
-from ...core.log import *
 from ...core.constants import *
+from ...core.log import *
 from ...models.app import *
+from ...models.critical import *
 from ...models.enums import *
 from ...models.fitting import *
 from ...models.polynomials import *
-from ...models.critical import *
+from ...thirdparty.maths import *
 from ..graph import *
-
 from .clean import *
 from .logging import *
 from .points_critical import *
@@ -25,8 +25,8 @@ from .points_critical import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'recognise_special_points',
-    'sort_special_points_specs',
+    "recognise_special_points",
+    "sort_special_points_specs",
 ]
 
 # ----------------------------------------------------------------
@@ -38,7 +38,9 @@ def sort_special_points_specs(
     points: dict[str, SpecialPointsConfig],
 ) -> list[tuple[str, SpecialPointsConfig]]:
     nodes = points.keys()
-    points_with_specs = [(key, point) for key, point in points.items() if point.spec is not None]
+    points_with_specs = [
+        (key, point) for key, point in points.items() if point.spec is not None
+    ]
     edges = [
         (u1, u2)
         for u1, point1 in points_with_specs
@@ -47,7 +49,7 @@ def sort_special_points_specs(
     ]
     nodes, err = sort_nodes_by_rank(nodes, edges)
     if err:
-        log_warn('Conditions specified are circular and may therefore be unsatisfiable.')
+        log_warn("Conditions specified are circular and may therefore be unsatisfiable.")
 
     return [(u, points[u]) for u in nodes]
 
@@ -57,10 +59,10 @@ def recognise_special_points(
     search: list[tuple[str, SpecialPointsConfig]],
     skip_errors: bool,
 ) -> dict[str, SpecialPointsConfig]:
-    '''
+    """
     NOTE: The conditions 'before' / 'after' are defined purely
     in terms of the peak-to-peak cycle.
-    '''
+    """
     if len(search) == 0:
         return {}
 
@@ -78,7 +80,11 @@ def recognise_special_points(
         polys.append(q)
 
     # compute and classify critical points of derivatives:
-    crits = [get_critical_points_bounded(p=q, dp=dq, t_min=0.0, t_max=1.0) for q, dq in zip(polys, polys[1:])]
+    crits = [
+        get_critical_points_bounded(p=q, dp=dq, t_min=0.0, t_max=1.0)
+        # DEV-NOTE: equivalent to zip(polys, polys[1:])
+        for q, dq in pairwise(polys)
+    ]
 
     # clean up critical points
     crits = clean_up_critical_points(crits, t_min=0.0, t_max=1.0, eps=FLOAT_ERR)  # fmt: skip
@@ -86,19 +92,24 @@ def recognise_special_points(
     # determine peak
     crit = filter_kinds(crits[0], kinds={EnumCriticalPoints.MAXIMUM})
     crit = filter_times(crit, t_before=1.0)
-    assert len(crit) >= 1, f'The cycle has {len(crit)} peaks but should have exactly one!'
+    assert len(crit) >= 1, f"The cycle has {len(crit)} peaks but should have exactly one!"
     t_max = crit[0].x
 
     # shift cycle to format peak-to-peak (NOTE: period scaled to 1)
-    crits = [[CriticalPoint(x=(pt.x - t_max) % 1, y=pt.y, kinds=pt.kinds) for pt in crit] for crit in crits]
+    crits = [
+        [CriticalPoint(x=(pt.x - t_max) % 1, y=pt.y, kinds=pt.kinds) for pt in crit]
+        for crit in crits
+    ]
 
     # sort critical points:
     crits = [sorted(crit, key=lambda pt: pt.x) for crit in crits]
 
     # messages
-    log_debug('Critical points of polynomial computed:')
-    log_debug_wrapped(lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0, polys=polys))
-    log_debug(f'Searching for {" -> ".join([ key for key, _ in search ])}.')
+    log_debug("Critical points of polynomial computed:")
+    log_debug_wrapped(
+        lambda: log_critical_points(crits=crits, t_min=0.0, t_max=1.0, polys=polys)
+    )
+    log_debug(f"Searching for {' -> '.join([key for key, _ in search])}.")
 
     # iteratively identify points:
     for key, point in results.items():
@@ -127,7 +138,7 @@ def recognise_special_points(
         try:
             t0 = crit[0].x
             times[key] = t0
-            log_debug(f'({key}) found t={t0:.4f}·T.')
+            log_debug(f"({key}) found t={t0:.4f}·T.")
             # unshift time-values to original format of cycle and store
             t = (t0 + t_max) % 1
             x = poly(t)

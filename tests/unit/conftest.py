@@ -5,47 +5,47 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.system import *
-from src.thirdparty.types import *
+from tests.unit.__paths__ import *
 from tests.unit.thirdparty.unit import *
 
 from src.core.log import *
-from tests.unit.__paths__ import *
+from src.thirdparty.maths import *
+from src.thirdparty.system import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # SETTINGS
 # ----------------------------------------------------------------
 
-np.seterr(all='warn')
+np.seterr(all="warn")
 
 # ----------------------------------------------------------------
 # FIXTURES
 # ----------------------------------------------------------------
 
 configure_logging(
-    name='unit',
+    name="unit",
     level=LOG_LEVELS.INFO,
-    path=os.path.join(get_tests_path(), 'logs'),
+    path=os.path.join(get_tests_path(), "logs"),
 )
 
 
-@fixture(scope='module', autouse=True)
+@fixture(scope="module", autouse=True)
 def test() -> TestCase:
     return TestCase()
 
 
-@fixture(scope='session', autouse=True)
+@fixture(scope="session", autouse=True)
 def seed() -> int:
     seed = 901372893172
     reseed(seed)
     return seed
 
 
-@fixture(scope='module', autouse=True)
+@fixture(scope="module", autouse=True)
 def debug() -> Callable[..., None]:
-    '''
+    """
     Fixture for development purposes only.
     Logs to file 'logs/debug.log'.
-    '''
+    """
     return log_dev

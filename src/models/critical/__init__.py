@@ -6,7 +6,6 @@
 # ----------------------------------------------------------------
 
 from ..generated.app import EnumCriticalPoints
-
 from .basic import *
 
 # ----------------------------------------------------------------
@@ -14,6 +13,6 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'EnumCriticalPoints',
-    'CriticalPoint',
+    "CriticalPoint",
+    "EnumCriticalPoints",
 ]

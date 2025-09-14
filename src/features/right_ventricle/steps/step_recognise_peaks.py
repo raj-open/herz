@@ -5,20 +5,19 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.data import *
-
+from ....algorithms.anomalies import *
 from ....core.log import *
 from ....core.utils import *
 from ....models.app import *
 from ....models.user import *
-from ....algorithms.anomalies import *
+from ....thirdparty.data import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_recognise_peaks',
+    "step_recognise_peaks",
 ]
 
 # ----------------------------------------------------------------
@@ -26,7 +25,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP recognise peaks', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP recognise peaks", level=LOG_LEVELS.INFO)
 def step_recognise_peaks(
     data: pd.DataFrame,
     quantity: str,
@@ -34,6 +33,6 @@ def step_recognise_peaks(
     N = len(data)
     values = data[quantity]
     peaks, troughs = get_extremes(values)
-    data[f'{quantity}[peak]'] = where_to_characteristic(peaks, N)
-    data[f'{quantity}[trough]'] = where_to_characteristic(troughs, N)
+    data[f"{quantity}[peak]"] = where_to_characteristic(peaks, N)
+    data[f"{quantity}[trough]"] = where_to_characteristic(troughs, N)
     return data

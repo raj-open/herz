@@ -14,9 +14,9 @@ from .timeseries import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'subfeature_output_steps',
-    'subfeature_pv_fitting_steps',
-    'subfeature_pv_recognition_steps',
-    'subfeature_pv_series_steps',
-    'subfeature_time_series_steps',
+    "subfeature_output_steps",
+    "subfeature_pv_fitting_steps",
+    "subfeature_pv_recognition_steps",
+    "subfeature_pv_series_steps",
+    "subfeature_time_series_steps",
 ]

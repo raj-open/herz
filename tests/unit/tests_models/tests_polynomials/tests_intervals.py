@@ -5,12 +5,12 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from src.thirdparty.maths import *
-from src.thirdparty.types import *
 from tests.unit.thirdparty.unit import *
 
 from src.models.enums import *
 from src.models.polynomials import *
+from src.thirdparty.maths import *
+from src.thirdparty.types import *
 
 # ----------------------------------------------------------------
 # TESTS
@@ -18,7 +18,7 @@ from src.models.polynomials import *
 
 
 @mark.parametrize(
-    ('coeff', 't0', 'period'),
+    ("coeff", "t0", "period"),
     [
         ([1], 0, 1),
         ([0, 1], 0, 1),
@@ -46,7 +46,7 @@ def test_resolve_piecewise_poly_CASES(
         period=period,
     )
     for g, a, b in f.resolve_piecewise(*intervals1):
-        test.assertFalse(g.cyclic, 'new model should not be cyclic')
+        test.assertFalse(g.cyclic, "new model should not be cyclic")
         times = np.linspace(start=a, stop=b, num=100, endpoint=False)
         times = times[a < times]
         np.testing.assert_array_almost_equal(
@@ -58,7 +58,7 @@ def test_resolve_piecewise_poly_CASES(
 
 
 @mark.parametrize(
-    ('coeff', 't0', 'period'),
+    ("coeff", "t0", "period"),
     [
         ([1], 0, 1),
         ([0, 1], 0, 1),
@@ -88,7 +88,7 @@ def test_resolve_piecewise_polyexp_CASES(
         period=period,
     )
     for g, a, b in f.resolve_piecewise(*intervals1):
-        test.assertFalse(g.cyclic, 'new model should not be cyclic')
+        test.assertFalse(g.cyclic, "new model should not be cyclic")
         times = np.linspace(start=a, stop=b, num=100, endpoint=False)
         times = times[a < times]
         np.testing.assert_array_almost_equal(

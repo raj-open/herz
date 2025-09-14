@@ -5,15 +5,14 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.data import *
-from ....thirdparty.maths import *
-from ....thirdparty.physics import *
-
-from ....setup import config
+from ....algorithms.interpolations import *
 from ....core.log import *
 from ....models.app import *
 from ....models.user import *
-from ....algorithms.interpolations import *
+from ....setup import config
+from ....thirdparty.data import *
+from ....thirdparty.maths import *
+from ....thirdparty.physics import *
 from .methods import *
 
 # ----------------------------------------------------------------
@@ -21,8 +20,8 @@ from .methods import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_clean_cycles',
-    'step_combine_data',
+    "step_clean_cycles",
+    "step_combine_data",
 ]
 
 # ----------------------------------------------------------------
@@ -30,16 +29,16 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP clean cycles', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP clean cycles", level=LOG_LEVELS.INFO)
 def step_clean_cycles(
     case: RequestConfig,
     data: pd.DataFrame,
     quantity: str,
 ) -> pd.DataFrame:
     unit = case.process.combine.unit
-    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get('time', unit))
+    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get("time", unit))
 
-    time = data['time'].to_numpy(copy=True)
+    time = data["time"].to_numpy(copy=True)
     time = time - min(time)
     values = data[quantity].to_numpy(copy=True)
 
@@ -56,29 +55,31 @@ def step_clean_cycles(
     time_uniform = np.linspace(start=0, stop=T_max, num=N, endpoint=False)
     values = interpolate_curve(time_uniform, x=time, y=values, T_max=T_max, periodic=True)
 
-    data = pd.DataFrame({'time': time_uniform, quantity: values}).astype({'time': float, quantity: float})
+    data = pd.DataFrame({"time": time_uniform, quantity: values}).astype(
+        {"time": float, quantity: float}
+    )
 
     return data
 
 
-@echo_function(message='STEP combine data', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP combine data", level=LOG_LEVELS.INFO)
 def step_combine_data(
     case: RequestConfig,
     data_pressure: pd.DataFrame,
     data_volume: pd.DataFrame,
 ) -> pd.DataFrame:
-    '''
+    """
     Places quantities into a common framework.
 
     NOTE: Currently unused!
-    '''
+    """
     unit = case.process.combine.unit
-    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get('time', unit))
+    cv_t = convert_units(unitFrom=unit, unitTo=config.UNITS.get("time", unit))
 
-    time_pressure = data_pressure['time'].to_numpy(copy=True)
-    pressure = data_pressure['pressure'].to_numpy(copy=True)
-    time_volume = data_volume['time'].to_numpy(copy=True)
-    volume = data_volume['volume'].to_numpy(copy=True)
+    time_pressure = data_pressure["time"].to_numpy(copy=True)
+    pressure = data_pressure["pressure"].to_numpy(copy=True)
+    time_volume = data_volume["time"].to_numpy(copy=True)
+    volume = data_volume["volume"].to_numpy(copy=True)
 
     # get T_max
     T_max = cv_t * (case.process.combine.t_max or 0.0)
@@ -98,15 +99,15 @@ def step_combine_data(
 
     data = pd.DataFrame(
         {
-            'time': time,
-            'pressure': pressure,
-            'volume': volume,
+            "time": time,
+            "pressure": pressure,
+            "volume": volume,
         }
     ).astype(
         {
-            'time': float,
-            'pressure': float,
-            'volume': float,
+            "time": float,
+            "pressure": float,
+            "volume": float,
         }
     )
 

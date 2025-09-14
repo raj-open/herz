@@ -6,7 +6,6 @@
 # ----------------------------------------------------------------
 
 from ...thirdparty.maths import *
-
 from .models_poly import *
 
 # ----------------------------------------------------------------
@@ -14,7 +13,7 @@ from .models_poly import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fourier_of_polynomial',
+    "fourier_of_polynomial",
 ]
 
 # ----------------------------------------------------------------
@@ -27,7 +26,7 @@ def fourier_of_polynomial(
     t1: float = 0,
     t2: float = 1,
 ) -> tuple[float, Poly[complex]]:
-    '''
+    r"""
     Let `F` be defined by
 
     ```text
@@ -53,14 +52,13 @@ def fourier_of_polynomial(
     NOTE: This is equal to `0` for `k=0`.
 
     We can thus express `F(n)` as a polynomial in `1/n` for `n ≠ 0`.
-    '''
-
+    """
     # rescale
     if not (t1 == 0 and t2 == 1):
-        '''
+        """
         ∫ f(t) dt / (t2–t1) from t = t1 to t2
         = ∫ f(a·t + t1) dt from t = 0 to 1
-        '''
+        """
         delta = t2 - t1
         if delta == 0:
             F0 = p(t1)
@@ -82,7 +80,10 @@ def fourier_of_polynomial(
 
     coeffs_exp = np.cumprod(g / indices)
     E = np.asarray(
-        [np.concatenate([[0], coeffs_exp[:k][::-1] / coeffs_exp[k - 1], zeroes[: deg - k]]) for k in range(1, deg + 1)]
+        [
+            np.concatenate([[0], coeffs_exp[:k][::-1] / coeffs_exp[k - 1], zeroes[: deg - k]])
+            for k in range(1, deg + 1)
+        ]
     ).T
 
     coeffs_p = np.asarray(p.coefficients)

@@ -14,12 +14,12 @@ from .geometry import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_poly_cycle',
-    'fit_poly_cycles',
-    'onb_conditions',
-    'onb_spectrum',
-    'shift_conditions',
-    'shift_condition',
-    'shift_der_condition',
-    'shift_int_condition',
+    "fit_poly_cycle",
+    "fit_poly_cycles",
+    "onb_conditions",
+    "onb_spectrum",
+    "shift_condition",
+    "shift_conditions",
+    "shift_der_condition",
+    "shift_int_condition",
 ]

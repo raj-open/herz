@@ -13,8 +13,8 @@ from ...thirdparty.types import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'compute_overlaps',
-    'merge_intervals',
+    "compute_overlaps",
+    "merge_intervals",
 ]
 
 # ----------------------------------------------------------------
@@ -25,9 +25,9 @@ __all__ = [
 def merge_intervals(
     intervals: Iterable[tuple[float, float]],
 ) -> Generator[tuple[float, float], None, None]:
-    '''
+    """
     Recursively merges all overlapping intervals yielding the simplified intervals.
-    '''
+    """
     for group in compute_overlaps(intervals):
         if len(group) == 0:
             continue
@@ -43,9 +43,9 @@ def merge_intervals(
 def compute_overlaps(
     intervals: Iterable[tuple[float, float]],
 ) -> Generator[set[int], None, None]:
-    '''
+    """
     Determines groups of indices of intervals that overlap up to transivitiy.
-    '''
+    """
     N = len(intervals)
     G = nx.Graph()
     G.add_nodes_from(range(N))

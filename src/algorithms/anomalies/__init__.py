@@ -14,10 +14,10 @@ from .points_bad import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'cycles_to_windows',
-    'get_cycles',
-    'get_extremes',
-    'get_peaks_simple',
-    'mark_pinched_points_on_cycle',
-    'mark_pinched_points_on_cycles',
+    "cycles_to_windows",
+    "get_cycles",
+    "get_extremes",
+    "get_peaks_simple",
+    "mark_pinched_points_on_cycle",
+    "mark_pinched_points_on_cycles",
 ]

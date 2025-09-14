@@ -6,8 +6,8 @@
 # ----------------------------------------------------------------
 
 from ..generated.app import AppConfig
-from ..generated.app import PolynomialConfig
 from ..generated.app import MatchingConfig
+from ..generated.app import PolynomialConfig
 from ..generated.app import RepoInfo
 
 # ----------------------------------------------------------------
@@ -15,8 +15,8 @@ from ..generated.app import RepoInfo
 # ----------------------------------------------------------------
 
 __all__ = [
-    'AppConfig',
-    'PolynomialConfig',
-    'MatchingConfig',
-    'RepoInfo',
+    "AppConfig",
+    "MatchingConfig",
+    "PolynomialConfig",
+    "RepoInfo",
 ]

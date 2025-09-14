@@ -5,8 +5,8 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..generated.user import DataTypeColumn
 from ..generated.user import DataTimeSeries
+from ..generated.user import DataTypeColumn
 from ..generated.user import DataTypeQuantity
 
 # ----------------------------------------------------------------
@@ -14,7 +14,7 @@ from ..generated.user import DataTypeQuantity
 # ----------------------------------------------------------------
 
 __all__ = [
-    'DataTypeColumn',
-    'DataTimeSeries',
-    'DataTypeQuantity',
+    "DataTimeSeries",
+    "DataTypeColumn",
+    "DataTypeQuantity",
 ]

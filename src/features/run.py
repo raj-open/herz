@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This file contains the main process.
 If called from e.g. cli.py or api.py, must initialise all paths.
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ..thirdparty.misc import *
-
 from ..core.log import *
 from ..models.app import *
 from ..models.user import *
+from ..thirdparty.misc import *
 from . import right_ventricle
 
 # ----------------------------------------------------------------
@@ -22,7 +21,7 @@ from . import right_ventricle
 # ----------------------------------------------------------------
 
 __all__ = [
-    'process',
+    "process",
 ]
 
 # ----------------------------------------------------------------
@@ -31,7 +30,7 @@ __all__ = [
 
 
 def process(cfg: AppConfig, case: RequestConfig):
-    '''
+    """
     The main process.
 
     **NOTE:** This process assumes that paths to
@@ -42,10 +41,10 @@ def process(cfg: AppConfig, case: RequestConfig):
     - config
 
     have been set
-    '''
+    """
     timer = Timer(
-        name=f'Elapsed time for {case.feature}',
-        text='{name}: {:.2f}s',
+        name=f"Elapsed time for {case.feature}",
+        text="{name}: {:.2f}s",
         logger=log_info,
     )
 
@@ -59,9 +58,9 @@ def process(cfg: AppConfig, case: RequestConfig):
             timer.stop()
 
         case _ as feature if isinstance(feature, EnumFeature):
-            raise ValueError(f'No endpoint established for `{feature.value}`.')
+            raise ValueError(f"No endpoint established for `{feature.value}`.")
 
         case _ as value:
-            raise ValueError(f'No endpoint established for `{value}`.')
+            raise ValueError(f"No endpoint established for `{value}`.")
 
     return

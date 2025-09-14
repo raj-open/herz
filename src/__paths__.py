@@ -12,16 +12,16 @@ import os
 # ----------------------------------------------------------------
 
 __all__ = [
-    'get_root_path',
-    'get_source_path',
+    "get_root_path",
+    "get_source_path",
 ]
 
 # ----------------------------------------------------------------
 # CONSTANTS
 # ----------------------------------------------------------------
 
-_root = os.path.relpath(os.path.join(os.path.dirname(__file__), '..'), os.getcwd())
-_source = os.path.join(_root, 'src')
+_root = os.path.relpath(os.path.join(os.path.dirname(__file__), ".."), os.getcwd())
+_source = os.path.join(_root, "src")
 
 # ----------------------------------------------------------------
 # METHODS

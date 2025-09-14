@@ -5,21 +5,20 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
+from .....models.fitting import *
+from .....models.polynomials import *
+from .....queries.fitting import *
 from .....thirdparty.data import *
 from .....thirdparty.maths import *
 from .....thirdparty.plots import *
 from .....thirdparty.types import *
-
-from .....models.fitting import *
-from .....models.polynomials import *
-from .....queries.fitting import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'quick_plot',
+    "quick_plot",
 ]
 
 # ----------------------------------------------------------------
@@ -54,22 +53,22 @@ def quick_plot(
         height=480,
         margin=dict(l=40, r=40, t=60, b=40),
         font=dict(
-            family='Calibri',
+            family="Calibri",
             size=10,
-            color='black',
+            color="black",
         ),
-        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        plot_bgcolor="hsla(0, 100%, 0%, 0.1)",
         title=dict(
-            text='Debug plot',
+            text="Debug plot",
             x=0.5,
             y=0.95,
             font=dict(size=12),
         ),
         xaxis=dict(
-            title=f'time',
-            linecolor='black',
+            title="time",
+            linecolor="black",
             mirror=True,  # adds border on top too
-            ticks='outside',
+            ticks="outside",
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
@@ -77,9 +76,9 @@ def quick_plot(
         ),
         yaxis=dict(
             title=quantity,
-            linecolor='black',
+            linecolor="black",
             mirror=True,  # adds border on right too
-            ticks='outside',
+            ticks="outside",
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
@@ -91,15 +90,15 @@ def quick_plot(
 
     plot_data = [
         pgo.Scatter(
-            name='debug [fit]',
+            name="debug [fit]",
             # NOTE: Ensure that the cycle contains start+end points!
             x=time,
             y=q.values(time),
-            mode='lines',
-            line_shape='spline',
+            mode="lines",
+            line_shape="spline",
             line=dict(
                 width=1,
-                color='black',
+                color="black",
             ),
             showlegend=True,
         ),
@@ -107,15 +106,15 @@ def quick_plot(
     if renormalise:
         plot_data.append(
             pgo.Scatter(
-                name='debug [data]',
+                name="debug [data]",
                 # NOTE: Ensure that the cycle contains start+end points!
-                x=data['time'],
+                x=data["time"],
                 y=data[quantity],
-                mode='markers',
-                line_shape='spline',
+                mode="markers",
+                line_shape="spline",
                 marker=dict(
                     size=2,
-                    color='black',
+                    color="black",
                 ),
                 showlegend=True,
             ),
@@ -124,15 +123,15 @@ def quick_plot(
 
     plot_data = [
         pgo.Scatter(
-            name='dx/dt [fit]',
+            name="dx/dt [fit]",
             # NOTE: Ensure that the cycle contains start+end points!
             x=time,
             y=dq.values(time) / T,
-            mode='lines',
-            line_shape='spline',
+            mode="lines",
+            line_shape="spline",
             line=dict(
                 width=1,
-                color='black',
+                color="black",
             ),
             showlegend=True,
         ),
@@ -141,15 +140,15 @@ def quick_plot(
 
     plot_data = [
         pgo.Scatter(
-            name='d²x/dt² [fit]',
+            name="d²x/dt² [fit]",
             # NOTE: Ensure that the cycle contains start+end points!
             x=time,
             y=ddq.values(time) / T**2,
-            mode='lines',
-            line_shape='spline',
+            mode="lines",
+            line_shape="spline",
             line=dict(
                 width=1,
-                color='black',
+                color="black",
             ),
             showlegend=True,
         ),

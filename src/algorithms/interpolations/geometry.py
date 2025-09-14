@@ -12,9 +12,9 @@ from ...thirdparty.maths import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'integral_interpolated',
-    'innerproduct_interpolated',
-    'norm_interpolated',
+    "innerproduct_interpolated",
+    "integral_interpolated",
+    "norm_interpolated",
 ]
 
 # ----------------------------------------------------------------
@@ -28,14 +28,15 @@ def integral_interpolated(
     T: float,
     periodic: bool = False,
 ) -> float:
-    '''
+    """
     Computes integral based on piecewise linear interpolation
     of a discrete time-series (`t`, `x`)
-    '''
-    t = np.asarray(t.tolist() + [T])
+    """
+    t = np.asarray([*t.tolist(), T])
 
     if periodic:
-        x = np.asarray(x.tolist() + [x[0]])
+        x = np.asarray([*x.tolist(), x[0]])
+
     else:
         x1 = np.asarray(x[1:])
         x2 = np.asarray(x[:-1])
@@ -43,8 +44,8 @@ def integral_interpolated(
 
     dt = np.diff(t)
     x_m = (x[:-1] + x[1:]) / 2
-    I = sum(x_m * dt)
-    return I
+    Integ = sum(x_m * dt)
+    return Integ
 
 
 def innerproduct_interpolated(

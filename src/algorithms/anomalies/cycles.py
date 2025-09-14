@@ -5,10 +5,11 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ...thirdparty.maths import *
-from ...thirdparty.types import *
+from itertools import pairwise
 
 from ...core.utils import *
+from ...thirdparty.maths import *
+from ...thirdparty.types import *
 from .peaks import *
 
 # ----------------------------------------------------------------
@@ -16,8 +17,8 @@ from .peaks import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'cycles_to_windows',
-    'get_cycles',
+    "cycles_to_windows",
+    "get_cycles",
 ]
 
 # ----------------------------------------------------------------
@@ -28,18 +29,19 @@ __all__ = [
 def cycles_to_windows(
     cycles: Iterable[int],
 ) -> list[tuple[int, int]]:
-    '''
+    """
     Turns a list indicating cycle indexes into a list
     of pairs of endpoints of the cycles.
 
     E.g. if the input is `[0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2]`,
     the output is `[(0, 4), (4, 6), (6, 11)]`.
-    '''
-    c_min = min(cycles + [0])
-    c_max = max(cycles + [0])
-    cycles = [c_min - 1] + list(cycles) + [c_max + 1]
+    """
+    c_min = min([*cycles, 0])
+    c_max = max([*cycles, 0])
+    cycles = [c_min - 1, *cycles, c_max + 1]
     peaks = characteristic_to_where(np.diff(cycles) != 0)
-    windows = list(zip(peaks, peaks[1:]))
+    # DEV-NOTE: equivalent to zip(peaks, peaks[1:])
+    windows = list(pairwise(peaks))
     return windows
 
 
@@ -58,9 +60,10 @@ def get_cycles(
         s = abs(normalised_order_statistics(np.diff(ext)))
 
         # remove cycles that are too small or too large
-        gaps = list(zip(ext, ext[1:]))
+        # DEV-NOTE: equivalent to zip(ext, ext[1:])
+        gaps = list(pairwise(ext))
         if remove_gaps:
-            gaps = [I for I, ss in zip(gaps, s) if ss < sig]
+            gaps = [Id for Id, ss in zip(gaps, s) if ss < sig]
 
         # enumerate remaining gaps as cycles (all else -> -1)
         for k, (i1, i2) in enumerate(gaps):

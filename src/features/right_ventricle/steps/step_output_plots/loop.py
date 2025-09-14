@@ -5,17 +5,16 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from .....thirdparty.data import *
-from .....thirdparty.maths import *
-from .....thirdparty.plots import *
-from .....thirdparty.types import *
-
-from .....setup import config
 from .....core.log import *
 from .....models.fitting import *
 from .....models.polynomials import *
 from .....models.user import *
 from .....queries.scientific import *
+from .....setup import config
+from .....thirdparty.data import *
+from .....thirdparty.maths import *
+from .....thirdparty.plots import *
+from .....thirdparty.types import *
 from .basic import *
 
 # ----------------------------------------------------------------
@@ -23,7 +22,7 @@ from .basic import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'step_output_loop_plot',
+    "step_output_loop_plot",
 ]
 
 # ----------------------------------------------------------------
@@ -31,7 +30,7 @@ __all__ = [
 # ----------------------------------------------------------------
 
 
-@echo_function(message='STEP output P-V loop plot', level=LOG_LEVELS.INFO)
+@echo_function(message="STEP output P-V loop plot", level=LOG_LEVELS.INFO)
 def step_output_loop_plot(
     data_p: pd.DataFrame,
     data_v: pd.DataFrame,
@@ -40,8 +39,12 @@ def step_output_loop_plot(
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
     poly_v: Poly[float],
-    interpol_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    interpol_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig_p: tuple[
+        FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]
+    ],
+    interpol_trig_v: tuple[
+        FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]
+    ],
     fitinfo_exp: tuple[FittedInfoExp, tuple[float, float], tuple[float, float]],
     special_p: dict[str, SpecialPointsConfig],
     special_v: dict[str, SpecialPointsConfig],
@@ -51,14 +54,14 @@ def step_output_loop_plot(
     cfg_output: UserOutput,
     N: int = 1000,
 ) -> pgo.Figure:
-    '''
+    """
     Creates the 2D loop plot including:
 
     - P-V-curve data
     - P-V-curve fitted
     - special points from time-series
     - special points for P-V-curve.
-    '''
+    """
     cv = output_conversions(cfg_output.quantities, units=config.UNITS)
     units = output_units(cfg_output.quantities)
 
@@ -113,7 +116,7 @@ def step_output_loop_plot(
     # save
     path = cfg_output.plot.path.root
     if path is not None:
-        path = path.format(label=plot_label, kind='pressure-volume')
+        path = path.format(label=plot_label, kind="pressure-volume")
         save_image(fig=fig, path=path)
 
     return fig
@@ -129,9 +132,9 @@ def setup_plot(
     cfg: UserOutput,
     units: dict[str, str],
 ) -> pgo.Figure:
-    '''
+    """
     Initialises plot.
-    '''
+    """
     cfg_font = cfg.plot.font
     fig = make_subplots(rows=1, cols=1, subplot_titles=[])
     fig.update_layout(
@@ -141,9 +144,9 @@ def setup_plot(
         font=dict(
             family=cfg_font.family,
             size=cfg_font.size,
-            color='hsla(0, 100%, 0%, 1)',
+            color="hsla(0, 100%, 0%, 1)",
         ),
-        plot_bgcolor='hsla(0, 100%, 0%, 0.1)',
+        plot_bgcolor="hsla(0, 100%, 0%, 0.1)",
         title=dict(
             text=title,
             x=0.5,
@@ -154,29 +157,29 @@ def setup_plot(
             ),
         ),
         xaxis=dict(
-            title=f'Volume    ({units["volume"]})',
-            linecolor='black',
+            title=f"Volume    ({units['volume']})",
+            linecolor="black",
             mirror=True,  # adds border on top too
-            ticks='outside',
+            ticks="outside",
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
             # rangemode='tozero',
         ),
         yaxis=dict(
-            title=f'Pressure    ({units["pressure"]})',
-            linecolor='black',
+            title=f"Pressure    ({units['pressure']})",
+            linecolor="black",
             mirror=True,  # adds border on right too
-            ticks='outside',
+            ticks="outside",
             showgrid=True,
             visible=True,
             # range=[0, None], # FIXME: does not work!
             # autorange='reversed',
-            rangemode='tozero',
+            rangemode="tozero",
         ),
         showlegend=cfg.plot.legend,
         legend=dict(
-            title='Series/Points',
+            title="Series/Points",
             font=dict(
                 family=cfg_font.family,
                 size=cfg_font.size_legend,
@@ -194,24 +197,26 @@ def plot_data_vs_data(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Plots (linearly interpolated) data points.
-    '''
-    perc = data['time']
+    """
+    perc = data["time"]
     t = T_pv * perc
 
     yield pgo.Scatter(
-        name='P vs. V [data/data]',
-        x=cv['volume'] * data['volume'],
-        y=cv['pressure'] * data['pressure'],
-        text=[f"ca. {tt:.0f}{units['time']} ({pc:.2%})" for pc, tt in zip(perc, cv['time'] * t)],
-        mode='markers',
+        name="P vs. V [data/data]",
+        x=cv["volume"] * data["volume"],
+        y=cv["pressure"] * data["pressure"],
+        text=[
+            f"ca. {tt:.0f}{units['time']} ({pc:.2%})" for pc, tt in zip(perc, cv["time"] * t)
+        ],
+        mode="markers",
         marker=dict(
             size=3,
-            color='hsla(0, 100%, 0%, 0.5)',
-            symbol='cross',
+            color="hsla(0, 100%, 0%, 0.5)",
+            symbol="cross",
         ),
-        visible=True if visible else 'legendonly',
+        visible=True if visible else "legendonly",
         showlegend=True,
     )
 
@@ -227,42 +232,42 @@ def plot_data_vs_fits(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Plots data points vs. fits
-    '''
+    """
     # fit each 'other' measurement to each time-series
-    time_p = data_p['time']
+    time_p = data_p["time"]
     data_p_volume = poly_v.values((T_v / T_p) * time_p)
-    time_v = data_v['time']
+    time_v = data_v["time"]
     data_v_pressure = poly_p.values((T_p / T_v) * time_v)
 
     yield pgo.Scatter(
-        name='P vs. V(P) [data/poly-fit]',
-        x=cv['volume'] * data_p_volume,
-        y=cv['pressure'] * data_p['pressure'],
-        text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * time_p],
-        mode='markers',
+        name="P vs. V(P) [data/poly-fit]",
+        x=cv["volume"] * data_p_volume,
+        y=cv["pressure"] * data_p["pressure"],
+        text=[f"{tt:.0f}{units['time']}" for tt in cv["time"] * time_p],
+        mode="markers",
         marker=dict(
             size=3,
-            color='hsla(180, 75%, 50%, 1)',
-            symbol='x',
+            color="hsla(180, 75%, 50%, 1)",
+            symbol="x",
         ),
-        visible=True if visible else 'legendonly',
+        visible=True if visible else "legendonly",
         showlegend=True,
     )
 
     yield pgo.Scatter(
-        name='P(V) vs. V [poly-fit/data]',
-        x=cv['volume'] * data_v['volume'],
-        y=cv['pressure'] * data_v_pressure,
-        text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * time_v],
-        mode='markers',
+        name="P(V) vs. V [poly-fit/data]",
+        x=cv["volume"] * data_v["volume"],
+        y=cv["pressure"] * data_v_pressure,
+        text=[f"{tt:.0f}{units['time']}" for tt in cv["time"] * time_v],
+        mode="markers",
         marker=dict(
             size=3,
-            color='hsla(300, 75%, 50%, 1)',
-            symbol='x',
+            color="hsla(300, 75%, 50%, 1)",
+            symbol="x",
         ),
-        visible=True if visible else 'legendonly',
+        visible=True if visible else "legendonly",
         showlegend=True,
     )
 
@@ -290,25 +295,29 @@ def plot_poly_fit(
     volume_fit = np.concatenate([volume_fit, volume_fit[:1]])
 
     yield pgo.Scatter(
-        name='P-V [poly-fit/poly-fit]',
+        name="P-V [poly-fit/poly-fit]",
         # NOTE: Ensure that the cycle contains start+end points!
-        x=cv['volume'] * volume_fit,
-        y=cv['pressure'] * pressure_fit,
-        text=[f'{tt:.0f}{units["time"]}' for tt in cv['time'] * time],
-        mode='lines',
-        line_shape='spline',
+        x=cv["volume"] * volume_fit,
+        y=cv["pressure"] * pressure_fit,
+        text=[f"{tt:.0f}{units['time']}" for tt in cv["time"] * time],
+        mode="lines",
+        line_shape="spline",
         line=dict(
             width=3,
-            color='hsla(0, 100%, 0%, 0.5)',
+            color="hsla(0, 100%, 0%, 0.5)",
         ),
-        visible=True if visible else 'legendonly',
+        visible=True if visible else "legendonly",
         showlegend=True,
     )
 
 
 def plot_interpolated_trig_curve(
-    interpol_trig_p: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
-    interpol_trig_v: tuple[FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]],
+    interpol_trig_p: tuple[
+        FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]
+    ],
+    interpol_trig_v: tuple[
+        FittedInfoTrig | None, list[tuple[float, float]], list[tuple[float, float]]
+    ],
     info_p: FittedInfoNormalisation,
     info_v: FittedInfoNormalisation,
     poly_p: Poly[float],
@@ -319,9 +328,9 @@ def plot_interpolated_trig_curve(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Plots fitted trig curves against data.
-    '''
+    """
     T_p = info_p.period
     T_v = info_v.period
     fit_p, _, _ = interpol_trig_p
@@ -333,21 +342,21 @@ def plot_interpolated_trig_curve(
             info_p,
             usehull=usehull,
             N=N,
-            cv_time=cv['time'],
-            cv_value=cv['pressure'],
-            cv_aux=cv['volume'],
+            cv_time=cv["time"],
+            cv_value=cv["pressure"],
+            cv_aux=cv["volume"],
             auxiliary=lambda t: poly_v.values((T_v / T_p) * t),
         )
         yield pgo.Scatter(
-            name='P(t) ~ cos(ωt)',
+            name="P(t) ~ cos(ωt)",
             x=vaxis,
             y=paxis,
-            mode='lines',
+            mode="lines",
             line=dict(
                 width=5,
-                color='hsla(100, 100%, 25%, 0.75)',
+                color="hsla(100, 100%, 25%, 0.75)",
             ),
-            visible=True if visible else 'legendonly',
+            visible=True if visible else "legendonly",
             showlegend=True,
         )
 
@@ -357,21 +366,21 @@ def plot_interpolated_trig_curve(
             info_v,
             usehull=usehull,
             N=N,
-            cv_time=cv['time'],
-            cv_value=cv['volume'],
-            cv_aux=cv['pressure'],
+            cv_time=cv["time"],
+            cv_value=cv["volume"],
+            cv_aux=cv["pressure"],
             auxiliary=lambda t: poly_p.values((T_p / T_v) * t),
         )
         yield pgo.Scatter(
-            name='V(t) ~ cos(ωt)',
+            name="V(t) ~ cos(ωt)",
             x=vaxis,
             y=paxis,
-            mode='lines',
+            mode="lines",
             line=dict(
                 width=5,
-                color='hsla(100, 100%, 25%, 0.75)',
+                color="hsla(100, 100%, 25%, 0.75)",
             ),
-            visible=True if visible else 'legendonly',
+            visible=True if visible else "legendonly",
             showlegend=True,
         )
 
@@ -385,23 +394,23 @@ def plot_exp_curve(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Creates subplot for P(V) ~ exp(βV) fitting.
-    '''
+    """
     # plot exp-curve
     vaxis, paxis = compute_fitted_curves_exp(fitinfo=fitinfo, N=N)
     yield pgo.Scatter(
-        name='P(V) ~ exp(βV)',
-        x=cv['volume'] * vaxis,
-        y=cv['pressure'] * paxis,
-        mode='lines',
-        line_shape='spline',
+        name="P(V) ~ exp(βV)",
+        x=cv["volume"] * vaxis,
+        y=cv["pressure"] * paxis,
+        mode="lines",
+        line_shape="spline",
         line=dict(
             width=5,
-            color='hsla(235, 100%, 50%, 0.75)',
+            color="hsla(235, 100%, 50%, 0.75)",
             # color='hsla(60, 100%, 50%, 0.5)',
         ),
-        visible=True if visible else 'legendonly',
+        visible=True if visible else "legendonly",
         showlegend=True,
     )
 
@@ -416,9 +425,9 @@ def plot_special_points(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Creates subplot for all time-domain special points.
-    '''
+    """
     T_p = info_p.period
     T_v = info_v.period
 
@@ -451,18 +460,18 @@ def plot_special_points(
         fmt = point.format
         yield pgo.Scatter(
             name=point.name,
-            x=[cv['volume'] * v_],
-            y=[cv['pressure'] * p_],
+            x=[cv["volume"] * v_],
+            y=[cv["pressure"] * p_],
             # text=[f'{point.name}'],
             # textposition=fmt.text_position,
             # mode='markers+text',
-            mode='markers',
+            mode="markers",
             marker=dict(
                 symbol=fmt.symbol,
                 size=fmt.size,
                 color=fmt.colour,
             ),
-            visible=True if point.found else 'legendonly',
+            visible=True if point.found else "legendonly",
             showlegend=True,
         )
 
@@ -473,9 +482,9 @@ def plot_special_points_pv(
     cv: dict[str, float],
     units: dict[str, str],
 ) -> Generator[pgo.Scatter, None, None]:
-    '''
+    """
     Creats subplots for a PV-special point and/or associated line.
-    '''
+    """
     visible = point.visible and point.found
     data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
 
@@ -489,24 +498,24 @@ def plot_special_points_pv(
             unit = units[quantity]
             # plot point
             yield pgo.Scatter(
-                name=f'{point.name} = {value:.4g} {unit}',
-                x=cv['volume'] * data[:, 0],
-                y=cv['pressure'] * data[:, 1],
+                name=f"{point.name} = {value:.4g} {unit}",
+                x=cv["volume"] * data[:, 0],
+                y=cv["pressure"] * data[:, 1],
                 text=[point.name],
                 textposition=point.format.text_position,
-                mode='markers+text',
+                mode="markers+text",
                 marker=dict(
                     symbol=point.format.symbol,
                     size=point.format.size,
                     color=point.format.colour,
                 ),
-                visible=True if visible else 'legendonly',
+                visible=True if visible else "legendonly",
                 showlegend=True,
             )
 
         case EnumSpecialPointPVKind.GRADIENT:
-            value = cv['pressure/volume'] * point.value
-            unit = units['pressure/volume']
+            value = cv["pressure/volume"] * point.value
+            unit = units["pressure/volume"]
             data = np.asarray([[pt.volume, pt.pressure] for pt in point.data])
             # insert mid point
             N_pts = len(point.data)
@@ -515,21 +524,21 @@ def plot_special_points_pv(
             data = np.row_stack([data[:N_mid, :], [data_mid], data[N_mid:, :]])
             # plot geometric line + value
             yield pgo.Scatter(
-                name=f'{point.name} = {value:.4g} {unit}',
-                x=cv['volume'] * data[:, 0],
-                y=cv['pressure'] * data[:, 1],
+                name=f"{point.name} = {value:.4g} {unit}",
+                x=cv["volume"] * data[:, 0],
+                y=cv["pressure"] * data[:, 1],
                 # TODO: This is inefficient!
                 # There has to be a better way to annotate
                 # + make the text disappear when disabling the curve.
-                text=[''] * N_mid + [point.name] + [''] * (N_pts - N_mid),
+                text=[""] * N_mid + [point.name] + [""] * (N_pts - N_mid),
                 textposition=point.format.text_position,
-                mode='lines+text',
+                mode="lines+text",
                 line=dict(
                     width=point.format.size,
                     color=point.format.colour,
                     # 'dash', 'dot', 'dotdash'
                     dash=point.format.symbol,
                 ),
-                visible=True if visible else 'legendonly',
+                visible=True if visible else "legendonly",
                 showlegend=True,
             )

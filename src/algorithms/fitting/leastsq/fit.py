@@ -5,18 +5,17 @@
 # IMPORTS
 # ----------------------------------------------------------------
 
-from ....thirdparty.types import *
-from ....thirdparty.maths import *
-
 from ....core.log import *
 from ....models.fitting import *
+from ....thirdparty.maths import *
+from ....thirdparty.types import *
 
 # ----------------------------------------------------------------
 # EXPORTS
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_least_sq',
+    "fit_least_sq",
 ]
 
 # ----------------------------------------------------------------
@@ -34,9 +33,13 @@ def fit_least_sq(
     gen_grad: Callable[[NDArray[np.float64]], tuple[NDArray[np.float64], NDArray[np.float64]]],
     gen_init: Callable[[NDArray[np.float64]], NDArray[np.float64]],
     # solver/loss
-    solve_linear_part: Callable[[NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+    solve_linear_part: Callable[
+        [NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]
+    ],
     loss_function: Callable[[NDArray[np.float64], NDArray[np.float64]], float],
-    loss_function_grad: Callable[[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]],
+    loss_function_grad: Callable[
+        [NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]], NDArray[np.float64]
+    ],
     restrict_eta: Callable[[float, NDArray[np.float64], NDArray[np.float64]], float],
     # learning parameters
     N_max: int = 1000,
@@ -44,7 +47,7 @@ def fit_least_sq(
     num_epochs: int = 10,
     eps: float = 0.5e-6,
 ) -> tuple[NDArray[np.float64], float, float]:
-    '''
+    """
     Method for `HYBRID_GRADIENT` approach:
 
     1. nudge params using gradient descent
@@ -57,7 +60,7 @@ def fit_least_sq(
     Either
     1. (relative) L²-difference < eps
     2. (relative) L²-difference over iterations < eps
-    '''
+    """
     # determine a size for relativisation of loss:
     best = (x_init, np.inf, np.inf)
 
@@ -83,7 +86,7 @@ def fit_least_sq(
 
             # iteratively solve optimisation problem
             for epoch in range(num_epochs):
-                log_debug(f'epoch {epoch} started')
+                log_debug(f"epoch {epoch} started")
                 # initialise omega for start of epoch
                 x = x_init.copy()
                 if epoch > 0:
@@ -126,12 +129,12 @@ def fit_least_sq(
                 if loss < best[1] or (loss == best[1] and dx_norm < best[2]):
                     best = (x, loss, dx_norm)
 
-                log_debug(f'epoch {epoch} finished')
+                log_debug(f"epoch {epoch} finished")
 
         case EnumSolver():
-            raise ValueError(f'No method developed for {mode.value}!')
+            raise ValueError(f"No method developed for {mode.value}!")
 
         case _ as mode:
-            raise ValueError(f'No method developed for {mode}!')
+            raise ValueError(f"No method developed for {mode}!")
 
     return best

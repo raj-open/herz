@@ -12,5 +12,5 @@ from .fit import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_normalisation',
+    "fit_normalisation",
 ]

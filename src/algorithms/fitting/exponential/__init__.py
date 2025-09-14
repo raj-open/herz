@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-'''
+"""
 # Exponential fitting of curves #
 
 Given is a monoton data series `P` vs. `V`.
@@ -87,15 +87,15 @@ The above provides us with the means to provide bounds on the range of β-values
 β_min := min 2·(P´/P) / V´
 β_max := max 2·(P´/P) / V´
 ```
-'''
+"""
 
 # ----------------------------------------------------------------
 # IMPORTS
 # ----------------------------------------------------------------
 
+from .conditions import *
 from .fit import *
 from .options import *
-from .conditions import *
 from .parameters import *
 
 # ----------------------------------------------------------------
@@ -103,10 +103,10 @@ from .parameters import *
 # ----------------------------------------------------------------
 
 __all__ = [
-    'fit_exponential_curve',
-    'fit_options_gradients_data',
-    'fit_options_scale_data',
-    'get_bounds_from_settings',
-    'get_initialisation_from_settings',
-    'get_schema_from_settings',
+    "fit_exponential_curve",
+    "fit_options_gradients_data",
+    "fit_options_scale_data",
+    "get_bounds_from_settings",
+    "get_initialisation_from_settings",
+    "get_schema_from_settings",
 ]
