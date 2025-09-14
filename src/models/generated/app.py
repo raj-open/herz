@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
 
@@ -15,7 +15,7 @@ class RepoInfo(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
     name: str
@@ -32,7 +32,7 @@ class MatchingConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     pressure: str
@@ -46,11 +46,11 @@ class PolyCritCondition(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     derivative: int = Field(..., ge=0)
-    num_critical: int = Field(..., alias='num-critical', ge=0)
+    num_critical: int = Field(..., alias="num-critical", ge=0)
 
 
 class PolyDerCondition(BaseModel):
@@ -61,7 +61,7 @@ class PolyDerCondition(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     derivative: int = Field(..., ge=0)
@@ -74,7 +74,7 @@ class TimeInterval(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     a: float
@@ -87,7 +87,7 @@ class PointPV(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     pressure: float
@@ -109,20 +109,20 @@ class PointFormat(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     size: int = Field(
-        2,
-        description='In the case of marker settings this determines the symbol-size.\nIn the case of line settings this determines the line-width.',
+        default=2,
+        description="In the case of marker settings this determines the symbol-size.\nIn the case of line settings this determines the line-width.",
     )
-    colour: str = 'black'
+    colour: str = "black"
     symbol: str = Field(
-        'x',
-        description='In the case of marker settings this determines the symbol.\nIn the case of line settings this determines the line-style.',
+        default="x",
+        description="In the case of marker settings this determines the symbol.\nIn the case of line settings this determines the line-style.",
     )
     text: str = None
-    text_position: str = Field('top center', alias='text-position')
+    text_position: str = Field(default="top center", alias="text-position")
 
 
 class FitTrigIntialisation(BaseModel):
@@ -132,14 +132,14 @@ class FitTrigIntialisation(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    omega: Union[str, int, float] = '2 * math.pi / 2'
-    hshift: Union[str, int, float] = 0
-    vscale: Union[str, int, float] = 1
-    vshift: Union[str, int, float] = 0
-    drift: Union[str, int, float] = 0
+    omega: str | int | float = "2 * math.pi / 2"
+    hshift: str | int | float = 0
+    vscale: str | int | float = 1
+    vshift: str | int | float = 0
+    drift: str | int | float = 0
 
 
 class FitExpIntialisation(BaseModel):
@@ -149,19 +149,19 @@ class FitExpIntialisation(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    beta: Union[str, int, float] = 0
-    vshift: Union[str, int, float] = 1
-    vscale: Union[str, int, float] = 0
+    beta: str | int | float = 0
+    vshift: str | int | float = 1
+    vscale: str | int | float = 0
 
 
-class PairString(RootModel[List[str]]):
+class PairString(RootModel[list[str]]):
     model_config = ConfigDict(
         populate_by_name=True,
     )
-    root: List[str] = Field(..., max_length=2, min_length=2)
+    root: list[str] = Field(..., max_length=2, min_length=2)
 
 
 class EnumCriticalPoints(str, Enum):
@@ -169,13 +169,13 @@ class EnumCriticalPoints(str, Enum):
     Enumeration of critical point types.
     """
 
-    UNKNOWN = 'UNKNOWN'
-    ZERO = 'ZERO'
-    MINIMUM = 'MINIMUM'
-    MAXIMUM = 'MAXIMUM'
-    LOCAL_MINIMUM = 'LOCAL-MINIMUM'
-    LOCAL_MAXIMUM = 'LOCAL-MAXIMUM'
-    INFLECTION = 'INFLECTION'
+    UNKNOWN = "UNKNOWN"
+    ZERO = "ZERO"
+    MINIMUM = "MINIMUM"
+    MAXIMUM = "MAXIMUM"
+    LOCAL_MINIMUM = "LOCAL-MINIMUM"
+    LOCAL_MAXIMUM = "LOCAL-MAXIMUM"
+    INFLECTION = "INFLECTION"
 
 
 class EnumBoundKind(str, Enum):
@@ -183,10 +183,10 @@ class EnumBoundKind(str, Enum):
     Enumeration bound types.
     """
 
-    HSCALE_LOWER_BOUND = 'HSCALE-LOWER-BOUND'
-    HSCALE_UPPER_BOUND = 'HSCALE-UPPER-BOUND'
-    INVHSCALE_LOWER_BOUND = 'INVHSCALE-LOWER-BOUND'
-    INVHSCALE_UPPER_BOUND = 'INVHSCALE-UPPER-BOUND'
+    HSCALE_LOWER_BOUND = "HSCALE-LOWER-BOUND"
+    HSCALE_UPPER_BOUND = "HSCALE-UPPER-BOUND"
+    INVHSCALE_LOWER_BOUND = "INVHSCALE-LOWER-BOUND"
+    INVHSCALE_UPPER_BOUND = "INVHSCALE-UPPER-BOUND"
 
 
 class EnumModelKind(str, Enum):
@@ -194,9 +194,9 @@ class EnumModelKind(str, Enum):
     Enumeration of kinds of models
     """
 
-    DATA = 'DATA'
-    POLY_MODEL = 'POLY-MODEL'
-    TRIG_MODEL = 'TRIG-MODEL'
+    DATA = "DATA"
+    POLY_MODEL = "POLY-MODEL"
+    TRIG_MODEL = "TRIG-MODEL"
 
 
 class EnumSpecialPointPVKind(str, Enum):
@@ -204,9 +204,9 @@ class EnumSpecialPointPVKind(str, Enum):
     Enumeration of kinds of special points on P-V curve
     """
 
-    GRADIENT = 'GRADIENT'
-    PRESSURE = 'PRESSURE'
-    VOLUME = 'VOLUME'
+    GRADIENT = "GRADIENT"
+    PRESSURE = "PRESSURE"
+    VOLUME = "VOLUME"
 
 
 class EnumSolver(str, Enum):
@@ -214,9 +214,9 @@ class EnumSolver(str, Enum):
     Enumeration of modi for solver.
     """
 
-    BRUTE_FORCE = 'BRUTE-FORCE'
-    GRADIENT = 'GRADIENT'
-    HYBRID_GRADIENT = 'HYBRID-GRADIENT'
+    BRUTE_FORCE = "BRUTE-FORCE"
+    GRADIENT = "GRADIENT"
+    HYBRID_GRADIENT = "HYBRID-GRADIENT"
 
 
 class AppInfo(RootModel[Any]):
@@ -234,10 +234,10 @@ class PolyIntCondition(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    times: List[TimeInterval] = Field(..., min_length=1)
+    times: list[TimeInterval] = Field(..., min_length=1)
 
 
 class SpecialPointsConfigPV(BaseModel):
@@ -247,19 +247,29 @@ class SpecialPointsConfigPV(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    name: str = Field(..., description='Name of special point.')
-    name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
-    description: Optional[str] = Field(None, description='A table-friendly description of the point.')
-    ignore: bool = Field(False, description='Option to suppress plotting.')
-    visible: bool = Field(True, description='Point is shown, but deactivated by default.')
-    found: bool = Field(False, description='Option to mark whether point successfully computed.')
+    name: str = Field(..., description="Name of special point.")
+    name_simple: str | None = Field(
+        default=None,
+        alias="name-simple",
+        description="A table-friendly version of the name.",
+    )
+    description: str | None = Field(
+        default=None, description="A table-friendly description of the point."
+    )
+    ignore: bool = Field(default=False, description="Option to suppress plotting.")
+    visible: bool = Field(
+        default=True, description="Point is shown, but deactivated by default."
+    )
+    found: bool = Field(
+        default=False, description="Option to mark whether point successfully computed."
+    )
     kind: EnumSpecialPointPVKind
     value: float = -1
-    data: List[PointPV] = []
-    format: PointFormat = Field(..., description='Settings for plot marker/line.')
+    data: list[PointPV] = []
+    format: PointFormat = Field(..., description="Settings for plot marker/line.")
 
 
 class SpecialPointsSpec(BaseModel):
@@ -273,21 +283,30 @@ class SpecialPointsSpec(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    derivative: int = Field(0, description="Order of the n'th derivative condition.", ge=0)
-    kind: EnumCriticalPoints = Field(..., description="Kind of n'th derivative condition: (local) min/max.")
-    reuse: bool = Field(False, description='Whether the recognised point is to be reused for the 2nd round of fitting.')
+    derivative: int = Field(
+        default=0, description="Order of the n'th derivative condition.", ge=0
+    )
+    kind: EnumCriticalPoints = Field(
+        ..., description="Kind of n'th derivative condition: (local) min/max."
+    )
+    reuse: bool = Field(
+        default=False,
+        description="Whether the recognised point is to be reused for the 2nd round of fitting.",
+    )
     strict: bool = Field(
-        True,
-        description='Whether the point is to occur strictly inside the cycle.\n\nDefault: `true`.\n\nNOTE: Only set to `false` for a time point that is the peak value.',
+        default=True,
+        description="Whether the point is to occur strictly inside the cycle.\n\nDefault: `true`.\n\nNOTE: Only set to `false` for a time point that is the peak value.",
     )
-    after: List[str] = Field(
-        ..., description='The currently specified point has to occur after this list of named points.'
+    after: list[str] = Field(
+        ...,
+        description="The currently specified point has to occur after this list of named points.",
     )
-    before: List[str] = Field(
-        ..., description='The currently specified point has to occur before this list of named points.'
+    before: list[str] = Field(
+        ...,
+        description="The currently specified point has to occur before this list of named points.",
     )
 
 
@@ -297,19 +316,20 @@ class InterpConfigPoly(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    special: List[str] = Field(
-        [], description='List of keys of special points\nwhose conditions we will continue to force.'
+    special: list[str] = Field(
+        default=[],
+        description="List of keys of special points\nwhose conditions we will continue to force.",
     )
-    points: Dict[str, Any] = Field(
-        {},
-        description='A local environment of definitions in terms of period and special points.\nThe expressions like "T" and "t[\'key\']" and "x[\'key\']"\nevaluate to period, time-coordiate and value of `\'key\'` respectively.',
+    points: dict[str, Any] = Field(
+        default={},
+        description="A local environment of definitions in terms of period and special points.\nThe expressions like \"T\" and \"t['key']\" and \"x['key']\"\nevaluate to period, time-coordiate and value of `'key'` respectively.",
     )
-    intervals: List[PairString] = Field(
+    intervals: list[PairString] = Field(
         ...,
-        description='Defines the spatial domain over which the model is to be defined.\nThe remainder is an interpolation.',
+        description="Defines the spatial domain over which the model is to be defined.\nThe remainder is an interpolation.",
         min_length=1,
     )
 
@@ -320,17 +340,21 @@ class Solver(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    n_max: int = Field(..., alias='n-max', ge=0)
+    n_max: int = Field(..., alias="n-max", ge=0)
     mode: EnumSolver = Field(
-        EnumSolver.BRUTE_FORCE, description='Determines the mode in which the fitting algorithm is executed.'
+        default=EnumSolver.BRUTE_FORCE,
+        description="Determines the mode in which the fitting algorithm is executed.",
     )
     model: EnumModelKind = Field(
-        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
+        default=EnumModelKind.DATA,
+        description="Indicates whether to fit against the data or another model.",
     )
-    drift: bool = Field(..., description='Indicates whether to include drift term in model.')
+    drift: bool = Field(
+        ..., description="Indicates whether to include drift term in model."
+    )
 
 
 class FitTrigCondition(BaseModel):
@@ -339,11 +363,13 @@ class FitTrigCondition(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    kind: EnumBoundKind = Field(..., description='Kind of bound.')
-    value: str = Field(..., description='Parseable expression for the value of the bound.')
+    kind: EnumBoundKind = Field(..., description="Kind of bound.")
+    value: str = Field(
+        ..., description="Parseable expression for the value of the bound."
+    )
 
 
 class Solver1(BaseModel):
@@ -352,15 +378,19 @@ class Solver1(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    n_max: int = Field(..., alias='n-max', description='Maximum number of iterations', ge=0)
+    n_max: int = Field(
+        ..., alias="n-max", description="Maximum number of iterations", ge=0
+    )
     model: EnumModelKind = Field(
-        EnumModelKind.DATA, description='Indicates whether to fit against the data or another model.'
+        default=EnumModelKind.DATA,
+        description="Indicates whether to fit against the data or another model.",
     )
     mode: EnumSolver = Field(
-        EnumSolver.BRUTE_FORCE, description='Determines the mode in which the fitting algorithm is executed.'
+        default=EnumSolver.BRUTE_FORCE,
+        description="Determines the mode in which the fitting algorithm is executed.",
     )
 
 
@@ -370,11 +400,13 @@ class FitExpCondition(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    kind: EnumBoundKind = Field(..., description='Kind of bound.')
-    value: str = Field(..., description='Parseable expression for the value of the bound.')
+    kind: EnumBoundKind = Field(..., description="Kind of bound.")
+    value: str = Field(
+        ..., description="Parseable expression for the value of the bound."
+    )
 
 
 class PolynomialConfig(BaseModel):
@@ -383,11 +415,11 @@ class PolynomialConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    pressure: List[Union[PolyCritCondition, PolyDerCondition, PolyIntCondition]]
-    volume: List[Union[PolyCritCondition, PolyDerCondition, PolyIntCondition]]
+    pressure: list[PolyCritCondition | PolyDerCondition | PolyIntCondition]
+    volume: list[PolyCritCondition | PolyDerCondition | PolyIntCondition]
 
 
 class SpecialPointsConfig(BaseModel):
@@ -396,22 +428,40 @@ class SpecialPointsConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    name: str = Field(..., description='Name of special point.')
-    name_simple: Optional[str] = Field(None, alias='name-simple', description='A table-friendly version of the name.')
-    description: Optional[str] = Field(None, description='A table-friendly description of the point.')
-    ignore: bool = Field(False, description='Option to suppress plotting.')
-    ignore_2_d: bool = Field(False, alias='ignore-2D', description='Option to suppress plotting in 2D Plot.')
-    derivatives: Optional[List[int]] = None
-    found: bool = Field(False, description='Option to mark whether point successfully computed.')
-    time: float = Field(-1, description='Time co-ordinate of special point (initially normalised to `[0, 1]`).')
-    value: float = Field(-1, description='Value of special point.')
-    spec: Optional[SpecialPointsSpec] = Field(
-        None, description='Optional specifications for computation of special point.'
+    name: str = Field(..., description="Name of special point.")
+    name_simple: str | None = Field(
+        default=None,
+        alias="name-simple",
+        description="A table-friendly version of the name.",
     )
-    format: Optional[PointFormat] = Field(None, description='Settings for plot marker.')
+    description: str | None = Field(
+        default=None, description="A table-friendly description of the point."
+    )
+    ignore: bool = Field(default=False, description="Option to suppress plotting.")
+    ignore_2D: bool = Field(
+        default=False,
+        alias="ignore-2D",
+        description="Option to suppress plotting in 2D Plot.",
+    )
+    derivatives: list[int] | None = None
+    found: bool = Field(
+        default=False, description="Option to mark whether point successfully computed."
+    )
+    time: float = Field(
+        default=-1,
+        description="Time co-ordinate of special point (initially normalised to `[0, 1]`).",
+    )
+    value: float = Field(default=-1, description="Value of special point.")
+    spec: SpecialPointsSpec | None = Field(
+        default=None,
+        description="Optional specifications for computation of special point.",
+    )
+    format: PointFormat | None = Field(
+        default=None, description="Settings for plot marker."
+    )
 
 
 class Polynomial(BaseModel):
@@ -420,11 +470,11 @@ class Polynomial(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     pressure: InterpConfigPoly
-    volume: Optional[InterpConfigPoly] = None
+    volume: InterpConfigPoly | None = None
 
 
 class InterpConfigTrig(BaseModel):
@@ -433,15 +483,21 @@ class InterpConfigTrig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    solver: Solver = Field(..., description='Settings for the solver.')
-    points: Dict[str, str] = Field(..., description='Schema for values to be used in intervals and conditions')
-    intervals: List[PairString] = Field(
-        ..., description='Defines the spatial domain over which the model is to be defined.', min_length=1
+    solver: Solver = Field(..., description="Settings for the solver.")
+    points: dict[str, str] = Field(
+        ..., description="Schema for values to be used in intervals and conditions"
     )
-    conditions: List[FitTrigCondition] = Field([], description='Provides restrictions on the frequency.')
+    intervals: list[PairString] = Field(
+        ...,
+        description="Defines the spatial domain over which the model is to be defined.",
+        min_length=1,
+    )
+    conditions: list[FitTrigCondition] = Field(
+        default=[], description="Provides restrictions on the frequency."
+    )
     initial: FitTrigIntialisation
 
 
@@ -451,15 +507,21 @@ class FitExpConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    solver: Solver1 = Field(..., description='Settings for the solver.')
-    points: Dict[str, str] = Field(..., description='Schema for values to be used in intervals and conditions')
-    intervals: Optional[List[PairString]] = Field(
-        None, description='Defines the spatial domain over which the model is to be defined.', min_length=1
+    solver: Solver1 = Field(..., description="Settings for the solver.")
+    points: dict[str, str] = Field(
+        ..., description="Schema for values to be used in intervals and conditions"
     )
-    conditions: List[FitExpCondition] = Field([], description='Provides restrictions on the exponential coefficient.')
+    intervals: list[PairString] | None = Field(
+        default=None,
+        description="Defines the spatial domain over which the model is to be defined.",
+        min_length=1,
+    )
+    conditions: list[FitExpCondition] = Field(
+        default=[], description="Provides restrictions on the exponential coefficient."
+    )
     initial: FitExpIntialisation
 
 
@@ -469,12 +531,12 @@ class SpecialPointsConfigs(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    pressure: Dict[str, SpecialPointsConfig]
-    volume: Dict[str, SpecialPointsConfig]
-    pv: Dict[str, SpecialPointsConfigPV]
+    pressure: dict[str, SpecialPointsConfig]
+    volume: dict[str, SpecialPointsConfig]
+    pv: dict[str, SpecialPointsConfigPV]
 
 
 class Trigonometric(BaseModel):
@@ -483,11 +545,11 @@ class Trigonometric(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     pressure: InterpConfigTrig
-    volume: Optional[InterpConfigTrig] = None
+    volume: InterpConfigTrig | None = None
 
 
 class InterpConfig(BaseModel):
@@ -496,11 +558,15 @@ class InterpConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    polynomial: Optional[Polynomial] = Field(None, description='Settings to fit polynomial interpolation.')
-    trigonometric: Optional[Trigonometric] = Field(None, description='Settings to fit trigonometric interpolation.')
+    polynomial: Polynomial | None = Field(
+        default=None, description="Settings to fit polynomial interpolation."
+    )
+    trigonometric: Trigonometric | None = Field(
+        default=None, description="Settings to fit trigonometric interpolation."
+    )
 
 
 class Settings(BaseModel):
@@ -512,14 +578,21 @@ class Settings(BaseModel):
         populate_by_name=True,
     )
     timezone: str
-    units: Dict[str, str] = Field(..., description='Standard units for physical conversion.')
+    units: dict[str, str] = Field(
+        ..., description="Standard units for physical conversion."
+    )
     matching: MatchingConfig
     polynomial: PolynomialConfig = Field(
-        ..., description='Conditions for initial fitting (polynomial) curves to raw data.'
+        ...,
+        description="Conditions for initial fitting (polynomial) curves to raw data.",
     )
     interpolation: InterpConfig
-    exponential: FitExpConfig = Field(..., description='Settings to fit exponential model.')
-    points: SpecialPointsConfigs = Field(..., description='Specifications used to compute special points.')
+    exponential: FitExpConfig = Field(
+        ..., description="Settings to fit exponential model."
+    )
+    points: SpecialPointsConfigs = Field(
+        ..., description="Specifications used to compute special points."
+    )
 
 
 class AppConfig(BaseModel):
@@ -528,8 +601,8 @@ class AppConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     info: AppInfo
-    settings: Settings = Field(..., description='Primary settings')
+    settings: Settings = Field(..., description="Primary settings")

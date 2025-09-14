@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -29,7 +28,7 @@ class FittedInfoNormalisation(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     period: float = 1.0
@@ -44,10 +43,12 @@ class FittedInfoPoly(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    coefficients: List[float] = Field([], description='Coefficients of polynomial model.')
+    coefficients: list[float] = Field(
+        default=[], description="Coefficients of polynomial model."
+    )
 
 
 class FittedInfoTrig(BaseModel):
@@ -59,7 +60,7 @@ class FittedInfoTrig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     hshift: float
@@ -78,7 +79,7 @@ class FittedInfoExp(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     hscale: float
@@ -102,5 +103,5 @@ class EnumExtremePoints(str, Enum):
     Enumeration of extreme point types.
     """
 
-    PEAK = 'peak'
-    TROUGH = 'trough'
+    PEAK = "peak"
+    TROUGH = "trough"

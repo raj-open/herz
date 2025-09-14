@@ -3,8 +3,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, SecretStr
 
 
@@ -14,16 +12,22 @@ class MetaData(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    path: str = Field(..., description='Full path to file (directory + filename incl. extension).')
-    filename: str = Field(..., description='Filename (without path, but with extension).')
-    basename: str = Field(..., description='Filename without path and without extension.')
-    ext: str = Field(..., description='Extension of file.')
-    size: int = Field(..., description='Size of file in bytes')
-    time_created: Optional[AwareDatetime] = Field(None, alias='time-created')
-    time_updated: Optional[AwareDatetime] = Field(None, alias='time-updated')
+    path: str = Field(
+        ..., description="Full path to file (directory + filename incl. extension)."
+    )
+    filename: str = Field(
+        ..., description="Filename (without path, but with extension)."
+    )
+    basename: str = Field(
+        ..., description="Filename without path and without extension."
+    )
+    ext: str = Field(..., description="Extension of file.")
+    size: int = Field(..., description="Size of file in bytes")
+    time_created: AwareDatetime | None = Field(default=None, alias="time-created")
+    time_updated: AwareDatetime | None = Field(default=None, alias="time-updated")
 
 
 class Credentials(BaseModel):
@@ -33,7 +37,7 @@ class Credentials(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     username: str

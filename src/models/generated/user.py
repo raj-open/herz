@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
@@ -15,33 +15,39 @@ class Combine(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
     dt: float = Field(..., gt=0.0)
-    t_max: Optional[float] = Field(None, alias='T-max', gt=0.0)
+    T_max: float | None = Field(default=None, alias="T-max", gt=0.0)
     unit: str
 
 
 class Cycles(BaseModel):
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
     remove_bad: bool = Field(
-        False, alias='remove-bad', description="Option to remove 'bad' parts at start/end of cycles."
+        default=False,
+        alias="remove-bad",
+        description="Option to remove 'bad' parts at start/end of cycles.",
     )
 
 
 class Font(BaseModel):
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    family: str = 'Tahoma'
-    size: int = Field(12, description='Size of font (in entire plot) in `pt`.')
-    size_title: int = Field(14, alias='size-title', description='Size of title font in `pt`.')
-    size_legend: int = Field(10, alias='size-legend', description='Size of legend font in `pt`.')
+    family: str = "Tahoma"
+    size: int = Field(default=12, description="Size of font (in entire plot) in `pt`.")
+    size_title: int = Field(
+        default=14, alias="size-title", description="Size of title font in `pt`."
+    )
+    size_legend: int = Field(
+        default=10, alias="size-legend", description="Size of legend font in `pt`."
+    )
 
 
 class PathToDirString(RootModel[str]):
@@ -50,8 +56,8 @@ class PathToDirString(RootModel[str]):
     )
     root: str = Field(
         ...,
-        description='Data type for a string to be a path to a directory.',
-        pattern='^[^\\\\\\/]+([\\\\\\/][^\\\\\\/]+)*$',
+        description="Data type for a string to be a path to a directory.",
+        pattern="^[^\\\\\\/]+([\\\\\\/][^\\\\\\/]+)*$",
     )
 
 
@@ -60,7 +66,9 @@ class FileString(RootModel[str]):
         populate_by_name=True,
     )
     root: str = Field(
-        ..., description='Data type for a string to be the base name of a file.', pattern='^[^\\\\\\/]*\\.[^\\\\\\/]+$'
+        ...,
+        description="Data type for a string to be the base name of a file.",
+        pattern="^[^\\\\\\/]*\\.[^\\\\\\/]+$",
     )
 
 
@@ -70,8 +78,8 @@ class PathToFileString(RootModel[str]):
     )
     root: str = Field(
         ...,
-        description='Data type for a string to be a path to a file.',
-        pattern='^[^\\\\\\/]+([\\\\\\/][^\\\\\\/]+)*\\.[^\\\\\\/]+$',
+        description="Data type for a string to be a path to a file.",
+        pattern="^[^\\\\\\/]+([\\\\\\/][^\\\\\\/]+)*\\.[^\\\\\\/]+$",
     )
 
 
@@ -82,7 +90,7 @@ class PythonImportString(RootModel[str]):
     root: str = Field(
         ...,
         description="Data type for a string to constitute an import 'path' in python.",
-        pattern='^(\\.\\.|\\.)[\\w\\_]+(\\.[\\w\\_]+)*$',
+        pattern="^(\\.\\.|\\.)[\\w\\_]+(\\.[\\w\\_]+)*$",
     )
 
 
@@ -91,10 +99,10 @@ class EnumType(str, Enum):
     Enumeration of settings for log level.
     """
 
-    BOOLEAN = 'bool'
-    DOUBLE = 'float'
-    INTEGER = 'int'
-    STRING = 'str'
+    BOOLEAN = "bool"
+    DOUBLE = "float"
+    INTEGER = "int"
+    STRING = "str"
 
 
 class DataTypeQuantity(BaseModel):
@@ -103,12 +111,14 @@ class DataTypeQuantity(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    name: Any = Field(..., description='Name of column in file.')
-    type: EnumType = Field(EnumType.DOUBLE, description='Data type (float, int, etc.)')
-    unit: str = Field(..., description='Physical unit as string')
+    name: Any = Field(..., description="Name of column in file.")
+    type: EnumType = Field(
+        default=EnumType.DOUBLE, description="Data type (float, int, etc.)"
+    )
+    unit: str = Field(..., description="Physical unit as string")
 
 
 class DataTypeColumn(BaseModel):
@@ -117,14 +127,14 @@ class DataTypeColumn(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     ignore: bool = Field(
-        False,
-        description='If `ignore = false`, then column will be included in combined output.\nOtherwise just used for internal computations.',
+        default=False,
+        description="If `ignore = false`, then column will be included in combined output.\nOtherwise just used for internal computations.",
     )
-    name: str = Field(..., description='Desired name of column in file.')
+    name: str = Field(..., description="Desired name of column in file.")
     quantity: str = Field(
         ...,
         description='(Root) name of physical quantity.\nE.g. for a column for "fitted pressure"\nuse `quantity="pressure"`.',
@@ -133,8 +143,10 @@ class DataTypeColumn(BaseModel):
         ...,
         description='Name of column in internal data frame.\nE.g. for a column for "fitted pressure"\nuse `key="pressure[fit]"`.',
     )
-    type: EnumType = Field(EnumType.DOUBLE, description='Data type (float, int, etc.)')
-    unit: str = Field(..., description='Physical unit as string')
+    type: EnumType = Field(
+        default=EnumType.DOUBLE, description="Data type (float, int, etc.)"
+    )
+    unit: str = Field(..., description="Physical unit as string")
 
 
 class EnumProgrammeMode(str, Enum):
@@ -142,8 +154,8 @@ class EnumProgrammeMode(str, Enum):
     Enumeration of endpoints for executing main programme.
     """
 
-    VERSION = 'version'
-    REQUESTS = 'requests'
+    VERSION = "version"
+    REQUESTS = "requests"
 
 
 class EnumFeature(str, Enum):
@@ -151,8 +163,8 @@ class EnumFeature(str, Enum):
     Enumeration of features
     """
 
-    UNKNOWN = 'UNKNOWN'
-    RIGHT_VENTRICLE = 'RIGHT-VENTRICLE'
+    UNKNOWN = "UNKNOWN"
+    RIGHT_VENTRICLE = "RIGHT-VENTRICLE"
 
 
 class EnumFittingMode(str, Enum):
@@ -160,18 +172,18 @@ class EnumFittingMode(str, Enum):
     Enumeration of settings for log level.
     """
 
-    SINGLE = 'SINGLE'
-    AVERAGE = 'AVERAGE'
+    SINGLE = "SINGLE"
+    AVERAGE = "AVERAGE"
 
 
 class Fit(BaseModel):
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
     mode: EnumFittingMode = Field(
-        EnumFittingMode.AVERAGE,
-        description='Whether to fit for each cycle individually,\nor to fit for all simultaneously (average).',
+        default=EnumFittingMode.AVERAGE,
+        description="Whether to fit for each cycle individually,\nor to fit for all simultaneously (average).",
     )
 
 
@@ -181,31 +193,33 @@ class UserProcess(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
-    combine: Combine = Field(..., description='Parameter options for combining time series.')
+    combine: Combine = Field(
+        ..., description="Parameter options for combining time series."
+    )
     cycles: Cycles
     fit: Fit
 
 
 class Table(BaseModel):
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
-    path: Optional[PathToDirString] = None
+    path: PathToDirString | None = None
     sep: str
     decimal: str
 
 
 class Plot(BaseModel):
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
-    path: Optional[PathToDirString] = None
-    collapse_cycles: bool = Field(True, alias='collapse-cycles')
+    path: PathToDirString | None = None
+    collapse_cycles: bool = Field(default=True, alias="collapse-cycles")
     legend: bool = False
     font: Font
 
@@ -216,11 +230,13 @@ class UserOutput(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
-    name: Optional[str] = Field(None, description='Name of case.')
-    quantities: List[DataTypeColumn] = Field(..., description='User settings for output quantities.', min_length=1)
+    name: str | None = Field(default=None, description="Name of case.")
+    quantities: list[DataTypeColumn] = Field(
+        ..., description="User settings for output quantities.", min_length=1
+    )
     table: Table
     plot: Plot
 
@@ -231,26 +247,31 @@ class DataTimeSeries(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    path: PathToDirString = Field(..., description='Path to file containing time series.')
-    sep: str = Field(';', description='Delimiter for columns used in file.')
-    decimal: str = Field('.', description='Symbol for decimals used in file.')
-    skip: Union[int, List[int], str] = Field(
-        [],
-        description='Which row indexes to skip.\nEither provide\n\n- a string of a lambda function (mapping integers to boolean values)\n- an integer, indicating how many rows to skip from the top\n- an array\n\nNoted that row numbers are **0-based**!',
+    path: PathToDirString = Field(
+        ..., description="Path to file containing time series."
+    )
+    sep: str = Field(default=";", description="Delimiter for columns used in file.")
+    decimal: str = Field(default=".", description="Symbol for decimals used in file.")
+    skip: int | list[int] | str = Field(
+        default=[],
+        description="Which row indexes to skip.\nEither provide\n\n- a string of a lambda function (mapping integers to boolean values)\n- an integer, indicating how many rows to skip from the top\n- an array\n\nNoted that row numbers are **0-based**!",
         examples=[
-            {'value': 3, 'summary': 'Rows `0,1,2` will be skipped.'},
-            {'value': '`lambda i: i % 3 == 1`', 'summary': 'Skips every 3rd rwo starting from row-index 1'},
+            {"value": 3, "summary": "Rows `0,1,2` will be skipped."},
             {
-                'value': [0, 1, 2, 4, 5],
-                'summary': 'In this case in the file\n- extra headers are on lines `0, 1, 2``,\n- headers are on row `3`\n- rows 4 and 5 contain further skippable content',
+                "value": "`lambda i: i % 3 == 1`",
+                "summary": "Skips every 3rd rwo starting from row-index 1",
+            },
+            {
+                "value": [0, 1, 2, 4, 5],
+                "summary": "In this case in the file\n- extra headers are on lines `0, 1, 2``,\n- headers are on row `3`\n- rows 4 and 5 contain further skippable content",
             },
         ],
     )
-    time: DataTypeQuantity = Field(..., description='Column name for time.')
-    value: DataTypeQuantity = Field(..., description='Column name for value.')
+    time: DataTypeQuantity = Field(..., description="Column name for time.")
+    value: DataTypeQuantity = Field(..., description="Column name for value.")
 
 
 class UserData(BaseModel):
@@ -259,7 +280,7 @@ class UserData(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
     pressure: DataTimeSeries
@@ -272,18 +293,20 @@ class RequestConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='forbid',
+        extra="forbid",
         populate_by_name=True,
     )
-    ignore: bool = Field(False, description='Whether or not to skip the case.')
+    ignore: bool = Field(default=False, description="Whether or not to skip the case.")
     feature: EnumFeature
     label: str = Field(
         ...,
-        description='Label used to refer to case and generate output files.\nNOTE: may not contain spaces.',
-        pattern='^\\S+$',
+        description="Label used to refer to case and generate output files.\nNOTE: may not contain spaces.",
+        pattern="^\\S+$",
     )
-    name: str = Field(..., description='Name of case. Should follow a standardised pattern.')
-    title: str = Field(..., description='Title of case, to be used e.g. in plots.')
+    name: str = Field(
+        ..., description="Name of case. Should follow a standardised pattern."
+    )
+    title: str = Field(..., description="Title of case, to be used e.g. in plots.")
     data: UserData
     process: UserProcess
     output: UserOutput
@@ -295,7 +318,9 @@ class RequestsConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        extra='allow',
+        extra="allow",
         populate_by_name=True,
     )
-    requests: List[RequestConfig] = Field([], description='List of settings for each case.')
+    requests: list[RequestConfig] = Field(
+        default=[], description="List of settings for each case."
+    )
